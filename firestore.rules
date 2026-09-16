@@ -1,0 +1,269 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+
+    function role() {
+      return request.auth.token.role != null
+        ? request.auth.token.role
+        : (exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+            ? 'admin'
+            : (exists(/databases/$(database)/documents/employees/$(request.auth.uid))
+                ? 'employee'
+                : 'customer'));
+    }
+
+    function companyId() {
+      return request.auth.token.companyId != null
+        ? request.auth.token.companyId
+        : (exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+            ? get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.companyId
+            : (exists(/databases/$(database)/documents/employees/$(request.auth.uid))
+                ? get(/databases/$(database)/documents/employees/$(request.auth.uid)).data.companyId
+                : ''));
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.role == 'admin' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isEmployee() {
+      return isSignedIn() && (
+        request.auth.token.role == 'employee' ||
+        exists(/databases/$(database)/documents/employees/$(request.auth.uid))
+      );
+    }
+
+    function isCompanyAdmin(cId) {
+      return isSignedIn() && (
+        request.auth.token.role == 'admin' ||
+        exists(/databases/$(database)/documents/companies/$(cId)/admins/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.companyId == cId)
+      );
+    }
+
+    function isCompanyEmployee(cId) {
+      return isSignedIn() && (
+        request.auth.token.role == 'employee' ||
+        exists(/databases/$(database)/documents/companies/$(cId)/employees/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/employees/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/employees/$(request.auth.uid)).data.companyId == cId)
+      );
+    }
+
+    function isCompanyStaff(cId) {
+      return isCompanyAdmin(cId) || isCompanyEmployee(cId);
+    }
+
+    // =========================================================================
+    // 1. COMPANIES (Root collection & Hierarchical Tree)
+    // =========================================================================
+    match /companies/{companyId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+                     || (request.resource.data.name is string
+                         && request.resource.data.companyPassword is string
+                         && request.resource.data.name.size() > 0
+                         && request.resource.data.companyPassword.size() > 0);
+      allow update: if isCompanyAdmin(companyId);
+      allow delete: if false;
+
+      // ---- /companies/{companyId}/admins/{adminId} ---------------------------
+      match /admins/{adminId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update: if isSignedIn();
+        allow delete: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/employees/{employeeId} ---------------------
+      match /employees/{employeeId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update: if isSignedIn();
+        allow delete: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/categories/{categoryId} --------------------
+      match /categories/{categoryId} {
+        allow read: if true;
+        allow write: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/products/{productId} ----------------------
+      match /products/{productId} {
+        allow read: if true;
+        allow write: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/orders/{orderId} --------------------------
+      match /orders/{orderId} {
+        allow read: if isSignedIn() &&
+          (resource.data.userId == request.auth.uid || isCompanyStaff(companyId));
+        allow create: if isSignedIn();
+        allow update: if isCompanyStaff(companyId) || (isSignedIn() && resource.data.userId == request.auth.uid);
+        allow delete: if false;
+
+        match /items/{itemId} {
+          allow read: if isSignedIn();
+          allow write: if isSignedIn();
+        }
+      }
+
+      // ---- /companies/{companyId}/vouchers/{voucherId} ----------------------
+      match /vouchers/{voucherId} {
+        allow read: if true;
+        allow write: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/banners/{bannerId} ------------------------
+      match /banners/{bannerId} {
+        allow read: if true;
+        allow write: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/delivery_charges/{pincode} ----------------
+      match /delivery_charges/{pincode} {
+        allow read: if true;
+        allow write: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/reviews/{reviewId} ------------------------
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow update: if isCompanyAdmin(companyId) || (isSignedIn() && resource.data.userId == request.auth.uid);
+        allow delete: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/recommendations/{recId} -------------------
+      match /recommendations/{recId} {
+        allow read: if true;
+        allow write: if isCompanyAdmin(companyId);
+      }
+
+      // ---- /companies/{companyId}/notifications/{notificationId} ------------
+      match /notifications/{notificationId} {
+        allow read: if isSignedIn() && (resource.data.recipientId == request.auth.uid || isCompanyAdmin(companyId));
+        allow create: if isSignedIn();
+        allow update: if isSignedIn() && (resource.data.recipientId == request.auth.uid || isCompanyAdmin(companyId));
+        allow delete: if isCompanyAdmin(companyId);
+      }
+    }
+
+    // =========================================================================
+    // 2. ROOT COLLECTIONS (Stay flat)
+    // =========================================================================
+
+    // Users / Shoppers (customers browse multiple companies)
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    // Platform-wide Ads Banners
+    match /ads_banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Media Links
+    match /media_links/{mediaId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // =========================================================================
+    // 3. COLLECTION GROUP RULES (For session restore & global feeds)
+    // =========================================================================
+    match /{path=**}/admins/{adminId} {
+      allow read: if isSignedIn();
+    }
+    match /{path=**}/employees/{employeeId} {
+      allow read: if isSignedIn();
+    }
+    match /{path=**}/products/{productId} {
+      allow read: if true;
+    }
+    match /{path=**}/categories/{categoryId} {
+      allow read: if true;
+    }
+    match /{path=**}/orders/{orderId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.token.role == 'admin' || request.auth.token.role == 'employee');
+    }
+    match /{path=**}/vouchers/{voucherId} {
+      allow read: if true;
+    }
+    match /{path=**}/banners/{bannerId} {
+      allow read: if true;
+    }
+    match /{path=**}/delivery_charges/{pincode} {
+      allow read: if true;
+    }
+    match /{path=**}/reviews/{reviewId} {
+      allow read: if true;
+    }
+    match /{path=**}/recommendations/{recId} {
+      allow read: if true;
+    }
+    match /{path=**}/notifications/{notificationId} {
+      allow read: if isSignedIn() && (resource.data.recipientId == request.auth.uid);
+    }
+
+    // =========================================================================
+    // 4. LEGACY ROOT FALLBACK (Ensures existing flat documents remain accessible)
+    // =========================================================================
+    match /admins/{adminId} {
+      allow read, write: if isSignedIn() && (adminId == request.auth.uid || isAdmin());
+    }
+    match /employees/{employeeId} {
+      allow read, write: if isSignedIn() && (employeeId == request.auth.uid || isAdmin());
+    }
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create: if isSignedIn() && role() == 'admin' &&
+        request.resource.data.companyId == companyId();
+      allow update, delete: if isSignedIn() && role() == 'admin' &&
+        resource.data.companyId == companyId();
+    }
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if isSignedIn() && isAdmin();
+      allow update: if isSignedIn() && role() == 'admin' &&
+        resource.data.companyId == companyId() &&
+        (!('categoryId' in request.resource.data) ||
+         get(/databases/$(database)/documents/categories/$(request.resource.data.categoryId))
+           .data.companyId == companyId());
+    }
+    match /orders/{orderId} {
+      allow read, write: if isSignedIn();
+    }
+    match /vouchers/{voucherId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /delivery_charges/{pincode} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    match /recommendations/{recId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /notifications/{notificationId} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}

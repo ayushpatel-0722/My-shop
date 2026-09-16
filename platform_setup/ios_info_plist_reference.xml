@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Camera usage description (QR scanner) -->
+    <key>NSCameraUsageDescription</key>
+    <string>Scan QR codes and product barcodes</string>
+
+    <!-- Photo library (image upload) -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Upload product and company images</string>
+
+    <!-- Deep-link scheme (Section 15.2) -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLName</key>
+            <string>com.example.ecommercePlatform</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>ecommerce</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Push notifications -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
+</dict>
+</plist>

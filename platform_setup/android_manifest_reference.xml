@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  REFERENCE AndroidManifest.xml — merge the highlighted parts into your
+  generated android/app/src/main/AndroidManifest.xml.
+
+  Required additions:
+    1. INTERNET permission (already present by default).
+    2. Deep-link intent-filters inside the main <activity>.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <application
+        android:label="Bazaar"
+        android:icon="@mipmap/ic_launcher">
+
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true">
+
+            <!-- Deep links (Section 15.2) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="ecommerce" android:host="product"/>
+                <data android:scheme="ecommerce" android:host="category"/>
+                <data android:scheme="ecommerce" android:host="company"/>
+                <data android:scheme="ecommerce" android:host="order"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="true"/>
+        </activity>
+
+        <!-- FCM notifications -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default_channel"/>
+    </application>
+</manifest>

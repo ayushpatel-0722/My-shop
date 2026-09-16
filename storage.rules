@@ -1,0 +1,18 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() { return request.auth != null; }
+    function role() { return request.auth.token.role; }
+    function isAdmin() { return isSignedIn() && role() == 'admin'; }
+
+    // Product images, banners, QR PNGs, payment proofs, reports.
+    match /images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() || isSignedIn();
+    }
+    match /{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

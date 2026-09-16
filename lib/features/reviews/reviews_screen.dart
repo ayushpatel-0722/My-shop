@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+
+import '../../app/l10n/app_localizations.dart';
+import '../../core/models/review.dart';
+import '../../core/services/service_locator.dart';
+
+/// Lists all visible reviews for a company (Section 14.2, user side).
+class ReviewsScreen extends StatelessWidget {
+  final String companyId;
+  const ReviewsScreen({super.key, required this.companyId});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.reviews)),
+      body: StreamBuilder<List<Review>>(
+        stream: repo.reviews(companyId),
+        builder: (context, snap) {
+          final list = (snap.data ?? const <Review>[])
+              .where((r) => r.isVisible)
+              .toList();
+          if (list.isEmpty) {
+            return const Center(child: Text('No reviews yet'));
+          }
+          final avg =
+              list.fold(0, (s, r) => s + r.rating) / list.length;
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _averageCard(avg, list.length),
+              const SizedBox(height: 12),
+              for (final r in list) _reviewCard(r),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _averageCard(double avg, int count) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Text(avg.toStringAsFixed(1),
+                style: const TextStyle(
+                    fontSize: 40, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: List.generate(
+                      5,
+                      (i) => Icon(
+                            i < avg.round() ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 20,
+                          )),
+                ),
+                Text('$count reviews'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _reviewCard(Review r) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        title: Row(
+          children: [
+            Expanded(child: Text(r.userName)),
+            Row(
+              children: List.generate(
+                  5,
+                  (i) => Icon(
+                        i < r.rating ? Icons.star : Icons.star_border,
+                        color: Colors.amber,
+                        size: 16,
+                      )),
+            ),
+          ],
+        ),
+        subtitle: r.message.isEmpty ? null : Text(r.message),
+      ),
+    );
+  }
+}

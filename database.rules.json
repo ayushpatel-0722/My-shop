@@ -1,0 +1,14 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "companies": {
+      ".read": true,
+      ".write": true
+    },
+    "media_links": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}
