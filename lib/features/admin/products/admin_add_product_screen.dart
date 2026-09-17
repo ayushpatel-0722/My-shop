@@ -19,7 +19,10 @@ import '../../../core/widgets/modern_card.dart';
 /// - Price & Discount calculation preview
 /// - Bounded layout constraints preventing viewport layout crashes
 class AdminAddProductScreen extends StatefulWidget {
-  const AdminAddProductScreen({super.key});
+  final Product? product;
+  final String? productId;
+
+  const AdminAddProductScreen({super.key, this.product, this.productId});
 
   @override
   State<AdminAddProductScreen> createState() => _AdminAddProductScreenState();
@@ -43,12 +46,17 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   String _companyId = '';
   String _companyName = '';
   String? _selectedCategoryId;
-  String _measurementType = 'quantity_based'; // 'quantity_based' | 'weight_based'
+  String _measurementType =
+      'quantity_based'; // 'quantity_based' | 'weight_based'
   bool _isRecommended = false;
   bool _isSaving = false;
+  bool _isLoadingProduct = false;
+  String? _loadedProductId;
 
   final List<String> _images = [];
   final List<ProductVariant> _variants = [];
+
+  bool get isEditMode => widget.product != null || widget.productId != null;
 
   static const List<String> _commonUnitTypes = [
     'pieces',
@@ -69,8 +77,65 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     _companyId = adminCompanyId;
     _companyName = adminCompanyName;
 
+    if (widget.product != null) {
+      _initFromProduct(widget.product!);
+    } else if (widget.productId != null && widget.productId!.isNotEmpty) {
+      _loadProductById(widget.productId!);
+    }
+
     if (_companyName.isEmpty && _companyId.isNotEmpty) {
       _loadCompanyName(_companyId);
+    }
+  }
+
+  void _initFromProduct(Product p) {
+    _loadedProductId = p.id;
+    _nameCtrl.text = p.name;
+    _detailsCtrl.text = p.details;
+    _subDetailsCtrl.text = p.subDetails;
+    _priceCtrl.text = p.amount > 0
+        ? (p.amount == p.amount.roundToDouble()
+              ? p.amount.toInt().toString()
+              : p.amount.toString())
+        : '';
+    _discountPriceCtrl.text = p.discountAmt > 0
+        ? (p.discountAmt == p.discountAmt.roundToDouble()
+              ? p.discountAmt.toInt().toString()
+              : p.discountAmt.toString())
+        : '';
+    _unitCtrl.text = p.unit == p.unit.roundToDouble()
+        ? p.unit.toInt().toString()
+        : p.unit.toString();
+    _unitTypeCtrl.text = p.unitType.isNotEmpty ? p.unitType : 'pieces';
+    _stockCtrl.text = p.stockQty.toString();
+    _measurementType = p.type.isNotEmpty ? p.type : 'quantity_based';
+    _isRecommended = p.isRecommended;
+    _selectedCategoryId = p.categoryId.isNotEmpty ? p.categoryId : null;
+    if (p.companyId.isNotEmpty) {
+      _companyId = p.companyId;
+    }
+    _images.clear();
+    _images.addAll(p.images);
+    _variants.clear();
+    _variants.addAll(p.variants);
+  }
+
+  Future<void> _loadProductById(String id) async {
+    setState(() => _isLoadingProduct = true);
+    try {
+      final p = await repo.product(id);
+      if (p != null && mounted) {
+        setState(() {
+          _initFromProduct(p);
+        });
+        if (_companyName.isEmpty && _companyId.isNotEmpty) {
+          _loadCompanyName(_companyId);
+        }
+      }
+    } catch (_) {
+      // Fallback
+    } finally {
+      if (mounted) setState(() => _isLoadingProduct = false);
     }
   }
 
@@ -104,12 +169,18 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     final urls = raw
         .split(',')
         .map((e) => e.trim())
-        .where((e) => e.isNotEmpty && (e.startsWith('http://') || e.startsWith('https://')))
+        .where(
+          (e) =>
+              e.isNotEmpty &&
+              (e.startsWith('http://') || e.startsWith('https://')),
+        )
         .toList();
 
     if (urls.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid HTTP or HTTPS image URL')),
+        const SnackBar(
+          content: Text('Please enter a valid HTTP or HTTPS image URL'),
+        ),
       );
       return;
     }
@@ -128,7 +199,8 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     final sizeCtrl = TextEditingController();
     final colorCtrl = TextEditingController();
     final skuCtrl = TextEditingController(
-      text: 'SKU-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
+      text:
+          'SKU-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
     );
     final stockCtrl = TextEditingController(text: '10');
     final priceOverrideCtrl = TextEditingController();
@@ -143,17 +215,26 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             children: [
               TextField(
                 controller: skuCtrl,
-                decoration: const InputDecoration(labelText: 'SKU *', hintText: 'e.g. SKU-RED-L'),
+                decoration: const InputDecoration(
+                  labelText: 'SKU *',
+                  hintText: 'e.g. SKU-RED-L',
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: sizeCtrl,
-                decoration: const InputDecoration(labelText: 'Size', hintText: 'e.g. S, M, L, XL, 500ml'),
+                decoration: const InputDecoration(
+                  labelText: 'Size',
+                  hintText: 'e.g. S, M, L, XL, 500ml',
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: colorCtrl,
-                decoration: const InputDecoration(labelText: 'Color', hintText: 'e.g. Navy, Crimson'),
+                decoration: const InputDecoration(
+                  labelText: 'Color',
+                  hintText: 'e.g. Navy, Crimson',
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -164,7 +245,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
               const SizedBox(height: 12),
               TextField(
                 controller: priceOverrideCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
                   labelText: 'Price Override (Optional)',
                   hintText: 'Leave empty or 0 to use base price',
@@ -208,13 +291,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedCategoryId == null || _selectedCategoryId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a Category for the product')),
-      );
-      return;
-    }
-
     setState(() => _isSaving = true);
 
     try {
@@ -226,14 +302,19 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       // Include pending typed image URL if valid
       final pendingUrl = _imageUrlCtrl.text.trim();
       final allImages = List<String>.from(_images);
-      if (pendingUrl.isNotEmpty && (pendingUrl.startsWith('http://') || pendingUrl.startsWith('https://'))) {
+      if (pendingUrl.isNotEmpty &&
+          (pendingUrl.startsWith('http://') ||
+              pendingUrl.startsWith('https://'))) {
         allImages.add(pendingUrl);
       }
 
+      final resolvedId =
+          _loadedProductId ?? widget.product?.id ?? widget.productId ?? '';
+
       final product = Product(
-        id: '',
+        id: resolvedId,
         companyId: _companyId,
-        categoryId: _selectedCategoryId!,
+        categoryId: _selectedCategoryId ?? '',
         name: _nameCtrl.text.trim(),
         details: _detailsCtrl.text.trim(),
         subDetails: _subDetailsCtrl.text.trim(),
@@ -253,7 +334,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Product "${product.name}" created successfully!'),
+          content: Text(
+            isEditMode
+                ? 'Product "${product.name}" updated successfully!'
+                : 'Product "${product.name}" created successfully!',
+          ),
           backgroundColor: Colors.green.shade700,
         ),
       );
@@ -278,18 +363,28 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingProduct) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Edit Product')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     // Calculate discount preview percentage
     final baseAmount = double.tryParse(_priceCtrl.text) ?? 0;
     final discAmount = double.tryParse(_discountPriceCtrl.text) ?? 0;
-    final hasDiscount = baseAmount > 0 && discAmount > 0 && discAmount < baseAmount;
-    final discountPercent = hasDiscount ? (((baseAmount - discAmount) / baseAmount) * 100).round() : 0;
+    final hasDiscount =
+        baseAmount > 0 && discAmount > 0 && discAmount < baseAmount;
+    final discountPercent = hasDiscount
+        ? (((baseAmount - discAmount) / baseAmount) * 100).round()
+        : 0;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Product'),
+        title: Text(isEditMode ? 'Edit Product' : 'Add New Product'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -322,13 +417,19 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           children: [
                             Text(
                               'Product Specification',
-                              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Create new catalog items with multi-image gallery, dynamic variant matrix, and inventory controls.',
+                              isEditMode
+                                  ? 'Update catalog item details, pricing, images, variants, and inventory controls.'
+                                  : 'Create new catalog items with multi-image gallery, dynamic variant matrix, and inventory controls.',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                                color: isDark
+                                    ? AppTheme.textSecondaryDark
+                                    : AppTheme.textSecondaryLight,
                               ),
                             ),
                           ],
@@ -337,25 +438,36 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       const SizedBox(width: 12),
                       // Read-only Company Scope Pill (Auto-assigned)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.store, size: 16, color: theme.colorScheme.primary),
+                            Icon(
+                              Icons.store,
+                              size: 16,
+                              color: theme.colorScheme.primary,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               _companyName.isNotEmpty
                                   ? _companyName
                                   : (_companyId.isNotEmpty
-                                      ? 'Company Scope'
-                                      : 'Global Scope'),
+                                        ? 'Company Scope'
+                                        : 'Global Scope'),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -377,12 +489,18 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.inventory_2_outlined, color: theme.colorScheme.primary, size: 20),
+                            Icon(
+                              Icons.inventory_2_outlined,
+                              color: theme.colorScheme.primary,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Basic Information',
-                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
@@ -395,21 +513,26 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             hintText: 'e.g. Organic Hass Avocado (Pack of 4)',
                             prefixIcon: Icon(Icons.title),
                           ),
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty) ? 'Product title is required' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Product title is required'
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         StreamBuilder<List<Category>>(
                           stream: repo.categories(companyId: _companyId),
                           builder: (context, snapshot) {
-                            final categories = snapshot.data ?? const <Category>[];
+                            final categories =
+                                snapshot.data ?? const <Category>[];
                             return DropdownButtonFormField<String>(
-                              initialValue: categories.any((c) => c.id == _selectedCategoryId)
+                              initialValue:
+                                  categories.any(
+                                    (c) => c.id == _selectedCategoryId,
+                                  )
                                   ? _selectedCategoryId
                                   : null,
                               isExpanded: true,
                               decoration: const InputDecoration(
-                                labelText: 'Category *',
+                                labelText: 'Category',
                                 prefixIcon: Icon(Icons.category_outlined),
                               ),
                               items: categories.map((c) {
@@ -421,9 +544,8 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   ),
                                 );
                               }).toList(),
-                              onChanged: (val) => setState(() => _selectedCategoryId = val),
-                              validator: (v) =>
-                                  (v == null || v.isEmpty) ? 'Please select a category' : null,
+                              onChanged: (val) =>
+                                  setState(() => _selectedCategoryId = val),
                             );
                           },
                         ),
@@ -433,7 +555,8 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           maxLines: 3,
                           decoration: const InputDecoration(
                             labelText: 'Full Description',
-                            hintText: 'Detailed product summary, origin, benefits...',
+                            hintText:
+                                'Detailed product summary, origin, benefits...',
                             alignLabelWithHint: true,
                           ),
                         ),
@@ -443,7 +566,8 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           maxLines: 2,
                           decoration: const InputDecoration(
                             labelText: 'Additional Specs / Sub-details',
-                            hintText: 'Ingredients, storage instructions, material specifications...',
+                            hintText:
+                                'Ingredients, storage instructions, material specifications...',
                             alignLabelWithHint: true,
                           ),
                         ),
@@ -462,7 +586,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
                         final priceField = TextFormField(
                           controller: _priceCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           onChanged: (_) => setState(() {}),
                           decoration: const InputDecoration(
                             labelText: 'Base Price (₹) *',
@@ -470,15 +596,19 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             prefixIcon: Icon(Icons.currency_rupee),
                           ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty) return 'Enter price';
-                            if (double.tryParse(v) == null) return 'Valid number';
+                            if (v == null || v.trim().isEmpty)
+                              return 'Enter price';
+                            if (double.tryParse(v) == null)
+                              return 'Valid number';
                             return null;
                           },
                         );
 
                         final discountPriceField = TextFormField(
                           controller: _discountPriceCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
                             labelText: 'Discounted Price (₹)',
@@ -486,7 +616,10 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             prefixIcon: const Icon(Icons.local_offer_outlined),
                             suffix: hasDiscount
                                 ? Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.green.shade600,
                                       borderRadius: BorderRadius.circular(6),
@@ -506,13 +639,16 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
                         final unitValField = TextFormField(
                           controller: _unitCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: const InputDecoration(
                             labelText: 'Unit Value *',
                             hintText: 'e.g. 1 or 500',
                           ),
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
                         );
 
                         final unitTypeField = TextFormField(
@@ -521,8 +657,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             labelText: 'Unit Type *',
                             hintText: 'e.g. kg, pieces',
                           ),
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
                         );
 
                         return Column(
@@ -530,12 +667,17 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.monetization_on_outlined, color: theme.colorScheme.primary, size: 20),
+                                Icon(
+                                  Icons.monetization_on_outlined,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Pricing & Measurement',
-                                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ],
@@ -556,7 +698,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             const SizedBox(height: 20),
                             Text(
                               'Base Measurement Type',
-                              style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             SizedBox(
@@ -566,17 +710,23 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 segments: [
                                   ButtonSegment<String>(
                                     value: 'quantity_based',
-                                    label: Text(isNarrow ? 'Quantity' : 'Quantity Based'),
+                                    label: Text(
+                                      isNarrow ? 'Quantity' : 'Quantity Based',
+                                    ),
                                     icon: const Icon(Icons.tag, size: 18),
                                   ),
                                   ButtonSegment<String>(
                                     value: 'weight_based',
-                                    label: Text(isNarrow ? 'Weight' : 'Weight Based'),
+                                    label: Text(
+                                      isNarrow ? 'Weight' : 'Weight Based',
+                                    ),
                                     icon: const Icon(Icons.scale, size: 18),
                                   ),
                                 ],
                                 selected: {_measurementType},
-                                onSelectionChanged: (set) => setState(() => _measurementType = set.first),
+                                onSelectionChanged: (set) => setState(
+                                  () => _measurementType = set.first,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -598,8 +748,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               runSpacing: 6,
                               children: _commonUnitTypes.map((u) {
                                 return ActionChip(
-                                  label: Text(u, style: const TextStyle(fontSize: 11)),
-                                  onPressed: () => setState(() => _unitTypeCtrl.text = u),
+                                  label: Text(
+                                    u,
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => _unitTypeCtrl.text = u),
                                 );
                               }).toList(),
                             ),
@@ -612,8 +766,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 hintText: 'Available inventory units',
                                 prefixIcon: Icon(Icons.warehouse_outlined),
                               ),
-                              validator: (v) =>
-                                  (v == null || v.trim().isEmpty) ? 'Enter inventory count' : null,
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'Enter inventory count'
+                                  : null,
                             ),
                             const SizedBox(height: 12),
                             Material(
@@ -625,11 +780,14 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   'Flag this product to appear in the recommendations engine carousel.',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                                    color: isDark
+                                        ? AppTheme.textSecondaryDark
+                                        : AppTheme.textSecondaryLight,
                                   ),
                                 ),
                                 value: _isRecommended,
-                                onChanged: (val) => setState(() => _isRecommended = val),
+                                onChanged: (val) =>
+                                    setState(() => _isRecommended = val),
                               ),
                             ),
                           ],
@@ -648,19 +806,27 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.photo_library_outlined, color: theme.colorScheme.primary, size: 20),
+                            Icon(
+                              Icons.photo_library_outlined,
+                              color: theme.colorScheme.primary,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Product Gallery',
-                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             Text(
                               '${_images.length} added',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                                color: isDark
+                                    ? AppTheme.textSecondaryDark
+                                    : AppTheme.textSecondaryLight,
                               ),
                             ),
                           ],
@@ -682,7 +848,10 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             const SizedBox(width: 8),
                             FilledButton.tonalIcon(
                               onPressed: _addImageUrl,
-                              icon: const Icon(Icons.add_photo_alternate, size: 18),
+                              icon: const Icon(
+                                Icons.add_photo_alternate,
+                                size: 18,
+                              ),
                               label: const Text('Add'),
                             ),
                           ],
@@ -694,7 +863,8 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: _images.length,
-                              separatorBuilder: (context, index) => const SizedBox(width: 12),
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(width: 12),
                               itemBuilder: (context, idx) {
                                 final url = _images[idx];
                                 return SizedBox(
@@ -709,21 +879,32 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                           height: 100,
                                           decoration: BoxDecoration(
                                             border: Border.all(
-                                              color: isDark ? AppTheme.borderDark : AppTheme.borderLight,
+                                              color: isDark
+                                                  ? AppTheme.borderDark
+                                                  : AppTheme.borderLight,
                                             ),
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Image.network(
                                             url,
                                             width: 100,
                                             height: 100,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (ctx, err, stack) => Container(
-                                              width: 100,
-                                              height: 100,
-                                              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                                              child: const Icon(Icons.broken_image, color: Colors.grey, size: 28),
-                                            ),
+                                            errorBuilder: (ctx, err, stack) =>
+                                                Container(
+                                                  width: 100,
+                                                  height: 100,
+                                                  color: isDark
+                                                      ? Colors.grey.shade800
+                                                      : Colors.grey.shade200,
+                                                  child: const Icon(
+                                                    Icons.broken_image,
+                                                    color: Colors.grey,
+                                                    size: 28,
+                                                  ),
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -738,7 +919,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                               color: Colors.black54,
                                               shape: BoxShape.circle,
                                             ),
-                                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                                            child: const Icon(
+                                              Icons.close,
+                                              size: 14,
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -747,14 +932,22 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                           bottom: 4,
                                           left: 4,
                                           child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: theme.colorScheme.primary,
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: const Text(
                                               'Main',
-                                              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -786,11 +979,17 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.tune, color: theme.colorScheme.primary, size: 20),
+                                Icon(
+                                  Icons.tune,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Variant Matrix',
-                                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ],
                             ),
@@ -805,7 +1004,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         Text(
                           'Define SKU, size, color, stock, and price overrides for product variations.',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                            color: isDark
+                                ? AppTheme.textSecondaryDark
+                                : AppTheme.textSecondaryLight,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -813,10 +1014,13 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                              color: theme.colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: isDark ? AppTheme.borderDark : AppTheme.borderLight,
+                                color: isDark
+                                    ? AppTheme.borderDark
+                                    : AppTheme.borderLight,
                               ),
                             ),
                             child: Center(
@@ -824,7 +1028,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 'No variants added (single item SKU). Tap "Add Variant" to configure sizes or colors.',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                                  color: isDark
+                                      ? AppTheme.textSecondaryDark
+                                      : AppTheme.textSecondaryLight,
                                 ),
                               ),
                             ),
@@ -832,15 +1038,23 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         else
                           Column(
                             children: [
-                              for (int idx = 0; idx < _variants.length; idx++) ...[
+                              for (
+                                int idx = 0;
+                                idx < _variants.length;
+                                idx++
+                              ) ...[
                                 if (idx > 0) const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: isDark ? AppTheme.surfaceContainerDark : AppTheme.surfaceContainerLight,
+                                    color: isDark
+                                        ? AppTheme.surfaceContainerDark
+                                        : AppTheme.surfaceContainerLight,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: isDark ? AppTheme.borderDark : AppTheme.borderLight,
+                                      color: isDark
+                                          ? AppTheme.borderDark
+                                          : AppTheme.borderLight,
                                     ),
                                   ),
                                   child: Row(
@@ -849,25 +1063,35 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               _variants[idx].sku,
-                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                              ),
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
                                               'Size: ${_variants[idx].size.isEmpty ? "Standard" : _variants[idx].size} • Color: ${_variants[idx].color.isEmpty ? "None" : _variants[idx].color} • Stock: ${_variants[idx].stockQty}${_variants[idx].priceOverride > 0 ? " • ₹${_variants[idx].priceOverride}" : ""}',
                                               style: TextStyle(
                                                 fontSize: 12,
-                                                color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                                                color: isDark
+                                                    ? AppTheme.textSecondaryDark
+                                                    : AppTheme
+                                                          .textSecondaryLight,
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
                                       IconButton(
-                                        icon: const Icon(Icons.delete_outline, size: 18),
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          size: 18,
+                                        ),
                                         onPressed: () => _removeVariant(idx),
                                       ),
                                     ],
@@ -884,7 +1108,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
                   // Save Action
                   ModernButton(
-                    text: 'Create Product',
+                    text: isEditMode ? 'Update Product' : 'Create Product',
                     icon: const Icon(Icons.check, size: 20),
                     isLoading: _isSaving,
                     height: 52,

@@ -141,13 +141,54 @@ class AdminProductsScreen extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => repo.deleteProduct(p.id),
+                icon: const Icon(Icons.edit_outlined, size: 20),
+                tooltip: 'Edit Product',
+                onPressed: () => context.push(
+                  AppRoutes.adminEditProductPath(p.id),
+                  extra: p,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  size: 20,
+                  color: Colors.redAccent,
+                ),
+                tooltip: 'Delete Product',
+                onPressed: () => _confirmDelete(context, p),
               ),
             ],
           ),
+          onTap: () =>
+              context.push(AppRoutes.adminEditProductPath(p.id), extra: p),
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, Product p) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Product'),
+        content: Text('Are you sure you want to delete "${p.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await repo.deleteProduct(p.id);
+    }
   }
 }

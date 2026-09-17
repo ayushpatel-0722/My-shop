@@ -27,11 +27,7 @@ class AdminAddCategoryScreen extends StatefulWidget {
   final Category? category;
   final String? categoryId;
 
-  const AdminAddCategoryScreen({
-    super.key,
-    this.category,
-    this.categoryId,
-  });
+  const AdminAddCategoryScreen({super.key, this.category, this.categoryId});
 
   @override
   State<AdminAddCategoryScreen> createState() => _AdminAddCategoryScreenState();
@@ -54,7 +50,20 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
   String? _loadedCategoryId;
 
   final List<String> _suggestedEmojis = [
-    '🛍️', '🍎', '🥦', '🥛', '🥩', '🍞', '📱', '💻', '👕', '👟', '🧴', '💊', '🏠', '🎮'
+    '🛍️',
+    '🍎',
+    '🥦',
+    '🥛',
+    '🥩',
+    '🍞',
+    '📱',
+    '💻',
+    '👕',
+    '👟',
+    '🧴',
+    '💊',
+    '🏠',
+    '🎮',
   ];
 
   final List<String> _suggestedTypes = [
@@ -158,21 +167,37 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
   Future<void> _handleSave(List<Category> existingCategories) async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedProductIds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one product for the category'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final trimmedName = _nameCtrl.text.trim();
     final trimmedType = _typeCtrl.text.trim();
-    final currentCatId = _loadedCategoryId ?? widget.category?.id ?? widget.categoryId ?? '';
+    final currentCatId =
+        _loadedCategoryId ?? widget.category?.id ?? widget.categoryId ?? '';
 
     // 1. Validate Name uniqueness (case-insensitive) within the same companyId
     final isDuplicate = existingCategories.any((cat) {
       if (currentCatId.isNotEmpty && cat.id == currentCatId) return false;
-      final sameCompany = cat.companyId == _companyId || (_companyId.isEmpty && cat.companyId.isEmpty);
-      return sameCompany && cat.name.trim().toLowerCase() == trimmedName.toLowerCase();
+      final sameCompany =
+          cat.companyId == _companyId ||
+          (_companyId.isEmpty && cat.companyId.isEmpty);
+      return sameCompany &&
+          cat.name.trim().toLowerCase() == trimmedName.toLowerCase();
     });
 
     if (isDuplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('A category named "$trimmedName" already exists in this company.'),
+          content: Text(
+            'A category named "$trimmedName" already exists in this company.',
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -195,7 +220,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       if (descendants.contains(_selectedParentId)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Invalid parent: Selecting a descendant category creates a cycle.'),
+            content: const Text(
+              'Invalid parent: Selecting a descendant category creates a cycle.',
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -212,7 +239,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
         name: trimmedName,
         details: _detailsCtrl.text.trim(),
         type: trimmedType,
-        parentId: _selectedParentId?.isNotEmpty == true ? _selectedParentId : null,
+        parentId: _selectedParentId?.isNotEmpty == true
+            ? _selectedParentId
+            : null,
         iconUrl: _iconCtrl.text.trim().isEmpty ? '🛍️' : _iconCtrl.text.trim(),
         productList: _selectedProductIds,
       );
@@ -254,7 +283,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final iconVal = _iconCtrl.text.trim();
 
-    final isHttp = iconVal.startsWith('http://') || iconVal.startsWith('https://');
+    final isHttp =
+        iconVal.startsWith('http://') || iconVal.startsWith('https://');
 
     return Container(
       width: 64,
@@ -303,9 +333,13 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       builder: (context, catSnap) {
         final existingCategories = catSnap.data ?? const <Category>[];
 
-        final currentCatId = _loadedCategoryId ?? widget.category?.id ?? widget.categoryId ?? '';
+        final currentCatId =
+            _loadedCategoryId ?? widget.category?.id ?? widget.categoryId ?? '';
         final invalidParentIds = currentCatId.isNotEmpty
-            ? ({currentCatId, ..._getDescendantIds(currentCatId, existingCategories)})
+            ? ({
+                currentCatId,
+                ..._getDescendantIds(currentCatId, existingCategories),
+              })
             : <String>{};
 
         // Allowed parent categories (filter out self and any descendants)
@@ -333,61 +367,84 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 24,
+                  ),
                   children: [
                     // Header Info
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isEditMode ? 'Edit Category' : 'Category Details',
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Configure hierarchy, catalog classification, and assigned products.',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: isDark
-                                    ? AppTheme.textSecondaryDark
-                                    : AppTheme.textSecondaryLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Read-only Company Scope Pill (Auto-assigned)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.store, size: 16, color: theme.colorScheme.primary),
-                              const SizedBox(width: 6),
                               Text(
-                                _companyName.isNotEmpty
-                                    ? _companyName
-                                    : (_companyId.isNotEmpty
-                                        ? 'Company Scope'
-                                        : 'Global Scope'),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
+                                isEditMode
+                                    ? 'Edit Category'
+                                    : 'Category Details',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Configure hierarchy, catalog classification, and assigned products.',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: isDark
+                                      ? AppTheme.textSecondaryDark
+                                      : AppTheme.textSecondaryLight,
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Read-only Company Scope Pill (Auto-assigned)
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.3,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.store,
+                                  size: 16,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    _companyName.isNotEmpty
+                                        ? _companyName
+                                        : (_companyId.isNotEmpty
+                                              ? 'Company Scope'
+                                              : 'Global Scope'),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -402,11 +459,17 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.label_outline, color: theme.colorScheme.primary, size: 20),
+                              Icon(
+                                Icons.label_outline,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Basic Information',
-                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
@@ -447,10 +510,14 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                             children: _suggestedTypes.map((type) {
                               final isSelected = _typeCtrl.text.trim() == type;
                               return ChoiceChip(
-                                label: Text(type, style: const TextStyle(fontSize: 12)),
+                                label: Text(
+                                  type,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
                                 selected: isSelected,
                                 onSelected: (selected) {
-                                  if (selected) setState(() => _typeCtrl.text = type);
+                                  if (selected)
+                                    setState(() => _typeCtrl.text = type);
                                 },
                               );
                             }).toList(),
@@ -461,7 +528,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                             maxLines: 3,
                             decoration: const InputDecoration(
                               labelText: 'Description / Details',
-                              hintText: 'Description shown on the category header...',
+                              hintText:
+                                  'Description shown on the category header...',
                               alignLabelWithHint: true,
                             ),
                           ),
@@ -479,11 +547,17 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.palette_outlined, color: theme.colorScheme.primary, size: 20),
+                              Icon(
+                                Icons.palette_outlined,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Icon & Visuals',
-                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
@@ -498,8 +572,10 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                                   controller: _iconCtrl,
                                   onChanged: (_) => setState(() {}),
                                   decoration: const InputDecoration(
-                                    labelText: 'Category Icon (Image URL or Emoji)',
-                                    hintText: 'Enter image URL or emoji (e.g. 🛍️)',
+                                    labelText:
+                                        'Category Icon (Image URL or Emoji)',
+                                    hintText:
+                                        'Enter image URL or emoji (e.g. 🛍️)',
                                   ),
                                 ),
                               ),
@@ -516,8 +592,12 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                             runSpacing: 8,
                             children: _suggestedEmojis.map((emoji) {
                               return ActionChip(
-                                label: Text(emoji, style: const TextStyle(fontSize: 18)),
-                                onPressed: () => setState(() => _iconCtrl.text = emoji),
+                                label: Text(
+                                  emoji,
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                                onPressed: () =>
+                                    setState(() => _iconCtrl.text = emoji),
                               );
                             }).toList(),
                           ),
@@ -535,11 +615,17 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.account_tree_outlined, color: theme.colorScheme.primary, size: 20),
+                              Icon(
+                                Icons.account_tree_outlined,
+                                color: theme.colorScheme.primary,
+                                size: 20,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Hierarchy & Nesting',
-                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
@@ -548,12 +634,17 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                             'Assign an existing parent category in the same company for nesting. '
                             'Self and descendant categories are automatically blocked to prevent hierarchy cycles.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                              color: isDark
+                                  ? AppTheme.textSecondaryDark
+                                  : AppTheme.textSecondaryLight,
                             ),
                           ),
                           const SizedBox(height: 16),
                           DropdownButtonFormField<String?>(
-                            initialValue: validParentCategories.any((c) => c.id == _selectedParentId)
+                            initialValue:
+                                validParentCategories.any(
+                                  (c) => c.id == _selectedParentId,
+                                )
                                 ? _selectedParentId
                                 : null,
                             decoration: const InputDecoration(
@@ -565,20 +656,27 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                                 value: null,
                                 child: Text('None (Top-Level Category)'),
                               ),
-                              ...validParentCategories.map((c) => DropdownMenuItem<String?>(
-                                    value: c.id,
-                                    child: Text(
-                                      '${c.iconUrl.isNotEmpty ? c.iconUrl : "📁"} ${c.name}',
-                                    ),
-                                  )),
+                              ...validParentCategories.map(
+                                (c) => DropdownMenuItem<String?>(
+                                  value: c.id,
+                                  child: Text(
+                                    '${c.iconUrl.isNotEmpty ? c.iconUrl : "📁"} ${c.name}',
+                                  ),
+                                ),
+                              ),
                             ],
-                            onChanged: (val) => setState(() => _selectedParentId = val),
+                            onChanged: (val) =>
+                                setState(() => _selectedParentId = val),
                           ),
                           if (invalidParentIds.isNotEmpty && isEditMode) ...[
                             const SizedBox(height: 8),
                             Text(
                               'Note: ${invalidParentIds.length} categories (this category and its descendants) are blocked from being chosen as parent.',
-                              style: const TextStyle(fontSize: 11, color: Colors.grey, fontStyle: FontStyle.italic),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey,
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
                           ],
                         ],
@@ -591,7 +689,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                     StreamBuilder<List<Product>>(
                       stream: repo.products(companyId: _companyId),
                       builder: (context, prodSnap) {
-                        final allCompanyProducts = prodSnap.data ?? const <Product>[];
+                        final allCompanyProducts =
+                            prodSnap.data ?? const <Product>[];
 
                         return ModernCard(
                           padding: const EdgeInsets.all(20),

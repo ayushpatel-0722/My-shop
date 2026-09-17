@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/category.dart';
 import '../../core/models/employee.dart';
+import '../../core/models/product.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/utils/app_route_logger.dart';
 import '../../features/admin/admins/admin_admins_screen.dart';
@@ -72,6 +73,7 @@ class AppRoutes {
   static const adminOrders = '/admin/orders';
   static const adminProducts = '/admin/products';
   static const adminAddProduct = '/admin/products/add';
+  static const adminEditProduct = '/admin/products/edit/:id';
   static const adminCategories = '/admin/categories';
   static const adminAddCategory = '/admin/categories/add';
   static const adminEditCategory = '/admin/categories/edit/:id';
@@ -95,7 +97,9 @@ class AppRoutes {
   static String companyPath(String slug) => '/company/$slug';
   static String productPath(String id) => '/product/$id';
   static String categoryPath(String id) => '/category/$id';
-  static String adminEditCategoryPath(String id) => '/admin/categories/edit/$id';
+  static String adminEditProductPath(String id) => '/admin/products/edit/$id';
+  static String adminEditCategoryPath(String id) =>
+      '/admin/categories/edit/$id';
   static String adminEditEmployeePath(String id) => '/admin/employees/edit/$id';
   static String orderPath(String id) => '/order/$id';
 }
@@ -222,7 +226,17 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.adminAddProduct,
-      builder: (_, __) => const AdminAddProductScreen(),
+      builder: (_, state) => AdminAddProductScreen(
+        product: state.extra is Product ? state.extra as Product : null,
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.adminEditProduct,
+      builder: (_, state) {
+        final id = state.pathParameters['id'];
+        final product = state.extra is Product ? state.extra as Product : null;
+        return AdminAddProductScreen(product: product, productId: id);
+      },
     ),
     GoRoute(
       path: AppRoutes.adminCategories,
@@ -238,7 +252,9 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.adminEditCategory,
       builder: (_, state) {
         final id = state.pathParameters['id'];
-        final category = state.extra is Category ? state.extra as Category : null;
+        final category = state.extra is Category
+            ? state.extra as Category
+            : null;
         return AdminAddCategoryScreen(category: category, categoryId: id);
       },
     ),
@@ -260,7 +276,9 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.adminEditEmployee,
       builder: (_, state) {
         final id = state.pathParameters['id'];
-        final employee = state.extra is Employee ? state.extra as Employee : null;
+        final employee = state.extra is Employee
+            ? state.extra as Employee
+            : null;
         return AdminAddEmployeeScreen(employee: employee, employeeId: id);
       },
     ),
