@@ -49,7 +49,16 @@ Future<void> main() async {
   // ------------------------------------------------------------------
   ServiceLocator.instance.init(firebaseReady: firebaseReady);
   if (firebaseReady) {
-    await ServiceLocator.instance.remoteConfigService?.init();
+    try {
+      await ServiceLocator.instance.remoteConfigService?.init().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          debugPrint('RemoteConfig init timed out, using defaults.');
+        },
+      );
+    } catch (e) {
+      debugPrint('RemoteConfig init error: $e');
+    }
   }
 
   runApp(Bootstrap(firebaseReady: firebaseReady));
@@ -61,6 +70,7 @@ Future<void> _initAppCheck() async {
     if (defaultTargetPlatform == TargetPlatform.android &&
         AppConfig.appCheckDebugTokenAndroid.isNotEmpty) {
       await FirebaseAppCheck.instance.activate(
+        // ignore: deprecated_member_use
         androidProvider: AndroidProvider.debug,
       );
       return;
@@ -68,12 +78,15 @@ Future<void> _initAppCheck() async {
     if (defaultTargetPlatform == TargetPlatform.iOS &&
         AppConfig.appCheckDebugTokenApple.isNotEmpty) {
       await FirebaseAppCheck.instance.activate(
+        // ignore: deprecated_member_use
         appleProvider: AppleProvider.debug,
       );
       return;
     }
     await FirebaseAppCheck.instance.activate(
+      // ignore: deprecated_member_use
       androidProvider: AndroidProvider.playIntegrity,
+      // ignore: deprecated_member_use
       appleProvider: AppleProvider.appAttest,
     );
   } catch (e) {

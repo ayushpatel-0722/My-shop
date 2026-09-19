@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/l10n/app_localizations.dart';
@@ -15,6 +16,8 @@ class AdminOrdersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Orders Pipeline',
       child: StreamBuilder<List<Order>>(
         stream: repo.orders(),

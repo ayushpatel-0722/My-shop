@@ -3,10 +3,10 @@ import 'package:app_links/app_links.dart';
 /// Resolves `ecommerce://…` and web deep links (Section 15.2).
 ///
 /// Routes use the helpers in `core/utils/formatters.dart`:
-///   ecommerce://product/<id>      -> Product Detail
-///   ecommerce://category/<id>     -> Category Explorer
-///   ecommerce://company/<slug>    -> Company micro-storefront
-///   ecommerce://order/<id>        -> Order tracking / packing manifest
+///   `ecommerce://product/<id>`      -> Product Detail
+///   `ecommerce://category/<id>`     -> Category Explorer
+///   `ecommerce://company/<slug>`    -> Company micro-storefront
+///   `ecommerce://order/<id>`        -> Order tracking / packing manifest
 class DeepLinkService {
   final _appLinks = AppLinks();
 

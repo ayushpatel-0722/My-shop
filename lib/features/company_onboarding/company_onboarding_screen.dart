@@ -33,7 +33,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
   // Company image URL (optional) — replace image upload with URL input.
   final _imageUrlCtrl = TextEditingController();
   String _currency = 'INR';
-  List<WeeklyHours> _hours = Company.defaultWeek();
+  final List<WeeklyHours> _hours = Company.defaultWeek();
   final Set<String> _deliveryTypes = {'self_pickup', 'home_delivery'};
   bool _busy = false;
 
@@ -81,8 +81,14 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
-                    onPressed: _step < 2 ? _next : _finish,
-                    child: Text(_step < 2 ? l10n.next : l10n.save),
+                    onPressed: _step < 2 ? _next : (_busy ? null : _finish),
+                    child: _busy
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          )
+                        : Text(_step < 2 ? l10n.next : l10n.save),
                   ),
                 ),
               ],
@@ -313,7 +319,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     // Basic validation
     if (companyName.isEmpty || companyPass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Company name and password are required.')),
+        const SnackBar(
+          content: Text('Company name and password are required.'),
+        ),
       );
       return;
     }
@@ -380,8 +388,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       }
 
       // 2. Create Company in Firestore & Realtime Database
-      final companyRef =
-          FirebaseFirestore.instance.collection('companies').doc();
+      final companyRef = FirebaseFirestore.instance
+          .collection('companies')
+          .doc();
       final companyId = companyRef.id;
 
       final company = Company(
@@ -420,10 +429,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
         address: _addressCtrl.text.trim(),
       );
 
-      final adminMap = {
-        ...admin.toMap(),
-        'id': uid,
-      };
+      final adminMap = {...admin.toMap(), 'id': uid};
 
       // Save to Cloud Firestore in subcollection: companies/{companyId}/admins/{uid}
       await FirebaseFirestore.instance
@@ -496,7 +502,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (e.code == 'weak-password') {
         userMsg = 'Password is too weak. Please use at least 6 characters.';
       } else if (e.code == 'email-already-in-use') {
-        userMsg = e.message ??
+        userMsg =
+            e.message ??
             'That email is already registered. Please sign in via Admin Login or use a different email.';
       } else if (e.code == 'invalid-email') {
         userMsg = 'Please enter a valid email address.';
@@ -515,9 +522,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       debugPrint('Unexpected error during onboarding: $e');
       debugPrint('Stack: $st');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _busy = false);

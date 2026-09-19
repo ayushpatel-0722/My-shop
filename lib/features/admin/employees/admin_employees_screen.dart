@@ -67,6 +67,8 @@ class AdminEmployeesScreen extends StatelessWidget {
     final companyId = AuthSession.currentUser?.companyId ?? '';
 
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Employees',
       actions: [
         IconButton(
@@ -113,7 +115,7 @@ class AdminEmployeesScreen extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: list.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            separatorBuilder: (_, i) => const SizedBox(height: 10),
             itemBuilder: (context, i) {
               final e = list[i];
               return ModernCard(
@@ -134,11 +136,16 @@ class AdminEmployeesScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               CircleAvatar(
-                                backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+                                backgroundColor: theme.colorScheme.primary
+                                    .withValues(alpha: 0.15),
                                 foregroundColor: theme.colorScheme.primary,
                                 child: Text(
-                                  e.name.isNotEmpty ? e.name[0].toUpperCase() : 'E',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  e.name.isNotEmpty
+                                      ? e.name[0].toUpperCase()
+                                      : 'E',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -161,19 +168,32 @@ class AdminEmployeesScreen extends StatelessWidget {
                                         const SizedBox(width: 8),
                                         // Shift Active status badge
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: e.shiftActive
-                                                ? Colors.green.withValues(alpha: 0.15)
-                                                : Colors.grey.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(8),
+                                                ? Colors.green.withValues(
+                                                    alpha: 0.15,
+                                                  )
+                                                : Colors.grey.withValues(
+                                                    alpha: 0.15,
+                                                  ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                           child: Text(
-                                            e.shiftActive ? 'Active Shift' : 'Off Shift',
+                                            e.shiftActive
+                                                ? 'Active Shift'
+                                                : 'Off Shift',
                                             style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
-                                              color: e.shiftActive ? Colors.green.shade700 : Colors.grey,
+                                              color: e.shiftActive
+                                                  ? Colors.green.shade700
+                                                  : Colors.grey,
                                             ),
                                           ),
                                         ),
@@ -184,7 +204,9 @@ class AdminEmployeesScreen extends StatelessWidget {
                                       '${e.role} • ${e.email}',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                                        color: isDark
+                                            ? AppTheme.textSecondaryDark
+                                            : AppTheme.textSecondaryLight,
                                       ),
                                     ),
                                   ],
@@ -199,7 +221,11 @@ class AdminEmployeesScreen extends StatelessWidget {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 20,
+                                  color: Colors.redAccent,
+                                ),
                                 tooltip: 'Delete Employee',
                                 onPressed: () => _confirmDelete(context, e),
                               ),
@@ -218,7 +244,11 @@ class AdminEmployeesScreen extends StatelessWidget {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.currency_rupee, size: 14, color: theme.colorScheme.primary),
+                                    Icon(
+                                      Icons.currency_rupee,
+                                      size: 14,
+                                      color: theme.colorScheme.primary,
+                                    ),
                                     Text(
                                       '${formatCurrency(e.salary)} / ${e.salaryType}',
                                       style: TextStyle(
@@ -234,7 +264,9 @@ class AdminEmployeesScreen extends StatelessWidget {
                                   'Salary: Not specified',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                                    color: isDark
+                                        ? AppTheme.textSecondaryDark
+                                        : AppTheme.textSecondaryLight,
                                   ),
                                 ),
 
@@ -246,7 +278,8 @@ class AdminEmployeesScreen extends StatelessWidget {
                                     _permissionChip('Pack', Colors.blue),
                                   if (e.permissions['canDispatch'] == true)
                                     _permissionChip('Dispatch', Colors.orange),
-                                  if (e.permissions['canManageInventory'] == true)
+                                  if (e.permissions['canManageInventory'] ==
+                                      true)
                                     _permissionChip('Inventory', Colors.purple),
                                   if (e.permissions['canViewReports'] == true)
                                     _permissionChip('Reports', Colors.teal),

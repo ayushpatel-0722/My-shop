@@ -49,16 +49,16 @@ class _ForceUpdateGateState extends State<ForceUpdateGate> {
 
   @override
   Widget build(BuildContext context) {
+    // When remoteConfig is null (e.g. web or mock mode), bypass gate immediately
+    if (widget.remoteConfig == null) {
+      return widget.child;
+    }
+
     return FutureBuilder<bool>(
       future: _needsUpdate,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
-          );
+          return widget.child;
         }
         if (snap.data == true) {
           return MaterialApp(

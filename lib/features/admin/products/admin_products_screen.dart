@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes/app_router.dart';
@@ -19,6 +20,8 @@ class AdminProductsScreen extends StatelessWidget {
     final adminCompanyId = AuthSession.currentUser?.companyId ?? '';
 
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Products',
       actions: [
         IconButton(
@@ -59,7 +62,7 @@ class AdminProductsScreen extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: list.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, i) => const SizedBox(height: 8),
             itemBuilder: (context, i) => _productTile(context, list[i]),
           );
         },
@@ -82,7 +85,7 @@ class AdminProductsScreen extends StatelessWidget {
                     width: 48,
                     height: 48,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
+                    errorBuilder: (_, e, st) =>
                         const CircleAvatar(child: Icon(Icons.image)),
                   )
                 : const CircleAvatar(child: Icon(Icons.image)),
@@ -91,33 +94,41 @@ class AdminProductsScreen extends StatelessWidget {
             p.name,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Row(
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                formatCurrency(p.price),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: p.isDiscounted ? Colors.green.shade700 : null,
-                ),
-              ),
-              if (p.isDiscounted) ...[
-                const SizedBox(width: 6),
-                Text(
-                  formatCurrency(p.amount),
-                  style: const TextStyle(
-                    decoration: TextDecoration.lineThrough,
-                    color: Colors.grey,
-                    fontSize: 12,
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Text(
+                    formatCurrency(p.price),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: p.isDiscounted ? Colors.green.shade700 : null,
+                    ),
                   ),
-                ),
-              ],
-              if (p.variants.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Text(
-                  '• ${p.variants.length} variants',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+                  if (p.isDiscounted) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      formatCurrency(p.amount),
+                      style: const TextStyle(
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.grey,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                  if (p.variants.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '• ${p.variants.length} variants',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 6),
+              _buildIdBadge(context, id: p.id, label: 'Product'),
             ],
           ),
           trailing: Row(
@@ -190,5 +201,66 @@ class AdminProductsScreen extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       await repo.deleteProduct(p.id);
     }
+  }
+
+  Widget _buildIdBadge(
+    BuildContext context, {
+    required String id,
+    required String label,
+  }) {
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: 'Copy $label ID',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: () {
+          Clipboard.setData(ClipboardData(text: id));
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$label ID copied to clipboard: $id'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+              width: 0.8,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  'ID: $id',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.copy_rounded,
+                size: 12,
+                color: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

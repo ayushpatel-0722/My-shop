@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:excel/excel.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../models/order.dart';

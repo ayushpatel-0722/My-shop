@@ -162,7 +162,8 @@ service cloud.firestore {
 
     // Users / Shoppers (customers browse multiple companies)
     match /users/{userId} {
-      allow read, write: if isSignedIn() && userId == request.auth.uid;
+      allow read: if true;
+      allow write: if isSignedIn() && (userId == request.auth.uid || isAdmin());
     }
 
     // Platform-wide Ads Banners

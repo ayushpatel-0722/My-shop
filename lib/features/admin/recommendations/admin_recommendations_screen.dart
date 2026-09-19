@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/models/recommendation.dart';
@@ -12,6 +13,8 @@ class AdminRecommendationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Recommendations',
       actions: [
         IconButton(
@@ -30,8 +33,9 @@ class AdminRecommendationsScreen extends StatelessWidget {
                 child: ListTile(
                   leading: Icon(Icons.auto_awesome),
                   title: Text('Fallback strategy'),
-                  subtitle:
-                      Text('Top Sellers · Trending · Curated · Cross-sell'),
+                  subtitle: Text(
+                    'Top Sellers · Trending · Curated · Cross-sell',
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -39,7 +43,10 @@ class AdminRecommendationsScreen extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.all(24),
                   child: Center(
-                      child: Text('No pinned recommendations — using best-sellers')),
+                    child: Text(
+                      'No pinned recommendations — using best-sellers',
+                    ),
+                  ),
                 ),
               for (final r in list)
                 Card(
@@ -95,19 +102,25 @@ class _PinProductSheetState extends State<_PinProductSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Pin a product',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Pin a product',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           TextField(
-              controller: _productIdCtrl,
-              decoration: const InputDecoration(labelText: 'Product ID')),
+            controller: _productIdCtrl,
+            decoration: const InputDecoration(labelText: 'Product ID'),
+          ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _strategy,
+            initialValue: _strategy,
             decoration: const InputDecoration(labelText: 'Strategy'),
             items: const [
               DropdownMenuItem(value: 'curated', child: Text('Curated')),
-              DropdownMenuItem(value: 'top_sellers', child: Text('Top sellers')),
+              DropdownMenuItem(
+                value: 'top_sellers',
+                child: Text('Top sellers'),
+              ),
               DropdownMenuItem(value: 'trending', child: Text('Trending')),
               DropdownMenuItem(value: 'cross_sell', child: Text('Cross-sell')),
             ],
@@ -116,11 +129,13 @@ class _PinProductSheetState extends State<_PinProductSheet> {
           const SizedBox(height: 24),
           FilledButton(
             onPressed: () {
-              repo.saveRecommendation(Recommendation(
-                id: '',
-                pinnedProductId: _productIdCtrl.text.trim(),
-                strategy: _strategy,
-              ));
+              repo.saveRecommendation(
+                Recommendation(
+                  id: '',
+                  pinnedProductId: _productIdCtrl.text.trim(),
+                  strategy: _strategy,
+                ),
+              );
               Navigator.pop(context);
             },
             child: const Text('Save'),

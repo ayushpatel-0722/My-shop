@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/models/order.dart';
@@ -12,6 +13,8 @@ class AdminReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Reports',
       child: StreamBuilder<List<Order>>(
         stream: repo.orders(),

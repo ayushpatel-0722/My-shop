@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,6 +15,8 @@ class AdminVouchersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Vouchers',
       actions: [
         IconButton(
@@ -42,15 +45,19 @@ class AdminVouchersScreen extends StatelessWidget {
     final label = v.discountType == 'percentage'
         ? '${v.discountValue}% OFF'
         : v.discountType == 'fixed_amount'
-            ? '₹${v.discountValue} OFF'
-            : 'Free Shipping';
+        ? '₹${v.discountValue} OFF'
+        : 'Free Shipping';
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: const Icon(Icons.local_offer),
-        title: Text(v.code, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          v.code,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Text(
-            '$label · min ₹${v.minOrderAmt} · expires ${v.expiryDate?.toLocal().toString().split(' ').first ?? '—'}'),
+          '$label · min ₹${v.minOrderAmt} · expires ${v.expiryDate?.toLocal().toString().split(' ').first ?? '—'}',
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -112,52 +119,67 @@ class _CreateVoucherSheetState extends State<_CreateVoucherSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Create Voucher',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Create Voucher',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             TextField(
-                controller: _codeCtrl,
-                decoration: const InputDecoration(labelText: 'Code')),
+              controller: _codeCtrl,
+              decoration: const InputDecoration(labelText: 'Code'),
+            ),
             const SizedBox(height: 12),
             TextField(
-                controller: _valueCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Value')),
+              controller: _valueCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Value'),
+            ),
             const SizedBox(height: 12),
             TextField(
-                controller: _minCtrl,
-                keyboardType: TextInputType.number,
-                decoration:
-                    const InputDecoration(labelText: 'Min order amount')),
+              controller: _minCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Min order amount'),
+            ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _type,
+              initialValue: _type,
               decoration: const InputDecoration(labelText: 'Discount type'),
               items: const [
                 DropdownMenuItem(
-                    value: 'percentage', child: Text('Percentage')),
+                  value: 'percentage',
+                  child: Text('Percentage'),
+                ),
                 DropdownMenuItem(
-                    value: 'fixed_amount', child: Text('Fixed amount')),
+                  value: 'fixed_amount',
+                  child: Text('Fixed amount'),
+                ),
                 DropdownMenuItem(
-                    value: 'free_shipping', child: Text('Free shipping')),
+                  value: 'free_shipping',
+                  child: Text('Free shipping'),
+                ),
               ],
               onChanged: (v) => setState(() => _type = v ?? 'percentage'),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _appliesTo,
+              initialValue: _appliesTo,
               decoration: const InputDecoration(labelText: 'Applies to'),
               items: const [
                 DropdownMenuItem(
-                    value: 'all_categories', child: Text('All categories')),
+                  value: 'all_categories',
+                  child: Text('All categories'),
+                ),
                 DropdownMenuItem(
-                    value: 'specific_category',
-                    child: Text('Specific category')),
+                  value: 'specific_category',
+                  child: Text('Specific category'),
+                ),
                 DropdownMenuItem(
-                    value: 'specific_product',
-                    child: Text('Specific product')),
+                  value: 'specific_product',
+                  child: Text('Specific product'),
+                ),
               ],
-              onChanged: (v) => setState(() => _appliesTo = v ?? 'all_categories'),
+              onChanged: (v) =>
+                  setState(() => _appliesTo = v ?? 'all_categories'),
             ),
             const SizedBox(height: 24),
             FilledButton(onPressed: _save, child: const Text('Save')),
@@ -179,8 +201,7 @@ class _CreateVoucherSheetState extends State<_CreateVoucherSheet> {
       minOrderAmt: double.tryParse(_minCtrl.text) ?? 0,
       expiryDate: DateTime.now().add(const Duration(days: 30)),
     );
-    await repo.saveVoucher(
-        Company(id: companyId, name: '', slug: ''), voucher);
+    await repo.saveVoucher(Company(id: companyId, name: '', slug: ''), voucher);
     if (!mounted) return;
     Navigator.pop(context);
   }

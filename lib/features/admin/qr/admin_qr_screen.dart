@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -21,6 +22,8 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
   @override
   Widget build(BuildContext context) {
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'QR Codes',
       child: ListView(
         padding: const EdgeInsets.all(16),

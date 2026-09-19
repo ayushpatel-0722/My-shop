@@ -35,90 +35,292 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.createAccount)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _nameCtrl,
-              decoration: InputDecoration(
-                  hintText: l10n.name, prefixIcon: const Icon(Icons.person)),
+      body: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state.status == AuthStatus.authenticated) {
+            context.go(AppRoutes.home);
+          }
+        },
+        builder: (context, state) {
+          final isAuthenticating = state.status == AuthStatus.authenticating;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _nameCtrl,
+                  readOnly: _otpSent || _busy || isAuthenticating,
+                  decoration: InputDecoration(
+                    labelText: l10n.name,
+                    hintText: 'Your full name',
+                    prefixIcon: const Icon(Icons.person),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _mobileCtrl,
+                  readOnly: _otpSent || _busy || isAuthenticating,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Mobile Number',
+                    hintText: '9876543210',
+                    prefixIcon: const Icon(Icons.phone_iphone),
+                    prefixText: '+91  ',
+                    suffixIcon: _otpSent
+                        ? TextButton(
+                            onPressed: _busy || isAuthenticating
+                                ? null
+                                : _changeNumber,
+                            child: const Text('Change'),
+                          )
+                        : null,
+                    helperText: _otpSent ? null : 'Enter 10-digit number',
+                  ),
+                ),
+                if (_otpSent) ...[
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _otpCtrl,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    enabled: !_busy && !isAuthenticating,
+                    decoration: const InputDecoration(
+                      labelText: 'OTP',
+                      hintText: '------',
+                      prefixIcon: Icon(Icons.pin_outlined),
+                      helperText: 'Enter the 6-digit code sent via SMS',
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: (_busy || isAuthenticating)
+                      ? null
+                      : (_otpSent ? _verify : _sendOtp),
+                  child: _busy
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        )
+                      : Text(_otpSent ? l10n.verifyOtp : l10n.sendOtp),
+                ),
+                if (_otpSent)
+                  TextButton(
+                    onPressed: (_busy || isAuthenticating) ? null : _resend,
+                    child: Text(l10n.resendOtp),
+                  ),
+                const SizedBox(height: 20),
+                Row(
+                  children: const [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(color: Colors.grey.shade300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: isAuthenticating
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(
+                          Icons.g_mobiledata,
+                          size: 28,
+                          color: Colors.red,
+                        ),
+                  label: Text(
+                    isAuthenticating ? 'Signing up...' : 'Sign up with Google',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onPressed: (_busy || isAuthenticating)
+                      ? null
+                      : () =>
+                            context.read<AuthCubit>().signInWithGoogle(context),
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () => context.go(AppRoutes.userLogin),
+                  child: const Text('Already have an account? Log In'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _mobileCtrl,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                  hintText: l10n.mobileNumber,
-                  prefixIcon: const Icon(Icons.phone_iphone)),
-            ),
-            if (_otpSent) ...[
-              const SizedBox(height: 16),
-              TextField(
-                controller: _otpCtrl,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                decoration: InputDecoration(
-                    hintText: l10n.enterOtp,
-                    prefixIcon: const Icon(Icons.pin_outlined)),
-              ),
-            ],
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _busy ? null : (_otpSent ? _verify : _sendOtp),
-              child: _busy
-                  ? const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2.5))
-                  : Text(_otpSent ? l10n.verifyOtp : l10n.sendOtp),
-            ),
-            if (_otpSent)
-              TextButton(
-                onPressed: () =>
-                    context.read<AuthCubit>().sendOtp(_mobileCtrl.text.trim()),
-                child: Text(l10n.resendOtp),
-              ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Future<void> _sendOtp() async {
-    if (_nameCtrl.text.isEmpty || _mobileCtrl.text.isEmpty) return;
-    setState(() => _busy = true);
-    final ok = await context.read<AuthCubit>().sendOtp(_mobileCtrl.text.trim());
+  void _changeNumber() {
     setState(() {
-      _busy = false;
-      if (ok) _otpSent = true;
+      _otpSent = false;
+      _otpCtrl.clear();
     });
-    if (!ok && mounted) {
+  }
+
+  /// Validates an Indian mobile number (10 digits, starting with 6–9).
+  bool _isValidMobile(String raw) {
+    final clean = raw.replaceAll(RegExp(r'[\s\-().]+'), '');
+    final digits = clean.startsWith('+91')
+        ? clean.substring(3)
+        : clean.startsWith('91') && clean.length == 12
+        ? clean.substring(2)
+        : clean.startsWith('0')
+        ? clean.substring(1)
+        : clean;
+    return RegExp(r'^[6-9]\d{9}$').hasMatch(digits);
+  }
+
+  Future<void> _sendOtp() async {
+    final name = _nameCtrl.text.trim();
+    final mobile = _mobileCtrl.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter your name')));
+      return;
+    }
+    if (mobile.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not send OTP. Try again.')),
+        const SnackBar(content: Text('Please enter your mobile number')),
       );
+      return;
+    }
+    if (!_isValidMobile(mobile)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Enter a valid 10-digit Indian mobile number (e.g. 9876543210)',
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _busy = true);
+    try {
+      final ok = await context.read<AuthCubit>().sendOtp(mobile);
+      if (mounted) {
+        if (ok) {
+          setState(() => _otpSent = true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('OTP sent to $mobile'),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not send OTP. Please try again.'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error: ${e.toString().replaceFirst('Exception: ', '')}',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _resend() async {
+    final mobile = _mobileCtrl.text.trim();
+    if (mobile.isEmpty) return;
+    setState(() => _busy = true);
+    try {
+      final ok = await context.read<AuthCubit>().sendOtp(mobile);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ok ? 'OTP resent to $mobile' : 'Could not resend OTP. Try again.',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
   Future<void> _verify() async {
-    setState(() => _busy = true);
-    final ok = await context
-        .read<AuthCubit>()
-        .verifyOtp(_mobileCtrl.text.trim(), _otpCtrl.text.trim());
-    if (!ok) {
-      setState(() => _busy = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Invalid OTP')));
-      }
+    final otp = _otpCtrl.text.trim();
+    if (otp.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter the 6-digit OTP')),
+      );
       return;
     }
-    // Verified — persist the customer's name against the new account.
-    await context
-        .read<AuthCubit>()
-        .createUserAccount(_nameCtrl.text.trim(), _mobileCtrl.text.trim());
-    if (!mounted) return;
-    context.go(AppRoutes.home);
+
+    setState(() => _busy = true);
+    try {
+      final ok = await context.read<AuthCubit>().verifyOtp(
+        _mobileCtrl.text.trim(),
+        otp,
+      );
+      if (!mounted) return;
+      if (!ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid OTP. Please try again.')),
+        );
+        return;
+      }
+      // Verified — persist the customer's name against the new account.
+      await context.read<AuthCubit>().createUserAccount(
+        _nameCtrl.text.trim(),
+        _mobileCtrl.text.trim(),
+      );
+      if (!mounted) return;
+      context.go(AppRoutes.home);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Verification failed: ${e.toString().replaceFirst('Exception: ', '')}',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 }

@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/services/service_locator.dart';
-import '../core/utils/app_route_logger.dart';
 import '../core/utils/force_update_gate.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_cubit.dart';
@@ -73,7 +72,7 @@ class _AppState extends State<App> {
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
-            themeMode: ThemeMode.system,
+            themeMode: ThemeMode.light,
             locale: locale,
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: AppLocalizations.localizationsDelegates,

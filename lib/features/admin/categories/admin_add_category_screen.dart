@@ -516,8 +516,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                                 ),
                                 selected: isSelected,
                                 onSelected: (selected) {
-                                  if (selected)
+                                  if (selected) {
                                     setState(() => _typeCtrl.text = type);
+                                  }
                                 },
                               );
                             }).toList(),

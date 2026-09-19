@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
+import '../../auth/auth_cubit.dart';
 
 /// Employee operations hub — high-contrast, minimal, shows only assigned
 /// packing tasks (Section 17.2). Employees never edit order status.
@@ -15,7 +17,19 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text('${l10n.packing} Queue')),
+      appBar: AppBar(
+        title: Text('${l10n.packing} Queue'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await context.read<AuthCubit>().signOut();
+              if (context.mounted) context.go(AppRoutes.role);
+            },
+          ),
+        ],
+      ),
       body: StreamBuilder<List<Order>>(
         stream: repo.orders(),
         builder: (context, snap) {

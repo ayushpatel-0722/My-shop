@@ -13,6 +13,7 @@ class AuthSession with ChangeNotifier {
 
   static AppUser? currentUser;
   static bool isRestoring = true;
+  static bool hasCompletedInitialBoot = false;
 
   static void set(AppUser? user, {bool restoring = false}) {
     currentUser = user;
@@ -23,6 +24,10 @@ class AuthSession with ChangeNotifier {
   static void setRestoring(bool restoring) {
     isRestoring = restoring;
     instance.notifyListeners();
+  }
+
+  static void markBootCompleted() {
+    hasCompletedInitialBoot = true;
   }
 
   static bool get isAdmin => currentUser?.isAdmin ?? false;

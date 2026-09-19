@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
-import '../../../core/models/company.dart';
 import '../../../core/models/order.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/service_locator.dart';
@@ -24,10 +23,25 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _pincodeCtrl = TextEditingController(text: '380001');
   final _voucherCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController(text: '12 Market Street');
+  final _addressCtrl = TextEditingController();
   String _deliveryType = 'home_delivery';
   Voucher? _appliedVoucher;
   double _deliveryCharge = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final user = context.read<AuthCubit>().currentUser;
+    final defaultAddr = user?.defaultAddress;
+    if (defaultAddr != null) {
+      _addressCtrl.text = defaultAddr.formattedAddress;
+      if (defaultAddr.pincode.isNotEmpty) {
+        _pincodeCtrl.text = defaultAddr.pincode;
+      }
+    } else {
+      _addressCtrl.text = '12 Market Street';
+    }
+  }
 
   @override
   void dispose() {
@@ -68,20 +82,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         builder: (context, cartState) {
           final subtotal = cartState.totalAmount;
           final discount = _appliedVoucher?.computeDiscount(subtotal) ?? 0.0;
-          final total = subtotal - discount +
+          final total =
+              subtotal -
+              discount +
               (_deliveryType == 'home_delivery' ? _deliveryCharge : 0);
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
               _field(l10n.address, _addressCtrl),
               const SizedBox(height: 12),
-              _field('Pincode', _pincodeCtrl,
-                  suffix: IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: _lookupDelivery)),
+              _field(
+                'Pincode',
+                _pincodeCtrl,
+                suffix: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _lookupDelivery,
+                ),
+              ),
               const SizedBox(height: 16),
-              Text(l10n.deliveryCharge,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                l10n.deliveryCharge,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               SegmentedButton<String>(
                 segments: const [
                   ButtonSegment(value: 'home_delivery', label: Text('Home')),
@@ -94,9 +116,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(
-                    child: _field(l10n.applyVoucher, _voucherCtrl),
-                  ),
+                  Expanded(child: _field(l10n.applyVoucher, _voucherCtrl)),
                   const SizedBox(width: 8),
                   FilledButton.tonal(
                     onPressed: () => _applyVoucher('c_organic'),
@@ -106,8 +126,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               const SizedBox(height: 24),
               _summaryRow(l10n.subtotal, subtotal),
-              _summaryRow(l10n.deliveryCharge,
-                  _deliveryType == 'home_delivery' ? _deliveryCharge : 0),
+              _summaryRow(
+                l10n.deliveryCharge,
+                _deliveryType == 'home_delivery' ? _deliveryCharge : 0,
+              ),
               _summaryRow(l10n.discount, discount),
               const Divider(height: 24),
               _summaryRow(l10n.totalAmount, total, bold: true),
@@ -136,12 +158,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
-          Text(formatCurrency(value),
-              style: TextStyle(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Text(
+            formatCurrency(value),
+            style: TextStyle(
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );
@@ -156,16 +184,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
       return;
     }
+    if (!mounted) return;
     final user = context.read<AuthCubit>().currentUser;
     if (cartState.items.isEmpty) return;
     final group = cartState.byCompany.entries.first;
     final items = group.value
-        .map((e) => OrderItem(
-              productId: e.product.id,
-              qty: e.qty,
-              unitPrice: e.product.price,
-              name: e.product.name,
-            ))
+        .map(
+          (e) => OrderItem(
+            productId: e.product.id,
+            qty: e.qty,
+            unitPrice: e.product.price,
+            name: e.product.name,
+          ),
+        )
         .toList();
     final order = Order(
       id: '',
@@ -180,8 +211,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       deliveryType: _deliveryType,
     );
     final placed = await repo.placeOrder(order);
-    context.read<CartCubit>().clear();
     if (!mounted) return;
+    context.read<CartCubit>().clear();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context).orderPlaced)),
     );

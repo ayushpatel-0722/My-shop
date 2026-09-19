@@ -23,60 +23,87 @@ class Customer {
   });
 
   factory Customer.fromMap(String id, Map<String, dynamic> map) => Customer(
-        id: id,
-        name: map['name'] ?? '',
-        mobileNumber: map['mobileNumber'] ?? '',
-        email: map['email'] ?? '',
-        addresses: (map['addresses'] as List? ?? const [])
-            .map((e) => AddressEntry.fromMap(e))
-            .toList(),
-        cartData: (map['cartData'] as Map? ?? const {})
-            .map((k, v) => MapEntry(k.toString(), (v as num?)?.toInt() ?? 1)),
-        savedVouchers: List<String>.from(map['savedVouchers'] ?? const []),
-        fcmTokens: List<String>.from(map['fcmTokens'] ?? const []),
-        preferredLanguage: map['preferredLanguage'] ?? 'en',
-      );
+    id: id,
+    name: map['name'] ?? '',
+    mobileNumber: map['mobileNumber'] ?? '',
+    email: map['email'] ?? '',
+    addresses: (map['addresses'] as List? ?? const [])
+        .map((e) => AddressEntry.fromMap(e))
+        .toList(),
+    cartData: (map['cartData'] as Map? ?? const {}).map(
+      (k, v) => MapEntry(k.toString(), (v as num?)?.toInt() ?? 1),
+    ),
+    savedVouchers: List<String>.from(map['savedVouchers'] ?? const []),
+    fcmTokens: List<String>.from(map['fcmTokens'] ?? const []),
+    preferredLanguage: map['preferredLanguage'] ?? 'en',
+  );
 
   Map<String, dynamic> toMap() => {
-        'name': name,
-        'mobileNumber': mobileNumber,
-        'email': email,
-        'addresses': addresses.map((e) => e.toMap()).toList(),
-        'cartData': cartData,
-        'savedVouchers': savedVouchers,
-        'fcmTokens': fcmTokens,
-        'preferredLanguage': preferredLanguage,
-      };
+    'name': name,
+    'mobileNumber': mobileNumber,
+    'email': email,
+    'addresses': addresses.map((e) => e.toMap()).toList(),
+    'cartData': cartData,
+    'savedVouchers': savedVouchers,
+    'fcmTokens': fcmTokens,
+    'preferredLanguage': preferredLanguage,
+  };
 }
 
 class AddressEntry {
-  final String label;
-  final String line1;
+  final String houseNo;
+  final String address;
   final String pincode;
+  final bool isDefault;
+  final String label;
   final double lat;
   final double lng;
 
   const AddressEntry({
-    this.label = '',
-    this.line1 = '',
+    this.houseNo = '',
+    this.address = '',
     this.pincode = '',
+    this.isDefault = false,
+    this.label = 'Home',
     this.lat = 0,
     this.lng = 0,
   });
 
-  factory AddressEntry.fromMap(Map<String, dynamic> map) => AddressEntry(
-        label: map['label'] ?? '',
-        line1: map['line1'] ?? '',
-        pincode: map['pincode'] ?? '',
-        lat: (map['lat'] ?? 0).toDouble(),
-        lng: (map['lng'] ?? 0).toDouble(),
-      );
+  /// Backwards compatibility for line1
+  String get line1 => formattedAddress;
+
+  /// Returns full formatted string e.g. "Flat 102, Green Valley, 380001"
+  String get formattedAddress {
+    final parts = [
+      if (houseNo.trim().isNotEmpty) houseNo.trim(),
+      if (address.trim().isNotEmpty) address.trim(),
+      if (pincode.trim().isNotEmpty) pincode.trim(),
+    ];
+    return parts.join(', ');
+  }
+
+  factory AddressEntry.fromMap(Map<String, dynamic> map) {
+    final legacyLine1 = map['line1'] as String? ?? '';
+    final rawAddress = map['address'] as String? ?? legacyLine1;
+    return AddressEntry(
+      houseNo: map['houseNo'] ?? '',
+      address: rawAddress,
+      pincode: map['pincode'] ?? '',
+      isDefault: map['isDefault'] ?? false,
+      label: map['label'] ?? 'Home',
+      lat: (map['lat'] ?? 0).toDouble(),
+      lng: (map['lng'] ?? 0).toDouble(),
+    );
+  }
 
   Map<String, dynamic> toMap() => {
-        'label': label,
-        'line1': line1,
-        'pincode': pincode,
-        'lat': lat,
-        'lng': lng,
-      };
+    'houseNo': houseNo,
+    'address': address,
+    'line1': formattedAddress,
+    'pincode': pincode,
+    'isDefault': isDefault,
+    'label': label,
+    'lat': lat,
+    'lng': lng,
+  };
 }

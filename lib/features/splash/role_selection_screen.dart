@@ -28,15 +28,24 @@ class RoleSelectionScreen extends StatelessWidget {
                   color: scheme.primary,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(Icons.storefront, size: 40, color: Colors.white),
+                child: const Icon(
+                  Icons.storefront,
+                  size: 40,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 16),
-              Text(l10n.continueAs,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold)),
+              Text(
+                l10n.continueAs,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(l10n.selectRole,
-                  style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                l10n.selectRole,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const Spacer(),
               _roleCard(
                 context,
@@ -56,7 +65,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 context,
                 icon: Icons.shopping_bag_outlined,
                 label: l10n.iAmShopper,
-                onTap: () => context.go(AppRoutes.userLogin),
+                onTap: () => context.go(AppRoutes.home),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
@@ -74,17 +83,17 @@ class RoleSelectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _roleCard(BuildContext context,
-      {required IconData icon,
-      required String label,
-      required VoidCallback onTap}) {
+  Widget _roleCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return Card(
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         leading: Icon(icon, size: 28),
-        title: Text(label,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),

@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,6 +16,8 @@ class AdminBannersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final companyId = context.read<AuthCubit>().currentUser?.companyId ?? '';
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Banners',
       actions: [
         IconButton(
@@ -40,7 +43,8 @@ class AdminBannersScreen extends StatelessWidget {
                   leading: const Icon(Icons.image),
                   title: Text(b.id),
                   subtitle: Text(
-                      '${b.actionType.name} · priority ${b.priority}'),
+                    '${b.actionType.name} · priority ${b.priority}',
+                  ),
                   trailing: const Icon(Icons.drag_handle),
                 ),
               );
@@ -93,32 +97,38 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Create Offer Banner',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Create Offer Banner',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           TextField(
-              controller: _imageUrlCtrl,
-              decoration: const InputDecoration(labelText: 'Image URL')),
+            controller: _imageUrlCtrl,
+            decoration: const InputDecoration(labelText: 'Image URL'),
+          ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _actionType,
+            initialValue: _actionType,
             decoration: const InputDecoration(labelText: 'Tap action'),
             items: const [
               DropdownMenuItem(value: 'product', child: Text('Product')),
               DropdownMenuItem(value: 'category', child: Text('Category')),
               DropdownMenuItem(
-                  value: 'external_url', child: Text('External URL')),
+                value: 'external_url',
+                child: Text('External URL'),
+              ),
             ],
             onChanged: (v) => setState(() => _actionType = v ?? 'product'),
           ),
           const SizedBox(height: 12),
           TextField(
             decoration: InputDecoration(
-                labelText: _actionType == 'category'
-                    ? 'Category ID'
-                    : _actionType == 'product'
-                        ? 'Product ID'
-                        : 'URL'),
+              labelText: _actionType == 'category'
+                  ? 'Category ID'
+                  : _actionType == 'product'
+                  ? 'Product ID'
+                  : 'URL',
+            ),
             onChanged: (v) => setState(() {
               if (_actionType == 'category') {
                 _targetCatId = v;
@@ -130,18 +140,20 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
           const SizedBox(height: 24),
           FilledButton(
             onPressed: () {
-              repo.saveBanner(OfferBanner(
-                id: '',
-                companyId: widget.companyId,
-                image: _imageUrlCtrl.text.trim(),
-                actionType: _actionType == 'category'
-                    ? BannerActionType.category
-                    : _actionType == 'external_url'
-                        ? BannerActionType.externalUrl
-                        : BannerActionType.product,
-                targetCatId: _targetCatId,
-                targetProdId: _targetProdId,
-              ));
+              repo.saveBanner(
+                OfferBanner(
+                  id: '',
+                  companyId: widget.companyId,
+                  image: _imageUrlCtrl.text.trim(),
+                  actionType: _actionType == 'category'
+                      ? BannerActionType.category
+                      : _actionType == 'external_url'
+                      ? BannerActionType.externalUrl
+                      : BannerActionType.product,
+                  targetCatId: _targetCatId,
+                  targetProdId: _targetProdId,
+                ),
+              );
               Navigator.pop(context);
             },
             child: const Text('Save'),

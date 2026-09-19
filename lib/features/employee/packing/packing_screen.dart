@@ -43,11 +43,12 @@ class _PackingScreenState extends State<PackingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('#${order.id.substring(0, 6).toUpperCase()}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    '#${order.id.substring(0, 6).toUpperCase()}',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Expanded(
                     child: ListView(
@@ -67,9 +68,9 @@ class _PackingScreenState extends State<PackingScreen> {
                               subtitle: Text('Qty: ${item.qty} · SKU scan'),
                               trailing: TextButton(
                                 onPressed: () async {
-                                  final result =
-                                      await context.push<String>(
-                                          AppRoutes.qrScanner);
+                                  final result = await context.push<String>(
+                                    AppRoutes.qrScanner,
+                                  );
                                   if (result != null && mounted) {
                                     setState(() => _scanned.add(result));
                                   }
@@ -90,19 +91,22 @@ class _PackingScreenState extends State<PackingScreen> {
                         ? null
                         : () async {
                             await repo.setEmployeePackingDone(order.id, true);
-                            if (!mounted) return;
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text('Packing done — notified Admin')),
+                                content: Text('Packing done — notified Admin'),
+                              ),
                             );
                             context.go(AppRoutes.employeeHome);
                           },
-                    icon: Icon(order.employeePackingDone
-                        ? Icons.check
-                        : Icons.inventory),
-                    label: Text(order.employeePackingDone
-                        ? 'Sent to Admin'
-                        : 'Packing Done'),
+                    icon: Icon(
+                      order.employeePackingDone ? Icons.check : Icons.inventory,
+                    ),
+                    label: Text(
+                      order.employeePackingDone
+                          ? 'Sent to Admin'
+                          : 'Packing Done',
+                    ),
                   ),
                 ],
               ),

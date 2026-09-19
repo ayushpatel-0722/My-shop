@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
 
-enum ModernButtonVariant { primary, secondary, outline, ghost }
+enum ModernButtonVariant { primary, secondary, outline, inverted, ghost }
 
 /// A modern interactive button with fluid scale-down press animations and hover states.
 class ModernButton extends StatefulWidget {
@@ -40,7 +40,8 @@ class _ModernButtonState extends State<ModernButton> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final enabled = widget.onPressed != null && !widget.isLoading;
-    final radius = widget.borderRadius ?? BorderRadius.circular(AppTheme.radiusMedium);
+    final radius =
+        widget.borderRadius ?? BorderRadius.circular(AppTheme.radiusMedium);
 
     Color bg;
     Color fg;
@@ -48,31 +49,43 @@ class _ModernButtonState extends State<ModernButton> {
 
     switch (widget.variant) {
       case ModernButtonVariant.primary:
-        bg = isDark ? AppTheme.primaryDark : AppTheme.primaryLight;
-        fg = isDark ? const Color(0xFF0B0F19) : Colors.white;
+        // Solid deep crimson #C5221F with white text
+        bg = isDark ? AppTheme.primaryDark : AppTheme.primaryDeep;
+        fg = Colors.white;
         if (!enabled) bg = bg.withValues(alpha: 0.5);
         break;
       case ModernButtonVariant.secondary:
-        bg = isDark ? const Color(0xFF243044) : const Color(0xFFEEF2FF);
-        fg = isDark ? AppTheme.primaryDark : AppTheme.primaryLight;
+        // Soft neutral container #EDEFF4 with dark neutral text
+        bg = isDark ? const Color(0xFF243044) : AppTheme.surfaceContainerLight;
+        fg = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
+        break;
+      case ModernButtonVariant.inverted:
+        // Dark Charcoal #1E2229 with white text
+        bg = isDark ? Colors.white : AppTheme.textPrimaryLight;
+        fg = isDark ? const Color(0xFF0B0F19) : Colors.white;
         break;
       case ModernButtonVariant.outline:
-        bg = Colors.transparent;
+        // Pure white background with #D9DFE7 border
+        bg = isDark ? Colors.transparent : Colors.white;
         fg = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
         border = Border.all(
-          color: isDark ? AppTheme.borderDark : AppTheme.borderLight,
+          color: isDark ? AppTheme.borderDark : const Color(0xFFD9DFE7),
           width: 1.2,
         );
         break;
       case ModernButtonVariant.ghost:
         bg = _isHovered
-            ? (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.04))
+            ? (isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.04))
             : Colors.transparent;
         fg = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
         break;
     }
 
-    final scale = enabled && _isPressed ? 0.97 : (enabled && _isHovered ? 1.01 : 1.0);
+    final scale = enabled && _isPressed
+        ? 0.97
+        : (enabled && _isHovered ? 1.01 : 1.0);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -98,10 +111,15 @@ class _ModernButtonState extends State<ModernButton> {
               color: bg,
               borderRadius: radius,
               border: border,
-              boxShadow: (widget.variant == ModernButtonVariant.primary && !isDark && enabled)
+              boxShadow:
+                  (widget.variant == ModernButtonVariant.primary &&
+                      !isDark &&
+                      enabled)
                   ? [
                       BoxShadow(
-                        color: AppTheme.primaryLight.withValues(alpha: _isHovered ? 0.35 : 0.2),
+                        color: AppTheme.primaryDeep.withValues(
+                          alpha: _isHovered ? 0.35 : 0.2,
+                        ),
                         blurRadius: _isHovered ? 16 : 10,
                         offset: const Offset(0, 4),
                       ),

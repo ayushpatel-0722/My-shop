@@ -180,8 +180,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Organic Honey'), findsOneWidget);
+    expect(find.text('ID: p_101'), findsOneWidget);
+    expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
     expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
     expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+
+    await tester.tap(find.text('ID: p_101'));
+    await tester.pump();
+    expect(find.text('Product ID copied to clipboard: p_101'), findsOneWidget);
   });
 
   testWidgets(
@@ -251,4 +257,195 @@ void main() {
       expect(updated.id, 'p_101');
     },
   );
+
+  testWidgets(
+    'AdminAddProductScreen generates Cartesian variant matrix and saves specs and policy',
+    (tester) async {
+      final mockRepo = MockAppRepository();
+      ServiceLocator.instance.repository = mockRepo;
+      AuthSession.currentUser = AppUser(
+        id: 'a_1',
+        companyId: 'c_organic',
+        companyName: 'GreenLeaf Organics',
+        name: 'Admin GreenLeaf',
+        email: 'admin@greenleaf.in',
+        role: 'admin',
+      );
+
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: const AdminAddProductScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Step 1: Basic Info
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product Title *'),
+        'Assorted Dry Fruits Box',
+      );
+
+      // Step 3: Pricing
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'MRP / Original Price (₹) *'),
+        '1200',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Selling / Discounted Price (₹)'),
+        '999',
+      );
+
+      // Step 4: Add Option 1 (Weight: 250g, 500g)
+      final addOptionBtn = find.widgetWithText(OutlinedButton, 'Add Option');
+      await tester.ensureVisible(addOptionBtn);
+      await tester.pumpAndSettle();
+      await tester.tap(addOptionBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Product Option'), findsOneWidget);
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Option Name *'),
+        'Weight',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Option Values (comma separated) *'),
+        '250g, 500g',
+      );
+      await tester.tap(find.text('Save Option'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Weight: '), findsOneWidget);
+
+      // Add Option 2 (Box: Standard, Festive)
+      await tester.tap(addOptionBtn);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Option Name *'),
+        'Box',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Option Values (comma separated) *'),
+        'Standard, Festive',
+      );
+      await tester.tap(find.text('Save Option'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Box: '), findsOneWidget);
+
+      // Generate Matrix
+      final genMatrixBtn = find.widgetWithText(FilledButton, 'Generate Matrix');
+      await tester.tap(genMatrixBtn);
+      await tester.pumpAndSettle();
+
+      // 4 combinations generated (2x2)
+      expect(find.text('4 Variant Combinations:'), findsOneWidget);
+      expect(find.text('250g / Standard'), findsOneWidget);
+      expect(find.text('250g / Festive'), findsOneWidget);
+      expect(find.text('500g / Standard'), findsOneWidget);
+      expect(find.text('500g / Festive'), findsOneWidget);
+
+      // Step 5: Add Specification
+      final addSpecBtn = find.widgetWithText(TextButton, 'Add Spec');
+      await tester.ensureVisible(addSpecBtn);
+      await tester.pumpAndSettle();
+      await tester.tap(addSpecBtn);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Spec Key').first,
+        'Shelf Life',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Spec Value').first,
+        '6 Months',
+      );
+
+      // Policy
+      final policyField = find.widgetWithText(
+        TextFormField,
+        'Delivery & Return Policy',
+      );
+      await tester.ensureVisible(policyField);
+      await tester.pumpAndSettle();
+      await tester.enterText(policyField, 'Free delivery. 7-day replacement.');
+
+      // Save Product
+      final createBtn = find.text('Create Product');
+      await tester.ensureVisible(createBtn);
+      await tester.pumpAndSettle();
+      await tester.tap(createBtn);
+      await tester.pumpAndSettle();
+
+      final allProducts = await mockRepo.products(companyId: 'c_organic').first;
+      final createdProduct = allProducts.firstWhere(
+        (p) => p.name == 'Assorted Dry Fruits Box',
+      );
+      expect(createdProduct, isNotNull);
+      expect(createdProduct.options.length, 2);
+      expect(createdProduct.variants.length, 4);
+      expect(createdProduct.specifications.length, 1);
+      expect(createdProduct.specifications.first.key, 'Shelf Life');
+      expect(createdProduct.specifications.first.value, '6 Months');
+      expect(createdProduct.policy, 'Free delivery. 7-day replacement.');
+    },
+  );
+
+  testWidgets('AdminAddProductScreen supports Unlimited Stock mode', (
+    tester,
+  ) async {
+    final mockRepo = MockAppRepository();
+    ServiceLocator.instance.repository = mockRepo;
+    AuthSession.currentUser = AppUser(
+      id: 'a_1',
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      name: 'Admin GreenLeaf',
+      email: 'admin@greenleaf.in',
+      role: 'admin',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(theme: AppTheme.light(), home: const AdminAddProductScreen()),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Product Title *'),
+      'Digital Recipe eBook',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'MRP / Original Price (₹) *'),
+      '199',
+    );
+
+    // Select Unlimited Stock
+    final unlimitedSeg = find.text('Unlimited Stock');
+    await tester.ensureVisible(unlimitedSeg);
+    await tester.pumpAndSettle();
+    await tester.tap(unlimitedSeg);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Unlimited Inventory:'), findsOneWidget);
+
+    final createBtn = find.text('Create Product');
+    await tester.ensureVisible(createBtn);
+    await tester.pumpAndSettle();
+    await tester.tap(createBtn);
+    await tester.pumpAndSettle();
+
+    final allProducts = await mockRepo.products(companyId: 'c_organic').first;
+    final created = allProducts.firstWhere(
+      (p) => p.name == 'Digital Recipe eBook',
+    );
+    expect(created.isUnlimitedStock, isTrue);
+    expect(created.isInStock, isTrue);
+  });
 }

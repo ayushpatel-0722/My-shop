@@ -55,17 +55,30 @@ class AppRouteLogger extends NavigatorObserver {
       return '${_routeScreenMap[path]} ($rawName)';
     }
 
-    if (path.startsWith('/company/')) return 'CompanyStoreScreen ($rawName)';
-    if (path.startsWith('/category/')) return 'CategoryViewScreen ($rawName)';
-    if (path.startsWith('/product/')) return 'ProductDetailsScreen ($rawName)';
-    if (path.startsWith('/admin/employees/edit/'))
+    if (path.startsWith('/company/')) {
+      return 'CompanyStoreScreen ($rawName)';
+    }
+    if (path.startsWith('/category/')) {
+      return 'CategoryViewScreen ($rawName)';
+    }
+    if (path.startsWith('/product/')) {
+      return 'ProductDetailsScreen ($rawName)';
+    }
+    if (path.startsWith('/admin/employees/edit/')) {
       return 'AdminAddEmployeeScreen ($rawName)';
-    if (path.startsWith('/order/')) return 'OrderTrackingScreen ($rawName)';
-    if (path.startsWith('/reviews/')) return 'ReviewsScreen ($rawName)';
-    if (path.startsWith('/leave-review/'))
+    }
+    if (path.startsWith('/order/')) {
+      return 'OrderTrackingScreen ($rawName)';
+    }
+    if (path.startsWith('/reviews/')) {
+      return 'ReviewsScreen ($rawName)';
+    }
+    if (path.startsWith('/leave-review/')) {
       return 'LeaveReviewScreen ($rawName)';
-    if (path.startsWith('/employee/packing/'))
+    }
+    if (path.startsWith('/employee/packing/')) {
       return 'PackingScreen ($rawName)';
+    }
 
     return rawName;
   }

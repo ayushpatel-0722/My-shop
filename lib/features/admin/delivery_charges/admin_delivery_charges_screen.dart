@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/models/delivery_charge.dart';
@@ -12,6 +13,8 @@ class AdminDeliveryChargesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Delivery Charges',
       actions: [
         TextButton.icon(

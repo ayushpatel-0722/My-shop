@@ -21,8 +21,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _navigated) return;
+      final auth = context.read<AuthCubit>();
+      if (!auth.state.restoring) {
+        _navigateBasedOnAuth(auth.state);
+      }
+    });
+
     // Safety timeout: if the auth restore takes too long (e.g. offline + cache
-    // miss), force navigation to role selection after 4 seconds.
+    // miss), force navigation to Home after 4 seconds.
     Future.delayed(const Duration(seconds: 4), () {
       if (!mounted || _navigated) return;
       _navigated = true;
@@ -69,16 +77,18 @@ class _SplashScreenState extends State<SplashScreen> {
                   color: scheme.primary,
                   borderRadius: BorderRadius.circular(28),
                 ),
-                child:
-                    const Icon(Icons.storefront, size: 52, color: Colors.white),
+                child: const Icon(
+                  Icons.storefront,
+                  size: 52,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 'Bazaar',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(

@@ -1,3 +1,4 @@
+import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/models/review.dart';
@@ -11,6 +12,8 @@ class AdminReviewsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Reviews',
       child: StreamBuilder<List<Review>>(
         stream: repo.reviews(''),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes/app_router.dart';
@@ -85,6 +86,8 @@ class AdminCategoriesScreen extends StatelessWidget {
     final adminCompanyId = AuthSession.currentUser?.companyId ?? '';
 
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Categories',
       actions: [
         IconButton(
@@ -208,6 +211,8 @@ class AdminCategoriesScreen extends StatelessWidget {
                             ],
                           ),
                         ],
+                        const SizedBox(height: 6),
+                        _buildIdBadge(context, id: cat.id, label: 'Category'),
                       ],
                     ),
                     trailing: Row(
@@ -242,6 +247,67 @@ class AdminCategoriesScreen extends StatelessWidget {
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildIdBadge(
+    BuildContext context, {
+    required String id,
+    required String label,
+  }) {
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: 'Copy $label ID',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: () {
+          Clipboard.setData(ClipboardData(text: id));
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$label ID copied to clipboard: $id'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+              width: 0.8,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  'ID: $id',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.copy_rounded,
+                size: 12,
+                color: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

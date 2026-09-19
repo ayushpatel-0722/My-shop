@@ -19,33 +19,58 @@ class AppTheme {
   // Color Palette Tokens
   // ---------------------------------------------------------------------------
 
-  // Primary brand accents
-  static const Color primaryLight = Color(0xFF4F46E5); // Modern Indigo
-  static const Color primaryDark = Color(0xFF818CF8);  // Accessible Lighter Indigo
-  static const Color primaryViolet = Color(0xFF7C3AED); // Deep Violet
+  // Primary brand accents (Vibrant Coral Red & Deep Crimson from design system spec)
+  static const Color primaryLight = Color(
+    0xFFFF5247,
+  ); // Vibrant Coral Red (70%)
+  static const Color primaryDeep = Color(
+    0xFFC5221F,
+  ); // Deep Crimson (Primary solid buttons & badges)
+  static const Color primaryDark = Color(0xFFFF6B61); // Accessible Coral
+  static const Color primaryViolet = Color(
+    0xFF3D38D9,
+  ); // Vibrant Royal Blue (Secondary)
 
-  // Light Mode Tokens
-  static const Color backgroundLight = Color(0xFFF8FAFC); // Crisp off-white
-  static const Color surfaceLight = Color(0xFFFFFFFF);    // Pure white
-  static const Color surfaceContainerLight = Color(0xFFF1F5F9); // Light slate
-  static const Color textPrimaryLight = Color(0xFF0F172A); // Dark slate
-  static const Color textSecondaryLight = Color(0xFF64748B); // Medium gray
-  static const Color borderLight = Color(0xFFE2E8F0); // Subtle 1px border
+  // Secondary brand accents (Royal Blue from spec #3D38D9)
+  static const Color secondaryLight = Color(0xFF3D38D9);
+  static const Color secondaryDark = Color(0xFF8581F7);
+
+  // Tertiary brand accents (Emerald / Mint Green from spec #0CA678)
+  static const Color tertiaryLight = Color(0xFF0CA678);
+  static const Color tertiaryDark = Color(0xFF20C997);
+
+  // Light Mode Tokens (Vibrant Marketplace canvas & surfaces)
+  static const Color backgroundLight = Color(
+    0xFFF4F6F9,
+  ); // Clean marketplace soft canvas
+  static const Color surfaceLight = Color(0xFFFFFFFF); // Pure crisp white
+  static const Color surfaceContainerLight = Color(
+    0xFFEDEFF4,
+  ); // Soft neutral container
+  static const Color textPrimaryLight = Color(
+    0xFF1E2229,
+  ); // Dark Charcoal (#1E2229 from spec)
+  static const Color textSecondaryLight = Color(0xFF6C757D); // Muted slate gray
+  static const Color borderLight = Color(
+    0xFFE2E6EC,
+  ); // Clean subtle border (#E2E6EC from spec)
 
   // Dark Mode Tokens
   static const Color backgroundDark = Color(0xFF0B0F19); // Midnight charcoal
-  static const Color surfaceDark = Color(0xFF1E293B);    // Elevated slate
-  static const Color surfaceContainerDark = Color(0xFF243044); // Container slate
+  static const Color surfaceDark = Color(0xFF1E293B); // Elevated slate
+  static const Color surfaceContainerDark = Color(
+    0xFF243044,
+  ); // Container slate
   static const Color textPrimaryDark = Color(0xFFF8FAFC); // Crisp off-white
   static const Color textSecondaryDark = Color(0xFF94A3B8); // Muted gray
   static const Color textMutedDark = Color(0xFF94A3B8); // Muted gray alias
   static const Color borderDark = Color(0x1FFFFFFF); // 12% subtle white border
 
   // Semantic Status Colors
-  static const Color success = Color(0xFF10B981);
+  static const Color success = Color(0xFF0CA678); // Emerald Green
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
-  static const Color info = Color(0xFF3B82F6);
+  static const Color info = Color(0xFF3D38D9); // Royal Blue
 
   // ---------------------------------------------------------------------------
   // Shadows, Elevations & Depth ("Sedoe")
@@ -54,13 +79,13 @@ class AppTheme {
   /// Soft, diffused, large-spread drop shadow for cards and surfaces in Light Mode.
   static const List<BoxShadow> lightCardShadow = [
     BoxShadow(
-      color: Color.fromRGBO(15, 23, 42, 0.04),
-      blurRadius: 24,
+      color: Color.fromRGBO(30, 34, 41, 0.05),
+      blurRadius: 20,
       spreadRadius: 0,
-      offset: Offset(0, 8),
+      offset: Offset(0, 6),
     ),
     BoxShadow(
-      color: Color.fromRGBO(15, 23, 42, 0.02),
+      color: Color.fromRGBO(30, 34, 41, 0.03),
       blurRadius: 6,
       spreadRadius: 0,
       offset: Offset(0, 2),
@@ -70,13 +95,13 @@ class AppTheme {
   /// Elevated shadow for floating elements, dropdowns, and dialogs in Light Mode.
   static const List<BoxShadow> lightFloatingShadow = [
     BoxShadow(
-      color: Color.fromRGBO(15, 23, 42, 0.08),
-      blurRadius: 32,
+      color: Color.fromRGBO(30, 34, 41, 0.10),
+      blurRadius: 28,
       spreadRadius: 0,
-      offset: Offset(0, 16),
+      offset: Offset(0, 14),
     ),
     BoxShadow(
-      color: Color.fromRGBO(15, 23, 42, 0.03),
+      color: Color.fromRGBO(30, 34, 41, 0.04),
       blurRadius: 8,
       spreadRadius: 0,
       offset: Offset(0, 4),
@@ -98,34 +123,39 @@ class AppTheme {
 
   static ThemeData light() {
     const colorScheme = ColorScheme.light(
-      primary: primaryLight,
+      primary:
+          primaryDeep, // Primary action color #C5221F (deep crimson from spec)
       onPrimary: Colors.white,
-      primaryContainer: Color(0xFFEEF2FF),
-      onPrimaryContainer: Color(0xFF312E81),
-      secondary: primaryViolet,
+      primaryContainer: Color(0xFFFFEBEA), // Soft coral tint
+      onPrimaryContainer: primaryDeep,
+      secondary: secondaryLight, // Royal Blue #3D38D9
       onSecondary: Colors.white,
-      secondaryContainer: Color(0xFFF3E8FF),
-      onSecondaryContainer: Color(0xFF581C87),
-      surface: surfaceLight,
-      onSurface: textPrimaryLight,
+      secondaryContainer: Color(0xFFEEEDFC),
+      onSecondaryContainer: Color(0xFF1B12A8),
+      tertiary: tertiaryLight, // Emerald Green #0CA678
+      onTertiary: Colors.white,
+      tertiaryContainer: Color(0xFFE6F7F2),
+      onTertiaryContainer: Color(0xFF087F5B),
+      surface: surfaceLight, // Crisp White #FFFFFF
+      onSurface: textPrimaryLight, // Dark Charcoal #1E2229
       surfaceContainerLowest: Colors.white,
-      surfaceContainerLow: Color(0xFFF8FAFC),
-      surfaceContainer: surfaceContainerLight,
-      surfaceContainerHigh: Color(0xFFE2E8F0),
-      surfaceContainerHighest: Color(0xFFCBD5E1),
+      surfaceContainerLow: Color(0xFFF8F9FA),
+      surfaceContainer: surfaceContainerLight, // Soft neutral #EDEFF4
+      surfaceContainerHigh: Color(0xFFE4E7ED),
+      surfaceContainerHighest: Color(0xFFD9DFE7),
       error: error,
       onError: Colors.white,
-      outline: borderLight,
-      outlineVariant: Color(0xFFF1F5F9),
+      outline: borderLight, // Subtle border #E2E6EC
+      outlineVariant: Color(0xFFEDEFF4),
     );
 
     return _buildTheme(
       brightness: Brightness.light,
       colorScheme: colorScheme,
-      scaffoldBg: backgroundLight,
-      textPrimary: textPrimaryLight,
+      scaffoldBg: backgroundLight, // #F4F6F9 light canvas
+      textPrimary: textPrimaryLight, // #1E2229
       textSecondary: textSecondaryLight,
-      borderColor: borderLight,
+      borderColor: borderLight, // #E2E6EC
     );
   }
 
@@ -133,12 +163,16 @@ class AppTheme {
     const colorScheme = ColorScheme.dark(
       primary: primaryDark,
       onPrimary: Color(0xFF0B0F19),
-      primaryContainer: Color(0xFF312E81),
-      onPrimaryContainer: Color(0xFFEEF2FF),
-      secondary: Color(0xFFA78BFA),
+      primaryContainer: Color(0xFF801A14),
+      onPrimaryContainer: Color(0xFFFFDAD6),
+      secondary: secondaryDark,
       onSecondary: Color(0xFF0B0F19),
-      secondaryContainer: Color(0xFF581C87),
-      onSecondaryContainer: Color(0xFFF3E8FF),
+      secondaryContainer: Color(0xFF1B12A8),
+      onSecondaryContainer: Color(0xFFEEEDFC),
+      tertiary: tertiaryDark,
+      onTertiary: Color(0xFF0B0F19),
+      tertiaryContainer: Color(0xFF087F5B),
+      onTertiaryContainer: Color(0xFFE6F7F2),
       surface: surfaceDark,
       onSurface: textPrimaryDark,
       surfaceContainerLowest: Color(0xFF0B0F19),
@@ -172,27 +206,81 @@ class AppTheme {
   }) {
     final isDark = brightness == Brightness.dark;
 
-    // Typography: Modern Inter sans-serif font
+    // Typography: Vibrant Marketplace Plus Jakarta Sans
     final baseTextTheme = isDark
         ? ThemeData.dark().textTheme
         : ThemeData.light().textTheme;
-    final textTheme = GoogleFonts.interTextTheme(baseTextTheme).copyWith(
-      displayLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, letterSpacing: -0.6),
-      displayMedium: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, letterSpacing: -0.5),
-      displaySmall: TextStyle(color: textPrimary, fontWeight: FontWeight.w600, letterSpacing: -0.25),
-      headlineLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, letterSpacing: -0.25),
-      headlineMedium: TextStyle(color: textPrimary, fontWeight: FontWeight.w600, letterSpacing: -0.25),
-      headlineSmall: TextStyle(color: textPrimary, fontWeight: FontWeight.w600),
-      titleLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w600),
-      titleMedium: TextStyle(color: textPrimary, fontWeight: FontWeight.w500),
-      titleSmall: TextStyle(color: textSecondary, fontWeight: FontWeight.w500),
-      bodyLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w400, height: 1.5),
-      bodyMedium: TextStyle(color: textPrimary, fontWeight: FontWeight.w400, height: 1.5),
-      bodySmall: TextStyle(color: textSecondary, fontWeight: FontWeight.w400, height: 1.4),
-      labelLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w600),
-      labelMedium: TextStyle(color: textSecondary, fontWeight: FontWeight.w500),
-      labelSmall: TextStyle(color: textSecondary, fontWeight: FontWeight.w500),
-    );
+    final textTheme = GoogleFonts.plusJakartaSansTextTheme(baseTextTheme)
+        .copyWith(
+          displayLarge: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.6,
+          ),
+          displayMedium: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.5,
+          ),
+          displaySmall: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.25,
+          ),
+          headlineLarge: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.25,
+          ),
+          headlineMedium: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.25,
+          ),
+          headlineSmall: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          titleLarge: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          titleMedium: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+          titleSmall: TextStyle(
+            color: textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+          bodyLarge: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w400,
+            height: 1.5,
+          ),
+          bodyMedium: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w400,
+            height: 1.5,
+          ),
+          bodySmall: TextStyle(
+            color: textSecondary,
+            fontWeight: FontWeight.w400,
+            height: 1.4,
+          ),
+          labelLarge: TextStyle(
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          labelMedium: TextStyle(
+            color: textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+          labelSmall: TextStyle(
+            color: textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -212,11 +300,12 @@ class AppTheme {
         },
       ),
 
-      // App Bar Theme
+      // App Bar Theme (Clean crisp white header in Light mode)
       appBarTheme: AppBarTheme(
         elevation: 0,
-        scrolledUnderElevation: 0.5,
-        backgroundColor: scaffoldBg,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: isDark ? scaffoldBg : Colors.white,
         foregroundColor: textPrimary,
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge?.copyWith(
@@ -226,7 +315,7 @@ class AppTheme {
         iconTheme: IconThemeData(color: textPrimary),
       ),
 
-      // Card Theme (16px radius, subtle border)
+      // Card Theme (16px radius, subtle border #E2E6EC, clean white surface)
       cardTheme: CardThemeData(
         elevation: 0,
         color: colorScheme.surface,
@@ -238,7 +327,7 @@ class AppTheme {
         clipBehavior: Clip.antiAlias,
       ),
 
-      // Elevated Button Theme (12px rounded, modern height & typography)
+      // Elevated Button Theme (Primary #C5221F crimson from spec, white text, 12px radius)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
@@ -273,12 +362,16 @@ class AppTheme {
         ),
       ),
 
-      // Outlined Button Theme
+      // Outlined Button Theme (White surface, #D9DFE7 border, #1E2229 text from spec)
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           elevation: 0,
+          backgroundColor: isDark ? Colors.transparent : Colors.white,
           foregroundColor: textPrimary,
-          side: BorderSide(color: borderColor, width: 1.2),
+          side: BorderSide(
+            color: isDark ? borderColor : const Color(0xFFD9DFE7),
+            width: 1.2,
+          ),
           minimumSize: const Size(64, 48),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
@@ -304,38 +397,74 @@ class AppTheme {
         ),
       ),
 
-      // Input Decoration Theme (Stripe/Linear style crisp rounded inputs)
+      // Input Decoration Theme (Soft #F4F6F9 container, #E2E6EC border from spec)
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        fillColor: isDark ? surfaceContainerDark : const Color(0xFFF4F6F9),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         hintStyle: textTheme.bodyMedium?.copyWith(color: textSecondary),
         labelStyle: textTheme.bodyMedium?.copyWith(color: textSecondary),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusMedium),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: borderColor, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusMedium),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: borderColor, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: BorderSide(color: colorScheme.primary, width: 1.8),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: primaryLight, width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radiusMedium),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: colorScheme.error, width: 1.2),
         ),
+      ),
+
+      // Navigation Bar Theme (Clean white bar with soft coral indicator)
+      navigationBarTheme: NavigationBarThemeData(
+        elevation: 0,
+        backgroundColor: isDark ? surfaceDark : Colors.white,
+        indicatorColor: const Color(0xFFFFEBEA),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: primaryDeep);
+          }
+          return IconThemeData(
+            color: isDark ? textSecondaryDark : textPrimaryLight,
+          );
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: primaryDeep,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return TextStyle(
+            color: isDark ? textSecondaryDark : textSecondaryLight,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          );
+        }),
       ),
 
       // Segmented Button Theme
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radiusMedium),
+            ),
           ),
-          side: WidgetStatePropertyAll(BorderSide(color: borderColor, width: 1)),
+          side: WidgetStatePropertyAll(
+            BorderSide(color: borderColor, width: 1),
+          ),
         ),
       ),
 
@@ -359,7 +488,9 @@ class AppTheme {
         backgroundColor: colorScheme.surface,
         elevation: isDark ? 0 : 8,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(radiusXLarge)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(radiusXLarge),
+          ),
         ),
       ),
 
@@ -368,14 +499,18 @@ class AppTheme {
         backgroundColor: colorScheme.surface,
         elevation: 0,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.horizontal(right: Radius.circular(radiusLarge)),
+          borderRadius: BorderRadius.horizontal(
+            right: Radius.circular(radiusLarge),
+          ),
         ),
       ),
 
       // SnackBar Theme
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFF0F172A),
+        backgroundColor: isDark
+            ? const Color(0xFF1E293B)
+            : const Color(0xFF0F172A),
         contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusMedium),

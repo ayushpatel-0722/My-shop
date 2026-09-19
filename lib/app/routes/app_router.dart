@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/category.dart';
@@ -34,10 +33,12 @@ import '../../features/checkout/tracking/orders_screen.dart';
 import '../../features/company_onboarding/company_onboarding_screen.dart';
 import '../../features/employee/order_queue/employee_order_queue_screen.dart';
 import '../../features/employee/packing/packing_screen.dart';
+import '../../features/marketplace/categories/categories_screen.dart';
 import '../../features/marketplace/category_view/category_view_screen.dart';
 import '../../features/marketplace/company_store/company_store_screen.dart';
 import '../../features/marketplace/home/home_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
+import '../../features/account/account_screen.dart';
 import '../../features/product/details/product_details_screen.dart';
 import '../../features/product/search/search_screen.dart';
 import '../../features/qr/qr_scanner_screen.dart';
@@ -57,6 +58,8 @@ class AppRoutes {
   static const adminSignup = '/admin-signup';
   static const companyOnboarding = '/company-onboarding';
   static const home = '/home';
+  static const categories = '/categories';
+  static const account = '/account';
   static const companyStore = '/company/:slug';
   static const category = '/category/:id';
   static const product = '/product/:id';
@@ -104,54 +107,120 @@ class AppRoutes {
   static String orderPath(String id) => '/order/$id';
 }
 
+/// Handles global routing guards, role protection, and browser reload policies:
+/// 1. While session is restoring on startup / reload: holds route.
+/// 2. On initial app boot / browser reload:
+///    - If user is NOT logged in: navigates to the main screen to choose role (/role).
+///    - If user IS logged in: navigates to their respective home screen (/admin, /employee, or /home).
+/// 3. In-app navigation after boot: enforces role-based access control.
+String? appRouteRedirect(String loc) {
+  // While session is restoring on startup / browser reload, hold route
+  if (AuthSession.isRestoring) {
+    return null;
+  }
+
+  // On app startup or browser reload:
+  // 1. If user is NOT logged in: land on Home Screen (/home) by default, or stay on public deep link.
+  // 2. If user IS logged in: any screen reload preserves/moves to respective home.
+  if (!AuthSession.hasCompletedInitialBoot) {
+    AuthSession.markBootCompleted();
+    if (AuthSession.currentUser == null) {
+      final allowedExact = {
+        AppRoutes.role,
+        AppRoutes.adminLogin,
+        AppRoutes.employeeLogin,
+        AppRoutes.userLogin,
+        AppRoutes.userSignup,
+        AppRoutes.adminSignup,
+        AppRoutes.companyOnboarding,
+        AppRoutes.home,
+        AppRoutes.search,
+        AppRoutes.cart,
+      };
+
+      final allowedPrefixes = [
+        '/company/', // company store
+        '/product/',
+        '/category/',
+        '/reviews/',
+      ];
+
+      var allowed = allowedExact.contains(loc);
+      if (!allowed) {
+        for (final p in allowedPrefixes) {
+          if (loc.startsWith(p)) {
+            allowed = true;
+            break;
+          }
+        }
+      }
+
+      if (!allowed) return AppRoutes.home;
+    } else {
+      if (AuthSession.isAdmin) {
+        if (loc != AppRoutes.admin) return AppRoutes.admin;
+      } else if (AuthSession.isEmployee) {
+        if (loc != AppRoutes.employeeHome) return AppRoutes.employeeHome;
+      } else {
+        if (loc != AppRoutes.home) return AppRoutes.home;
+      }
+    }
+    return null;
+  }
+
+  // If user is authenticated, redirect away from auth selection & login screens
+  if (AuthSession.currentUser != null) {
+    if (loc == AppRoutes.role ||
+        loc == AppRoutes.userLogin ||
+        loc == AppRoutes.userSignup ||
+        loc == AppRoutes.adminLogin ||
+        loc == AppRoutes.employeeLogin) {
+      if (AuthSession.isAdmin) return AppRoutes.admin;
+      if (AuthSession.isEmployee) return AppRoutes.employeeHome;
+      return AppRoutes.home;
+    }
+  }
+
+  // Protect only the admin area ("/admin" and its subpaths), not the
+  // admin-login route. Similarly protect only the employee area.
+  if ((loc == AppRoutes.admin || loc.startsWith('${AppRoutes.admin}/')) &&
+      !AuthSession.isAdmin) {
+    return AppRoutes.role;
+  }
+  if ((loc == AppRoutes.employeeHome ||
+          loc.startsWith('${AppRoutes.employeeHome}/')) &&
+      !AuthSession.isEmployee) {
+    return AppRoutes.role;
+  }
+  return null;
+}
+
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
   refreshListenable: AuthSession.instance,
   observers: [AppRouteLogger()],
-  // Role-based access guards (Section 17): Employees can never open an Admin
-  // screen, and only a signed-in role can enter its area.
-  redirect: (context, state) {
-    final loc = state.matchedLocation;
-
-    // While session is restoring on startup / browser reload, preserve target route
-    if (AuthSession.isRestoring) {
-      return null;
-    }
-
-    // Protect only the admin area ("/admin" and its subpaths), not the
-    // admin-login route. Similarly protect only the employee area.
-    if ((loc == AppRoutes.admin || loc.startsWith('${AppRoutes.admin}/')) &&
-        !AuthSession.isAdmin) {
-      return AppRoutes.role;
-    }
-    if ((loc == AppRoutes.employeeHome ||
-            loc.startsWith('${AppRoutes.employeeHome}/')) &&
-        !AuthSession.isEmployee) {
-      return AppRoutes.role;
-    }
-    return null;
-  },
+  redirect: (context, state) => appRouteRedirect(state.matchedLocation),
   routes: [
-    GoRoute(path: AppRoutes.splash, builder: (_, __) => const SplashScreen()),
+    GoRoute(path: AppRoutes.splash, builder: (_, s) => const SplashScreen()),
     GoRoute(
       path: AppRoutes.role,
-      builder: (_, __) => const RoleSelectionScreen(),
+      builder: (_, s) => const RoleSelectionScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminLogin,
-      builder: (_, __) => const AdminLoginScreen(),
+      builder: (_, s) => const AdminLoginScreen(),
     ),
     GoRoute(
       path: AppRoutes.employeeLogin,
-      builder: (_, __) => const EmployeeLoginScreen(),
+      builder: (_, s) => const EmployeeLoginScreen(),
     ),
     GoRoute(
       path: AppRoutes.userLogin,
-      builder: (_, __) => const UserLoginScreen(),
+      builder: (_, s) => const UserLoginScreen(),
     ),
     GoRoute(
       path: AppRoutes.userSignup,
-      builder: (_, __) => const UserSignupScreen(),
+      builder: (_, s) => const UserSignupScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminSignup,
@@ -162,9 +231,13 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.companyOnboarding,
-      builder: (_, __) => const CompanyOnboardingScreen(),
+      builder: (_, s) => const CompanyOnboardingScreen(),
     ),
-    GoRoute(path: AppRoutes.home, builder: (_, __) => const HomeScreen()),
+    GoRoute(path: AppRoutes.home, builder: (_, s) => const HomeScreen()),
+    GoRoute(
+      path: AppRoutes.categories,
+      builder: (_, s) => const CategoriesScreen(),
+    ),
     GoRoute(
       path: AppRoutes.companyStore,
       builder: (_, state) =>
@@ -182,13 +255,14 @@ final GoRouter appRouter = GoRouter(
       builder: (_, state) =>
           ProductDetailsScreen(productId: state.pathParameters['id'] ?? ''),
     ),
-    GoRoute(path: AppRoutes.search, builder: (_, __) => const SearchScreen()),
-    GoRoute(path: AppRoutes.cart, builder: (_, __) => const CartScreen()),
+    GoRoute(path: AppRoutes.search, builder: (_, s) => const SearchScreen()),
+    GoRoute(path: AppRoutes.cart, builder: (_, s) => const CartScreen()),
     GoRoute(
       path: AppRoutes.checkout,
-      builder: (_, __) => const CheckoutScreen(),
+      builder: (_, s) => const CheckoutScreen(),
     ),
-    GoRoute(path: AppRoutes.orders, builder: (_, __) => const OrdersScreen()),
+    GoRoute(path: AppRoutes.orders, builder: (_, s) => const OrdersScreen()),
+    GoRoute(path: AppRoutes.account, builder: (_, s) => const AccountScreen()),
     GoRoute(
       path: AppRoutes.orderTracking,
       builder: (_, state) =>
@@ -208,21 +282,21 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.notifications,
-      builder: (_, __) => const NotificationsScreen(),
+      builder: (_, s) => const NotificationsScreen(),
     ),
 
     // Admin
     GoRoute(
       path: AppRoutes.admin,
-      builder: (_, __) => const AdminDashboardScreen(),
+      builder: (_, s) => const AdminDashboardScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminOrders,
-      builder: (_, __) => const AdminOrdersScreen(),
+      builder: (_, s) => const AdminOrdersScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminProducts,
-      builder: (_, __) => const AdminProductsScreen(),
+      builder: (_, s) => const AdminProductsScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminAddProduct,
@@ -240,7 +314,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.adminCategories,
-      builder: (_, __) => const AdminCategoriesScreen(),
+      builder: (_, s) => const AdminCategoriesScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminAddCategory,
@@ -260,11 +334,11 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.adminVouchers,
-      builder: (_, __) => const AdminVouchersScreen(),
+      builder: (_, s) => const AdminVouchersScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminEmployees,
-      builder: (_, __) => const AdminEmployeesScreen(),
+      builder: (_, s) => const AdminEmployeesScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminAddEmployee,
@@ -284,34 +358,34 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.adminAdmins,
-      builder: (_, __) => const AdminAdminsScreen(),
+      builder: (_, s) => const AdminAdminsScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminDelivery,
-      builder: (_, __) => const AdminDeliveryChargesScreen(),
+      builder: (_, s) => const AdminDeliveryChargesScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminBanners,
-      builder: (_, __) => const AdminBannersScreen(),
+      builder: (_, s) => const AdminBannersScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminReviews,
-      builder: (_, __) => const AdminReviewsScreen(),
+      builder: (_, s) => const AdminReviewsScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminRecommendations,
-      builder: (_, __) => const AdminRecommendationsScreen(),
+      builder: (_, s) => const AdminRecommendationsScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminReports,
-      builder: (_, __) => const AdminReportsScreen(),
+      builder: (_, s) => const AdminReportsScreen(),
     ),
-    GoRoute(path: AppRoutes.adminQr, builder: (_, __) => const AdminQrScreen()),
+    GoRoute(path: AppRoutes.adminQr, builder: (_, s) => const AdminQrScreen()),
 
     // Employee
     GoRoute(
       path: AppRoutes.employeeHome,
-      builder: (_, __) => const EmployeeOrderQueueScreen(),
+      builder: (_, s) => const EmployeeOrderQueueScreen(),
     ),
     GoRoute(
       path: AppRoutes.packing,
@@ -322,7 +396,7 @@ final GoRouter appRouter = GoRouter(
     // QR scanner (shared by Employee packing + Shopper scan)
     GoRoute(
       path: AppRoutes.qrScanner,
-      builder: (_, __) => const QrScannerScreen(),
+      builder: (_, s) => const QrScannerScreen(),
     ),
   ],
 );

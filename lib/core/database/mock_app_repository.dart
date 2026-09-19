@@ -115,7 +115,8 @@ class MockAppRepository implements AppRepository {
   void _pushCompanies() => _companiesCtrl.add(List.unmodifiable(_companies));
   void _pushCategories() => _categoriesCtrl.add(List.unmodifiable(_categories));
   void _pushProducts() => _productsCtrl.add(List.unmodifiable(_products));
-  void _pushBanners() => _offerBannersCtrl.add(List.unmodifiable(_offerBanners));
+  void _pushBanners() =>
+      _offerBannersCtrl.add(List.unmodifiable(_offerBanners));
   void _pushOrders() => _ordersCtrl.add(List.unmodifiable(_orders));
   void _pushReviews() => _reviewsCtrl.add(List.unmodifiable(_reviews));
   void _pushNotifications() =>
@@ -133,14 +134,22 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<AppUser?> verifyOtp(String mobileNumber, String otp) async {
-    final user = _usersByMobile[mobileNumber];
+    var user = _usersByMobile[mobileNumber];
+    if (user == null) {
+      user = AppUser(
+        id: 'mock_${mobileNumber.replaceAll(RegExp(r'\D'), '')}',
+        name: 'Customer',
+        mobileNumber: mobileNumber,
+        role: 'user',
+      );
+      _usersByMobile[mobileNumber] = user;
+    }
     _currentUser = user;
     return user;
   }
 
   @override
-  Future<bool> userExists(String mobileNumber) async =>
-      _usersByMobile.containsKey(mobileNumber);
+  Future<bool> userExists(String mobileNumber) async => true;
 
   @override
   Future<AppUser?> adminLogin({
@@ -166,15 +175,64 @@ class MockAppRepository implements AppRepository {
   }
 
   @override
-  Future<void> createUserAccount(String name, String mobileNumber) async {
+  Future<void> createUserAccount(
+    String name,
+    String mobileNumber, {
+    String email = '',
+    String authProvider = '',
+    String googleId = '',
+    List<AddressEntry> addresses = const [],
+  }) async {
     final user = AppUser(
-      id: _uuid.v4(),
+      id: googleId.isNotEmpty ? googleId : _uuid.v4(),
       name: name,
+      email: email,
       mobileNumber: mobileNumber,
       role: 'user',
+      authProvider: authProvider,
+      googleId: googleId,
+      addresses: addresses,
     );
-    _usersByMobile[mobileNumber] = user;
+    if (mobileNumber.isNotEmpty) {
+      _usersByMobile[mobileNumber] = user;
+    }
     _currentUser = user;
+  }
+
+  @override
+  Future<void> updateUserMobile(String userId, String mobileNumber) async {
+    if (_currentUser != null) {
+      final updated = _currentUser!.copyWith(mobileNumber: mobileNumber);
+      _currentUser = updated;
+      _usersByMobile[mobileNumber] = updated;
+    }
+  }
+
+  @override
+  Future<void> saveUserAddress(String userId, AddressEntry address) async {
+    if (_currentUser != null) {
+      final list = List<AddressEntry>.from(_currentUser!.addresses);
+      if (address.isDefault || list.isEmpty) {
+        for (var i = 0; i < list.length; i++) {
+          final a = list[i];
+          list[i] = AddressEntry(
+            houseNo: a.houseNo,
+            address: a.address,
+            pincode: a.pincode,
+            isDefault: false,
+            label: a.label,
+            lat: a.lat,
+            lng: a.lng,
+          );
+        }
+      }
+      list.add(address);
+      final updated = _currentUser!.copyWith(addresses: list);
+      _currentUser = updated;
+      if (updated.mobileNumber.isNotEmpty) {
+        _usersByMobile[updated.mobileNumber] = updated;
+      }
+    }
   }
 
   @override
@@ -395,9 +453,7 @@ class MockAppRepository implements AppRepository {
   @override
   Future<Employee?> employee(String id, {String companyId = ''}) async =>
       _mockEmployees.firstWhereOrNull(
-        (e) =>
-            e.id == id &&
-            (companyId.isEmpty || e.companyId == companyId),
+        (e) => e.id == id && (companyId.isEmpty || e.companyId == companyId),
       );
 
   @override
@@ -567,11 +623,16 @@ class MockAppRepository implements AppRepository {
   }
 
   @override
-  Future<void> deleteCategory(String categoryId, {String companyId = ''}) async {
+  Future<void> deleteCategory(
+    String categoryId, {
+    String companyId = '',
+  }) async {
     _categories.removeWhere(
       (c) =>
           c.id == categoryId &&
-          (companyId.isEmpty || c.companyId == companyId || c.companyId.isEmpty),
+          (companyId.isEmpty ||
+              c.companyId == companyId ||
+              c.companyId.isEmpty),
     );
     _pushCategories();
   }
@@ -591,8 +652,7 @@ class MockAppRepository implements AppRepository {
   Future<void> deleteEmployee(String companyId, String employeeId) async {
     _mockEmployees.removeWhere(
       (e) =>
-          e.id == employeeId &&
-          (companyId.isEmpty || e.companyId == companyId),
+          e.id == employeeId && (companyId.isEmpty || e.companyId == companyId),
     );
     _pushEmployees();
   }
@@ -642,6 +702,7 @@ class MockAppRepository implements AppRepository {
   @override
   Future<void> saveBanner(OfferBanner banner) async {
     _offerBanners.add(banner);
+    _pushBanners();
   }
 
   @override

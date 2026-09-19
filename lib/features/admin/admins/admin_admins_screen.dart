@@ -16,6 +16,8 @@ class AdminAdminsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final companyId = context.read<AuthCubit>().currentUser?.companyId ?? '';
     return AdminShell(
+      showBack: true,
+      backRoute: AppRoutes.admin,
       title: 'Admins',
       actions: [
         IconButton(

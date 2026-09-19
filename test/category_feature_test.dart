@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myshop/app/theme/app_theme.dart';
+import 'package:myshop/core/database/mock_app_repository.dart';
+import 'package:myshop/core/models/app_user.dart';
 import 'package:myshop/core/models/category.dart';
 import 'package:myshop/core/models/product.dart';
+import 'package:myshop/core/services/auth_session.dart';
+import 'package:myshop/core/services/service_locator.dart';
+import 'package:myshop/features/admin/categories/admin_categories_screen.dart';
 import 'package:myshop/features/admin/categories/widgets/product_assignment_picker.dart';
 
 void main() {
@@ -110,10 +116,12 @@ void main() {
 
       bool isDuplicate(String name, String companyId, {String excludeId = ''}) {
         final target = name.trim().toLowerCase();
-        return categories.any((c) =>
-            (excludeId.isEmpty || c.id != excludeId) &&
-            c.companyId == companyId &&
-            c.name.trim().toLowerCase() == target);
+        return categories.any(
+          (c) =>
+              (excludeId.isEmpty || c.id != excludeId) &&
+              c.companyId == companyId &&
+              c.name.trim().toLowerCase() == target,
+        );
       }
 
       // "groceries" exists in c_abc
@@ -155,52 +163,100 @@ void main() {
       ),
     ];
 
-    testWidgets('renders available and assigned products, handles search and selection',
-        (tester) async {
-      List<String> selected = ['p_101'];
+    testWidgets(
+      'renders available and assigned products, handles search and selection',
+      (tester) async {
+        List<String> selected = ['p_101'];
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (context, setState) {
-                return ProductAssignmentPicker(
-                  allProducts: sampleProducts,
-                  selectedProductIds: selected,
-                  onSelectedChanged: (newSelected) {
-                    setState(() {
-                      selected = newSelected;
-                    });
-                  },
-                );
-              },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return ProductAssignmentPicker(
+                    allProducts: sampleProducts,
+                    selectedProductIds: selected,
+                    onSelectedChanged: (newSelected) {
+                      setState(() {
+                        selected = newSelected;
+                      });
+                    },
+                  );
+                },
+              ),
             ),
           ),
+        );
+
+        // Verify counter
+        expect(find.text('1 products selected'), findsOneWidget);
+
+        // Verify product names are rendered
+        expect(find.text('Organic Honey'), findsOneWidget);
+        expect(find.text('Green Tea'), findsOneWidget);
+        expect(find.text('Almond Milk'), findsOneWidget);
+
+        // Search for "Green"
+        await tester.enterText(find.byType(TextField), 'Green');
+        await tester.pumpAndSettle();
+
+        expect(find.text('Green Tea'), findsOneWidget);
+        expect(find.text('Organic Honey'), findsNothing);
+        expect(find.text('Almond Milk'), findsNothing);
+
+        // Clear search
+        await tester.tap(find.byIcon(Icons.clear));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Organic Honey'), findsOneWidget);
+        expect(find.text('Green Tea'), findsOneWidget);
+      },
+    );
+  });
+
+  group('AdminCategoriesScreen Tests', () {
+    testWidgets('displays category ID and copies to clipboard on tap', (
+      tester,
+    ) async {
+      final mockRepo = MockAppRepository();
+      ServiceLocator.instance.repository = mockRepo;
+      AuthSession.currentUser = AppUser(
+        id: 'a_1',
+        companyId: 'c_organic',
+        companyName: 'GreenLeaf Organics',
+        name: 'Admin GreenLeaf',
+        email: 'admin@greenleaf.in',
+        role: 'admin',
+      );
+
+      await mockRepo.saveCategory(
+        const Category(
+          id: 'cat_beverages',
+          companyId: 'c_organic',
+          name: 'Beverages',
+          type: 'Drinks',
+          productList: ['p_101'],
         ),
       );
 
-      // Verify counter
-      expect(find.text('1 products selected'), findsOneWidget);
-
-      // Verify product names are rendered
-      expect(find.text('Organic Honey'), findsOneWidget);
-      expect(find.text('Green Tea'), findsOneWidget);
-      expect(find.text('Almond Milk'), findsOneWidget);
-
-      // Search for "Green"
-      await tester.enterText(find.byType(TextField), 'Green');
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: const AdminCategoriesScreen(),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('Green Tea'), findsOneWidget);
-      expect(find.text('Organic Honey'), findsNothing);
-      expect(find.text('Almond Milk'), findsNothing);
+      expect(find.text('Beverages'), findsOneWidget);
+      expect(find.text('ID: cat_beverages'), findsOneWidget);
+      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
 
-      // Clear search
-      await tester.tap(find.byIcon(Icons.clear));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Organic Honey'), findsOneWidget);
-      expect(find.text('Green Tea'), findsOneWidget);
+      await tester.tap(find.text('ID: cat_beverages'));
+      await tester.pump();
+      expect(
+        find.text('Category ID copied to clipboard: cat_beverages'),
+        findsOneWidget,
+      );
     });
   });
 }

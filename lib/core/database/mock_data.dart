@@ -18,6 +18,8 @@ class MockData {
       details: 'Farm-fresh organic groceries delivered daily.',
       address: '12 Market Street, Ahmedabad',
       location: 'https://maps.google.com/?q=Ahmedabad',
+      logoUrl:
+          'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80',
       currency: 'INR',
       deliveryTypes: const ['self_pickup', 'home_delivery'],
       weeklyHours: Company.defaultWeek(),
@@ -30,6 +32,8 @@ class MockData {
       details: 'Gadgets, accessories and smart electronics.',
       address: '45 Circuit Avenue, Ahmedabad',
       location: 'https://maps.google.com/?q=Ahmedabad',
+      logoUrl:
+          'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=200&auto=format&fit=crop&q=80',
       currency: 'INR',
       deliveryTypes: const ['home_delivery'],
       weeklyHours: Company.defaultWeek(),
@@ -38,18 +42,42 @@ class MockData {
 
   // ---------- Categories ----------
   static final categories = <Category>[
-    const Category(id: 'cat_veg', name: 'Vegetables', type: 'Grocery',
-        iconUrl: '🥦'),
-    const Category(id: 'cat_fruit', name: 'Fruits', type: 'Grocery',
-        iconUrl: '🍎'),
-    const Category(id: 'cat_dairy', name: 'Dairy & Eggs', type: 'Grocery',
-        iconUrl: '🥛'),
-    const Category(id: 'cat_phone', name: 'Phones', type: 'Electronics',
-        iconUrl: '📱'),
-    const Category(id: 'cat_audio', name: 'Audio', type: 'Electronics',
-        iconUrl: '🎧'),
-    const Category(id: 'cat_wear', name: 'Wearables', type: 'Electronics',
-        iconUrl: '⌚'),
+    const Category(
+      id: 'cat_veg',
+      name: 'Vegetables',
+      type: 'Grocery',
+      iconUrl: '🥦',
+    ),
+    const Category(
+      id: 'cat_fruit',
+      name: 'Fruits',
+      type: 'Grocery',
+      iconUrl: '🍎',
+    ),
+    const Category(
+      id: 'cat_dairy',
+      name: 'Dairy & Eggs',
+      type: 'Grocery',
+      iconUrl: '🥛',
+    ),
+    const Category(
+      id: 'cat_phone',
+      name: 'Phones',
+      type: 'Electronics',
+      iconUrl: '📱',
+    ),
+    const Category(
+      id: 'cat_audio',
+      name: 'Audio',
+      type: 'Electronics',
+      iconUrl: '🎧',
+    ),
+    const Category(
+      id: 'cat_wear',
+      name: 'Wearables',
+      type: 'Electronics',
+      iconUrl: '⌚',
+    ),
   ];
 
   // ---------- Products ----------
@@ -66,7 +94,9 @@ class MockData {
       unitType: 'grams',
       amount: 60,
       discountAmt: 48,
-      images: [],
+      images: [
+        'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
+      ],
       stockQty: 120,
       isRecommended: true,
     ),
@@ -80,6 +110,9 @@ class MockData {
       unit: 250,
       unitType: 'grams',
       amount: 40,
+      images: [
+        'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&auto=format&fit=crop&q=80',
+      ],
       stockQty: 80,
     ),
     const Product(
@@ -93,7 +126,9 @@ class MockData {
       unitType: 'kg',
       amount: 180,
       discountAmt: 150,
-      images: [],
+      images: [
+        'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&auto=format&fit=crop&q=80',
+      ],
       stockQty: 60,
       isRecommended: true,
     ),
@@ -107,6 +142,9 @@ class MockData {
       unit: 1,
       unitType: 'liters',
       amount: 68,
+      images: [
+        'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&auto=format&fit=crop&q=80',
+      ],
       stockQty: 200,
     ),
     // TechTronics Hub
@@ -121,7 +159,9 @@ class MockData {
       unitType: 'pieces',
       amount: 24999,
       discountAmt: 21999,
-      images: [],
+      images: [
+        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&auto=format&fit=crop&q=80',
+      ],
       stockQty: 25,
       isRecommended: true,
       variants: [
@@ -140,7 +180,9 @@ class MockData {
       unitType: 'pieces',
       amount: 2999,
       discountAmt: 2499,
-      images: [],
+      images: [
+        'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&auto=format&fit=crop&q=80',
+      ],
       stockQty: 80,
       isRecommended: true,
     ),
@@ -154,6 +196,10 @@ class MockData {
       unit: 1,
       unitType: 'pieces',
       amount: 4999,
+      discountAmt: 3999,
+      images: [
+        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop&q=80',
+      ],
       stockQty: 40,
     ),
   ];

@@ -45,7 +45,16 @@ abstract class AppRepository {
     required String password,
   });
 
-  Future<void> createUserAccount(String name, String mobileNumber);
+  Future<void> createUserAccount(
+    String name,
+    String mobileNumber, {
+    String email = '',
+    String authProvider = '',
+    String googleId = '',
+    List<AddressEntry> addresses = const [],
+  });
+  Future<void> updateUserMobile(String userId, String mobileNumber);
+  Future<void> saveUserAddress(String userId, AddressEntry address);
   Future<Company> createCompany(Company company);
   Future<Admin> createAdminAccount(Admin admin, {required String password});
   Future<Employee> createEmployeeAccount(
