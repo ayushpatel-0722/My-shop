@@ -82,10 +82,18 @@ abstract class AppRepository {
   Stream<List<AdBanner>> adBanners();
   Stream<List<OfferBanner>> offerBanners(String companyId);
   Stream<List<Voucher>> vouchers(String companyId);
+  /// Case-insensitive lookup of a live voucher code inside [companyId].
   Future<Voucher?> voucherByCode(String companyId, String code);
   Future<DeliveryCharge?> deliveryCharge(String pincode, String companyId);
   Stream<List<DeliveryCharge>> deliveryCharges({String companyId = ''});
   Stream<List<Order>> orders({String userId = '', String companyId = ''});
+
+  /// A single order, or null when it does not exist.
+  Future<Order?> order(String orderId);
+
+  /// Live view of one order (used by tracking / packing screens) so they never
+  /// subscribe to every order of every company.
+  Stream<Order?> watchOrder(String orderId);
   Stream<List<Review>> reviews(String companyId);
   Stream<List<AppNotification>> notifications(String recipientId);
   Stream<List<Employee>> employees(String companyId);
@@ -100,18 +108,40 @@ abstract class AppRepository {
   Stream<List<Recommendation>> recommendationRecords({String companyId = ''});
 
   // ---------------------------------------------------------------- Writes --
+  /// Persists an order and performs the bookkeeping that belongs to it:
+  /// stock decrement and voucher redemption counters.
+  ///
+  /// Throws [ArgumentError] when the order has no company or no items.
   Future<Order> placeOrder(Order order);
+
+  /// Moves an order to [status]. Throws [ArgumentError] on an illegal
+  /// transition (see `OrderStatusRules`).
   Future<void> updateOrderStatus(String orderId, String status);
+
+  /// Cancels an order when its current status still allows it.
+  Future<void> cancelOrder(String orderId);
+
   Future<void> togglePaymentStatus(String orderId);
   Future<void> setEmployeePackingDone(String orderId, bool done);
   Future<void> assignEmployee(String orderId, String employeeId);
   Future<void> submitReview(Review review);
   Future<void> markNotificationRead(String id);
-  Future<void> saveVoucher(Company company, Voucher voucher);
-  Future<void> deleteVoucher(String voucherId);
+
+  /// Creates **or** updates a voucher (matched by id, then by code).
+  Future<void> saveVoucher(Voucher voucher);
+
+  Future<void> deleteVoucher(String voucherId, {String companyId = ''});
+
+  /// Creates or updates a product and keeps its category assignment in sync.
   Future<void> saveProduct(Product product);
-  Future<void> deleteProduct(String productId);
+
+  /// Deletes a product and removes it from every category that listed it.
+  Future<void> deleteProduct(String productId, {String companyId = ''});
+
+  /// Creates or updates a category, refusing to build a hierarchy cycle.
   Future<void> saveCategory(Category category);
+
+  /// Deletes a category, re-parenting its children and its products.
   Future<void> deleteCategory(String categoryId, {String companyId = ''});
   Future<void> saveEmployee(Employee employee);
   Future<void> deleteEmployee(String companyId, String employeeId);

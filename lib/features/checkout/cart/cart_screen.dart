@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
+import '../../../core/models/cart_item.dart';
 import '../../../core/models/company.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
@@ -86,15 +87,34 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _cartTile(BuildContext context, dynamic item, String companyId) {
+  Widget _cartTile(BuildContext context, CartItem item, String companyId) {
     final cubit = context.read<CartCubit>();
+    // Do not let a shopper increase a line past the available stock.
+    final maxQty = item.product.isUnlimitedStock ? 99 : item.product.stockQty;
+    final canAdd = item.qty < (maxQty < 1 ? 1 : maxQty);
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: const CircleAvatar(child: Icon(Icons.image)),
         title: Text(item.product.name),
-        subtitle: Text(
-          formatCurrency(item.product.price * item.qty, symbol: '₹'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              formatCurrency(item.lineTotal, symbol: '₹'),
+            ),
+            if (!item.product.isInStock)
+              const Text(
+                'Out of stock',
+                style: TextStyle(fontSize: 11, color: Colors.redAccent),
+              )
+            else if (item.product.isLowStock())
+              Text(
+                'Only ${item.product.stockQty} left',
+                style: const TextStyle(fontSize: 11, color: Colors.orange),
+              ),
+          ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -109,7 +129,10 @@ class CartScreen extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.add_circle_outline),
-              onPressed: () => cubit.increment(companyId, item.product.id),
+              tooltip: canAdd ? 'Add one' : 'No more stock',
+              onPressed: canAdd
+                  ? () => cubit.increment(companyId, item.product.id)
+                  : null,
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline),

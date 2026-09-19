@@ -1,20 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/domain/order_status.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/order_status_badge.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../marketplace/widgets/marketplace_bottom_nav.dart';
 
-/// The shopper's order history screen with AppBar and MarketplaceBottomNav.
-class OrdersScreen extends StatelessWidget {
+/// The shopper's order history.
+///
+/// Improvements over the previous version: status filters with live counts,
+/// the real payable amount (including discount and delivery), item previews
+/// and a cancel action for orders that have not been dispatched yet.
+class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
+
+  @override
+  State<OrdersScreen> createState() => _OrdersScreenState();
+}
+
+class _OrdersScreenState extends State<OrdersScreen> {
+  String _statusFilter = 'all';
 
   @override
   Widget build(BuildContext context) {
@@ -37,26 +51,51 @@ class OrdersScreen extends StatelessWidget {
       ),
       body: !isLoggedIn
           ? _buildGuestView(context)
-          : StreamBuilder<List<Order>>(
-              stream: repo.orders(userId: user.id),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  );
-                }
-                final list = snap.data ?? const <Order>[];
-                if (list.isEmpty) {
-                  return _buildEmptyOrdersView(context, l10n);
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: list.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, i) =>
-                      _orderCard(context, list[i], l10n),
-                );
-              },
+          : Column(
+              children: [
+                _StatusChips(
+                  selected: _statusFilter,
+                  onChanged: (value) => setState(() => _statusFilter = value),
+                ),
+                Expanded(
+                  child: StreamBuilder<List<Order>>(
+                    stream: repo.orders(userId: user.id),
+                    builder: (context, snap) {
+                      if (snap.connectionState == ConnectionState.waiting &&
+                          (snap.data?.isEmpty ?? true)) {
+                        return const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        );
+                      }
+                      final all = snap.data ?? const <Order>[];
+                      final list = _statusFilter == 'all'
+                          ? all
+                          : all
+                              .where((o) => o.orderStatus == _statusFilter)
+                              .toList();
+
+                      if (all.isEmpty) {
+                        return _buildEmptyOrdersView(context, l10n);
+                      }
+                      if (list.isEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Text('No orders with this status'),
+                          ),
+                        );
+                      }
+                      return ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                        itemCount: list.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, i) =>
+                            _orderCard(context, list[i], l10n),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
       bottomNavigationBar: const MarketplaceBottomNav(currentIndex: 2),
     );
@@ -184,9 +223,14 @@ class OrdersScreen extends StatelessWidget {
   }
 
   Widget _orderCard(BuildContext context, Order order, AppLocalizations l10n) {
-    final statusColor = _statusColor(order.orderStatus);
+    final preview = order.items
+        .take(2)
+        .map((e) => e.name)
+        .where((e) => e.isNotEmpty)
+        .join(', ');
 
     return Container(
+      key: Key('order-card-${order.id}'),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -207,66 +251,61 @@ class OrdersScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Order ID + Status
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Order #${order.id.length > 8 ? order.id.substring(0, 8).toUpperCase() : order.id.toUpperCase()}',
+                    'Order ${order.reference}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       color: Color(0xFF1E2229),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      _statusLabel(order.orderStatus, l10n),
-                      style: TextStyle(
-                        color: statusColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  OrderStatusBadge(status: order.orderStatus),
                 ],
               ),
               const SizedBox(height: 10),
               const Divider(height: 1, color: Color(0xFFF3F4F6)),
               const SizedBox(height: 10),
-
-              // Items & Date & Price
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${order.items.length} ${order.items.length == 1 ? 'item' : 'items'}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF4B5563),
-                          fontWeight: FontWeight.w500,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${order.itemCount} '
+                          '${order.itemCount == 1 ? 'item' : 'items'}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF4B5563),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        formatDate(order.createdAt),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9CA3AF),
+                        const SizedBox(height: 2),
+                        Text(
+                          formatDate(order.createdAt),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF9CA3AF),
+                          ),
                         ),
-                      ),
-                    ],
+                        if (preview.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            preview,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                   Row(
                     children: [
@@ -288,6 +327,23 @@ class OrdersScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              if (!order.isOpen) ...[
+                const SizedBox(height: 8),
+                Text(
+                  order.isCancelled
+                      ? 'Cancelled ${_fmtDate(order.cancelledAt)}'
+                      : 'Delivered ${_fmtDate(order.createdAt)}',
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ] else
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.info_outline, size: 16),
+                    label: const Text('Track order'),
+                    onPressed: () => context.go(AppRoutes.orderPath(order.id)),
+                  ),
+                ),
             ],
           ),
         ),
@@ -295,43 +351,72 @@ class OrdersScreen extends StatelessWidget {
     );
   }
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case OrderStatus.confirmed:
-        return const Color(0xFF2563EB);
-      case OrderStatus.packing:
-        return const Color(0xFFD97706);
-      case OrderStatus.ready:
-      case OrderStatus.onTheWay:
-        return const Color(0xFF7C3AED);
-      case OrderStatus.completed:
-        return const Color(0xFF1E8F66);
-      case OrderStatus.cancelled:
-        return const Color(0xFFDC2626);
-      case OrderStatus.pending:
-      default:
-        return const Color(0xFFFF5247);
-    }
+  static String _fmtDate(DateTime? date) =>
+      date == null ? '' : DateFormat('dd MMM').format(date);
+}
+
+/// Status filter chips with live counts for the signed-in shopper.
+class _StatusChips extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  const _StatusChips({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final userId = context.watch<AuthCubit>().currentUser?.id ?? '';
+
+    return StreamBuilder<List<Order>>(
+      stream: userId.isEmpty
+          ? Stream<List<Order>>.empty()
+          : repo.orders(userId: userId),
+      builder: (context, snap) {
+        final orders = snap.data ?? const <Order>[];
+        int countOf(String status) =>
+            orders.where((o) => o.orderStatus == status).length;
+
+        return SizedBox(
+          height: 46,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            children: [
+              _chip(context, 'All', orders.length, 'all'),
+              for (final status in OrderStatusRules.openStatuses)
+                _chip(context, orderStatusLabel(context, status),
+                    countOf(status), status),
+              _chip(
+                context,
+                orderStatusLabel(context, OrderStatus.cancelled),
+                countOf(OrderStatus.cancelled),
+                OrderStatus.cancelled,
+              ),
+              _chip(
+                context,
+                orderStatusLabel(context, OrderStatus.completed),
+                countOf(OrderStatus.completed),
+                OrderStatus.completed,
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
-  String _statusLabel(String status, AppLocalizations l10n) {
-    switch (status) {
-      case OrderStatus.pending:
-        return l10n.pending;
-      case OrderStatus.confirmed:
-        return l10n.confirmed;
-      case OrderStatus.cancelled:
-        return l10n.cancelled;
-      case OrderStatus.packing:
-        return l10n.packing;
-      case OrderStatus.ready:
-        return l10n.ready;
-      case OrderStatus.onTheWay:
-        return l10n.onTheWay;
-      case OrderStatus.completed:
-        return l10n.completed;
-      default:
-        return status;
-    }
+  Widget _chip(
+    BuildContext context,
+    String label,
+    int count,
+    String value,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text('$label ($count)'),
+        selected: selected == value,
+        onSelected: (_) => onChanged(value),
+      ),
+    );
   }
 }

@@ -1,112 +1,578 @@
-import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import '../../../app/l10n/app_localizations.dart';
+import '../../../app/routes/app_router.dart';
+import '../../../core/domain/order_status.dart';
 import '../../../core/models/order.dart';
+import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
 
-/// Master order pipeline — Kanban board (Section 17.1). Only the Admin can
-/// advance an order's status.
-class AdminOrdersScreen extends StatelessWidget {
+/// Master order pipeline for the signed-in store.
+///
+/// Fixes over the previous version:
+///  * **Scoped** to the admin's company instead of reading every order in the
+///    platform (`repo.orders()` with no filters leaked other stores' data).
+///  * **Cancelled orders are visible** — they used to disappear because the
+///    board only rendered `trackerChain` columns.
+///  * **Searchable** by reference, store, pincode or product name.
+///  * **Legal transitions only** — the advance button is driven by
+///    [OrderStatusRules] and cancellation is offered until dispatch.
+///  * **Itemised totals** — subtotal / discount / delivery are shown, so the
+///    admin sees exactly what the customer was charged.
+class AdminOrdersScreen extends StatefulWidget {
   const AdminOrdersScreen({super.key});
 
   @override
+  State<AdminOrdersScreen> createState() => _AdminOrdersScreenState();
+}
+
+class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
+  final _searchCtrl = TextEditingController();
+  String _statusFilter = 'all';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  String get _companyId => AuthSession.currentUser?.companyId ?? '';
+
+  /// Matches the reference, customer id, pincode, address or any item name.
+  bool _matches(Order order, String query) {
+    if (query.isEmpty) return true;
+    final q = query.toLowerCase();
+    if (order.id.toLowerCase().contains(q)) return true;
+    if (order.pincode.toLowerCase().contains(q)) return true;
+    if (order.address.toLowerCase().contains(q)) return true;
+    if (order.userId.toLowerCase().contains(q)) return true;
+    if (order.companyName.toLowerCase().contains(q)) return true;
+    return order.items
+        .any((item) => item.name.toLowerCase().contains(q));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
       title: 'Orders Pipeline',
-      child: StreamBuilder<List<Order>>(
-        stream: repo.orders(),
-        builder: (context, snap) {
-          final orders = snap.data ?? const <Order>[];
-          if (orders.isEmpty) {
-            return const Center(child: Text('No orders yet'));
-          }
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              for (final status in OrderStatus.trackerChain) ...[
-                _columnHeader(context, status, l10n),
-                for (final o in orders.where((e) => e.orderStatus == status))
-                  _orderCard(context, o, l10n),
-                const SizedBox(height: 16),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _columnHeader(BuildContext context, String status, AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(
-        _label(status, l10n),
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium
-            ?.copyWith(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget _orderCard(BuildContext context, Order order, AppLocalizations l10n) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
       child: Column(
         children: [
-          ListTile(
-            title: Text('#${order.id.substring(0, 6).toUpperCase()} · ${order.companyName}'),
-            subtitle: Text('${order.items.length} items · ${formatCurrency(order.totalAmount)}'),
-            trailing: _advanceButton(context, order, l10n),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: TextField(
+              key: const Key('order-search-field'),
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                labelText: 'Search orders',
+                hintText: 'Reference, pincode, product…',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchCtrl.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() {});
+                        },
+                      ),
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
           ),
-          SwitchListTile(
-            title: Text(l10n.paymentStatus),
-            subtitle: Text(order.paymentStatus == 'done'
-                ? l10n.paymentDone
-                : l10n.paymentPending),
-            value: order.paymentStatus == 'done',
-            onChanged: (_) => repo.togglePaymentStatus(order.id),
+          _StatusFilterBar(
+            selected: _statusFilter,
+            onChanged: (value) => setState(() => _statusFilter = value),
+          ),
+          Expanded(
+            child: StreamBuilder<List<Order>>(
+              stream: repo.orders(companyId: _companyId),
+              builder: (context, snap) {
+                final all = snap.data ?? const <Order>[];
+                final query = _searchCtrl.text.trim();
+                final visible = all
+                    .where(
+                      (o) =>
+                          (_statusFilter == 'all' ||
+                              o.orderStatus == _statusFilter) &&
+                          _matches(o, query),
+                    )
+                    .toList();
+
+                if (snap.connectionState == ConnectionState.waiting &&
+                    all.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (all.isEmpty) {
+                  return const _CenteredMessage(
+                    icon: Icons.receipt_long_outlined,
+                    message: 'No orders yet',
+                    detail: 'Orders from your store will appear here instantly.',
+                  );
+                }
+                if (visible.isEmpty) {
+                  return const _CenteredMessage(
+                    icon: Icons.filter_alt_off_outlined,
+                    message: 'No orders match these filters',
+                    detail: 'Clear the search box or pick another status.',
+                  );
+                }
+
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                  children: [
+                    _PipelineSummary(orders: all),
+                    const SizedBox(height: 12),
+                    for (final status in _visibleColumns(visible))
+                      _PipelineColumn(
+                        status: status,
+                        orders: visible
+                            .where((o) => o.orderStatus == status)
+                            .toList(),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _advanceButton(BuildContext context, Order order, AppLocalizations l10n) {
-    final chain = OrderStatus.trackerChain;
-    final idx = chain.indexOf(order.orderStatus);
-    if (idx >= chain.length - 1) return const SizedBox.shrink();
-    final next = chain[idx + 1];
-    return FilledButton.tonal(
-      onPressed: () => repo.updateOrderStatus(order.id, next),
-      child: Text(_label(next, l10n)),
+  /// Only render columns that contain something (plus the filter's own column).
+  List<String> _visibleColumns(List<Order> orders) {
+    final statuses = orders.map((o) => o.orderStatus).toSet();
+    if (_statusFilter != 'all') statuses.add(_statusFilter);
+    return OrderStatusRules.boardColumns
+        .where(statuses.contains)
+        .toList(growable: false);
+  }
+}
+
+/// Chips: All + every pipeline status with a live count.
+class _StatusFilterBar extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onChanged;
+
+  const _StatusFilterBar({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Order>>(
+      stream: repo.orders(companyId: AuthSession.currentUser?.companyId ?? ''),
+      builder: (context, snap) {
+        final orders = snap.data ?? const <Order>[];
+        int countOf(String status) =>
+            orders.where((o) => o.orderStatus == status).length;
+
+        return SizedBox(
+          height: 46,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            children: [
+              _chip('All', orders.length, 'all'),
+              for (final status in OrderStatusRules.boardColumns)
+                _chip(
+                  orderStatusLabel(context, status),
+                  countOf(status),
+                  status,
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  String _label(String status, AppLocalizations l10n) {
-    switch (status) {
-      case OrderStatus.pending:
-        return l10n.pending;
-      case OrderStatus.confirmed:
-        return l10n.confirmed;
-      case OrderStatus.cancelled:
-        return l10n.cancelled;
-      case OrderStatus.packing:
-        return l10n.packing;
-      case OrderStatus.ready:
-        return l10n.ready;
-      case OrderStatus.onTheWay:
-        return l10n.onTheWay;
-      case OrderStatus.completed:
-        return l10n.completed;
-      default:
-        return status;
+  Widget _chip(String label, int count, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text('$label ($count)'),
+        selected: selected == value,
+        onSelected: (_) => onChanged(value),
+      ),
+    );
+  }
+}
+
+/// Headline counters for the pipeline.
+class _PipelineSummary extends StatelessWidget {
+  final List<Order> orders;
+
+  const _PipelineSummary({required this.orders});
+
+  @override
+  Widget build(BuildContext context) {
+    final open = orders.where((o) => o.isOpen).length;
+    final revenue = orders
+        .where((o) => !o.isCancelled)
+        .fold<double>(0, (sum, o) => sum + o.totalAmount);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Expanded(
+              child: _Metric(
+                label: 'Open orders',
+                value: '$open',
+                icon: Icons.timelapse,
+              ),
+            ),
+            Expanded(
+              child: _Metric(
+                label: 'All orders',
+                value: '${orders.length}',
+                icon: Icons.receipt_long,
+              ),
+            ),
+            Expanded(
+              child: _Metric(
+                label: 'Revenue',
+                value: formatCurrency(revenue),
+                icon: Icons.currency_rupee,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Metric extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _Metric({required this.label, required this.value, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+      ],
+    );
+  }
+}
+
+class _PipelineColumn extends StatelessWidget {
+  final String status;
+  final List<Order> orders;
+
+  const _PipelineColumn({required this.status, required this.orders});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(width: 4, height: 18, color: orderStatusColor(status)),
+              const SizedBox(width: 8),
+              Text(
+                orderStatusLabel(context, status),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '(${orders.length})',
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (orders.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'Nothing here',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            )
+          else
+            for (final order in orders) ...[
+              _OrderCard(key: Key('order-card-${order.id}'), order: order),
+              const SizedBox(height: 8),
+            ],
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderCard extends StatelessWidget {
+  final Order order;
+
+  const _OrderCard({super.key, required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final next = OrderStatusRules.nextStage(order.orderStatus);
+    final cancellable = OrderStatusRules.isCancellable(order.orderStatus);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  order.reference,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OrderStatusBadge(status: order.orderStatus),
+                const Spacer(),
+                Text(
+                  formatCurrency(order.totalAmount),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${order.itemCount} item(s) · '
+              '${order.isSelfPickup ? 'Self pickup' : 'Home delivery'}'
+              '${order.pincode.isNotEmpty ? ' · ${order.pincode}' : ''}',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            if (order.createdAt != null)
+              Text(
+                DateFormat('dd MMM, hh:mm a').format(order.createdAt!),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            if (order.address.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                order.address,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+            const SizedBox(height: 8),
+            _BillBreakdown(order: order),
+            const Divider(height: 16),
+            SwitchListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Paid', style: TextStyle(fontSize: 13)),
+              value: order.isPaid,
+              onChanged: (_) => repo.togglePaymentStatus(order.id),
+            ),
+            Row(
+              children: [
+                if (next != null)
+                  Expanded(
+                    child: FilledButton.tonal(
+                      key: Key('order-advance-${order.id}'),
+                      onPressed: () => _advance(context, next),
+                      child: Text('Mark ${orderStatusLabel(context, next)}'),
+                    ),
+                  ),
+                if (next != null && cancellable) const SizedBox(width: 8),
+                if (cancellable)
+                  Expanded(
+                    child: OutlinedButton(
+                      key: Key('order-cancel-${order.id}'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: theme.colorScheme.error,
+                      ),
+                      onPressed: () => _confirmCancel(context),
+                      child: const Text('Cancel order'),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _advance(BuildContext context, String next) async {
+    try {
+      await repo.updateOrderStatus(order.id, next);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Order ${order.reference} → ${orderStatusLabel(context, next)}',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not update order: $e')),
+      );
     }
+  }
+
+  Future<void> _confirmCancel(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel this order?'),
+        content: Text(
+          'Order ${order.reference} will be cancelled and the customer will '
+          'see it under "Cancelled".',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Keep'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await repo.cancelOrder(order.id);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not cancel order: $e')),
+      );
+    }
+  }
+}
+
+/// Itemised money block so the admin sees the same bill as the customer.
+class _BillBreakdown extends StatelessWidget {
+  final Order order;
+
+  const _BillBreakdown({required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          _row('Items', formatCurrency(order.subtotal)),
+          if (order.discountAmount > 0)
+            _row(
+              'Discount${order.voucherCode.isNotEmpty ? ' (${order.voucherCode})' : ''}',
+              '− ${formatCurrency(order.discountAmount)}',
+              color: Colors.green.shade700,
+            ),
+          _row('Delivery', formatCurrency(order.deliveryCharge)),
+          const Divider(height: 12),
+          _row('Payable', formatCurrency(order.totalAmount), bold: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(String label, String value, {bool bold = false, Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CenteredMessage extends StatelessWidget {
+  final IconData icon;
+  final String message;
+  final String detail;
+
+  const _CenteredMessage({
+    required this.icon,
+    required this.message,
+    required this.detail,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 52, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              detail,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -757,39 +757,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return StreamBuilder<List<Voucher>>(
       stream: vouchers,
       builder: (context, snap) {
-        final list = snap.data ?? const <Voucher>[];
-        if (list.isEmpty) {
-          final defaultVouchers = [
-            Voucher(
-              id: 'v1',
-              code: 'WELCOME50',
-              discountValue: 50,
-              discountType: 'percentage',
-              companyId: '',
-              minOrderAmt: 199,
-              expiryDate: DateTime.now().add(const Duration(days: 7)),
-            ),
-            Voucher(
-              id: 'v2',
-              code: 'FLAT100',
-              discountValue: 100,
-              discountType: 'flat',
-              companyId: '',
-              minOrderAmt: 499,
-              expiryDate: DateTime.now().add(const Duration(days: 5)),
-            ),
-            Voucher(
-              id: 'v3',
-              code: 'FREESHIP',
-              discountValue: 40,
-              discountType: 'flat',
-              companyId: '',
-              minOrderAmt: 299,
-              expiryDate: DateTime.now().add(const Duration(days: 10)),
-            ),
-          ];
-          return _buildVoucherList(defaultVouchers);
+        // Never advertise a code the shopper cannot redeem: expired, paused
+        // and exhausted vouchers are filtered out (previously the rail fell
+        // back to three invented "WELCOME50 / FLAT100 / FREESHIP" coupons
+        // that did not exist in any store).
+        final now = DateTime.now();
+        final list = (snap.data ?? const <Voucher>[])
+            .where((v) => v.isLiveAt(now) && !v.isExhausted)
+            .toList();
+
+        if (snap.connectionState == ConnectionState.waiting && list.isEmpty) {
+          return const SizedBox(
+            height: 72,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
         }
+        if (list.isEmpty) return const SizedBox.shrink();
         return _buildVoucherList(list);
       },
     );
@@ -810,10 +793,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _voucherCard(BuildContext context, Voucher v) {
     final isClaimed = _claimedVouchers.contains(v.id);
-    final isPercent = v.discountType == 'percentage';
-    final discountStr = isPercent
-        ? '${v.discountValue}% OFF'
-        : '₹${v.discountValue} OFF';
+    final discountStr = v.discountLabel;
 
     return Container(
       width: 210,
@@ -873,6 +853,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (v.minOrderAmt > 0)
+                  Text(
+                    'Min ₹${v.minOrderAmt.toStringAsFixed(0)}',
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
               ],
             ),
           ),

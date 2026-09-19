@@ -1,3 +1,19 @@
+import '../utils/type_utils.dart';
+
+/// How a product is measured and sold.
+class ProductType {
+  /// Sold by weight (kg / g / l ...).
+  static const weightBased = 'weight_based';
+
+  /// Sold by count (pieces / packs ...).
+  static const quantityBased = 'quantity_based';
+
+  static const values = <String>[weightBased, quantityBased];
+
+  static String label(String type) =>
+      type == weightBased ? 'Weight based' : 'Quantity based';
+}
+
 /// Product option definition (e.g. Option name: "Weight", values: ["250g", "500g", "1kg"]).
 class ProductOption {
   final String name;
@@ -77,9 +93,9 @@ class ProductVariant {
               if (rawSize.isNotEmpty) 'Size': rawSize,
               if (rawColor.isNotEmpty) 'Color': rawColor,
             },
-      stockQty: (map['stockQty'] as num?)?.toInt() ?? 0,
-      isUnlimitedStock: map['isUnlimitedStock'] as bool? ?? false,
-      priceOverride: (map['priceOverride'] as num?)?.toDouble() ?? 0.0,
+      stockQty: asInt(map['stockQty']),
+      isUnlimitedStock: asBool(map['isUnlimitedStock']),
+      priceOverride: asDouble(map['priceOverride']),
       size: rawSize,
       color: rawColor,
     );
@@ -154,35 +170,70 @@ class Product {
 
   bool get isInStock => isUnlimitedStock || stockQty > 0;
 
+  /// True when stock tracking is on and the quantity is at or below [threshold].
+  bool isLowStock({int threshold = 20}) =>
+      !isUnlimitedStock && stockQty > 0 && stockQty <= threshold;
+
+  /// Lower-cased haystack used by catalogue search.
+  String get searchIndex => <String>[
+    name,
+    sku,
+    details,
+    subDetails,
+    unitType,
+    policy,
+  ].join(' ').toLowerCase();
+
+  /// Case-insensitive, multi-term search over [searchIndex].
+  bool matches(String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    for (final term in q.split(RegExp(r'\s+'))) {
+      if (term.isEmpty) continue;
+      if (!searchIndex.contains(term)) return false;
+    }
+    return true;
+  }
+
+  /// Primary image (empty string when the product has none).
+  String get imageUrl => images.isNotEmpty ? images.first : '';
+
+  /// Blank product pre-filled with the tenant/company it belongs to.
+  factory Product.empty({String companyId = '', String categoryId = ''}) =>
+      Product(
+        id: '',
+        companyId: companyId,
+        categoryId: categoryId,
+        name: '',
+        unit: 1,
+        unitType: 'pieces',
+      );
+
   factory Product.fromMap(String id, Map<String, dynamic> map) => Product(
     id: id,
-    companyId: map['companyId']?.toString() ?? '',
-    categoryId: map['categoryId']?.toString() ?? '',
-    name: map['name']?.toString() ?? '',
-    details: map['details']?.toString() ?? '',
-    type: map['type']?.toString() ?? 'quantity_based',
-    unit: (map['unit'] as num?)?.toDouble() ?? 1.0,
-    unitType: map['unitType']?.toString() ?? 'pieces',
-    amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
-    discountAmt: (map['discountAmt'] as num?)?.toDouble() ?? 0.0,
-    subDetails: map['subDetails']?.toString() ?? '',
-    images: (map['images'] as List? ?? const [])
-        .map((e) => e.toString())
-        .toList(),
-    variants: (map['variants'] as List? ?? const [])
-        .map((e) => ProductVariant.fromMap(e as Map<String, dynamic>))
-        .toList(),
-    options: (map['options'] as List? ?? const [])
-        .map((e) => ProductOption.fromMap(e as Map<String, dynamic>))
-        .toList(),
-    specifications: (map['specifications'] as List? ?? const [])
-        .map((e) => ProductSpec.fromMap(e as Map<String, dynamic>))
-        .toList(),
-    policy: map['policy']?.toString() ?? '',
-    sku: map['sku']?.toString() ?? '',
-    stockQty: (map['stockQty'] as num?)?.toInt() ?? 0,
-    isUnlimitedStock: map['isUnlimitedStock'] as bool? ?? false,
-    isRecommended: map['isRecommended'] ?? false,
+    companyId: asString(map['companyId']),
+    categoryId: asString(map['categoryId']),
+    name: asString(map['name']),
+    details: asString(map['details']),
+    type: ProductType.values.contains(map['type'])
+        ? asString(map['type'])
+        : ProductType.quantityBased,
+    unit: asDouble(map['unit'], 1),
+    unitType: asString(map['unitType'], 'pieces'),
+    amount: asDouble(map['amount']),
+    discountAmt: asDouble(map['discountAmt']),
+    subDetails: asString(map['subDetails']),
+    images: asStringList(map['images']),
+    variants: asMapList(map['variants']).map(ProductVariant.fromMap).toList(),
+    options: asMapList(map['options']).map(ProductOption.fromMap).toList(),
+    specifications: asMapList(
+      map['specifications'],
+    ).map(ProductSpec.fromMap).toList(),
+    policy: asString(map['policy']),
+    sku: asString(map['sku']),
+    stockQty: asInt(map['stockQty']),
+    isUnlimitedStock: asBool(map['isUnlimitedStock']),
+    isRecommended: asBool(map['isRecommended']),
   );
 
   Map<String, dynamic> toMap() => {

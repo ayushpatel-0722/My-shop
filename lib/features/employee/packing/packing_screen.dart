@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n/app_localizations.dart';
@@ -18,33 +17,32 @@ class PackingScreen extends StatefulWidget {
 }
 
 class _PackingScreenState extends State<PackingScreen> {
-  Order? _order;
   final Set<String> _scanned = {};
-
-  @override
-  void initState() {
-    super.initState();
-    repo.orders().listen((list) {
-      final o = list.where((e) => e.id == widget.orderId).firstOrNull;
-      if (mounted) setState(() => _order = o);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final order = _order;
     return Scaffold(
       appBar: AppBar(title: Text('${l10n.packing} Manifest')),
-      body: order == null
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
+      body: StreamBuilder<Order?>(
+        // Single-order stream: no need to pull the whole company (or the
+        // whole platform) just to render one manifest.
+        stream: repo.watchOrder(widget.orderId),
+        builder: (context, snap) {
+          final order = snap.data;
+          if (order == null) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return const Center(child: Text('Order not found'));
+          }
+          return Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    '#${order.id.substring(0, 6).toUpperCase()}',
+                    order.reference,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -64,7 +62,9 @@ class _PackingScreenState extends State<PackingScreen> {
                                     ? Colors.green
                                     : Colors.grey,
                               ),
-                              title: Text(item.name),
+                              title: Text(
+                                item.name.isNotEmpty ? item.name : item.productId,
+                              ),
                               subtitle: Text('Qty: ${item.qty} · SKU scan'),
                               trailing: TextButton(
                                 onPressed: () async {
@@ -110,7 +110,9 @@ class _PackingScreenState extends State<PackingScreen> {
                   ),
                 ],
               ),
-            ),
+          );
+        },
+      ),
     );
   }
 }

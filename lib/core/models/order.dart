@@ -1,4 +1,6 @@
-/// Order + order-item models (Firestore: /orders + /orders/{id}/items).
+import '../utils/type_utils.dart';
+
+/// Order lifecycle statuses.
 class OrderStatus {
   static const pending = 'pending';
   static const confirmed = 'confirmed';
@@ -8,7 +10,7 @@ class OrderStatus {
   static const onTheWay = 'on_the_way';
   static const completed = 'completed';
 
-  static const all = [
+  static const all = <String>[
     pending,
     confirmed,
     cancelled,
@@ -19,7 +21,7 @@ class OrderStatus {
   ];
 
   /// Order of stages for the pizza-tracker timeline.
-  static const trackerChain = [
+  static const trackerChain = <String>[
     pending,
     confirmed,
     packing,
@@ -27,8 +29,31 @@ class OrderStatus {
     onTheWay,
     completed,
   ];
+
+  /// True when [status] is a value the pipeline understands.
+  static bool isValid(String status) => all.contains(status);
 }
 
+/// Payment statuses.
+class PaymentStatus {
+  static const pending = 'pending';
+  static const done = 'done';
+
+  static const all = <String>[pending, done];
+}
+
+/// Delivery modes.
+class DeliveryType {
+  static const homeDelivery = 'home_delivery';
+  static const selfPickup = 'self_pickup';
+
+  static const all = <String>[homeDelivery, selfPickup];
+}
+
+/// One line of an order.
+///
+/// `name`, `image` and `unitPrice` are snapshots taken at checkout: editing or
+/// deleting the product later must not rewrite a customer's past orders.
 class OrderItem {
   final String productId;
   final int qty;
@@ -44,94 +69,204 @@ class OrderItem {
     this.image = '',
   });
 
-  double get itemTotal => qty * unitPrice;
+  double get itemTotal => unitPrice * (qty < 0 ? 0 : qty);
 
   factory OrderItem.fromMap(Map<String, dynamic> map) => OrderItem(
-        productId: map['productId'] ?? '',
-        qty: map['qty'] ?? 1,
-        unitPrice: (map['unitPrice'] ?? 0).toDouble(),
-        name: map['name'] ?? '',
-        image: map['image'] ?? '',
+        productId: asString(map['productId']),
+        qty: asInt(map['qty'], 1),
+        unitPrice: asDouble(map['unitPrice']),
+        name: asString(map['name']),
+        image: asString(map['image']),
       );
 
-  Map<String, dynamic> toMap() => {
+  Map<String, dynamic> toMap() => <String, dynamic>{
         'productId': productId,
         'qty': qty,
         'unitPrice': unitPrice,
         'name': name,
         'image': image,
+        'itemTotal': itemTotal,
       };
+
+  OrderItem copyWith({int? qty}) => OrderItem(
+        productId: productId,
+        qty: qty ?? this.qty,
+        unitPrice: unitPrice,
+        name: name,
+        image: image,
+      );
+
+  @override
+  String toString() => 'OrderItem($productId x$qty @ $unitPrice)';
 }
 
+/// Order model (Firestore: `/companies/{companyId}/orders/{orderId}` plus
+/// an `items` sub-collection).
+///
+/// The money fields are stored explicitly so the receipt, the admin pipeline
+/// and the reports all agree:
+///
+///   `subtotal` - `discountAmount` + `deliveryCharge` = `totalAmount`
 class Order {
   final String id;
   final String userId;
   final String companyId;
   final String companyName;
   final List<OrderItem> items;
+
+  /// Sum of `itemTotal` over [items] before any discount.
+  final double subtotal;
+
+  /// Voucher discount applied to the items.
+  final double discountAmount;
+
+  /// Delivery fee actually charged (0 after a free-shipping voucher).
+  final double deliveryCharge;
+
+  /// Amount the customer pays.
   final double totalAmount;
+
   final String address;
   final String pincode;
   final String? voucherId;
-  final String paymentStatus; // pending | done
+
+  /// Denormalised so the receipt still shows the code if the voucher is deleted.
+  final String voucherCode;
+
+  final String paymentStatus;
   final String orderStatus;
-  final String deliveryType; // self_pickup | home_delivery
+  final String deliveryType;
   final String? assignedEmployeeId;
   final bool employeePackingDone;
   final String? reviewId;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? cancelledAt;
 
   const Order({
     required this.id,
     required this.userId,
     required this.companyId,
     this.companyName = '',
-    this.items = const [],
-    this.totalAmount = 0,
+    this.items = const <OrderItem>[],
+    double? subtotal,
+    this.discountAmount = 0,
+    this.deliveryCharge = 0,
+    double? totalAmount,
     this.address = '',
     this.pincode = '',
     this.voucherId,
-    this.paymentStatus = 'pending',
+    this.voucherCode = '',
+    this.paymentStatus = PaymentStatus.pending,
     this.orderStatus = OrderStatus.pending,
-    this.deliveryType = 'home_delivery',
+    this.deliveryType = DeliveryType.homeDelivery,
     this.assignedEmployeeId,
     this.employeePackingDone = false,
     this.reviewId,
     this.createdAt,
-  });
+    this.updatedAt,
+    this.cancelledAt,
+  })  : subtotal = subtotal ?? itemsTotalOf(items),
+        totalAmount = totalAmount ?? itemsTotalOf(items);
 
-  factory Order.fromMap(String id, Map<String, dynamic> map) => Order(
-        id: id,
-        userId: map['userId'] ?? '',
-        companyId: map['companyId'] ?? '',
-        companyName: map['companyName'] ?? '',
-        items: (map['items'] as List? ?? const [])
-            .map((e) => OrderItem.fromMap(e))
-            .toList(),
-        totalAmount: (map['totalAmount'] ?? 0).toDouble(),
-        address: map['address'] ?? '',
-        pincode: map['pincode'] ?? '',
-        voucherId: map['voucherId'],
-        paymentStatus: map['paymentStatus'] ?? 'pending',
-        orderStatus: map['orderStatus'] ?? OrderStatus.pending,
-        deliveryType: map['deliveryType'] ?? 'home_delivery',
-        assignedEmployeeId: map['assignedEmployeeId'],
-        employeePackingDone: map['employeePackingDone'] ?? false,
-        reviewId: map['reviewId'],
-        createdAt: map['createdAt'] != null
-            ? DateTime.tryParse(map['createdAt'].toString())
-            : null,
-      );
+  /// Sum of the line totals, used as the default for [subtotal].
+  static double itemsTotalOf(List<OrderItem> items) =>
+      items.fold<double>(0, (sum, e) => sum + e.itemTotal);
 
-  Map<String, dynamic> toMap() => {
+  // -------------------------------------------------------------- Derived --
+
+  double get itemsTotal => itemsTotalOf(items);
+
+  int get itemCount => items.fold<int>(0, (sum, e) => sum + (e.qty < 0 ? 0 : e.qty));
+
+  /// Sum of item discount + shipping saved, for the receipt.
+  double get totalSavings => discountAmount;
+
+  bool get isCancelled => orderStatus == OrderStatus.cancelled;
+  bool get isCompleted => orderStatus == OrderStatus.completed;
+  bool get isPending => orderStatus == OrderStatus.pending;
+
+  /// Still flowing through the pipeline (neither delivered nor cancelled).
+  bool get isOpen => !isCancelled && !isCompleted;
+
+  bool get isPaid => paymentStatus == PaymentStatus.done;
+  bool get isSelfPickup => deliveryType == DeliveryType.selfPickup;
+
+  /// Compact, always-safe label for chips and titles (`#A1B2C3`).
+  String get reference => '#${shortId(id, 6)}';
+
+  /// True when the stored money fields add up (guards against bad writes).
+  bool get isBalanced {
+    final expected = subtotal - discountAmount + deliveryCharge;
+    return (expected - totalAmount).abs() < 0.01;
+  }
+
+  // -------------------------------------------------------------- Parsing --
+
+  factory Order.fromMap(String id, Map<String, dynamic> map) {
+    final items = asMapList(map['items']).map(OrderItem.fromMap).toList();
+    final subtotal = asDouble(map['subtotal'], itemsTotalOf(items));
+    return Order(
+      id: id,
+      userId: asString(map['userId']),
+      companyId: asString(map['companyId']),
+      companyName: asString(map['companyName']),
+      items: items,
+      subtotal: subtotal,
+      discountAmount: asDouble(map['discountAmount'], asDouble(map['discount'])),
+      deliveryCharge: asDouble(map['deliveryCharge']),
+      // Legacy orders only stored `totalAmount`; keep it when the new fields
+      // are missing instead of silently zeroing the receipt.
+      totalAmount:
+          asDouble(map['totalAmount'], subtotal),
+      address: asString(map['address']),
+      pincode: asString(map['pincode']),
+      voucherId: map['voucherId'] == null
+          ? null
+          : asString(map['voucherId']).isNotEmpty
+              ? asString(map['voucherId'])
+              : null,
+      voucherCode: asString(map['voucherCode']),
+      paymentStatus: PaymentStatus.all.contains(map['paymentStatus'])
+          ? asString(map['paymentStatus'])
+          : PaymentStatus.pending,
+      orderStatus: OrderStatus.isValid(asString(map['orderStatus']))
+          ? asString(map['orderStatus'])
+          : OrderStatus.pending,
+      deliveryType: DeliveryType.all.contains(map['deliveryType'])
+          ? asString(map['deliveryType'])
+          : DeliveryType.homeDelivery,
+      assignedEmployeeId: map['assignedEmployeeId'] == null
+          ? null
+          : asString(map['assignedEmployeeId']).isNotEmpty
+              ? asString(map['assignedEmployeeId'])
+              : null,
+      employeePackingDone: asBool(map['employeePackingDone']),
+      reviewId: map['reviewId'] == null
+          ? null
+          : asString(map['reviewId']).isNotEmpty
+              ? asString(map['reviewId'])
+              : null,
+      createdAt: asDateTime(map['createdAt']),
+      updatedAt: asDateTime(map['updatedAt']),
+      cancelledAt: asDateTime(map['cancelledAt']),
+    );
+  }
+
+  Map<String, dynamic> toMap() => <String, dynamic>{
+        'id': id,
         'userId': userId,
         'companyId': companyId,
         'companyName': companyName,
         'items': items.map((e) => e.toMap()).toList(),
+        'subtotal': subtotal,
+        'discountAmount': discountAmount,
+        'deliveryCharge': deliveryCharge,
         'totalAmount': totalAmount,
         'address': address,
         'pincode': pincode,
         'voucherId': voucherId,
+        'voucherCode': voucherCode,
         'paymentStatus': paymentStatus,
         'orderStatus': orderStatus,
         'deliveryType': deliveryType,
@@ -139,44 +274,74 @@ class Order {
         'employeePackingDone': employeePackingDone,
         'reviewId': reviewId,
         'createdAt': createdAt?.toIso8601String(),
+        'updatedAt': updatedAt?.toIso8601String(),
+        'cancelledAt': cancelledAt?.toIso8601String(),
       };
+
+  // ------------------------------------------------------------- Mutation --
 
   Order copyWith({
     String? orderStatus,
     String? paymentStatus,
     String? assignedEmployeeId,
+    bool clearAssignedEmployee = false,
     bool? employeePackingDone,
     String? reviewId,
+    String? address,
+    String? pincode,
+    String? companyName,
+    String? voucherId,
+    String? voucherCode,
+    double? subtotal,
+    double? discountAmount,
+    double? deliveryCharge,
+    double? totalAmount,
+    DateTime? updatedAt,
+    DateTime? cancelledAt,
+    bool clearCancelledAt = false,
   }) =>
       Order(
         id: id,
         userId: userId,
         companyId: companyId,
-        companyName: companyName,
+        companyName: companyName ?? this.companyName,
         items: items,
-        totalAmount: totalAmount,
-        address: address,
-        pincode: pincode,
-        voucherId: voucherId,
+        subtotal: subtotal ?? this.subtotal,
+        discountAmount: discountAmount ?? this.discountAmount,
+        deliveryCharge: deliveryCharge ?? this.deliveryCharge,
+        totalAmount: totalAmount ?? this.totalAmount,
+        address: address ?? this.address,
+        pincode: pincode ?? this.pincode,
+        voucherId: voucherId ?? this.voucherId,
+        voucherCode: voucherCode ?? this.voucherCode,
         paymentStatus: paymentStatus ?? this.paymentStatus,
         orderStatus: orderStatus ?? this.orderStatus,
         deliveryType: deliveryType,
-        assignedEmployeeId: assignedEmployeeId ?? this.assignedEmployeeId,
+        assignedEmployeeId: clearAssignedEmployee
+            ? null
+            : (assignedEmployeeId ?? this.assignedEmployeeId),
         employeePackingDone: employeePackingDone ?? this.employeePackingDone,
         reviewId: reviewId ?? this.reviewId,
         createdAt: createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        cancelledAt:
+            clearCancelledAt ? null : (cancelledAt ?? this.cancelledAt),
       );
 
-  Order copyWithItems(List<OrderItem> newItems) => Order(
+  Order copyWithItems(List<OrderItem> newItems, {double? subtotal}) => Order(
         id: id,
         userId: userId,
         companyId: companyId,
         companyName: companyName,
         items: newItems,
+        subtotal: subtotal ?? this.subtotal,
+        discountAmount: discountAmount,
+        deliveryCharge: deliveryCharge,
         totalAmount: totalAmount,
         address: address,
         pincode: pincode,
         voucherId: voucherId,
+        voucherCode: voucherCode,
         paymentStatus: paymentStatus,
         orderStatus: orderStatus,
         deliveryType: deliveryType,
@@ -184,5 +349,24 @@ class Order {
         employeePackingDone: employeePackingDone,
         reviewId: reviewId,
         createdAt: createdAt,
+        updatedAt: updatedAt,
+        cancelledAt: cancelledAt,
       );
+
+  /// Applies a status change and stamps the audit timestamps.
+  Order withStatus(String status, {DateTime? now, bool? paid}) {
+    final timestamp = now ?? DateTime.now();
+    return copyWith(
+      orderStatus: status,
+      updatedAt: timestamp,
+      cancelledAt: status == OrderStatus.cancelled ? timestamp : null,
+      clearCancelledAt: status != OrderStatus.cancelled,
+      paymentStatus:
+          status == OrderStatus.cancelled ? PaymentStatus.pending : paid,
+    );
+  }
+
+  @override
+  String toString() =>
+      'Order($reference, ${orderStatus.toUpperCase()}, total: $totalAmount)';
 }

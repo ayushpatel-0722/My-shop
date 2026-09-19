@@ -6,6 +6,8 @@ import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/company.dart';
+import '../../../core/models/order.dart' show DeliveryType;
+import '../../../core/domain/category_tree.dart';
 import '../../../core/services/service_locator.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
@@ -164,12 +166,22 @@ class CategoriesScreen extends StatelessWidget {
           );
         }
 
+        // Only top level categories belong in the grid: sub-categories are
+        // reachable from their parent, so mixing them in duplicated entries.
+        final roots = CategoryTree.build(list).roots;
+        if (roots.isEmpty) {
+          return const SizedBox(
+            height: 120,
+            child: Center(child: Text('No categories yet')),
+          );
+        }
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: list.length,
+            itemCount: roots.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
               mainAxisSpacing: 14,
@@ -177,7 +189,7 @@ class CategoriesScreen extends StatelessWidget {
               childAspectRatio: 0.76,
             ),
             itemBuilder: (context, i) {
-              final cat = list[i];
+              final cat = roots[i].category;
               final bgColor = _pastelColors[i % _pastelColors.length];
 
               return InkWell(
@@ -300,18 +312,13 @@ class CategoriesScreen extends StatelessWidget {
   }
 
   Widget _buildShopCard(BuildContext context, Company company, int index) {
-    final ratings = [4.8, 4.9, 4.7, 4.6];
-    final times = ['15-25 min', '20-30 min', '25-35 min', '10-20 min'];
-    final discounts = [
-      'Up to 40% OFF',
-      'Flat ₹100 OFF',
-      'Free Delivery',
-      'Buy 1 Get 1',
-    ];
-
-    final rating = ratings[index % ratings.length];
-    final deliveryTime = times[index % times.length];
-    final discount = discounts[index % discounts.length];
+    // NOTE: no invented ratings / delivery times / offers any more — every
+    // badge below is derived from real company data.
+    final isOpen = company.isOpenNow();
+    final offersHomeDelivery =
+        company.deliveryTypes.contains(DeliveryType.homeDelivery);
+    final offersPickup =
+        company.deliveryTypes.contains(DeliveryType.selfPickup);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -404,7 +411,7 @@ class CategoriesScreen extends StatelessWidget {
                       ),
                     const SizedBox(height: 8),
 
-                    // Badges row: Rating, Delivery time, Offer
+                    // Badges row: open state + real fulfilment options
                     Row(
                       children: [
                         Container(
@@ -413,78 +420,90 @@ class CategoriesScreen extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEF3C7),
+                            color: isOpen
+                                ? const Color(0xFFE8F5E9)
+                                : const Color(0xFFF3F4F6),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
-                                Icons.star_rounded,
+                              Icon(
+                                isOpen ? Icons.schedule : Icons.event_busy,
                                 size: 14,
-                                color: Color(0xFFD97706),
+                                color: isOpen
+                                    ? const Color(0xFF1E8F66)
+                                    : const Color(0xFF6B7280),
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                '$rating',
-                                style: const TextStyle(
+                                isOpen ? 'Open now' : 'Closed',
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF92400E),
+                                  color: isOpen
+                                      ? const Color(0xFF1E8F66)
+                                      : const Color(0xFF6B7280),
                                 ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.bolt_rounded,
-                                size: 14,
-                                color: Color(0xFFFF5247),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                deliveryTime,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF4B5563),
+                        if (offersHomeDelivery || offersPickup)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F4F6),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.bolt_rounded,
+                                  size: 14,
+                                  color: Color(0xFFFF5247),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFEBEA),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            discount,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFF5247),
+                                const SizedBox(width: 2),
+                                Text(
+                                  offersHomeDelivery && offersPickup
+                                      ? 'Delivery & pickup'
+                                      : offersHomeDelivery
+                                          ? 'Home delivery'
+                                          : 'Self pickup',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF4B5563),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
+                        const Spacer(),
+                        if (!company.isActive)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFEBEA),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              company.status.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFFF5247),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],

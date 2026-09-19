@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
+import '../domain/category_tree.dart';
+import '../domain/order_status.dart';
 import '../models/admin.dart';
 import '../models/app_user.dart';
 import '../models/banner.dart';
@@ -21,8 +23,18 @@ import 'mock_data.dart';
 
 /// In-memory implementation of [AppRepository].
 ///
-/// Kept for UI-only demos and widget tests. The production backend is
-/// [FirebaseAppRepository].
+/// Used for UI demos and for the widget/unit test suite. It mirrors the
+/// guarantees the Firestore implementation provides, so a behaviour verified
+/// here holds in production:
+///
+/// * **Tenancy** — every read is filtered by `companyId` when one is supplied.
+/// * **Referential integrity** — deleting a product removes it from every
+///   category; deleting a category re-parents its children (and its products)
+///   instead of leaving orphans behind.
+/// * **Voucher bookkeeping** — placing an order records the redemption so
+///   per-user and global caps are enforced.
+/// * **Order lifecycle** — status changes are validated by
+///   [OrderStatusRules]; illegal transitions throw instead of corrupting data.
 class MockAppRepository implements AppRepository {
   final _uuid = const Uuid();
 
@@ -34,12 +46,12 @@ class MockAppRepository implements AppRepository {
   final List<Voucher> _vouchers = [...MockData.vouchers];
   final List<DeliveryCharge> _deliveryCharges = [...MockData.deliveryCharges];
   final List<Review> _reviews = [...MockData.reviews];
-  final List<Order> _orders = [];
-  final List<AppNotification> _notifications = [];
-  final List<Recommendation> _recommendations = [];
-  final Map<String, AppUser> _usersByMobile = {};
-  final Map<String, AppUser> _admins = {};
-  final Map<String, AppUser> _employees = {};
+  final List<Order> _orders = <Order>[];
+  final List<AppNotification> _notifications = <AppNotification>[];
+  final List<Recommendation> _recommendations = <Recommendation>[];
+  final Map<String, AppUser> _usersByMobile = <String, AppUser>{};
+  final Map<String, AppUser> _admins = <String, AppUser>{};
+  final Map<String, AppUser> _employees = <String, AppUser>{};
 
   final _companiesCtrl = StreamController<List<Company>>.broadcast();
   final _categoriesCtrl = StreamController<List<Category>>.broadcast();
@@ -56,31 +68,31 @@ class MockAppRepository implements AppRepository {
       StreamController<List<Recommendation>>.broadcast();
   final _employeesCtrl = StreamController<List<Employee>>.broadcast();
 
-  final List<Employee> _mockEmployees = [];
+  final List<Employee> _mockEmployees = <Employee>[];
   AppUser? _currentUser;
 
   MockAppRepository() {
-    _usersByMobile['9876543210'] = AppUser(
+    _usersByMobile['9876543210'] = const AppUser(
       id: 'u_seed',
       name: 'Demo User',
       mobileNumber: '9876543210',
       role: 'user',
     );
-    _admins['admin@greenleaf.in'] = AppUser(
+    _admins['admin@greenleaf.in'] = const AppUser(
       id: 'a_1',
       companyId: 'c_organic',
       name: 'Admin GreenLeaf',
       email: 'admin@greenleaf.in',
       role: 'admin',
     );
-    _admins['admin@techtronics.in'] = AppUser(
+    _admins['admin@techtronics.in'] = const AppUser(
       id: 'a_2',
       companyId: 'c_techtronics',
       name: 'Admin TechTronics',
       email: 'admin@techtronics.in',
       role: 'admin',
     );
-    _employees['packer@greenleaf.in'] = AppUser(
+    _employees['packer@greenleaf.in'] = const AppUser(
       id: 'e_1',
       companyId: 'c_organic',
       name: 'Ramesh Packer',
@@ -112,6 +124,8 @@ class MockAppRepository implements AppRepository {
     );
   }
 
+  // -------------------------------------------------------------- Push ----
+
   void _pushCompanies() => _companiesCtrl.add(List.unmodifiable(_companies));
   void _pushCategories() => _categoriesCtrl.add(List.unmodifiable(_categories));
   void _pushProducts() => _productsCtrl.add(List.unmodifiable(_products));
@@ -127,6 +141,63 @@ class MockAppRepository implements AppRepository {
       _recommendationCtrl.add(List.unmodifiable(_recommendations));
   void _pushEmployees() =>
       _employeesCtrl.add(List.unmodifiable(_mockEmployees));
+  void _pushVouchers() => _vouchersCtrl.add(List.unmodifiable(_vouchers));
+
+  /// Emits the current value immediately, then every later change.
+  ///
+  /// A plain broadcast controller silently drops the value pushed before the
+  /// first listener subscribes, which makes `stream.first` hang.
+  Stream<List<T>> _live<T>(
+    StreamController<List<T>> ctrl,
+    List<T> Function() read,
+  ) async* {
+    yield read();
+    yield* ctrl.stream.map((_) => read());
+  }
+
+  List<Product> _readProducts({
+    String companyId = '',
+    String categoryId = '',
+    String search = '',
+  }) =>
+      _products.where((p) {
+        if (companyId.isNotEmpty && p.companyId != companyId) return false;
+        if (categoryId.isNotEmpty && p.categoryId != categoryId) return false;
+        if (search.isNotEmpty && !p.matches(search)) return false;
+        return true;
+      }).toList();
+
+  List<Category> _readCategories({String companyId = ''}) =>
+      _categories
+          .where(
+            (c) =>
+                companyId.isEmpty ||
+                c.companyId == companyId ||
+                c.companyId.isEmpty,
+          )
+          .toList();
+
+  List<Voucher> _readVouchers({String companyId = ''}) =>
+      _vouchers
+          .where((v) => companyId.isEmpty || v.companyId == companyId)
+          .toList();
+
+  List<Order> _readOrders({String userId = '', String companyId = ''}) {
+    final list = _orders.where((o) {
+      if (userId.isNotEmpty && o.userId != userId) return false;
+      if (companyId.isNotEmpty && o.companyId != companyId) return false;
+      return true;
+    }).toList();
+    list.sort((a, b) {
+      final at = b.createdAt;
+      final bt = a.createdAt;
+      if (at == null && bt == null) return 0;
+      if (at == null) return 1;
+      if (bt == null) return -1;
+      return at.compareTo(bt);
+    });
+    return list;
+  }
 
   // ---- Auth ----
   @override
@@ -301,154 +372,128 @@ class MockAppRepository implements AppRepository {
 
   // ---- Reads ----
   @override
-  Stream<List<Company>> companies() {
-    _pushCompanies();
-    return _companiesCtrl.stream;
-  }
+  Stream<List<Company>> companies() =>
+      _live(_companiesCtrl, () => List.unmodifiable(_companies));
 
   @override
   Future<Company?> company(String id) async =>
       _companies.firstWhereOrNull((c) => c.id == id);
 
   @override
-  Stream<List<Category>> categories({String companyId = ''}) {
-    _pushCategories();
-    return _categoriesCtrl.stream.map(
-      (list) => list
-          .where(
-            (c) =>
-                companyId.isEmpty ||
-                c.companyId == companyId ||
-                c.companyId.isEmpty,
-          )
-          .toList(),
-    );
-  }
+  Stream<List<Category>> categories({String companyId = ''}) =>
+      _live(_categoriesCtrl, () => _readCategories(companyId: companyId));
 
   @override
-  Future<Category?> category(String id, {String companyId = ''}) async {
-    try {
-      return _categories.firstWhere(
+  Future<Category?> category(String id, {String companyId = ''}) async =>
+      _categories.firstWhereOrNull(
         (c) =>
             c.id == id &&
             (companyId.isEmpty ||
                 c.companyId == companyId ||
                 c.companyId.isEmpty),
       );
-    } catch (_) {
-      return null;
-    }
-  }
 
   @override
   Stream<List<Product>> products({
     String companyId = '',
     String categoryId = '',
     String search = '',
-  }) {
-    _pushProducts();
-    return _productsCtrl.stream.map(
-      (list) => list.where((p) {
-        if (companyId.isNotEmpty && p.companyId != companyId) return false;
-        if (categoryId.isNotEmpty && p.categoryId != categoryId) return false;
-        if (search.isNotEmpty &&
-            !p.name.toLowerCase().contains(search.toLowerCase())) {
-          return false;
-        }
-        return true;
-      }).toList(),
-    );
-  }
+  }) =>
+      _live(
+        _productsCtrl,
+        () => _readProducts(
+          companyId: companyId,
+          categoryId: categoryId,
+          search: search,
+        ),
+      );
 
   @override
   Future<Product?> product(String id) async =>
       _products.firstWhereOrNull((p) => p.id == id);
 
   @override
-  Stream<List<AdBanner>> adBanners() {
-    _adBannersCtrl.add(List.unmodifiable(_adBanners));
-    return _adBannersCtrl.stream;
-  }
+  Stream<List<AdBanner>> adBanners() =>
+      _live(_adBannersCtrl, () => List.unmodifiable(_adBanners));
 
   @override
-  Stream<List<OfferBanner>> offerBanners(String companyId) {
-    _offerBannersCtrl.add(
-      _offerBanners.where((b) => b.companyId == companyId).toList(),
-    );
-    return _offerBannersCtrl.stream.map(
-      (list) => list.where((b) => b.companyId == companyId).toList(),
-    );
-  }
-
-  @override
-  Stream<List<Voucher>> vouchers(String companyId) {
-    _vouchersCtrl.add(
-      _vouchers.where((v) => v.companyId == companyId).toList(),
-    );
-    return _vouchersCtrl.stream.map(
-      (list) => list.where((v) => v.companyId == companyId).toList(),
-    );
-  }
-
-  @override
-  Future<Voucher?> voucherByCode(String companyId, String code) async =>
-      _vouchers.firstWhereOrNull(
-        (v) =>
-            v.companyId == companyId &&
-            v.code.toLowerCase() == code.toLowerCase(),
+  Stream<List<OfferBanner>> offerBanners(String companyId) => _live(
+        _offerBannersCtrl,
+        () => _offerBanners.where((b) => b.companyId == companyId).toList(),
       );
+
+  @override
+  Stream<List<Voucher>> vouchers(String companyId) =>
+      _live(_vouchersCtrl, () => _readVouchers(companyId: companyId));
+
+  @override
+  Future<Voucher?> voucherByCode(String companyId, String code) async {
+    final wanted = Voucher.normalizeCode(code);
+    if (wanted.isEmpty) return null;
+    return _vouchers.firstWhereOrNull(
+      (v) =>
+          (companyId.isEmpty || v.companyId == companyId) &&
+          v.normalizedCode == wanted,
+    );
+  }
 
   @override
   Future<DeliveryCharge?> deliveryCharge(
     String pincode,
     String companyId,
-  ) async => _deliveryCharges.firstWhereOrNull((d) => d.pincode == pincode);
+  ) async =>
+      _deliveryCharges.firstWhereOrNull(
+        (d) =>
+            d.pincode == pincode &&
+            (companyId.isEmpty || d.companyId == companyId || d.companyId.isEmpty),
+      );
 
   @override
-  Stream<List<DeliveryCharge>> deliveryCharges({String companyId = ''}) {
-    _pushDelivery();
-    return _deliveryCtrl.stream;
-  }
+  Stream<List<DeliveryCharge>> deliveryCharges({String companyId = ''}) =>
+      _live(
+        _deliveryCtrl,
+        () => _deliveryCharges
+            .where(
+              (d) =>
+                  companyId.isEmpty ||
+                  d.companyId == companyId ||
+                  d.companyId.isEmpty,
+            )
+            .toList(),
+      );
 
   @override
-  Stream<List<Order>> orders({String userId = '', String companyId = ''}) {
-    _pushOrders();
-    return _ordersCtrl.stream.map(
-      (list) => list.where((o) {
-        if (userId.isNotEmpty && o.userId != userId) return false;
-        if (companyId.isNotEmpty && o.companyId != companyId) return false;
-        return true;
-      }).toList(),
-    );
-  }
+  Stream<List<Order>> orders({String userId = '', String companyId = ''}) =>
+      _live(_ordersCtrl, () => _readOrders(userId: userId, companyId: companyId));
 
   @override
-  Stream<List<Review>> reviews(String companyId) {
-    _pushReviews();
-    return _reviewsCtrl.stream.map(
-      (list) => list.where((r) => r.companyId == companyId).toList(),
-    );
-  }
+  Future<Order?> order(String orderId) async =>
+      _orders.firstWhereOrNull((o) => o.id == orderId);
 
   @override
-  Stream<List<AppNotification>> notifications(String recipientId) {
-    _pushNotifications();
-    return _notificationsCtrl.stream.map(
-      (list) => list.where((n) => n.recipientId == recipientId).toList(),
-    );
-  }
+  Stream<Order?> watchOrder(String orderId) => orders().map(
+        (list) => list.firstWhereOrNull((o) => o.id == orderId),
+      );
 
   @override
-  Stream<List<Employee>> employees(String companyId) async* {
-    yield _mockEmployees
-        .where((e) => companyId.isEmpty || e.companyId == companyId)
-        .toList();
-    yield* _employeesCtrl.stream.map(
-      (list) => list
-          .where((e) => companyId.isEmpty || e.companyId == companyId)
-          .toList(),
-    );
-  }
+  Stream<List<Review>> reviews(String companyId) => _live(
+        _reviewsCtrl,
+        () => _reviews.where((r) => r.companyId == companyId).toList(),
+      );
+
+  @override
+  Stream<List<AppNotification>> notifications(String recipientId) => _live(
+        _notificationsCtrl,
+        () => _notifications.where((n) => n.recipientId == recipientId).toList(),
+      );
+
+  @override
+  Stream<List<Employee>> employees(String companyId) => _live(
+        _employeesCtrl,
+        () => _mockEmployees
+            .where((e) => companyId.isEmpty || e.companyId == companyId)
+            .toList(),
+      );
 
   @override
   Future<Employee?> employee(String id, {String companyId = ''}) async =>
@@ -458,19 +503,19 @@ class MockAppRepository implements AppRepository {
 
   @override
   Stream<List<Admin>> admins(String companyId) => Stream.value(
-    _admins.values
-        .where((a) => a.companyId == companyId)
-        .map(
-          (a) => Admin(
-            id: a.id,
-            companyId: a.companyId,
-            name: a.name,
-            email: a.email,
-            mobileNumber: a.mobileNumber,
-          ),
-        )
-        .toList(),
-  );
+        _admins.values
+            .where((a) => a.companyId == companyId)
+            .map(
+              (a) => Admin(
+                id: a.id,
+                companyId: a.companyId,
+                name: a.name,
+                email: a.email,
+                mobileNumber: a.mobileNumber,
+              ),
+            )
+            .toList(),
+      );
 
   @override
   Future<List<Product>> recommendations({String companyId = ''}) async {
@@ -481,45 +526,115 @@ class MockAppRepository implements AppRepository {
   }
 
   @override
-  Stream<List<Recommendation>> recommendationRecords({String companyId = ''}) {
-    _pushRecommendations();
-    return _recommendationCtrl.stream.map(
-      (list) => companyId.isEmpty
-          ? list
-          : list.where((r) => r.companyId == companyId).toList(),
+  Stream<List<Recommendation>> recommendationRecords({String companyId = ''}) =>
+      _live(
+        _recommendationCtrl,
+        () => companyId.isEmpty
+            ? List.unmodifiable(_recommendations)
+            : _recommendations.where((r) => r.companyId == companyId).toList(),
+      );
+
+  // ---- Writes ----
+
+  /// Validates the move, then applies it together with the audit timestamps.
+  Order _applyStatus(Order order, String status, {DateTime? now}) {
+    OrderStatusRules.ensureValidStatus(status);
+    OrderStatusRules.ensureTransition(order.orderStatus, status);
+    final timestamp = now ?? DateTime.now();
+    return order.copyWith(
+      orderStatus: status,
+      updatedAt: timestamp,
+      cancelledAt: status == OrderStatus.cancelled ? timestamp : null,
+      clearCancelledAt: status != OrderStatus.cancelled,
     );
   }
 
-  // ---- Writes ----
   @override
   Future<Order> placeOrder(Order order) async {
+    if (order.companyId.isEmpty) {
+      throw ArgumentError('An order must belong to a company.');
+    }
+    if (order.items.isEmpty) {
+      throw ArgumentError('Cannot place an order with no items.');
+    }
+
+    final now = DateTime.now();
+    final id = order.id.isEmpty ? _uuid.v4() : order.id;
+
+    // Freeze the bill so later catalogue edits cannot rewrite the receipt.
+    final subtotal = Order.itemsTotalOf(order.items);
     final doc = Order(
-      id: order.id.isEmpty ? _uuid.v4() : order.id,
+      id: id,
       userId: order.userId,
       companyId: order.companyId,
       companyName: order.companyName,
       items: order.items,
-      totalAmount: order.totalAmount,
+      subtotal: order.subtotal != subtotal && order.subtotal > 0
+          ? order.subtotal
+          : subtotal,
+      discountAmount: order.discountAmount,
+      deliveryCharge: order.deliveryCharge,
+      totalAmount: order.totalAmount > 0
+          ? order.totalAmount
+          : (order.subtotal > 0 ? order.subtotal : subtotal) -
+              order.discountAmount +
+              order.deliveryCharge,
       address: order.address,
       pincode: order.pincode,
       voucherId: order.voucherId,
+      voucherCode: order.voucherCode,
       paymentStatus: order.paymentStatus,
       orderStatus: order.orderStatus,
       deliveryType: order.deliveryType,
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedAt: now,
     );
+
     _orders.add(doc);
+
+    // Stock + voucher bookkeeping belong to the same logical write.
+    _decrementStock(doc);
+    if (doc.voucherId != null && doc.voucherId!.isNotEmpty) {
+      _recordVoucherUsage(doc);
+    }
+
     _pushOrders();
     return doc;
+  }
+
+  void _decrementStock(Order order) {
+    for (final item in order.items) {
+      final i = _products.indexWhere((p) => p.id == item.productId);
+      if (i == -1) continue;
+      final p = _products[i];
+      if (p.isUnlimitedStock) continue;
+      final remaining = p.stockQty - (item.qty < 0 ? 0 : item.qty);
+      _products[i] = p.copyWith(stockQty: remaining < 0 ? 0 : remaining);
+    }
+    _pushProducts();
+  }
+
+  void _recordVoucherUsage(Order order) {
+    final i = _vouchers.indexWhere((v) => v.id == order.voucherId);
+    if (i == -1) return;
+    _vouchers[i] = _vouchers[i].registerUsage(
+      orderId: order.id,
+      userId: order.userId,
+    );
+    _pushVouchers();
   }
 
   @override
   Future<void> updateOrderStatus(String orderId, String status) async {
     final i = _orders.indexWhere((o) => o.id == orderId);
     if (i == -1) return;
-    _orders[i] = _orders[i].copyWith(orderStatus: status);
+    _orders[i] = _applyStatus(_orders[i], status);
     _pushOrders();
   }
+
+  @override
+  Future<void> cancelOrder(String orderId) =>
+      updateOrderStatus(orderId, OrderStatus.cancelled);
 
   @override
   Future<void> togglePaymentStatus(String orderId) async {
@@ -527,7 +642,10 @@ class MockAppRepository implements AppRepository {
     if (i == -1) return;
     final o = _orders[i];
     _orders[i] = o.copyWith(
-      paymentStatus: o.paymentStatus == 'pending' ? 'done' : 'pending',
+      paymentStatus: o.paymentStatus == PaymentStatus.pending
+          ? PaymentStatus.done
+          : PaymentStatus.pending,
+      updatedAt: DateTime.now(),
     );
     _pushOrders();
   }
@@ -544,7 +662,10 @@ class MockAppRepository implements AppRepository {
   Future<void> assignEmployee(String orderId, String employeeId) async {
     final i = _orders.indexWhere((o) => o.id == orderId);
     if (i == -1) return;
-    _orders[i] = _orders[i].copyWith(assignedEmployeeId: employeeId);
+    _orders[i] = _orders[i].copyWith(
+      assignedEmployeeId: employeeId.isEmpty ? null : employeeId,
+      clearAssignedEmployee: employeeId.isEmpty,
+    );
     _pushOrders();
   }
 
@@ -562,62 +683,138 @@ class MockAppRepository implements AppRepository {
         createdAt: DateTime.now(),
       ),
     );
+    final oi = _orders.indexWhere((o) => o.id == review.orderId);
+    if (oi != -1) {
+      _orders[oi] = _orders[oi].copyWith(reviewId: review.id);
+      _pushOrders();
+    }
     _pushReviews();
   }
 
   @override
-  Future<void> markNotificationRead(String id) async {}
-
-  @override
-  Future<void> saveVoucher(Company company, Voucher voucher) async {
-    _vouchers.add(
-      Voucher(
-        id: voucher.id.isEmpty ? _uuid.v4() : voucher.id,
-        companyId: company.id,
-        code: voucher.code,
-        discountType: voucher.discountType,
-        discountValue: voucher.discountValue,
-        appliesTo: voucher.appliesTo,
-        productIds: voucher.productIds,
-        categoryIds: voucher.categoryIds,
-        minOrderAmt: voucher.minOrderAmt,
-        expiryDate: voucher.expiryDate,
-      ),
+  Future<void> markNotificationRead(String id) async {
+    final i = _notifications.indexWhere((n) => n.id == id);
+    if (i == -1) return;
+    final n = _notifications[i];
+    _notifications[i] = AppNotification(
+      id: n.id,
+      recipientId: n.recipientId,
+      role: n.role,
+      type: n.type,
+      title: n.title,
+      body: n.body,
+      deepLink: n.deepLink,
+      isRead: true,
+      createdAt: n.createdAt,
     );
-    _vouchersCtrl.add(
-      _vouchers.where((v) => v.companyId == company.id).toList(),
-    );
+    _pushNotifications();
   }
 
   @override
-  Future<void> deleteVoucher(String voucherId) async {
-    _vouchers.removeWhere((v) => v.id == voucherId);
+  Future<void> saveVoucher(Voucher voucher) async {
+    if (voucher.companyId.isEmpty) {
+      throw ArgumentError('A voucher must belong to a company.');
+    }
+    final normalized = voucher.copyWith(code: voucher.normalizedCode);
+
+    if (normalized.id.isNotEmpty) {
+      final byId = _vouchers.indexWhere((v) => v.id == normalized.id);
+      if (byId != -1) {
+        _vouchers[byId] = normalized;
+      } else {
+        _vouchers.add(normalized);
+      }
+    } else {
+      // Editing by code (documents created before an id existed).
+      final byCode = _vouchers.indexWhere(
+        (v) =>
+            v.companyId == normalized.companyId &&
+            v.normalizedCode == normalized.normalizedCode,
+      );
+      if (byCode != -1) {
+        _vouchers[byCode] = normalized.copyWith(id: _vouchers[byCode].id);
+      } else {
+        _vouchers.add(normalized.copyWith(id: _uuid.v4()));
+      }
+    }
+    _pushVouchers();
+  }
+
+  @override
+  Future<void> deleteVoucher(String voucherId, {String companyId = ''}) async {
+    _vouchers.removeWhere(
+      (v) =>
+          v.id == voucherId &&
+          (companyId.isEmpty || v.companyId == companyId),
+    );
+    _pushVouchers();
   }
 
   @override
   Future<void> saveProduct(Product product) async {
-    final i = _products.indexWhere((p) => p.id == product.id);
+    if (product.companyId.isEmpty) {
+      throw ArgumentError('A product must belong to a company.');
+    }
+    final id = product.id.isEmpty ? _uuid.v4() : product.id;
+    final saved = product.copyWith(id: id);
+    final i = _products.indexWhere((p) => p.id == id);
     if (i == -1) {
-      _products.add(product);
+      _products.add(saved);
     } else {
-      _products[i] = product;
+      _products[i] = saved;
+    }
+
+    // Keep the category assignment list in sync with `product.categoryId`.
+    if (saved.categoryId.isNotEmpty) {
+      final ci = _categories.indexWhere((c) => c.id == saved.categoryId);
+      if (ci != -1) {
+        _categories[ci] = _categories[ci].withProduct(id);
+      }
     }
     _pushProducts();
+    if (saved.categoryId.isNotEmpty) _pushCategories();
   }
 
   @override
-  Future<void> deleteProduct(String productId) async {
-    _products.removeWhere((p) => p.id == productId);
+  Future<void> deleteProduct(String productId, {String companyId = ''}) async {
+    _products.removeWhere(
+      (p) => p.id == productId && (companyId.isEmpty || p.companyId == companyId),
+    );
+
+    // Referential integrity: drop it from every category that listed it.
+    var touched = false;
+    for (var i = 0; i < _categories.length; i++) {
+      if (_categories[i].productList.contains(productId)) {
+        _categories[i] = _categories[i].withoutProduct(productId);
+        touched = true;
+      }
+    }
     _pushProducts();
+    if (touched) _pushCategories();
   }
 
   @override
   Future<void> saveCategory(Category category) async {
-    final i = _categories.indexWhere((c) => c.id == category.id);
+    final id = category.id.isEmpty ? _uuid.v4() : category.id;
+    final saved = category.copyWith(id: id);
+
+    // Never let an admin build a loop: a cycle would hang the tree builder.
+    if (saved.parentId != null &&
+        CategoryHierarchy.wouldCreateCycle(
+          categoryId: id,
+          newParentId: saved.parentId,
+          all: _categories,
+        )) {
+      throw ArgumentError(
+        'Cannot move "${saved.name}" under one of its own sub-categories.',
+      );
+    }
+
+    final i = _categories.indexWhere((c) => c.id == id);
     if (i == -1) {
-      _categories.add(category);
+      _categories.add(saved);
     } else {
-      _categories[i] = category;
+      _categories[i] = saved;
     }
     _pushCategories();
   }
@@ -627,14 +824,54 @@ class MockAppRepository implements AppRepository {
     String categoryId, {
     String companyId = '',
   }) async {
-    _categories.removeWhere(
+    final i = _categories.indexWhere(
       (c) =>
           c.id == categoryId &&
           (companyId.isEmpty ||
               c.companyId == companyId ||
               c.companyId.isEmpty),
     );
+    if (i == -1) return;
+
+    final removed = _categories[i];
+    final newParent = removed.parentId;
+
+    // Children move up one level instead of being orphaned.
+    for (var j = 0; j < _categories.length; j++) {
+      if (_categories[j].parentId == categoryId) {
+        _categories[j] = _categories[j].copyWith(
+          parentId: newParent,
+          clearParentId: newParent == null || newParent.isEmpty,
+        );
+      }
+    }
+
+    // Products fall back to the parent category (or become uncategorised).
+    final orphans = <String>[...removed.productList];
+    for (var j = 0; j < _products.length; j++) {
+      if (_products[j].categoryId == categoryId) {
+        orphans.add(_products[j].id);
+        _products[j] = _products[j].copyWith(
+          categoryId: newParent == null ? '' : newParent,
+        );
+      }
+    }
+
+    _categories.removeAt(i);
+
+    if (newParent != null && newParent.isNotEmpty) {
+      final pi = _categories.indexWhere((c) => c.id == newParent);
+      if (pi != -1) {
+        var parent = _categories[pi];
+        for (final productId in orphans) {
+          parent = parent.withProduct(productId);
+        }
+        _categories[pi] = parent;
+      }
+    }
+
     _pushCategories();
+    if (orphans.isNotEmpty) _pushProducts();
   }
 
   @override
@@ -659,7 +896,11 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<void> saveDeliveryCharge(DeliveryCharge charge) async {
-    final i = _deliveryCharges.indexWhere((d) => d.pincode == charge.pincode);
+    final i = _deliveryCharges.indexWhere(
+      (d) =>
+          d.pincode == charge.pincode &&
+          (charge.companyId.isEmpty || d.companyId == charge.companyId),
+    );
     if (i == -1) {
       _deliveryCharges.add(charge);
     } else {
@@ -670,8 +911,9 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<void> importDeliveryCharges(List<DeliveryCharge> charges) async {
-    _deliveryCharges.addAll(charges);
-    _pushDelivery();
+    for (final c in charges) {
+      await saveDeliveryCharge(c);
+    }
   }
 
   @override
@@ -701,13 +943,24 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<void> saveBanner(OfferBanner banner) async {
-    _offerBanners.add(banner);
+    final i = _offerBanners.indexWhere((b) => b.id == banner.id);
+    if (i == -1) {
+      _offerBanners.add(banner);
+    } else {
+      _offerBanners[i] = banner;
+    }
     _pushBanners();
   }
 
   @override
   Future<void> saveAdBanner(AdBanner banner) async {
-    _adBanners.add(banner);
+    final i = _adBanners.indexWhere((b) => b.id == banner.id);
+    if (i == -1) {
+      _adBanners.add(banner);
+    } else {
+      _adBanners[i] = banner;
+    }
+    _pushBanners();
   }
 
   @override

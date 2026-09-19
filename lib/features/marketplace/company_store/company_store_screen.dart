@@ -135,8 +135,12 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                     stream: repo.vouchers(company.id),
                     builder: (context, voucherSnap) {
                       final rawVouchers = voucherSnap.data ?? const <Voucher>[];
+                      // Only advertise codes a shopper can actually redeem.
                       final activeVouchers = rawVouchers
-                          .where((v) => !v.isExpired)
+                          .where(
+                            (v) =>
+                                v.isLiveAt(DateTime.now()) && !v.isExhausted,
+                          )
                           .toList();
                       return StreamBuilder<List<Review>>(
                         stream: repo.reviews(company.id),
@@ -980,7 +984,9 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                   : '₹${v.discountValue.toStringAsFixed(0)} OFF';
               final sub = v.minOrderAmt > 0
                   ? 'Orders over ₹${v.minOrderAmt.toStringAsFixed(0)}'
-                  : 'First order';
+                  : v.firstTimeOnly
+                      ? 'First order'
+                      : 'No minimum';
               return _voucherItem(title: title, sub: sub, code: v.code);
             },
           ),
