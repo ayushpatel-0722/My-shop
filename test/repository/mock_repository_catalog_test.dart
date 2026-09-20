@@ -17,7 +17,12 @@ void main() {
   group('Products', () {
     test('saveProduct assigns an id when the product is new', () async {
       await repo.saveProduct(
-        const Product(id: '', companyId: 'c_organic', categoryId: 'cat_veg', name: 'Mango'),
+        const Product(
+          id: '',
+          companyId: 'c_organic',
+          categoryId: 'cat_veg',
+          name: 'Mango',
+        ),
       );
 
       final products = await repo.products(companyId: 'c_organic').first;
@@ -34,7 +39,9 @@ void main() {
         amount: 250,
       );
       await repo.saveProduct(product);
-      await repo.saveProduct(product.copyWith(amount: 299, name: 'Honey (new crop)'));
+      await repo.saveProduct(
+        product.copyWith(amount: 299, name: 'Honey (new crop)'),
+      );
 
       final products = await repo.products(companyId: 'c_organic').first;
       expect(products.where((p) => p.id == 'p_honey'), hasLength(1));
@@ -43,7 +50,14 @@ void main() {
 
     test('saveProduct requires a company', () async {
       expect(
-        () => repo.saveProduct(const Product(id: 'x', companyId: '', name: 'Ghost')),
+        () => repo.saveProduct(
+          const Product(
+            id: 'x',
+            companyId: '',
+            categoryId: 'cat_veg',
+            name: 'Ghost',
+          ),
+        ),
         throwsArgumentError,
       );
     });
@@ -61,7 +75,10 @@ void main() {
         ),
       );
 
-      final category = (await repo.category('cat_test', companyId: 'c_organic'))!;
+      final category = (await repo.category(
+        'cat_test',
+        companyId: 'c_organic',
+      ))!;
       expect(category.productList, contains('p_test'));
     });
 
@@ -85,14 +102,22 @@ void main() {
 
       await repo.deleteProduct('p_test', companyId: 'c_organic');
 
-      final category = (await repo.category('cat_test', companyId: 'c_organic'))!;
+      final category = (await repo.category(
+        'cat_test',
+        companyId: 'c_organic',
+      ))!;
       expect(category.productList, isNot(contains('p_test')));
       expect(await repo.product('p_test'), isNull);
     });
 
     test('deleteProduct is scoped to the owning company', () async {
       await repo.saveProduct(
-        const Product(id: 'p_x', companyId: 'c_organic', name: 'Mine'),
+        const Product(
+          id: 'p_x',
+          companyId: 'c_organic',
+          categoryId: 'cat_veg',
+          name: 'Mine',
+        ),
       );
       await repo.deleteProduct('p_x', companyId: 'c_techtronics');
 
@@ -123,7 +148,9 @@ void main() {
           sku: 'MB-1234',
         ),
       );
-      final found = await repo.products(companyId: 'c_organic', search: 'MB-1234').first;
+      final found = await repo
+          .products(companyId: 'c_organic', search: 'MB-1234')
+          .first;
       expect(found.map((p) => p.id), contains('p_sku'));
     });
 
@@ -133,7 +160,12 @@ void main() {
       await tick();
 
       await repo.saveProduct(
-        const Product(id: 'p_stream', companyId: 'c_organic', name: 'Streamed'),
+        const Product(
+          id: 'p_stream',
+          companyId: 'c_organic',
+          categoryId: 'cat_veg',
+          name: 'Streamed',
+        ),
       );
       await tick();
 
@@ -145,21 +177,29 @@ void main() {
 
   group('Categories', () {
     test('saveCategory upserts by id', () async {
-      await repo.saveCategory(const Category(id: 'cat_a', name: 'A', companyId: 'c_organic'));
-      await repo.saveCategory(const Category(id: 'cat_a', name: 'A renamed', companyId: 'c_organic'));
+      await repo.saveCategory(
+        const Category(id: 'cat_a', name: 'A', companyId: 'c_organic'),
+      );
+      await repo.saveCategory(
+        const Category(id: 'cat_a', name: 'A renamed', companyId: 'c_organic'),
+      );
 
       final list = await repo.categories(companyId: 'c_organic').first;
       expect(list.where((c) => c.id == 'cat_a'), hasLength(1));
-      expect(
-        list.firstWhere((c) => c.id == 'cat_a').name,
-        'A renamed',
-      );
+      expect(list.firstWhere((c) => c.id == 'cat_a').name, 'A renamed');
     });
 
     test('a category can be nested under another one', () async {
-      await repo.saveCategory(const Category(id: 'parent', name: 'Parent', companyId: 'c_organic'));
       await repo.saveCategory(
-        const Category(id: 'child', name: 'Child', companyId: 'c_organic', parentId: 'parent'),
+        const Category(id: 'parent', name: 'Parent', companyId: 'c_organic'),
+      );
+      await repo.saveCategory(
+        const Category(
+          id: 'child',
+          name: 'Child',
+          companyId: 'c_organic',
+          parentId: 'parent',
+        ),
       );
 
       final child = (await repo.category('child', companyId: 'c_organic'))!;
@@ -167,26 +207,50 @@ void main() {
     });
 
     test('saveCategory refuses to create a hierarchy cycle', () async {
-      await repo.saveCategory(const Category(id: 'a', name: 'A', companyId: 'c_organic'));
       await repo.saveCategory(
-        const Category(id: 'b', name: 'B', companyId: 'c_organic', parentId: 'a'),
+        const Category(id: 'a', name: 'A', companyId: 'c_organic'),
+      );
+      await repo.saveCategory(
+        const Category(
+          id: 'b',
+          name: 'B',
+          companyId: 'c_organic',
+          parentId: 'a',
+        ),
       );
 
       expect(
         () => repo.saveCategory(
-          const Category(id: 'a', name: 'A', companyId: 'c_organic', parentId: 'b'),
+          const Category(
+            id: 'a',
+            name: 'A',
+            companyId: 'c_organic',
+            parentId: 'b',
+          ),
         ),
         throwsArgumentError,
       );
     });
 
     test('deleting a parent re-parents the children', () async {
-      await repo.saveCategory(const Category(id: 'root', name: 'Root', companyId: 'c_organic'));
       await repo.saveCategory(
-        const Category(id: 'mid', name: 'Mid', companyId: 'c_organic', parentId: 'root'),
+        const Category(id: 'root', name: 'Root', companyId: 'c_organic'),
       );
       await repo.saveCategory(
-        const Category(id: 'leaf', name: 'Leaf', companyId: 'c_organic', parentId: 'mid'),
+        const Category(
+          id: 'mid',
+          name: 'Mid',
+          companyId: 'c_organic',
+          parentId: 'root',
+        ),
+      );
+      await repo.saveCategory(
+        const Category(
+          id: 'leaf',
+          name: 'Leaf',
+          companyId: 'c_organic',
+          parentId: 'mid',
+        ),
       );
 
       await repo.deleteCategory('mid', companyId: 'c_organic');
@@ -197,7 +261,9 @@ void main() {
     });
 
     test('deleting a category moves its products to the parent', () async {
-      await repo.saveCategory(const Category(id: 'root', name: 'Root', companyId: 'c_organic'));
+      await repo.saveCategory(
+        const Category(id: 'root', name: 'Root', companyId: 'c_organic'),
+      );
       await repo.saveCategory(
         const Category(
           id: 'child',
@@ -208,7 +274,12 @@ void main() {
         ),
       );
       await repo.saveProduct(
-        const Product(id: 'p_move', companyId: 'c_organic', categoryId: 'child', name: 'Mover'),
+        const Product(
+          id: 'p_move',
+          companyId: 'c_organic',
+          categoryId: 'child',
+          name: 'Mover',
+        ),
       );
 
       await repo.deleteCategory('child', companyId: 'c_organic');
@@ -221,8 +292,16 @@ void main() {
     });
 
     test('categories() returns global + own company only', () async {
-      await repo.saveCategory(const Category(id: 'mine', name: 'Mine', companyId: 'c_organic'));
-      await repo.saveCategory(const Category(id: 'theirs', name: 'Theirs', companyId: 'c_techtronics'));
+      await repo.saveCategory(
+        const Category(id: 'mine', name: 'Mine', companyId: 'c_organic'),
+      );
+      await repo.saveCategory(
+        const Category(
+          id: 'theirs',
+          name: 'Theirs',
+          companyId: 'c_techtronics',
+        ),
+      );
 
       final list = await repo.categories(companyId: 'c_organic').first;
       final ids = list.map((c) => c.id);
@@ -259,7 +338,8 @@ void main() {
 
     test('saveVoucher requires a company', () async {
       expect(
-        () => repo.saveVoucher(const Voucher(id: 'v', companyId: '', code: 'X')),
+        () =>
+            repo.saveVoucher(const Voucher(id: 'v', companyId: '', code: 'X')),
         throwsArgumentError,
       );
     });

@@ -32,36 +32,61 @@ class CartState {
 class CartCubit extends Cubit<CartState> {
   CartCubit() : super(const CartState());
 
-  void add(Product product, {Company? company}) {
+  void add(
+    Product product, {
+    ProductVariant? variant,
+    String? companyId,
+    String? companyName,
+    int qty = 1,
+    Company? company,
+  }) {
     final items = [...state.items];
+    final resolvedCompanyId = companyId ?? company?.id ?? product.companyId;
+    final resolvedCompanyName = companyName ?? company?.name ?? '';
+    final targetSku = variant?.sku ?? '';
+
     final i = items.indexWhere(
-        (e) => e.product.id == product.id && e.companyId == product.companyId);
+      (e) =>
+          e.product.id == product.id &&
+          e.companyId == resolvedCompanyId &&
+          (e.variant?.sku ?? '') == targetSku,
+    );
     if (i != -1) {
-      items[i] = items[i].copyWith(qty: items[i].qty + 1);
+      items[i] = items[i].copyWith(qty: items[i].qty + qty);
     } else {
-      items.add(CartItem(
-        companyId: product.companyId,
-        companyName: company?.name ?? '',
-        product: product,
-        qty: 1,
-      ));
+      items.add(
+        CartItem(
+          companyId: resolvedCompanyId,
+          companyName: resolvedCompanyName,
+          product: product,
+          variant: variant,
+          qty: qty,
+        ),
+      );
     }
     emit(state.copyWith(items: items));
   }
 
-  void increment(String companyId, String productId) {
+  void increment(String companyId, String productId, {String variantSku = ''}) {
     final items = state.items
-        .map((e) => e.companyId == companyId && e.product.id == productId
-            ? e.copyWith(qty: e.qty + 1)
-            : e)
+        .map(
+          (e) =>
+              e.companyId == companyId &&
+                  e.product.id == productId &&
+                  (e.variant?.sku ?? '') == variantSku
+              ? e.copyWith(qty: e.qty + 1)
+              : e,
+        )
         .toList();
     emit(state.copyWith(items: items));
   }
 
-  void decrement(String companyId, String productId) {
+  void decrement(String companyId, String productId, {String variantSku = ''}) {
     final items = <CartItem>[];
     for (final e in state.items) {
-      if (e.companyId == companyId && e.product.id == productId) {
+      if (e.companyId == companyId &&
+          e.product.id == productId &&
+          (e.variant?.sku ?? '') == variantSku) {
         if (e.qty > 1) items.add(e.copyWith(qty: e.qty - 1));
       } else {
         items.add(e);
@@ -70,9 +95,14 @@ class CartCubit extends Cubit<CartState> {
     emit(state.copyWith(items: items));
   }
 
-  void remove(String companyId, String productId) {
+  void remove(String companyId, String productId, {String variantSku = ''}) {
     final items = state.items
-        .where((e) => !(e.companyId == companyId && e.product.id == productId))
+        .where(
+          (e) =>
+              !(e.companyId == companyId &&
+                  e.product.id == productId &&
+                  (e.variant?.sku ?? '') == variantSku),
+        )
         .toList();
     emit(state.copyWith(items: items));
   }

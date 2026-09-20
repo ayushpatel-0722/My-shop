@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
+import 'package:myshop/core/domain/catalog.dart';
 import 'package:myshop/core/models/category.dart';
 import 'package:myshop/core/models/product.dart';
 import 'package:myshop/features/marketplace/categories/categories_screen.dart';
@@ -40,8 +41,9 @@ void main() {
       );
     });
 
-    testWidgets('shows real store data instead of invented ratings',
-        (tester) async {
+    testWidgets('shows real store data instead of invented ratings', (
+      tester,
+    ) async {
       await pumpTestApp(tester, const CategoriesScreen());
 
       expect(find.text('GreenLeaf Organics'), findsWidgets);
@@ -62,7 +64,10 @@ void main() {
     testWidgets('lists the products filed under the category', (tester) async {
       await pumpTestApp(
         tester,
-        const CategoryViewScreen(categoryId: 'cat_veg', categoryName: 'Vegetables'),
+        const CategoryViewScreen(
+          categoryId: 'cat_veg',
+          categoryName: 'Vegetables',
+        ),
       );
 
       expect(find.text('Fresh Tomatoes'), findsOneWidget);
@@ -96,11 +101,15 @@ void main() {
       );
     });
 
-    testWidgets('an empty category is distinguished from a loading one',
-        (tester) async {
+    testWidgets('an empty category is distinguished from a loading one', (
+      tester,
+    ) async {
       await pumpTestApp(
         tester,
-        const CategoryViewScreen(categoryId: 'cat_empty', categoryName: 'Empty'),
+        const CategoryViewScreen(
+          categoryId: 'cat_empty',
+          categoryName: 'Empty',
+        ),
       );
 
       expect(find.text('No products in this category'), findsOneWidget);
@@ -121,7 +130,10 @@ void main() {
 
       await pumpTestApp(
         tester,
-        const CategoryViewScreen(categoryId: 'cat_veg', categoryName: 'Vegetables'),
+        const CategoryViewScreen(
+          categoryId: 'cat_veg',
+          categoryName: 'Vegetables',
+        ),
       );
       expect(find.text('Sold Out Spinach'), findsOneWidget);
 
@@ -135,7 +147,10 @@ void main() {
     testWidgets('sorting by price reorders the grid', (tester) async {
       await pumpTestApp(
         tester,
-        const CategoryViewScreen(categoryId: 'cat_veg', categoryName: 'Vegetables'),
+        const CategoryViewScreen(
+          categoryId: 'cat_veg',
+          categoryName: 'Vegetables',
+        ),
       );
 
       await tester.tap(find.byType(DropdownButton<ProductSort>));

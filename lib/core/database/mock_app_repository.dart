@@ -159,28 +159,25 @@ class MockAppRepository implements AppRepository {
     String companyId = '',
     String categoryId = '',
     String search = '',
-  }) =>
-      _products.where((p) {
-        if (companyId.isNotEmpty && p.companyId != companyId) return false;
-        if (categoryId.isNotEmpty && p.categoryId != categoryId) return false;
-        if (search.isNotEmpty && !p.matches(search)) return false;
-        return true;
-      }).toList();
+  }) => _products.where((p) {
+    if (companyId.isNotEmpty && p.companyId != companyId) return false;
+    if (categoryId.isNotEmpty && p.categoryId != categoryId) return false;
+    if (search.isNotEmpty && !p.matches(search)) return false;
+    return true;
+  }).toList();
 
-  List<Category> _readCategories({String companyId = ''}) =>
-      _categories
-          .where(
-            (c) =>
-                companyId.isEmpty ||
-                c.companyId == companyId ||
-                c.companyId.isEmpty,
-          )
-          .toList();
+  List<Category> _readCategories({String companyId = ''}) => _categories
+      .where(
+        (c) =>
+            companyId.isEmpty ||
+            c.companyId == companyId ||
+            c.companyId.isEmpty,
+      )
+      .toList();
 
-  List<Voucher> _readVouchers({String companyId = ''}) =>
-      _vouchers
-          .where((v) => companyId.isEmpty || v.companyId == companyId)
-          .toList();
+  List<Voucher> _readVouchers({String companyId = ''}) => _vouchers
+      .where((v) => companyId.isEmpty || v.companyId == companyId)
+      .toList();
 
   List<Order> _readOrders({String userId = '', String companyId = ''}) {
     final list = _orders.where((o) {
@@ -398,15 +395,14 @@ class MockAppRepository implements AppRepository {
     String companyId = '',
     String categoryId = '',
     String search = '',
-  }) =>
-      _live(
-        _productsCtrl,
-        () => _readProducts(
-          companyId: companyId,
-          categoryId: categoryId,
-          search: search,
-        ),
-      );
+  }) => _live(
+    _productsCtrl,
+    () => _readProducts(
+      companyId: companyId,
+      categoryId: categoryId,
+      search: search,
+    ),
+  );
 
   @override
   Future<Product?> product(String id) async =>
@@ -418,9 +414,9 @@ class MockAppRepository implements AppRepository {
 
   @override
   Stream<List<OfferBanner>> offerBanners(String companyId) => _live(
-        _offerBannersCtrl,
-        () => _offerBanners.where((b) => b.companyId == companyId).toList(),
-      );
+    _offerBannersCtrl,
+    () => _offerBanners.where((b) => b.companyId == companyId).toList(),
+  );
 
   @override
   Stream<List<Voucher>> vouchers(String companyId) =>
@@ -441,12 +437,11 @@ class MockAppRepository implements AppRepository {
   Future<DeliveryCharge?> deliveryCharge(
     String pincode,
     String companyId,
-  ) async =>
-      _deliveryCharges.firstWhereOrNull(
-        (d) =>
-            d.pincode == pincode &&
-            (companyId.isEmpty || d.companyId == companyId || d.companyId.isEmpty),
-      );
+  ) async => _deliveryCharges.firstWhereOrNull(
+    (d) =>
+        d.pincode == pincode &&
+        (companyId.isEmpty || d.companyId == companyId || d.companyId.isEmpty),
+  );
 
   @override
   Stream<List<DeliveryCharge>> deliveryCharges({String companyId = ''}) =>
@@ -464,36 +459,38 @@ class MockAppRepository implements AppRepository {
 
   @override
   Stream<List<Order>> orders({String userId = '', String companyId = ''}) =>
-      _live(_ordersCtrl, () => _readOrders(userId: userId, companyId: companyId));
+      _live(
+        _ordersCtrl,
+        () => _readOrders(userId: userId, companyId: companyId),
+      );
 
   @override
   Future<Order?> order(String orderId) async =>
       _orders.firstWhereOrNull((o) => o.id == orderId);
 
   @override
-  Stream<Order?> watchOrder(String orderId) => orders().map(
-        (list) => list.firstWhereOrNull((o) => o.id == orderId),
-      );
+  Stream<Order?> watchOrder(String orderId) =>
+      orders().map((list) => list.firstWhereOrNull((o) => o.id == orderId));
 
   @override
   Stream<List<Review>> reviews(String companyId) => _live(
-        _reviewsCtrl,
-        () => _reviews.where((r) => r.companyId == companyId).toList(),
-      );
+    _reviewsCtrl,
+    () => _reviews.where((r) => r.companyId == companyId).toList(),
+  );
 
   @override
   Stream<List<AppNotification>> notifications(String recipientId) => _live(
-        _notificationsCtrl,
-        () => _notifications.where((n) => n.recipientId == recipientId).toList(),
-      );
+    _notificationsCtrl,
+    () => _notifications.where((n) => n.recipientId == recipientId).toList(),
+  );
 
   @override
   Stream<List<Employee>> employees(String companyId) => _live(
-        _employeesCtrl,
-        () => _mockEmployees
-            .where((e) => companyId.isEmpty || e.companyId == companyId)
-            .toList(),
-      );
+    _employeesCtrl,
+    () => _mockEmployees
+        .where((e) => companyId.isEmpty || e.companyId == companyId)
+        .toList(),
+  );
 
   @override
   Future<Employee?> employee(String id, {String companyId = ''}) async =>
@@ -503,19 +500,19 @@ class MockAppRepository implements AppRepository {
 
   @override
   Stream<List<Admin>> admins(String companyId) => Stream.value(
-        _admins.values
-            .where((a) => a.companyId == companyId)
-            .map(
-              (a) => Admin(
-                id: a.id,
-                companyId: a.companyId,
-                name: a.name,
-                email: a.email,
-                mobileNumber: a.mobileNumber,
-              ),
-            )
-            .toList(),
-      );
+    _admins.values
+        .where((a) => a.companyId == companyId)
+        .map(
+          (a) => Admin(
+            id: a.id,
+            companyId: a.companyId,
+            name: a.name,
+            email: a.email,
+            mobileNumber: a.mobileNumber,
+          ),
+        )
+        .toList(),
+  );
 
   @override
   Future<List<Product>> recommendations({String companyId = ''}) async {
@@ -577,8 +574,8 @@ class MockAppRepository implements AppRepository {
       totalAmount: order.totalAmount > 0
           ? order.totalAmount
           : (order.subtotal > 0 ? order.subtotal : subtotal) -
-              order.discountAmount +
-              order.deliveryCharge,
+                order.discountAmount +
+                order.deliveryCharge,
       address: order.address,
       pincode: order.pincode,
       voucherId: order.voucherId,
@@ -744,8 +741,7 @@ class MockAppRepository implements AppRepository {
   Future<void> deleteVoucher(String voucherId, {String companyId = ''}) async {
     _vouchers.removeWhere(
       (v) =>
-          v.id == voucherId &&
-          (companyId.isEmpty || v.companyId == companyId),
+          v.id == voucherId && (companyId.isEmpty || v.companyId == companyId),
     );
     _pushVouchers();
   }
@@ -778,7 +774,8 @@ class MockAppRepository implements AppRepository {
   @override
   Future<void> deleteProduct(String productId, {String companyId = ''}) async {
     _products.removeWhere(
-      (p) => p.id == productId && (companyId.isEmpty || p.companyId == companyId),
+      (p) =>
+          p.id == productId && (companyId.isEmpty || p.companyId == companyId),
     );
 
     // Referential integrity: drop it from every category that listed it.
@@ -851,9 +848,7 @@ class MockAppRepository implements AppRepository {
     for (var j = 0; j < _products.length; j++) {
       if (_products[j].categoryId == categoryId) {
         orphans.add(_products[j].id);
-        _products[j] = _products[j].copyWith(
-          categoryId: newParent == null ? '' : newParent,
-        );
+        _products[j] = _products[j].copyWith(categoryId: newParent ?? '');
       }
     }
 

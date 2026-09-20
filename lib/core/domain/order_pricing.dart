@@ -15,6 +15,9 @@ class PricedLine {
   final String image;
   final int qty;
   final double unitPrice;
+  final String variantTitle;
+  final String variantSku;
+  final Map<String, String> variantAttributes;
 
   const PricedLine({
     required this.productId,
@@ -22,21 +25,28 @@ class PricedLine {
     this.image = '',
     required this.qty,
     required this.unitPrice,
+    this.variantTitle = '',
+    this.variantSku = '',
+    this.variantAttributes = const {},
   });
 
   double get lineTotal => roundMoney(unitPrice * qty);
 
   Map<String, dynamic> toMap() => {
-        'productId': productId,
-        'name': name,
-        'image': image,
-        'qty': qty,
-        'unitPrice': unitPrice,
-        'lineTotal': lineTotal,
-      };
+    'productId': productId,
+    'name': name,
+    'image': image,
+    'qty': qty,
+    'unitPrice': unitPrice,
+    'lineTotal': lineTotal,
+    'variantTitle': variantTitle,
+    'variantSku': variantSku,
+    'variantAttributes': variantAttributes,
+  };
 
   @override
-  String toString() => 'PricedLine($productId, $qty x $unitPrice)';
+  String toString() =>
+      'PricedLine($productId, $qty x $unitPrice${variantTitle.isNotEmpty ? " [$variantTitle]" : ""})';
 }
 
 /// The complete, itemised amount payable for one store's cart.
@@ -82,16 +92,16 @@ class OrderBill {
       evaluation.isAccepted ? evaluation.deliveryDiscount : 0;
 
   Map<String, dynamic> toMap() => {
-        'companyId': companyId,
-        'companyName': companyName,
-        'subtotal': subtotal,
-        'discount': discount,
-        'deliveryCharge': deliveryCharge,
-        'total': total,
-        'voucherId': voucher?.id,
-        'voucherCode': voucher?.code ?? '',
-        'lines': lines.map((e) => e.toMap()).toList(),
-      };
+    'companyId': companyId,
+    'companyName': companyName,
+    'subtotal': subtotal,
+    'discount': discount,
+    'deliveryCharge': deliveryCharge,
+    'total': total,
+    'voucherId': voucher?.id,
+    'voucherCode': voucher?.code ?? '',
+    'lines': lines.map((e) => e.toMap()).toList(),
+  };
 
   @override
   String toString() =>
@@ -126,12 +136,17 @@ class OrderPricer {
             name: e.product.name,
             image: e.product.images.isNotEmpty ? e.product.images.first : '',
             qty: e.qty,
-            unitPrice: e.product.price,
+            unitPrice: e.effectivePrice,
+            variantTitle: e.variant?.title ?? '',
+            variantSku: e.variant?.sku ?? '',
+            variantAttributes: e.variant?.attributes ?? const {},
           ),
         )
         .toList();
 
-    final subtotal = roundMoney(lines.fold<double>(0, (s, e) => s + e.lineTotal));
+    final subtotal = roundMoney(
+      lines.fold<double>(0, (s, e) => s + e.lineTotal),
+    );
     final rawDelivery = deliveryRequired ? roundMoney(deliveryCharge) : 0.0;
 
     final evaluation = voucher == null
@@ -144,10 +159,13 @@ class OrderPricer {
           );
 
     final applied = evaluation.isAccepted ? voucher : null;
-    final discount =
-        evaluation.isAccepted ? roundMoney(evaluation.discount) : 0.0;
+    final discount = evaluation.isAccepted
+        ? roundMoney(evaluation.discount)
+        : 0.0;
     final shipping = evaluation.isAccepted
-        ? roundMoney(_clamp(rawDelivery - evaluation.deliveryDiscount, 0, rawDelivery))
+        ? roundMoney(
+            _clamp(rawDelivery - evaluation.deliveryDiscount, 0, rawDelivery),
+          )
         : rawDelivery;
     final total = _clamp(subtotal - discount + shipping, 0, double.infinity);
 

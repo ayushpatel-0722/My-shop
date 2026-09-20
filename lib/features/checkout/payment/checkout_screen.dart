@@ -84,7 +84,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-  List<String> _companiesOf(CartState? state) => state?.byCompany.keys.toList() ?? const <String>[];
+  List<String> _companiesOf(CartState? state) =>
+      state?.byCompany.keys.toList() ?? const <String>[];
 
   Future<void> _loadOrderHistory(String userId) async {
     if (userId.isEmpty) return;
@@ -104,10 +105,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     setState(() => _deliveryCharges.addAll(charges));
   }
 
-  Future<void> _applyVoucher(
-    String companyId,
-    List<CartItem> items,
-  ) async {
+  Future<void> _applyVoucher(String companyId, List<CartItem> items) async {
     final controller = _voucherCtrls[companyId];
     final code = controller?.text.trim() ?? '';
     final l10n = AppLocalizations.of(context);
@@ -120,13 +118,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    final userId = context.read<AuthCubit>().currentUser?.id ?? '';
     final voucher = await repo.voucherByCode(companyId, code);
+    if (!mounted) return;
+
     final evaluation = const VoucherEvaluator().evaluate(
       voucher: voucher,
       items: items,
       context: VoucherContext(
         now: DateTime.now(),
-        userId: context.read<AuthCubit>().currentUser?.id ?? '',
+        userId: userId,
         previousOrderCount: _previousOrderCount,
       ),
       deliveryCharge: _deliveryCharges[companyId] ?? 0,
@@ -137,8 +138,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (!evaluation.isAccepted) {
       setState(() {
         _applied[companyId] = null;
-        _voucherError[companyId] =
-            voucher == null ? l10n.invalidCode : evaluation.message;
+        _voucherError[companyId] = voucher == null
+            ? l10n.invalidCode
+            : evaluation.message;
       });
       return;
     }
@@ -147,9 +149,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _applied[companyId] = voucher;
       _voucherError.remove(companyId);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.voucherApplied)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.voucherApplied)));
   }
 
   void _removeVoucher(String companyId) {
@@ -199,16 +201,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // Critical write: refuse to continue when the device is offline.
-    if (!await connectivity.isOnline()) {
-      if (!mounted) return;
+    final isOnline = await connectivity.isOnline();
+    if (!mounted) return;
+    if (!isOnline) {
       _snack(l10n.noInternet);
       return;
     }
 
+    final user = context.read<AuthCubit>().currentUser;
     setState(() => _placing = true);
 
     try {
-      final user = context.read<AuthCubit>().currentUser;
       final bills = _bills(state);
       final placed = <Order>[];
 
@@ -229,6 +232,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   unitPrice: line.unitPrice,
                   name: line.name,
                   image: line.image,
+                  variantTitle: line.variantTitle,
+                  variantSku: line.variantSku,
+                  variantAttributes: line.variantAttributes,
                 ),
               )
               .toList(),
@@ -247,9 +253,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (!mounted) return;
       context.read<CartCubit>().clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.orderPlaced)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.orderPlaced)));
       if (placed.length == 1) {
         context.go(AppRoutes.orderPath(placed.first.id));
       } else {
@@ -300,10 +306,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           }
           final bills = _bills(cartState);
 
-          final subtotal =
-              bills.values.fold<double>(0, (sum, b) => sum + b.subtotal);
-          final discount =
-              bills.values.fold<double>(0, (sum, b) => sum + b.discount);
+          final subtotal = bills.values.fold<double>(
+            0,
+            (sum, b) => sum + b.subtotal,
+          );
+          final discount = bills.values.fold<double>(
+            0,
+            (sum, b) => sum + b.discount,
+          );
           final delivery = bills.values.fold<double>(
             0,
             (sum, b) => sum + b.deliveryCharge,
@@ -480,10 +490,9 @@ class _StoreCheckoutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final resolvedBill = bill;
-    final storeName =
-        items.isNotEmpty && items.first.companyName.isNotEmpty
-            ? items.first.companyName
-            : 'Store';
+    final storeName = items.isNotEmpty && items.first.companyName.isNotEmpty
+        ? items.first.companyName
+        : 'Store';
 
     return Card(
       child: Padding(
@@ -584,12 +593,7 @@ class _StoreCheckoutCard extends StatelessWidget {
     );
   }
 
-  Widget _row(
-    String label,
-    String value, {
-    bool bold = false,
-    Color? color,
-  }) {
+  Widget _row(String label, String value, {bool bold = false, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(

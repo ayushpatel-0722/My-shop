@@ -71,8 +71,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       final list = _statusFilter == 'all'
                           ? all
                           : all
-                              .where((o) => o.orderStatus == _statusFilter)
-                              .toList();
+                                .where((o) => o.orderStatus == _statusFilter)
+                                .toList();
 
                       if (all.isEmpty) {
                         return _buildEmptyOrdersView(context, l10n);
@@ -88,7 +88,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       return ListView.separated(
                         padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                         itemCount: list.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
                         itemBuilder: (context, i) =>
                             _orderCard(context, list[i], l10n),
                       );
@@ -223,18 +223,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Widget _orderCard(BuildContext context, Order order, AppLocalizations l10n) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final preview = order.items
         .take(2)
-        .map((e) => e.name)
+        .map((e) {
+          final hasVariant = e.variantTitle.isNotEmpty;
+          return hasVariant ? '${e.name} (${e.variantTitle})' : e.name;
+        })
         .where((e) => e.isNotEmpty)
         .join(', ');
 
     return Container(
       key: Key('order-card-${order.id}'),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.surfaceContainerDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF0F2F5)),
+        border: Border.all(
+          color: isDark ? AppTheme.borderDark : const Color(0xFFF0F2F5),
+        ),
         boxShadow: const [
           BoxShadow(
             color: Color.fromRGBO(0, 0, 0, 0.03),
@@ -244,7 +250,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ],
       ),
       child: InkWell(
-        onTap: () => context.go(AppRoutes.orderPath(order.id)),
+        onTap: () => context.push(AppRoutes.orderPath(order.id)),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -256,17 +262,20 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 children: [
                   Text(
                     'Order ${order.reference}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E2229),
+                      color: isDark ? Colors.white : const Color(0xFF1E2229),
                     ),
                   ),
                   OrderStatusBadge(status: order.orderStatus),
                 ],
               ),
               const SizedBox(height: 10),
-              const Divider(height: 1, color: Color(0xFFF3F4F6)),
+              Divider(
+                height: 1,
+                color: isDark ? AppTheme.borderDark : const Color(0xFFF3F4F6),
+              ),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -278,9 +287,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         Text(
                           '${order.itemCount} '
                           '${order.itemCount == 1 ? 'item' : 'items'}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF4B5563),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF4B5563),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -298,9 +309,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             preview,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF6B7280),
+                              color: isDark
+                                  ? const Color(0xFFCBD5E1)
+                                  : const Color(0xFF6B7280),
                             ),
                           ),
                         ],
@@ -311,10 +324,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     children: [
                       Text(
                         formatCurrency(order.totalAmount),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Color(0xFF1E2229),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF1E2229),
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -341,7 +356,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   child: TextButton.icon(
                     icon: const Icon(Icons.info_outline, size: 16),
                     label: const Text('Track order'),
-                    onPressed: () => context.go(AppRoutes.orderPath(order.id)),
+                    onPressed: () =>
+                        context.push(AppRoutes.orderPath(order.id)),
                   ),
                 ),
             ],
@@ -383,8 +399,12 @@ class _StatusChips extends StatelessWidget {
             children: [
               _chip(context, 'All', orders.length, 'all'),
               for (final status in OrderStatusRules.openStatuses)
-                _chip(context, orderStatusLabel(context, status),
-                    countOf(status), status),
+                _chip(
+                  context,
+                  orderStatusLabel(context, status),
+                  countOf(status),
+                  status,
+                ),
               _chip(
                 context,
                 orderStatusLabel(context, OrderStatus.cancelled),
@@ -404,12 +424,7 @@ class _StatusChips extends StatelessWidget {
     );
   }
 
-  Widget _chip(
-    BuildContext context,
-    String label,
-    int count,
-    String value,
-  ) {
+  Widget _chip(BuildContext context, String label, int count, String value) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: FilterChip(

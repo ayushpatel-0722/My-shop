@@ -60,6 +60,9 @@ class OrderItem {
   final double unitPrice;
   final String name;
   final String image;
+  final String variantTitle;
+  final String variantSku;
+  final Map<String, String> variantAttributes;
 
   const OrderItem({
     required this.productId,
@@ -67,37 +70,68 @@ class OrderItem {
     required this.unitPrice,
     this.name = '',
     this.image = '',
+    this.variantTitle = '',
+    this.variantSku = '',
+    this.variantAttributes = const {},
   });
 
   double get itemTotal => unitPrice * (qty < 0 ? 0 : qty);
 
-  factory OrderItem.fromMap(Map<String, dynamic> map) => OrderItem(
-        productId: asString(map['productId']),
-        qty: asInt(map['qty'], 1),
-        unitPrice: asDouble(map['unitPrice']),
-        name: asString(map['name']),
-        image: asString(map['image']),
-      );
+  factory OrderItem.fromMap(Map<String, dynamic> map) {
+    final rawAttrs = map['variantAttributes'];
+    final attrs = <String, String>{};
+    if (rawAttrs is Map) {
+      rawAttrs.forEach((k, v) {
+        if (k != null && v != null) attrs[k.toString()] = v.toString();
+      });
+    }
+
+    return OrderItem(
+      productId: asString(map['productId']),
+      qty: asInt(map['qty'], 1),
+      unitPrice: asDouble(map['unitPrice']),
+      name: asString(map['name']),
+      image: asString(map['image']),
+      variantTitle: asString(map['variantTitle']),
+      variantSku: asString(map['variantSku']),
+      variantAttributes: attrs,
+    );
+  }
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'productId': productId,
-        'qty': qty,
-        'unitPrice': unitPrice,
-        'name': name,
-        'image': image,
-        'itemTotal': itemTotal,
-      };
+    'productId': productId,
+    'qty': qty,
+    'unitPrice': unitPrice,
+    'name': name,
+    'image': image,
+    'itemTotal': itemTotal,
+    'variantTitle': variantTitle,
+    'variantSku': variantSku,
+    'variantAttributes': variantAttributes,
+  };
 
-  OrderItem copyWith({int? qty}) => OrderItem(
-        productId: productId,
-        qty: qty ?? this.qty,
-        unitPrice: unitPrice,
-        name: name,
-        image: image,
-      );
+  OrderItem copyWith({
+    int? qty,
+    double? unitPrice,
+    String? name,
+    String? image,
+    String? variantTitle,
+    String? variantSku,
+    Map<String, String>? variantAttributes,
+  }) => OrderItem(
+    productId: productId,
+    qty: qty ?? this.qty,
+    unitPrice: unitPrice ?? this.unitPrice,
+    name: name ?? this.name,
+    image: image ?? this.image,
+    variantTitle: variantTitle ?? this.variantTitle,
+    variantSku: variantSku ?? this.variantSku,
+    variantAttributes: variantAttributes ?? this.variantAttributes,
+  );
 
   @override
-  String toString() => 'OrderItem($productId x$qty @ $unitPrice)';
+  String toString() =>
+      'OrderItem($productId x$qty @ $unitPrice${variantTitle.isNotEmpty ? " [$variantTitle]" : ""})';
 }
 
 /// Order model (Firestore: `/companies/{companyId}/orders/{orderId}` plus
@@ -143,7 +177,7 @@ class Order {
   final DateTime? updatedAt;
   final DateTime? cancelledAt;
 
-  const Order({
+  Order({
     required this.id,
     required this.userId,
     required this.companyId,
@@ -166,8 +200,8 @@ class Order {
     this.createdAt,
     this.updatedAt,
     this.cancelledAt,
-  })  : subtotal = subtotal ?? itemsTotalOf(items),
-        totalAmount = totalAmount ?? itemsTotalOf(items);
+  }) : subtotal = subtotal ?? itemsTotalOf(items),
+       totalAmount = totalAmount ?? itemsTotalOf(items);
 
   /// Sum of the line totals, used as the default for [subtotal].
   static double itemsTotalOf(List<OrderItem> items) =>
@@ -177,7 +211,8 @@ class Order {
 
   double get itemsTotal => itemsTotalOf(items);
 
-  int get itemCount => items.fold<int>(0, (sum, e) => sum + (e.qty < 0 ? 0 : e.qty));
+  int get itemCount =>
+      items.fold<int>(0, (sum, e) => sum + (e.qty < 0 ? 0 : e.qty));
 
   /// Sum of item discount + shipping saved, for the receipt.
   double get totalSavings => discountAmount;
@@ -213,19 +248,21 @@ class Order {
       companyName: asString(map['companyName']),
       items: items,
       subtotal: subtotal,
-      discountAmount: asDouble(map['discountAmount'], asDouble(map['discount'])),
+      discountAmount: asDouble(
+        map['discountAmount'],
+        asDouble(map['discount']),
+      ),
       deliveryCharge: asDouble(map['deliveryCharge']),
       // Legacy orders only stored `totalAmount`; keep it when the new fields
       // are missing instead of silently zeroing the receipt.
-      totalAmount:
-          asDouble(map['totalAmount'], subtotal),
+      totalAmount: asDouble(map['totalAmount'], subtotal),
       address: asString(map['address']),
       pincode: asString(map['pincode']),
       voucherId: map['voucherId'] == null
           ? null
           : asString(map['voucherId']).isNotEmpty
-              ? asString(map['voucherId'])
-              : null,
+          ? asString(map['voucherId'])
+          : null,
       voucherCode: asString(map['voucherCode']),
       paymentStatus: PaymentStatus.all.contains(map['paymentStatus'])
           ? asString(map['paymentStatus'])
@@ -239,14 +276,14 @@ class Order {
       assignedEmployeeId: map['assignedEmployeeId'] == null
           ? null
           : asString(map['assignedEmployeeId']).isNotEmpty
-              ? asString(map['assignedEmployeeId'])
-              : null,
+          ? asString(map['assignedEmployeeId'])
+          : null,
       employeePackingDone: asBool(map['employeePackingDone']),
       reviewId: map['reviewId'] == null
           ? null
           : asString(map['reviewId']).isNotEmpty
-              ? asString(map['reviewId'])
-              : null,
+          ? asString(map['reviewId'])
+          : null,
       createdAt: asDateTime(map['createdAt']),
       updatedAt: asDateTime(map['updatedAt']),
       cancelledAt: asDateTime(map['cancelledAt']),
@@ -254,33 +291,34 @@ class Order {
   }
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'id': id,
-        'userId': userId,
-        'companyId': companyId,
-        'companyName': companyName,
-        'items': items.map((e) => e.toMap()).toList(),
-        'subtotal': subtotal,
-        'discountAmount': discountAmount,
-        'deliveryCharge': deliveryCharge,
-        'totalAmount': totalAmount,
-        'address': address,
-        'pincode': pincode,
-        'voucherId': voucherId,
-        'voucherCode': voucherCode,
-        'paymentStatus': paymentStatus,
-        'orderStatus': orderStatus,
-        'deliveryType': deliveryType,
-        'assignedEmployeeId': assignedEmployeeId,
-        'employeePackingDone': employeePackingDone,
-        'reviewId': reviewId,
-        'createdAt': createdAt?.toIso8601String(),
-        'updatedAt': updatedAt?.toIso8601String(),
-        'cancelledAt': cancelledAt?.toIso8601String(),
-      };
+    'id': id,
+    'userId': userId,
+    'companyId': companyId,
+    'companyName': companyName,
+    'items': items.map((e) => e.toMap()).toList(),
+    'subtotal': subtotal,
+    'discountAmount': discountAmount,
+    'deliveryCharge': deliveryCharge,
+    'totalAmount': totalAmount,
+    'address': address,
+    'pincode': pincode,
+    'voucherId': voucherId,
+    'voucherCode': voucherCode,
+    'paymentStatus': paymentStatus,
+    'orderStatus': orderStatus,
+    'deliveryType': deliveryType,
+    'assignedEmployeeId': assignedEmployeeId,
+    'employeePackingDone': employeePackingDone,
+    'reviewId': reviewId,
+    'createdAt': createdAt?.toIso8601String(),
+    'updatedAt': updatedAt?.toIso8601String(),
+    'cancelledAt': cancelledAt?.toIso8601String(),
+  };
 
   // ------------------------------------------------------------- Mutation --
 
   Order copyWith({
+    String? id,
     String? orderStatus,
     String? paymentStatus,
     String? assignedEmployeeId,
@@ -299,59 +337,57 @@ class Order {
     DateTime? updatedAt,
     DateTime? cancelledAt,
     bool clearCancelledAt = false,
-  }) =>
-      Order(
-        id: id,
-        userId: userId,
-        companyId: companyId,
-        companyName: companyName ?? this.companyName,
-        items: items,
-        subtotal: subtotal ?? this.subtotal,
-        discountAmount: discountAmount ?? this.discountAmount,
-        deliveryCharge: deliveryCharge ?? this.deliveryCharge,
-        totalAmount: totalAmount ?? this.totalAmount,
-        address: address ?? this.address,
-        pincode: pincode ?? this.pincode,
-        voucherId: voucherId ?? this.voucherId,
-        voucherCode: voucherCode ?? this.voucherCode,
-        paymentStatus: paymentStatus ?? this.paymentStatus,
-        orderStatus: orderStatus ?? this.orderStatus,
-        deliveryType: deliveryType,
-        assignedEmployeeId: clearAssignedEmployee
-            ? null
-            : (assignedEmployeeId ?? this.assignedEmployeeId),
-        employeePackingDone: employeePackingDone ?? this.employeePackingDone,
-        reviewId: reviewId ?? this.reviewId,
-        createdAt: createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-        cancelledAt:
-            clearCancelledAt ? null : (cancelledAt ?? this.cancelledAt),
-      );
+  }) => Order(
+    id: id ?? this.id,
+    userId: userId,
+    companyId: companyId,
+    companyName: companyName ?? this.companyName,
+    items: items,
+    subtotal: subtotal ?? this.subtotal,
+    discountAmount: discountAmount ?? this.discountAmount,
+    deliveryCharge: deliveryCharge ?? this.deliveryCharge,
+    totalAmount: totalAmount ?? this.totalAmount,
+    address: address ?? this.address,
+    pincode: pincode ?? this.pincode,
+    voucherId: voucherId ?? this.voucherId,
+    voucherCode: voucherCode ?? this.voucherCode,
+    paymentStatus: paymentStatus ?? this.paymentStatus,
+    orderStatus: orderStatus ?? this.orderStatus,
+    deliveryType: deliveryType,
+    assignedEmployeeId: clearAssignedEmployee
+        ? null
+        : (assignedEmployeeId ?? this.assignedEmployeeId),
+    employeePackingDone: employeePackingDone ?? this.employeePackingDone,
+    reviewId: reviewId ?? this.reviewId,
+    createdAt: createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    cancelledAt: clearCancelledAt ? null : (cancelledAt ?? this.cancelledAt),
+  );
 
   Order copyWithItems(List<OrderItem> newItems, {double? subtotal}) => Order(
-        id: id,
-        userId: userId,
-        companyId: companyId,
-        companyName: companyName,
-        items: newItems,
-        subtotal: subtotal ?? this.subtotal,
-        discountAmount: discountAmount,
-        deliveryCharge: deliveryCharge,
-        totalAmount: totalAmount,
-        address: address,
-        pincode: pincode,
-        voucherId: voucherId,
-        voucherCode: voucherCode,
-        paymentStatus: paymentStatus,
-        orderStatus: orderStatus,
-        deliveryType: deliveryType,
-        assignedEmployeeId: assignedEmployeeId,
-        employeePackingDone: employeePackingDone,
-        reviewId: reviewId,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        cancelledAt: cancelledAt,
-      );
+    id: id,
+    userId: userId,
+    companyId: companyId,
+    companyName: companyName,
+    items: newItems,
+    subtotal: subtotal ?? this.subtotal,
+    discountAmount: discountAmount,
+    deliveryCharge: deliveryCharge,
+    totalAmount: totalAmount,
+    address: address,
+    pincode: pincode,
+    voucherId: voucherId,
+    voucherCode: voucherCode,
+    paymentStatus: paymentStatus,
+    orderStatus: orderStatus,
+    deliveryType: deliveryType,
+    assignedEmployeeId: assignedEmployeeId,
+    employeePackingDone: employeePackingDone,
+    reviewId: reviewId,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    cancelledAt: cancelledAt,
+  );
 
   /// Applies a status change and stamps the audit timestamps.
   Order withStatus(String status, {DateTime? now, bool? paid}) {
@@ -361,8 +397,9 @@ class Order {
       updatedAt: timestamp,
       cancelledAt: status == OrderStatus.cancelled ? timestamp : null,
       clearCancelledAt: status != OrderStatus.cancelled,
-      paymentStatus:
-          status == OrderStatus.cancelled ? PaymentStatus.pending : paid,
+      paymentStatus: status == OrderStatus.cancelled
+          ? PaymentStatus.pending
+          : (paid == true ? PaymentStatus.done : PaymentStatus.pending),
     );
   }
 

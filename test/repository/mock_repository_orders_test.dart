@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
-import 'package:myshop/core/domain/order_status.dart';
 import 'package:myshop/core/domain/voucher_evaluator.dart';
 import 'package:myshop/core/models/order.dart';
 import 'package:myshop/core/models/voucher.dart';
@@ -20,8 +19,16 @@ Order order({
   String? voucherId,
   String voucherCode = '',
 }) {
-  final lines = items ??
-      const [OrderItem(productId: 'p_tomato', qty: 2, unitPrice: 60, name: 'Tomatoes')];
+  final lines =
+      items ??
+      const [
+        OrderItem(
+          productId: 'p_tomato',
+          qty: 2,
+          unitPrice: 60,
+          name: 'Tomatoes',
+        ),
+      ];
   return Order(
     id: id,
     userId: userId,
@@ -64,23 +71,23 @@ void main() {
       expect(placed.isBalanced, isTrue);
     });
 
-    test('keeps the full bill (discount + delivery) on the stored order', () async {
-      final placed = await repo.placeOrder(
-        order(subtotal: 500, discount: 75, delivery: 30, total: 455),
-      );
+    test(
+      'keeps the full bill (discount + delivery) on the stored order',
+      () async {
+        final placed = await repo.placeOrder(
+          order(subtotal: 500, discount: 75, delivery: 30, total: 455),
+        );
 
-      expect(placed.subtotal, 500);
-      expect(placed.discountAmount, 75);
-      expect(placed.deliveryCharge, 30);
-      expect(placed.totalAmount, 455);
-      expect(placed.isBalanced, isTrue);
-    });
+        expect(placed.subtotal, 500);
+        expect(placed.discountAmount, 75);
+        expect(placed.deliveryCharge, 30);
+        expect(placed.totalAmount, 455);
+        expect(placed.isBalanced, isTrue);
+      },
+    );
 
     test('rejects an order without a company or without items', () async {
-      expect(
-        () => repo.placeOrder(order(companyId: '')),
-        throwsArgumentError,
-      );
+      expect(() => repo.placeOrder(order(companyId: '')), throwsArgumentError);
       expect(
         () => repo.placeOrder(order(items: const <OrderItem>[])),
         throwsArgumentError,
@@ -90,9 +97,16 @@ void main() {
     test('decrements the stock of the ordered products', () async {
       final before = (await repo.product('p_tomato'))!;
       await repo.placeOrder(
-        order(items: const [
-          OrderItem(productId: 'p_tomato', qty: 5, unitPrice: 60, name: 'Tomatoes'),
-        ]),
+        order(
+          items: const [
+            OrderItem(
+              productId: 'p_tomato',
+              qty: 5,
+              unitPrice: 60,
+              name: 'Tomatoes',
+            ),
+          ],
+        ),
       );
       final after = (await repo.product('p_tomato'))!;
 
@@ -101,9 +115,16 @@ void main() {
 
     test('stock never drops below zero', () async {
       await repo.placeOrder(
-        order(items: const [
-          OrderItem(productId: 'p_tomato', qty: 99999, unitPrice: 60, name: 'Tomatoes'),
-        ]),
+        order(
+          items: const [
+            OrderItem(
+              productId: 'p_tomato',
+              qty: 99999,
+              unitPrice: 60,
+              name: 'Tomatoes',
+            ),
+          ],
+        ),
       );
       expect((await repo.product('p_tomato'))!.stockQty, 0);
     });
@@ -125,7 +146,13 @@ void main() {
       );
 
       final placed = await repo.placeOrder(
-        order(voucherId: 'v_once', voucherCode: 'ONCE', discount: 50, subtotal: 200, total: 150),
+        order(
+          voucherId: 'v_once',
+          voucherCode: 'ONCE',
+          discount: 50,
+          subtotal: 200,
+          total: 150,
+        ),
       );
 
       final voucher = (await repo.voucherByCode('c_organic', 'ONCE'))!;
@@ -149,7 +176,13 @@ void main() {
       );
 
       await repo.placeOrder(
-        order(voucherId: 'v_single', voucherCode: 'SINGLE', subtotal: 200, discount: 50, total: 150),
+        order(
+          voucherId: 'v_single',
+          voucherCode: 'SINGLE',
+          subtotal: 200,
+          discount: 50,
+          total: 150,
+        ),
       );
 
       // The evaluator is what checkout asks before accepting the code again.

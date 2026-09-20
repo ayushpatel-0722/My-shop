@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/l10n/app_localizations.dart';
+import '../../app/routes/app_router.dart';
 import '../../core/models/review.dart';
 import '../../core/services/service_locator.dart';
 
@@ -13,7 +15,18 @@ class ReviewsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.reviews)),
+      appBar: AppBar(
+        title: Text(l10n.reviews),
+        leading: BackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
+        ),
+      ),
       body: StreamBuilder<List<Review>>(
         stream: repo.reviews(companyId),
         builder: (context, snap) {
@@ -23,8 +36,7 @@ class ReviewsScreen extends StatelessWidget {
           if (list.isEmpty) {
             return const Center(child: Text('No reviews yet'));
           }
-          final avg =
-              list.fold(0, (s, r) => s + r.rating) / list.length;
+          final avg = list.fold(0, (s, r) => s + r.rating) / list.length;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -44,21 +56,23 @@ class ReviewsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            Text(avg.toStringAsFixed(1),
-                style: const TextStyle(
-                    fontSize: 40, fontWeight: FontWeight.bold)),
+            Text(
+              avg.toStringAsFixed(1),
+              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: List.generate(
-                      5,
-                      (i) => Icon(
-                            i < avg.round() ? Icons.star : Icons.star_border,
-                            color: Colors.amber,
-                            size: 20,
-                          )),
+                    5,
+                    (i) => Icon(
+                      i < avg.round() ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
+                  ),
                 ),
                 Text('$count reviews'),
               ],
@@ -78,12 +92,13 @@ class ReviewsScreen extends StatelessWidget {
             Expanded(child: Text(r.userName)),
             Row(
               children: List.generate(
-                  5,
-                  (i) => Icon(
-                        i < r.rating ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
-                        size: 16,
-                      )),
+                5,
+                (i) => Icon(
+                  i < r.rating ? Icons.star : Icons.star_border,
+                  color: Colors.amber,
+                  size: 16,
+                ),
+              ),
             ),
           ],
         ),

@@ -44,9 +44,11 @@ abstract class TestHarness {
   /// Without this, `connectivity_plus` throws `MissingPluginException`.
   static void setupPlatformChannels() {
     TestWidgetsFlutterBinding.ensureInitialized();
-    const MethodChannel(
-      'dev.fluttercommunity.plus/connectivity',
-    ).setMockMethodCallHandler((call) async => <String>['wifi']);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+          (call) async => <String>['wifi'],
+        );
   }
 
   /// Signs [user] in for both the router guards and the admin shell.
@@ -100,82 +102,77 @@ GoRouter buildTestRouter(
   Widget child, {
   String initialLocation = '/',
   List<GoRoute> extraRoutes = const <GoRoute>[],
-}) =>
-    GoRouter(
-      initialLocation: initialLocation,
-      errorBuilder: (context, state) =>
-          Scaffold(body: Center(child: Text('Route error: ${state.uri}'))),
-      routes: <RouteBase>[
-        GoRoute(path: '/', builder: (context, state) => child),
-        ...extraRoutes,
-        GoRoute(
-          path: AppRoutes.orders,
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Orders screen'))),
+}) => GoRouter(
+  initialLocation: initialLocation,
+  errorBuilder: (context, state) =>
+      Scaffold(body: Center(child: Text('Route error: ${state.uri}'))),
+  routes: <RouteBase>[
+    GoRoute(path: '/', builder: (context, state) => child),
+    ...extraRoutes,
+    GoRoute(
+      path: AppRoutes.orders,
+      builder: (context, state) =>
+          const Scaffold(body: Center(child: Text('Orders screen'))),
+    ),
+    GoRoute(
+      path: AppRoutes.orderTracking,
+      builder: (context, state) => Scaffold(
+        body: Center(child: Text('Order ${state.pathParameters['id']}')),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.home,
+      builder: (context, state) =>
+          const Scaffold(body: Center(child: Text('Home screen'))),
+    ),
+    GoRoute(
+      path: AppRoutes.cart,
+      builder: (context, state) =>
+          const Scaffold(body: Center(child: Text('Cart screen'))),
+    ),
+    GoRoute(
+      path: AppRoutes.categories,
+      builder: (context, state) =>
+          const Scaffold(body: Center(child: Text('Categories screen'))),
+    ),
+    GoRoute(
+      path: AppRoutes.category,
+      builder: (context, state) => Scaffold(
+        body: Center(child: Text('Category ${state.pathParameters['id']}')),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.product,
+      builder: (context, state) => Scaffold(
+        body: Center(child: Text('Product ${state.pathParameters['id']}')),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.adminAddProduct,
+      builder: (context, state) =>
+          const Scaffold(body: Center(child: Text('Add product screen'))),
+    ),
+    GoRoute(
+      path: AppRoutes.adminAddCategory,
+      builder: (context, state) =>
+          const Scaffold(body: Center(child: Text('Add category screen'))),
+    ),
+    GoRoute(
+      path: AppRoutes.adminEditProduct,
+      builder: (context, state) => Scaffold(
+        body: Center(child: Text('Edit product ${state.pathParameters['id']}')),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.adminEditCategory,
+      builder: (context, state) => Scaffold(
+        body: Center(
+          child: Text('Edit category ${state.pathParameters['id']}'),
         ),
-        GoRoute(
-          path: AppRoutes.orderTracking,
-          builder: (context, state) => Scaffold(
-            body: Center(
-              child: Text('Order ${state.pathParameters['id']}'),
-            ),
-          ),
-        ),
-        GoRoute(
-          path: AppRoutes.home,
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Home screen'))),
-        ),
-        GoRoute(
-          path: AppRoutes.cart,
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Cart screen'))),
-        ),
-        GoRoute(
-          path: AppRoutes.categories,
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Categories screen'))),
-        ),
-        GoRoute(
-          path: AppRoutes.category,
-          builder: (context, state) => Scaffold(
-            body: Center(child: Text('Category ${state.pathParameters['id']}')),
-          ),
-        ),
-        GoRoute(
-          path: AppRoutes.product,
-          builder: (context, state) => Scaffold(
-            body: Center(child: Text('Product ${state.pathParameters['id']}')),
-          ),
-        ),
-        GoRoute(
-          path: AppRoutes.adminAddProduct,
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Add product screen'))),
-        ),
-        GoRoute(
-          path: AppRoutes.adminAddCategory,
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Add category screen'))),
-        ),
-        GoRoute(
-          path: AppRoutes.adminEditProduct,
-          builder: (context, state) => Scaffold(
-            body: Center(
-              child: Text('Edit product ${state.pathParameters['id']}'),
-            ),
-          ),
-        ),
-        GoRoute(
-          path: AppRoutes.adminEditCategory,
-          builder: (context, state) => Scaffold(
-            body: Center(
-              child: Text('Edit category ${state.pathParameters['id']}'),
-            ),
-          ),
-        ),
-      ],
-    );
+      ),
+    ),
+  ],
+);
 
 /// Builds a themed, localized app around [child] with the BLoCs the screens
 /// expect.
@@ -204,14 +201,24 @@ Widget buildTestApp(
     ),
   );
 
+  if (withRouter) {
+    return MaterialApp.router(
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      locale: const Locale('en'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      routerConfig: buildTestRouter(shell),
+    );
+  }
+
   return MaterialApp(
     theme: AppTheme.light(),
     darkTheme: AppTheme.dark(),
     locale: const Locale('en'),
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
-    home: withRouter ? null : shell,
-    routerConfig: withRouter ? buildTestRouter(shell) : null,
+    home: shell,
   );
 }
 

@@ -51,11 +51,11 @@ void main() {
   );
 
   Future<void> openCheckout(WidgetTester tester) => pumpTestApp(
-        tester,
-        const CheckoutScreen(),
-        user: TestHarness.shopper,
-        cartCubit: cart,
-      );
+    tester,
+    const CheckoutScreen(),
+    user: TestHarness.shopper,
+    cartCubit: cart,
+  );
 
   Future<void> enterAddressAndPincode(
     WidgetTester tester, {
@@ -78,42 +78,67 @@ void main() {
     expect(find.text('Your cart is empty'), findsOneWidget);
   });
 
-  testWidgets('places one order per store of a multi-store cart', (tester) async {
-    cart.add(tomatoes, 'c_organic', 'GreenLeaf Organics', qty: 2);
-    cart.add(phone, 'c_techtronics', 'TechTronics Hub', qty: 1);
+  testWidgets('places one order per store of a multi-store cart', (
+    tester,
+  ) async {
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 2,
+    );
+    cart.add(
+      phone,
+      companyId: 'c_techtronics',
+      companyName: 'TechTronics Hub',
+      qty: 1,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
 
-    expect(find.byKey(const Key('checkout-store-card-c_organic')), findsOneWidget);
+    expect(
+      find.byKey(const Key('checkout-store-card-c_organic')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const Key('checkout-store-card-c_techtronics')),
       findsOneWidget,
     );
 
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
     final orders = await repo.orders(userId: TestHarness.shopper.id).first;
     expect(orders.length, 2, reason: 'every store gets its own order');
-    expect(
-      orders.map((o) => o.companyId).toSet(),
-      {'c_organic', 'c_techtronics'},
-    );
+    expect(orders.map((o) => o.companyId).toSet(), {
+      'c_organic',
+      'c_techtronics',
+    });
     expect(cart.state.items, isEmpty, reason: 'the cart is emptied on success');
   });
 
   testWidgets('stores the full bill on the order', (tester) async {
-    cart.add(tomatoes, 'c_organic', 'GreenLeaf Organics', qty: 2); // 96
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 2,
+    ); // 96
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
-    final order = (await repo.orders(userId: TestHarness.shopper.id).first).single;
+    final order =
+        (await repo.orders(userId: TestHarness.shopper.id).first).single;
     expect(order.subtotal, 96, reason: '2 × 48');
     expect(order.deliveryCharge, 30, reason: 'pincode 380001 costs 30');
     expect(order.discountAmount, 0);
@@ -125,7 +150,12 @@ void main() {
   });
 
   testWidgets('self pickup is not charged for delivery', (tester) async {
-    cart.add(tomatoes, 'c_organic', 'GreenLeaf Organics', qty: 1);
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
@@ -133,20 +163,30 @@ void main() {
     await tester.tap(find.text('Self pickup'));
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
-    final order = (await repo.orders(userId: TestHarness.shopper.id).first).single;
+    final order =
+        (await repo.orders(userId: TestHarness.shopper.id).first).single;
     expect(order.deliveryCharge, 0);
     expect(order.totalAmount, 48);
     expect(order.isSelfPickup, isTrue);
   });
 
-  testWidgets('a valid voucher reduces the total and is recorded', (tester) async {
+  testWidgets('a valid voucher reduces the total and is recorded', (
+    tester,
+  ) async {
     // 2 × 250 = 500 (>= the 100 minimum of FRESH20).
     await repo.saveProduct(milk.copyWith(amount: 250, discountAmt: 0));
-    cart.add(milk.copyWith(amount: 250, discountAmt: 0), 'c_organic', 'GreenLeaf Organics', qty: 2);
+    cart.add(
+      milk.copyWith(amount: 250, discountAmt: 0),
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 2,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
@@ -162,11 +202,14 @@ void main() {
     expect(find.text('₹500'), findsWidgets);
     expect(find.text('− ₹100'), findsWidgets);
 
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
-    final order = (await repo.orders(userId: TestHarness.shopper.id).first).single;
+    final order =
+        (await repo.orders(userId: TestHarness.shopper.id).first).single;
     expect(order.discountAmount, 100);
     expect(order.voucherCode, 'FRESH20');
     expect(order.totalAmount, 430, reason: '500 - 100 + 30 delivery');
@@ -178,7 +221,12 @@ void main() {
   });
 
   testWidgets('an unknown code is refused with an explanation', (tester) async {
-    cart.add(tomatoes, 'c_organic', 'GreenLeaf Organics', qty: 2);
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 2,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
@@ -192,18 +240,26 @@ void main() {
 
     expect(find.text('Invalid code'), findsOneWidget);
 
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
-    final order = (await repo.orders(userId: TestHarness.shopper.id).first).single;
+    final order =
+        (await repo.orders(userId: TestHarness.shopper.id).first).single;
     expect(order.discountAmount, 0);
     expect(order.voucherCode, isEmpty);
   });
 
   testWidgets('a voucher below the minimum order is refused', (tester) async {
     // Cart total 48, FRESH20 needs 100.
-    cart.add(tomatoes, 'c_organic', 'GreenLeaf Organics', qty: 1);
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
@@ -215,11 +271,19 @@ void main() {
     await tester.tap(find.byKey(const Key('checkout-apply-c_organic')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Add a few more items to use this voucher.'), findsOneWidget);
+    expect(
+      find.text('Add a few more items to use this voucher.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('another store\'s code cannot be used here', (tester) async {
-    cart.add(phone, 'c_techtronics', 'TechTronics Hub', qty: 1);
+    cart.add(
+      phone,
+      companyId: 'c_techtronics',
+      companyName: 'TechTronics Hub',
+      qty: 1,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
@@ -234,9 +298,15 @@ void main() {
     expect(find.text('Invalid code'), findsOneWidget);
   });
 
-  testWidgets('a free shipping voucher waives the delivery fee only',
-      (tester) async {
-    cart.add(milk, 'c_organic', 'GreenLeaf Organics', qty: 1); // 68
+  testWidgets('a free shipping voucher waives the delivery fee only', (
+    tester,
+  ) async {
+    cart.add(
+      milk,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    ); // 68
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
@@ -248,11 +318,14 @@ void main() {
     await tester.tap(find.byKey(const Key('checkout-apply-c_organic')));
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
-    final order = (await repo.orders(userId: TestHarness.shopper.id).first).single;
+    final order =
+        (await repo.orders(userId: TestHarness.shopper.id).first).single;
     expect(order.discountAmount, 0);
     expect(order.deliveryCharge, 0);
     expect(order.totalAmount, 68);
@@ -269,7 +342,12 @@ void main() {
         expiryDate: DateTime.now().subtract(const Duration(days: 1)),
       ),
     );
-    cart.add(milk, 'c_organic', 'GreenLeaf Organics', qty: 1);
+    cart.add(
+      milk,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
@@ -284,12 +362,20 @@ void main() {
     expect(find.text('This voucher has expired.'), findsOneWidget);
   });
 
-  testWidgets('the address and pincode are validated before ordering',
-      (tester) async {
-    cart.add(tomatoes, 'c_organic', 'GreenLeaf Organics', qty: 1);
+  testWidgets('the address and pincode are validated before ordering', (
+    tester,
+  ) async {
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    );
 
     await openCheckout(tester);
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
@@ -300,9 +386,14 @@ void main() {
       find.byKey(const Key('checkout-address-field')),
       '12 Market Street',
     );
-    await tester.enterText(find.byKey(const Key('checkout-pincode-field')), '38');
+    await tester.enterText(
+      find.byKey(const Key('checkout-pincode-field')),
+      '38',
+    );
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
@@ -311,11 +402,18 @@ void main() {
   });
 
   testWidgets('placing an order reduces the stock', (tester) async {
-    cart.add(tomatoes, 'c_organic', 'GreenLeaf Organics', qty: 5);
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 5,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);
-    await tester.ensureVisible(find.byKey(const Key('checkout-place-order-button')));
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
@@ -324,7 +422,12 @@ void main() {
 
   testWidgets('a lowercase code is accepted', (tester) async {
     await repo.saveProduct(milk.copyWith(amount: 250, discountAmt: 0));
-    cart.add(milk.copyWith(amount: 250, discountAmt: 0), 'c_organic', 'GreenLeaf Organics', qty: 2);
+    cart.add(
+      milk.copyWith(amount: 250, discountAmt: 0),
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 2,
+    );
 
     await openCheckout(tester);
     await enterAddressAndPincode(tester);

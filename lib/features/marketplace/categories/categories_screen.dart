@@ -50,7 +50,7 @@ class CategoriesScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Color(0xFF1E2229)),
-            onPressed: () => context.go(AppRoutes.search),
+            onPressed: () => context.push(AppRoutes.search),
           ),
           BlocBuilder<CartCubit, CartState>(
             builder: (context, state) {
@@ -72,7 +72,7 @@ class CategoriesScreen extends StatelessWidget {
                     color: Color(0xFF1E2229),
                   ),
                 ),
-                onPressed: () => context.go(AppRoutes.cart),
+                onPressed: () => context.push(AppRoutes.cart),
               );
             },
           ),
@@ -86,7 +86,7 @@ class CategoriesScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: InkWell(
-                onTap: () => context.go(AppRoutes.search),
+                onTap: () => context.push(AppRoutes.search),
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -193,7 +193,7 @@ class CategoriesScreen extends StatelessWidget {
               final bgColor = _pastelColors[i % _pastelColors.length];
 
               return InkWell(
-                onTap: () => context.go(
+                onTap: () => context.push(
                   '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
                 ),
                 borderRadius: BorderRadius.circular(16),
@@ -315,10 +315,12 @@ class CategoriesScreen extends StatelessWidget {
     // NOTE: no invented ratings / delivery times / offers any more — every
     // badge below is derived from real company data.
     final isOpen = company.isOpenNow();
-    final offersHomeDelivery =
-        company.deliveryTypes.contains(DeliveryType.homeDelivery);
-    final offersPickup =
-        company.deliveryTypes.contains(DeliveryType.selfPickup);
+    final offersHomeDelivery = company.deliveryTypes.contains(
+      DeliveryType.homeDelivery,
+    );
+    final offersPickup = company.deliveryTypes.contains(
+      DeliveryType.selfPickup,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -335,7 +337,7 @@ class CategoriesScreen extends StatelessWidget {
         ],
       ),
       child: InkWell(
-        onTap: () => context.go(AppRoutes.companyPath(company.slug)),
+        onTap: () => context.push(AppRoutes.companyPath(company.slug)),
         borderRadius: BorderRadius.circular(18),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -473,8 +475,8 @@ class CategoriesScreen extends StatelessWidget {
                                   offersHomeDelivery && offersPickup
                                       ? 'Delivery & pickup'
                                       : offersHomeDelivery
-                                          ? 'Home delivery'
-                                          : 'Self pickup',
+                                      ? 'Home delivery'
+                                      : 'Self pickup',
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,

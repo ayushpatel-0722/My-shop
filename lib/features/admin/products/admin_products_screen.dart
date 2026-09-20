@@ -41,10 +41,8 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
 
   String get _companyId => AuthSession.currentUser?.companyId ?? '';
 
-  CatalogQuery get _query => CatalogQuery(
-        search: _searchCtrl.text,
-        sort: _sort,
-      );
+  CatalogQuery get _query =>
+      CatalogQuery(search: _searchCtrl.text, sort: _sort);
 
   List<Product> _apply(List<Product> products) {
     final filtered = Catalog.apply(products, _query);
@@ -189,7 +187,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                     return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                       itemCount: list.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
                       itemBuilder: (context, i) => _ProductTile(
                         product: list[i],
                         categoryName: names[list[i].categoryId] ?? '',
@@ -197,7 +195,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                           AppRoutes.adminEditProductPath(list[i].id),
                           extra: list[i],
                         ),
-                        onDelete: () => _confirmDelete(context, list[i]),
+                        onDelete: () => _confirmDelete(list[i]),
                       ),
                     );
                   },
@@ -221,7 +219,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, Product product) async {
+  Future<void> _confirmDelete(Product product) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -252,9 +250,9 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete product: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to delete product: $e')));
     }
   }
 }
@@ -278,8 +276,8 @@ class _ProductTile extends StatelessWidget {
     final statusColor = status == StockStatus.outOfStock
         ? Colors.redAccent
         : status == StockStatus.lowStock
-            ? Colors.orange
-            : Colors.green;
+        ? Colors.orange
+        : Colors.green;
 
     return ModernCard(
       key: Key('product-tile-${product.id}'),
@@ -290,12 +288,13 @@ class _ProductTile extends StatelessWidget {
           child: SizedBox(
             width: 48,
             height: 48,
-            child: product.imageUrl.isNotEmpty &&
+            child:
+                product.imageUrl.isNotEmpty &&
                     product.imageUrl.startsWith('http')
                 ? Image.network(
                     product.imageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.image),
+                    errorBuilder: (_, _, _) => const Icon(Icons.image),
                   )
                 : const Icon(Icons.image),
           ),
@@ -337,13 +336,15 @@ class _ProductTile extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              categoryName.isEmpty
-                  ? 'Uncategorised'
-                  : categoryName,
+              categoryName.isEmpty ? 'Uncategorised' : categoryName,
               style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
             const SizedBox(height: 6),
-            CopyableIdBadge(key: Key('product-id-${product.id}'), id: product.id, label: 'Product'),
+            CopyableIdBadge(
+              key: Key('product-id-${product.id}'),
+              id: product.id,
+              label: 'Product',
+            ),
           ],
         ),
         trailing: Column(

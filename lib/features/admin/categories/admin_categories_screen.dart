@@ -114,7 +114,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                     itemCount: matches.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, i) => _CategoryTile(
                       node: matches[i],
                       indent: 0,
@@ -127,12 +127,13 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                         extra: matches[i].category,
                       ),
                       onDelete: () =>
-                          _confirmDelete(context, matches[i].category, categories),
+                          _confirmDelete(matches[i].category, categories),
                     ),
                   );
                 }
 
-                final expandedIds = tree.flatten()
+                final expandedIds = tree
+                    .flatten()
                     .where(
                       (node) =>
                           node.children.isNotEmpty &&
@@ -162,12 +163,12 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                         onToggle: node.isLeaf
                             ? null
                             : () => setState(() {
-                                  if (_collapsed.contains(node.id)) {
-                                    _collapsed.remove(node.id);
-                                  } else {
-                                    _collapsed.add(node.id);
-                                  }
-                                }),
+                                if (_collapsed.contains(node.id)) {
+                                  _collapsed.remove(node.id);
+                                } else {
+                                  _collapsed.add(node.id);
+                                }
+                              }),
                         pathLabel: node.depth == 0
                             ? ''
                             : CategoryHierarchy.pathLabel(
@@ -179,7 +180,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                           extra: node.category,
                         ),
                         onDelete: () =>
-                            _confirmDelete(context, node.category, categories),
+                            _confirmDelete(node.category, categories),
                       ),
                       const SizedBox(height: 8),
                     ],
@@ -193,19 +194,16 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     );
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-    Category category,
-    List<Category> all,
-  ) async {
-    final children =
-        all.where((c) => c.parentId == category.id).toList(growable: false);
+  Future<void> _confirmDelete(Category category, List<Category> all) async {
+    final children = all
+        .where((c) => c.parentId == category.id)
+        .toList(growable: false);
     final parentName = category.parentId == null
         ? null
         : all
-            .where((c) => c.id == category.parentId)
-            .map((c) => c.name)
-            .firstOrNull;
+              .where((c) => c.id == category.parentId)
+              .map((c) => c.name)
+              .firstOrNull;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -254,9 +252,9 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete category: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to delete category: $e')));
     }
   }
 }
@@ -465,21 +463,60 @@ class _CategoryGlyph extends StatelessWidget {
   Widget build(BuildContext context) {
     final icon = category.iconUrl.trim();
     if (category.hasImageIcon) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          icon,
-          width: 36,
-          height: 36,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) =>
-              const Text('🛍️', style: TextStyle(fontSize: 24)),
+      return Container(
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade200, width: 1),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(9),
+          child: Image.network(
+            icon,
+            fit: BoxFit.cover,
+            loadingBuilder: (_, child, progress) {
+              if (progress == null) return child;
+              return const Center(
+                child: SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
+            },
+            errorBuilder: (_, _, _) => Container(
+              color: Colors.grey.shade100,
+              child: const Center(
+                child: Icon(
+                  Icons.category_outlined,
+                  size: 22,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
         ),
       );
     }
-    return Text(
-      icon.isNotEmpty ? icon : '🛍️',
-      style: const TextStyle(fontSize: 24),
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          icon.isNotEmpty ? icon : '📁',
+          style: const TextStyle(fontSize: 22),
+        ),
+      ),
     );
   }
 }

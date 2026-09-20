@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n/app_localizations.dart';
+import '../../../app/routes/app_router.dart';
 import '../../../core/domain/order_status.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
@@ -21,7 +23,18 @@ class OrderTrackingScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.orderStatus)),
+      appBar: AppBar(
+        title: Text(l10n.orderStatus),
+        leading: BackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.orders);
+            }
+          },
+        ),
+      ),
       body: StreamBuilder<Order?>(
         stream: repo.watchOrder(orderId),
         builder: (context, snap) {
@@ -76,11 +89,54 @@ class OrderTrackingScreen extends StatelessWidget {
                     for (final item in order.items)
                       ListTile(
                         dense: true,
-                        title: Text(
-                          item.name.isNotEmpty ? item.name : item.productId,
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.name.isNotEmpty
+                                    ? item.name
+                                    : item.productId,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (item.variantTitle.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFF1E293B)
+                                      : const Color(0xFFF3F4F6),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  item.variantTitle,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF4B5563),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                        subtitle: Text('${item.qty} × ${formatCurrency(item.unitPrice)}'),
-                        trailing: Text(formatCurrency(item.itemTotal)),
+                        subtitle: Text(
+                          '${item.qty} × ${formatCurrency(item.unitPrice)}',
+                        ),
+                        trailing: Text(
+                          formatCurrency(item.itemTotal),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                   ],
                 ),
@@ -134,9 +190,9 @@ class OrderTrackingScreen extends StatelessWidget {
       await repo.cancelOrder(order.id);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not cancel order: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not cancel order: $e')));
     }
   }
 
@@ -145,15 +201,12 @@ class OrderTrackingScreen extends StatelessWidget {
       children: [
         Text(
           'Order ${order.reference}',
-          style: Theme.of(context)
-              .textTheme
-              .titleLarge
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
-        Text(
-          '${order.itemCount} items · ${formatDate(order.createdAt)}',
-        ),
+        Text('${order.itemCount} items · ${formatDate(order.createdAt)}'),
         const SizedBox(height: 10),
         OrderStatusBadge(status: order.orderStatus),
       ],
@@ -274,12 +327,7 @@ class _BillCard extends StatelessWidget {
     );
   }
 
-  Widget _row(
-    String label,
-    String value, {
-    bool bold = false,
-    Color? color,
-  }) {
+  Widget _row(String label, String value, {bool bold = false, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(

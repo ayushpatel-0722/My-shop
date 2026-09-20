@@ -122,7 +122,7 @@ void main() {
 
   group('Order — lifecycle helpers', () {
     test('status flags', () {
-      const pending = Order(id: 'o', userId: 'u', companyId: 'c');
+      final pending = Order(id: 'o', userId: 'u', companyId: 'c');
       expect(pending.isOpen, isTrue);
       expect(pending.isPending, isTrue);
 
@@ -137,7 +137,7 @@ void main() {
 
     test('withStatus stamps cancelledAt only when cancelling', () {
       final now = DateTime(2026, 6, 1, 10);
-      const order = Order(id: 'o', userId: 'u', companyId: 'c');
+      final order = Order(id: 'o', userId: 'u', companyId: 'c');
 
       final packed = order.withStatus(OrderStatus.packing, now: now);
       expect(packed.orderStatus, OrderStatus.packing);
@@ -152,13 +152,16 @@ void main() {
     });
 
     test('withStatus can flip the payment flag', () {
-      const order = Order(id: 'o', userId: 'u', companyId: 'c');
+      final order = Order(id: 'o', userId: 'u', companyId: 'c');
       expect(order.isPaid, isFalse);
-      expect(order.withStatus(OrderStatus.confirmed, paid: true).isPaid, isTrue);
+      expect(
+        order.withStatus(OrderStatus.confirmed, paid: true).isPaid,
+        isTrue,
+      );
     });
 
     test('withStatus clears payment when cancelling', () {
-      const order = Order(
+      final order = Order(
         id: 'o',
         userId: 'u',
         companyId: 'c',
@@ -168,16 +171,16 @@ void main() {
     });
 
     test('reference is safe for short and long ids', () {
-      expect(const Order(id: 'abc', userId: 'u', companyId: 'c').reference, '#ABC');
+      expect(Order(id: 'abc', userId: 'u', companyId: 'c').reference, '#ABC');
       expect(
-        const Order(id: 'abcdefghij', userId: 'u', companyId: 'c').reference,
+        Order(id: 'abcdefghij', userId: 'u', companyId: 'c').reference,
         '#ABCDEF',
       );
-      expect(const Order(id: '', userId: 'u', companyId: 'c').reference, '#—');
+      expect(Order(id: '', userId: 'u', companyId: 'c').reference, '#—');
     });
 
     test('copyWithItems keeps the billing fields', () {
-      const order = Order(
+      final order = Order(
         id: 'o',
         userId: 'u',
         companyId: 'c',
@@ -186,9 +189,9 @@ void main() {
         deliveryCharge: 5,
         totalAmount: 95,
       );
-      final updated = order.copyWithItems(
-        const [OrderItem(productId: 'p9', qty: 1, unitPrice: 60)],
-      );
+      final updated = order.copyWithItems(const [
+        OrderItem(productId: 'p9', qty: 1, unitPrice: 60),
+      ]);
       expect(updated.items.single.productId, 'p9');
       expect(updated.subtotal, 100, reason: 'the stored bill is preserved');
       expect(updated.totalAmount, 95);

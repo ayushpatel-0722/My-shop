@@ -29,7 +29,8 @@ class CategoryNode {
       children.fold<int>(0, (sum, child) => sum + 1 + child.descendantCount);
 
   @override
-  String toString() => 'CategoryNode($id, depth: $depth, kids: ${children.length})';
+  String toString() =>
+      'CategoryNode($id, depth: $depth, kids: ${children.length})';
 }
 
 /// Builds and queries a category hierarchy from the flat Firestore list.
@@ -46,7 +47,10 @@ class CategoryTree {
   /// Categories whose parent chain looped and had to be re-rooted.
   final List<Category> repairedCycles;
 
-  const CategoryTree({this.roots = const <CategoryNode>[], this.repairedCycles = const <Category>[]});
+  const CategoryTree({
+    this.roots = const <CategoryNode>[],
+    this.repairedCycles = const <Category>[],
+  });
 
   factory CategoryTree.build(List<Category> categories) {
     final byId = <String, Category>{};
@@ -70,7 +74,7 @@ class CategoryTree {
     }
 
     final knownIds = byId.keys.toSet();
-    final repairedIds = <String>{};
+    final repairedIds = <String>{for (final c in repaired) c.id};
 
     List<CategoryNode> buildLevel(String? parentId, int depth) {
       if (depth > maxDepth) return const <CategoryNode>[];
@@ -101,10 +105,7 @@ class CategoryTree {
       repairedIds.add(c.id);
     }
 
-    return CategoryTree(
-      roots: buildLevel(null, 0),
-      repairedCycles: repaired,
-    );
+    return CategoryTree(roots: buildLevel(null, 0), repairedCycles: repaired);
   }
 
   /// Depth-first list of every node.
@@ -141,15 +142,11 @@ class CategoryTree {
   }
 
   /// Every id that should start expanded: all parents with children.
-  Set<String> get defaultExpandedIds => flatten()
-      .where((n) => n.children.isNotEmpty)
-      .map((n) => n.id)
-      .toSet();
+  Set<String> get defaultExpandedIds =>
+      flatten().where((n) => n.children.isNotEmpty).map((n) => n.id).toSet();
 
   static List<CategoryNode> _sorted(List<CategoryNode> nodes) {
-    nodes.sort(
-      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-    );
+    nodes.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     return nodes;
   }
 

@@ -138,8 +138,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                       // Only advertise codes a shopper can actually redeem.
                       final activeVouchers = rawVouchers
                           .where(
-                            (v) =>
-                                v.isLiveAt(DateTime.now()) && !v.isExhausted,
+                            (v) => v.isLiveAt(DateTime.now()) && !v.isExhausted,
                           )
                           .toList();
                       return StreamBuilder<List<Review>>(
@@ -187,10 +186,20 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
           }
         },
       ),
+      title: Text(
+        company.name,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Color(0xFF1E2229),
+          fontWeight: FontWeight.bold,
+          fontSize: 17,
+        ),
+      ),
       actions: [
         IconButton(
           icon: const Icon(Icons.search, color: Color(0xFF1E2229)),
-          onPressed: () => context.go(AppRoutes.search),
+          onPressed: () => context.push(AppRoutes.search),
         ),
         IconButton(
           icon: const Icon(
@@ -219,7 +228,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                   color: Color(0xFF1E2229),
                 ),
               ),
-              onPressed: () => context.go(AppRoutes.cart),
+              onPressed: () => context.push(AppRoutes.cart),
             );
           },
         ),
@@ -271,17 +280,17 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
     return ListView(
       padding: const EdgeInsets.only(bottom: 40),
       children: [
-        // 1. Cover Banner + Overlapping Avatar + Follow Action
+        // 1. Cover Banner + Store Avatar + Follow Action
         _buildCoverAndHeader(context, company, offerBanners),
 
         const SizedBox(height: 12),
 
-        // 2. Store Metadata (Real Rating calculation, Open/Closed, Delivery Info)
+        // 2. Shop Details & Metadata (Rating, Open/Closed, Hours, Address, Delivery Info)
         _buildStoreMetadata(context, company, reviews),
 
         const SizedBox(height: 16),
 
-        // 3. Live Promo Banner / Top Voucher Card from Firestore
+        // 3. This Company's Offer Banner / Top Deals from Firestore
         if (offerBanners.isNotEmpty || vouchers.isNotEmpty) ...[
           _buildLivePromoCard(context, company, offerBanners, vouchers),
           const SizedBox(height: 16),
@@ -290,22 +299,29 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         // 4. Live Offers & Vouchers from Firestore for this company
         if (vouchers.isNotEmpty) ...[
           _buildOffersSection(context, company, vouchers),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
         ],
 
-        // 5. Category Filter Chips (Derived dynamically from company products)
-        if (categories.isNotEmpty || allProducts.isNotEmpty) ...[
-          _buildCategoryFilterRail(categories, allProducts),
-          const SizedBox(height: 18),
-        ],
+        // 5. Category-wise Product Sections (Category 1 -> Products, Category 2 -> Products...)
+        _buildCategoryWiseProductSections(
+          context,
+          company,
+          categories,
+          allProducts,
+        ),
 
-        // 6. Top Picks from [Store Name]
+        // 6. Trending Products from this Store
         if (effectiveTopPicks.isNotEmpty) ...[
           _buildTopPicksSection(context, company, effectiveTopPicks),
           const SizedBox(height: 24),
         ],
 
-        // 7. All Products Grid with Live Sort/Filters
+        // 7. All Products Section (Category Filter Chips + Grid)
+        if (categories.isNotEmpty || allProducts.isNotEmpty) ...[
+          _buildCategoryFilterRail(categories, allProducts),
+          const SizedBox(height: 16),
+        ],
+
         _buildAllProductsSection(context, company, filteredProducts),
 
         const SizedBox(height: 28),
@@ -313,6 +329,133 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         // 8. Live Customer Reviews & Rating Breakdown from Firestore
         _buildReviewsSection(context, company, reviews),
       ],
+    );
+  }
+
+  /// Builds dedicated horizontal product rails for each category in this company's catalogue.
+  Widget _buildCategoryWiseProductSections(
+    BuildContext context,
+    Company company,
+    List<Category> categories,
+    List<Product> allProducts,
+  ) {
+    final Map<String, List<Product>> categoryProductMap = {};
+    for (final p in allProducts) {
+      if (p.categoryId.isNotEmpty) {
+        categoryProductMap.putIfAbsent(p.categoryId, () => []).add(p);
+      }
+    }
+
+    if (categoryProductMap.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: categoryProductMap.entries.map((entry) {
+        final catId = entry.key;
+        final catProducts = entry.value;
+        final categoryObj = categories.firstWhereOrNull((c) => c.id == catId);
+        final catName = categoryObj?.name.isNotEmpty == true
+            ? categoryObj!.name
+            : 'Category Products';
+        final catIcon = categoryObj?.iconUrl.isNotEmpty == true
+            ? categoryObj!.iconUrl
+            : '📦';
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        if (catIcon.length <= 4)
+                          Text(catIcon, style: const TextStyle(fontSize: 18))
+                        else
+                          const Icon(
+                            Icons.category_outlined,
+                            size: 18,
+                            color: Color(0xFFB3261E),
+                          ),
+                        const SizedBox(width: 8),
+                        Text(
+                          catName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1E2229),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F3F5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${catProducts.length}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF6C757D),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    InkWell(
+                      onTap: () {
+                        setState(() => _selectedCategoryId = catId);
+                      },
+                      child: const Row(
+                        children: [
+                          Text(
+                            'See All',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFB3261E),
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right,
+                            size: 16,
+                            color: Color(0xFFB3261E),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 242,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: catProducts.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 12),
+                  itemBuilder: (context, i) => _topPickCard(
+                    context,
+                    company,
+                    catProducts[i],
+                    company.currencySymbol,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -757,10 +900,10 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
     return InkWell(
       onTap: () {
         if (banner.targetProdId != null && banner.targetProdId!.isNotEmpty) {
-          context.go(AppRoutes.productPath(banner.targetProdId!));
+          context.push(AppRoutes.productPath(banner.targetProdId!));
         } else if (banner.targetCatId != null &&
             banner.targetCatId!.isNotEmpty) {
-          context.go(AppRoutes.categoryPath(banner.targetCatId!));
+          context.push(AppRoutes.categoryPath(banner.targetCatId!));
         }
       },
       child: Image.network(
@@ -985,8 +1128,8 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               final sub = v.minOrderAmt > 0
                   ? 'Orders over ₹${v.minOrderAmt.toStringAsFixed(0)}'
                   : v.firstTimeOnly
-                      ? 'First order'
-                      : 'No minimum';
+                  ? 'First order'
+                  : 'No minimum';
               return _voucherItem(title: title, sub: sub, code: v.code);
             },
           ),
@@ -1244,7 +1387,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         ],
       ),
       child: InkWell(
-        onTap: () => context.go(AppRoutes.productPath(p.id)),
+        onTap: () => context.push(AppRoutes.productPath(p.id)),
         borderRadius: BorderRadius.circular(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1557,7 +1700,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         ],
       ),
       child: InkWell(
-        onTap: () => context.go(AppRoutes.productPath(p.id)),
+        onTap: () => context.push(AppRoutes.productPath(p.id)),
         borderRadius: BorderRadius.circular(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1892,7 +2035,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
           // Leave / View All Reviews Link
           Center(
             child: TextButton.icon(
-              onPressed: () => context.go(
+              onPressed: () => context.push(
                 AppRoutes.reviews.replaceFirst(':companyId', company.id),
               ),
               icon: const Icon(

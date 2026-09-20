@@ -24,6 +24,15 @@ class _SearchScreenState extends State<SearchScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
+        ),
         title: TextField(
           autofocus: true,
           decoration: InputDecoration(
@@ -44,8 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 }
                 return GridView.builder(
                   padding: const EdgeInsets.all(16),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 0.72,
                     crossAxisSpacing: 12,
@@ -55,7 +63,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemBuilder: (context, i) => ProductCard(
                     product: list[i],
                     onTap: () =>
-                        context.go(AppRoutes.productPath(list[i].id)),
+                        context.push(AppRoutes.productPath(list[i].id)),
                   ),
                 );
               },

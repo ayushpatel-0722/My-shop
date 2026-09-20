@@ -47,7 +47,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go(AppRoutes.home);
+              context.go(AppRoutes.categories);
             }
           },
         ),
@@ -67,7 +67,8 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
           return StreamBuilder<List<Product>>(
             stream: repo.products(),
             builder: (context, snap) {
-              final loading = snap.connectionState == ConnectionState.waiting &&
+              final loading =
+                  snap.connectionState == ConnectionState.waiting &&
                   (snap.data?.isEmpty ?? true);
 
               final products = Catalog.apply(
@@ -94,40 +95,40 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                     child: loading
                         ? const Center(child: CircularProgressIndicator())
                         : products.isEmpty
-                            ? _EmptyCategory(
-                                hasStockFilter: _inStockOnly,
-                                onClear: () =>
-                                    setState(() => _inStockOnly = false),
-                              )
-                            : LayoutBuilder(
-                                builder: (context, constraints) {
-                                  final width = constraints.maxWidth;
-                                  final crossAxisCount = width >= 1000
-                                      ? 4
-                                      : width >= 700
-                                          ? 3
-                                          : 2;
-                                  final childAspectRatio =
-                                      width >= 1000 ? 0.68 : 0.72;
-                                  return GridView.builder(
-                                    padding: const EdgeInsets.all(16),
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
+                        ? _EmptyCategory(
+                            hasStockFilter: _inStockOnly,
+                            onClear: () => setState(() => _inStockOnly = false),
+                          )
+                        : LayoutBuilder(
+                            builder: (context, constraints) {
+                              final width = constraints.maxWidth;
+                              final crossAxisCount = width >= 1000
+                                  ? 4
+                                  : width >= 700
+                                  ? 3
+                                  : 2;
+                              final childAspectRatio = width >= 1000
+                                  ? 0.68
+                                  : 0.72;
+                              return GridView.builder(
+                                padding: const EdgeInsets.all(16),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: crossAxisCount,
                                       childAspectRatio: childAspectRatio,
                                       crossAxisSpacing: 12,
                                       mainAxisSpacing: 12,
                                     ),
-                                    itemCount: products.length,
-                                    itemBuilder: (context, i) => ProductCard(
-                                      product: products[i],
-                                      onTap: () => context.go(
-                                        AppRoutes.productPath(products[i].id),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                                itemCount: products.length,
+                                itemBuilder: (context, i) => ProductCard(
+                                  product: products[i],
+                                  onTap: () => context.push(
+                                    AppRoutes.productPath(products[i].id),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                   ),
                 ],
               );
@@ -168,10 +169,7 @@ class _Toolbar extends StatelessWidget {
           Row(
             children: [
               const Text('In stock', style: TextStyle(fontSize: 12)),
-              Switch(
-                value: inStockOnly,
-                onChanged: onStockChanged,
-              ),
+              Switch(value: inStockOnly, onChanged: onStockChanged),
             ],
           ),
           const SizedBox(width: 4),
@@ -197,10 +195,7 @@ class _EmptyCategory extends StatelessWidget {
   final bool hasStockFilter;
   final VoidCallback onClear;
 
-  const _EmptyCategory({
-    required this.hasStockFilter,
-    required this.onClear,
-  });
+  const _EmptyCategory({required this.hasStockFilter, required this.onClear});
 
   @override
   Widget build(BuildContext context) {

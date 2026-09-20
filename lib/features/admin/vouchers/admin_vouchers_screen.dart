@@ -78,7 +78,7 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
           key: const Key('voucher-create-button'),
           icon: const Icon(Icons.add),
           tooltip: 'Create voucher',
-          onPressed: () => _openEditor(context, null),
+          onPressed: () => _openEditor(null),
         ),
       ],
       child: Column(
@@ -141,7 +141,7 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
                     detail:
                         'Create your first coupon code to run a promotion for this store.',
                     actionLabel: 'Create Voucher',
-                    onAction: () => _openEditor(context, null),
+                    onAction: () => _openEditor(null),
                   );
                 }
                 if (list.isEmpty) {
@@ -161,8 +161,8 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
                       _VoucherTile(
                         key: Key('voucher-tile-${v.id}'),
                         voucher: v,
-                        onEdit: () => _openEditor(context, v),
-                        onDelete: () => _confirmDelete(context, v),
+                        onEdit: () => _openEditor(v),
+                        onDelete: () => _confirmDelete(v),
                         onToggle: (value) =>
                             repo.saveVoucher(v.copyWith(isActive: value)),
                       ),
@@ -191,7 +191,7 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
     }
   }
 
-  Future<void> _openEditor(BuildContext context, Voucher? voucher) async {
+  Future<void> _openEditor(Voucher? voucher) async {
     // Existing codes are needed to keep codes unique inside the store.
     final codes = (await repo.vouchers(_companyId).first)
         .where((v) => v.id != voucher?.id)
@@ -211,7 +211,7 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, Voucher voucher) async {
+  Future<void> _confirmDelete(Voucher voucher) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -245,9 +245,9 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete voucher: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not delete voucher: $e')));
     }
   }
 }
@@ -260,8 +260,9 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final active =
-        vouchers.where((v) => v.isLiveAt(now) && !v.isExhausted).length;
+    final active = vouchers
+        .where((v) => v.isLiveAt(now) && !v.isExhausted)
+        .length;
     final paused = vouchers.where((v) => !v.isActive).length;
     final expired = vouchers.where((v) => v.isExpiredAt(now)).length;
 
@@ -334,7 +335,10 @@ class _StatCard extends StatelessWidget {
               value,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -366,17 +370,17 @@ class _VoucherTile extends StatelessWidget {
     final statusColor = !voucher.isActive
         ? Colors.orange
         : expired
-            ? Colors.redAccent
-            : exhausted
-                ? Colors.purple
-                : Colors.green;
+        ? Colors.redAccent
+        : exhausted
+        ? Colors.purple
+        : Colors.green;
     final statusLabel = !voucher.isActive
         ? 'Paused'
         : expired
-            ? 'Expired'
-            : exhausted
-                ? 'Limit reached'
-                : 'Active';
+        ? 'Expired'
+        : exhausted
+        ? 'Limit reached'
+        : 'Active';
 
     final usage = voucher.maxUses > 0
         ? '${voucher.usageCount}/${voucher.maxUses} uses'
@@ -472,8 +476,8 @@ class _VoucherTile extends StatelessWidget {
                   value: voucher.maxUses == 0
                       ? 0
                       : (voucher.usageCount / voucher.maxUses)
-                          .clamp(0.0, 1.0)
-                          .toDouble(),
+                            .clamp(0.0, 1.0)
+                            .toDouble(),
                   minHeight: 6,
                   color: exhausted ? Colors.purple : theme.colorScheme.primary,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -489,10 +493,7 @@ class _VoucherTile extends StatelessWidget {
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
-                Switch(
-                  value: voucher.isActive,
-                  onChanged: onToggle,
-                ),
+                Switch(value: voucher.isActive, onChanged: onToggle),
               ],
             ),
           ],
@@ -672,7 +673,8 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
       _saving = true;
     });
 
-    final base = widget.voucher ??
+    final base =
+        widget.voucher ??
         Voucher(id: '', companyId: widget.companyId, code: '');
     final voucher = base.copyWith(
       code: Voucher.normalizeCode(_codeCtrl.text),
@@ -712,9 +714,9 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save voucher: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not save voucher: $e')));
     }
   }
 
@@ -856,9 +858,11 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.event),
               title: const Text('Expiry date'),
-              subtitle: Text(_expiryDate == null
-                  ? 'No expiry'
-                  : DateFormat('dd MMM yyyy').format(_expiryDate!)),
+              subtitle: Text(
+                _expiryDate == null
+                    ? 'No expiry'
+                    : DateFormat('dd MMM yyyy').format(_expiryDate!),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -868,10 +872,7 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                       tooltip: 'No expiry',
                       onPressed: () => setState(() => _expiryDate = null),
                     ),
-                  TextButton(
-                    onPressed: _pickExpiry,
-                    child: const Text('Pick'),
-                  ),
+                  TextButton(onPressed: _pickExpiry, child: const Text('Pick')),
                 ],
               ),
             ),

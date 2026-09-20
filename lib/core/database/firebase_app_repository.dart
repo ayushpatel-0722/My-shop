@@ -1110,8 +1110,7 @@ class FirebaseAppRepository implements AppRepository {
       if (match != null) return match;
     }
 
-    final groupSnap =
-        await _db.collectionGroup('vouchers').limit(200).get();
+    final groupSnap = await _db.collectionGroup('vouchers').limit(200).get();
     final groupMatch = pick(groupSnap.docs);
     if (groupMatch != null) return groupMatch;
 
@@ -1190,7 +1189,6 @@ class FirebaseAppRepository implements AppRepository {
   @override
   Stream<Order?> watchOrder(String orderId) {
     final controller = StreamController<Order?>();
-    DocumentReference<Map<String, dynamic>>? resolved;
 
     Future<void> emit(DocumentSnapshot<Map<String, dynamic>> snap) async {
       if (!snap.exists) {
@@ -1207,7 +1205,6 @@ class FirebaseAppRepository implements AppRepository {
           controller.add(null);
           return;
         }
-        resolved = ref;
         await emit(await ref.get());
         await controller.addStream(ref.snapshots().asyncMap(_orderFromDoc));
       } catch (e, st) {
@@ -1432,8 +1429,8 @@ class FirebaseAppRepository implements AppRepository {
     final payable = order.totalAmount > 0
         ? order.totalAmount
         : (order.subtotal > 0 ? order.subtotal : subtotal) -
-            order.discountAmount +
-            order.deliveryCharge;
+              order.discountAmount +
+              order.deliveryCharge;
 
     final orderMap = <String, dynamic>{
       'id': ref.id,
@@ -1522,9 +1519,7 @@ class FirebaseAppRepository implements AppRepository {
     if (voucher.usedOrderIds.contains(order.id)) return;
 
     await ref.set(
-      voucher
-          .registerUsage(orderId: order.id, userId: order.userId)
-          .toMap(),
+      voucher.registerUsage(orderId: order.id, userId: order.userId).toMap(),
       SetOptions(merge: false),
     );
   }
@@ -1537,7 +1532,8 @@ class FirebaseAppRepository implements AppRepository {
     final target = ref ?? _db.collection('orders').doc(orderId);
     final current = await target.get();
     if (current.exists) {
-      final existing = _asMap(current.data())['orderStatus']?.toString() ??
+      final existing =
+          _asMap(current.data())['orderStatus']?.toString() ??
           OrderStatus.pending;
       OrderStatusRules.ensureTransition(existing, status);
     }
@@ -1688,10 +1684,11 @@ class FirebaseAppRepository implements AppRepository {
     }
     final id = product.id.isEmpty ? _uuid.v4() : product.id;
     final batch = _db.batch();
-    batch.set(
-      _productsCol(companyId).doc(id),
-      <String, dynamic>{...product.toMap(), 'id': id, 'companyId': companyId},
-    );
+    batch.set(_productsCol(companyId).doc(id), <String, dynamic>{
+      ...product.toMap(),
+      'id': id,
+      'companyId': companyId,
+    });
 
     // Keep `category.productList` consistent with `product.categoryId`.
     final categoryId = product.categoryId.trim();
@@ -1699,8 +1696,10 @@ class FirebaseAppRepository implements AppRepository {
       final categoryRef = _categoriesCol(companyId).doc(categoryId);
       final categorySnap = await categoryRef.get();
       if (categorySnap.exists) {
-        final category =
-            Category.fromMap(categorySnap.id, _asMap(categorySnap.data()));
+        final category = Category.fromMap(
+          categorySnap.id,
+          _asMap(categorySnap.data()),
+        );
         if (!category.productList.contains(id)) {
           batch.update(categoryRef, {
             'productList': <String>[...category.productList, id],
@@ -1750,7 +1749,9 @@ class FirebaseAppRepository implements AppRepository {
     for (final d in categories.docs) {
       final category = Category.fromMap(d.id, _asMap(d.data()));
       if (category.productList.contains(productId)) {
-        batch.update(d.reference, {'productList': category.withoutProduct(productId).productList});
+        batch.update(d.reference, {
+          'productList': category.withoutProduct(productId).productList,
+        });
       }
     }
   }
@@ -1830,24 +1831,21 @@ class FirebaseAppRepository implements AppRepository {
     // Children move up one level; products fall back to the parent category.
     for (final c in all) {
       if (c.parentId == categoryId) {
-        batch.update(_categoryRef(c), <String, dynamic>{
-          'parentId': newParent,
-        });
+        batch.update(_categoryRef(c), <String, dynamic>{'parentId': newParent});
       }
     }
 
     if (removed != null && removed.productList.isNotEmpty) {
       final orphans = <String>[...removed.productList];
       final productsSnap = companyId.isNotEmpty
-          ? await _productsCol(companyId)
-              .where('categoryId', isEqualTo: categoryId)
-              .limit(500)
-              .get()
+          ? await _productsCol(
+              companyId,
+            ).where('categoryId', isEqualTo: categoryId).limit(500).get()
           : await _db
-              .collectionGroup('products')
-              .where('categoryId', isEqualTo: categoryId)
-              .limit(500)
-              .get();
+                .collectionGroup('products')
+                .where('categoryId', isEqualTo: categoryId)
+                .limit(500)
+                .get();
       for (final p in productsSnap.docs) {
         orphans.add(p.id);
         batch.update(p.reference, <String, dynamic>{
@@ -1888,8 +1886,8 @@ class FirebaseAppRepository implements AppRepository {
 
   DocumentReference<Map<String, dynamic>> _categoryRef(Category category) =>
       category.companyId.isNotEmpty
-          ? _categoriesCol(category.companyId).doc(category.id)
-          : _db.collection('categories').doc(category.id);
+      ? _categoriesCol(category.companyId).doc(category.id)
+      : _db.collection('categories').doc(category.id);
 
   @override
   Future<void> saveEmployee(Employee employee) async {
