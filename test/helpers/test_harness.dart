@@ -14,6 +14,7 @@ import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/core/services/service_locator.dart';
 import 'package:myshop/features/auth/auth_cubit.dart';
 import 'package:myshop/features/checkout/cart/cart_cubit.dart';
+import 'package:myshop/features/checkout/cart/wishlist_cubit.dart';
 
 /// Shared wiring for the widget tests.
 ///
@@ -171,6 +172,40 @@ GoRouter buildTestRouter(
         ),
       ),
     ),
+    GoRoute(
+      path: AppRoutes.reviews,
+      builder: (context, state) => Scaffold(
+        body: Center(
+          child: Text('Reviews ${state.pathParameters['companyId']}'),
+        ),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.leaveReview,
+      builder: (context, state) => Scaffold(
+        body: Center(
+          child: Text(
+            'Leave review ${state.pathParameters['orderId']} '
+            'rating=${state.uri.queryParameters['rating'] ?? ''}',
+          ),
+        ),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.search,
+      builder: (context, state) => Scaffold(
+        body: Center(
+          child: Text(
+            'Search companyId=${state.uri.queryParameters['companyId'] ?? ''}',
+          ),
+        ),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.account,
+      builder: (context, state) =>
+          const Scaffold(body: Center(child: Text('Account screen'))),
+    ),
   ],
 );
 
@@ -184,6 +219,7 @@ Widget buildTestApp(
   AppUser? user,
   AuthCubit? authCubit,
   CartCubit? cartCubit,
+  WishlistCubit? wishlistCubit,
   Size size = const Size(1200, 2400),
   bool withRouter = true,
 }) {
@@ -196,6 +232,9 @@ Widget buildTestApp(
         else if (user != null)
           BlocProvider<AuthCubit>.value(value: AuthCubit.seeded(user)),
         BlocProvider<CartCubit>.value(value: cartCubit ?? CartCubit()),
+        BlocProvider<WishlistCubit>.value(
+          value: wishlistCubit ?? WishlistCubit(),
+        ),
       ],
       child: child,
     ),
@@ -229,6 +268,7 @@ Future<void> pumpTestApp(
   AppUser? user,
   AuthCubit? authCubit,
   CartCubit? cartCubit,
+  WishlistCubit? wishlistCubit,
   Size size = const Size(1200, 2400),
 }) async {
   await tester.pumpWidget(
@@ -237,6 +277,7 @@ Future<void> pumpTestApp(
       user: user,
       authCubit: authCubit,
       cartCubit: cartCubit,
+      wishlistCubit: wishlistCubit,
       size: size,
     ),
   );

@@ -10,8 +10,16 @@ import '../../../core/models/company.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import 'cart_cubit.dart';
+import 'wishlist_cubit.dart';
 
 /// Cart grouped by company (Section 3 / multi-company cart support).
+///
+/// The line-item card shows everything a shopper needs to decide without
+/// opening the product page: thumbnail, variant subtext, the real purchasing
+/// unit on the stepper ("– 500 g +"), a stock warning when the shelf is
+/// almost bare, and a live subtotal. Swiping a card left removes it — with
+/// "Move to Wishlist" and "Undo" offered in the snackbar so a mis-swipe
+/// never loses the item for good.
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
@@ -59,7 +67,7 @@ class CartScreen extends StatelessWidget {
                     for (final entry in state.byCompany.entries) ...[
                       _companyHeader(entry.key),
                       for (final item in entry.value)
-                        _cartTile(context, item, entry.key),
+                        _CartLineCard(item: item, companyId: entry.key),
                       const SizedBox(height: 12),
                     ],
                   ],
@@ -83,7 +91,7 @@ class CartScreen extends StatelessWidget {
           final comp = companies.where((c) => c.id == companyId).firstOrNull;
           final name = (comp != null && comp.name.isNotEmpty)
               ? comp.name
-              : (companyId.isEmpty ? 'Store' : 'Store');
+              : 'Store';
           return Row(
             children: [
               const Icon(Icons.storefront, size: 18),
@@ -98,301 +106,6 @@ class CartScreen extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _cartTile(BuildContext context, CartItem item, String companyId) {
-    final cubit = context.read<CartCubit>();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final v = item.variant;
-    final maxQty = v != null
-        ? (v.isUnlimitedStock ? 99 : v.stockQty)
-        : (item.product.isUnlimitedStock ? 99 : item.product.stockQty);
-    final inStock = v != null
-        ? (v.isUnlimitedStock || v.stockQty > 0)
-        : item.product.isInStock;
-    final canAdd = item.qty < (maxQty < 1 ? 1 : maxQty);
-    final hasImage =
-        item.product.images.isNotEmpty &&
-        item.product.images.first.trim().isNotEmpty;
-    final variantSku = v?.sku ?? '';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.surfaceContainerDark : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? AppTheme.borderDark : const Color(0xFFE2E8F0),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.03),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Thumbnail
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: SizedBox(
-              width: 72,
-              height: 72,
-              child: hasImage
-                  ? Image.network(
-                      item.product.images.first.trim(),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        color: isDark
-                            ? AppTheme.surfaceDark
-                            : Colors.grey.shade100,
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    )
-                  : Container(
-                      color: isDark
-                          ? AppTheme.surfaceDark
-                          : Colors.grey.shade100,
-                      child: const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: Colors.grey,
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Product Details & Variant Tag
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.product.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: isDark ? Colors.white : const Color(0xFF1E2229),
-                  ),
-                ),
-                const SizedBox(height: 4),
-
-                // Variant Label / Dimension Tag
-                if (item.variantLabel.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 7,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF1E293B)
-                          : const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: isDark
-                            ? const Color(0xFF3B82F6).withValues(alpha: 0.4)
-                            : const Color(0xFFBFDBFE),
-                      ),
-                    ),
-                    child: Text(
-                      item.variantLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? const Color(0xFF60A5FA)
-                            : const Color(0xFF2563EB),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ] else ...[
-                  Text(
-                    '${item.product.unit} ${item.product.unitType}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-
-                // Unit Price & Line Total
-                Row(
-                  children: [
-                    Text(
-                      formatCurrency(item.effectivePrice, symbol: '₹'),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      ),
-                    ),
-                    if (item.qty > 1) ...[
-                      const SizedBox(width: 4),
-                      Text(
-                        '× ${item.qty} = ${formatCurrency(item.lineTotal, symbol: '₹')}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-
-                if (!inStock)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 2),
-                    child: Text(
-                      'Out of stock',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
-                else if (item.product.isLowStock())
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      'Only $maxQty left',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.orange,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Quantity Selector & Remove Button
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.delete_outline,
-                  size: 19,
-                  color: isDark
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF94A3B8),
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => cubit.remove(
-                  companyId,
-                  item.product.id,
-                  variantSku: variantSku,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppTheme.surfaceDark
-                      : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isDark
-                        ? AppTheme.borderDark
-                        : const Color(0xFFCBD5E1),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    InkWell(
-                      onTap: () => cubit.decrement(
-                        companyId,
-                        item.product.id,
-                        variantSku: variantSku,
-                      ),
-                      borderRadius: const BorderRadius.horizontal(
-                        left: Radius.circular(8),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        child: Icon(
-                          Icons.remove,
-                          size: 16,
-                          color: isDark
-                              ? Colors.white70
-                              : const Color(0xFF475569),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: Text(
-                        '${item.qty}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: isDark
-                              ? Colors.white
-                              : const Color(0xFF1E293B),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: canAdd
-                          ? () => cubit.increment(
-                              companyId,
-                              item.product.id,
-                              variantSku: variantSku,
-                            )
-                          : null,
-                      borderRadius: const BorderRadius.horizontal(
-                        right: Radius.circular(8),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          size: 16,
-                          color: canAdd
-                              ? (isDark
-                                    ? Colors.white70
-                                    : const Color(0xFF475569))
-                              : (isDark
-                                    ? Colors.white24
-                                    : const Color(0xFFCBD5E1)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -434,6 +147,377 @@ class CartScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// One product line inside its company block.
+class _CartLineCard extends StatelessWidget {
+  final CartItem item;
+  final String companyId;
+
+  const _CartLineCard({required this.item, required this.companyId});
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<CartCubit>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final variantSku = item.variant?.sku ?? '';
+    final canAdd = item.qty < item.maxQty;
+    final stockWarning = item.stockWarningLabel();
+    final hasImage =
+        item.product.images.isNotEmpty &&
+        item.product.images.first.trim().isNotEmpty;
+
+    void removeLine() => cubit.remove(
+      companyId,
+      item.product.id,
+      variantSku: variantSku,
+    );
+
+    return Dismissible(
+      key: Key('cart-line-${item.cartKey}'),
+      direction: DismissDirection.endToStart,
+      // Red "Remove" action revealed by the left swipe; the wishlist hint sits
+      // above it because a swipe is fast and the alternative must be visible
+      // before the finger lifts.
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFDC2626),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Icon(Icons.bookmark_add_outlined, color: Colors.white70, size: 16),
+            SizedBox(height: 2),
+            Text(
+              'Move to Wishlist?',
+              style: TextStyle(color: Colors.white70, fontSize: 10),
+            ),
+            SizedBox(height: 6),
+            Icon(Icons.delete_outline, color: Colors.white, size: 26),
+            SizedBox(height: 2),
+            Text(
+              'Remove',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      onDismissed: (_) => _removeWithOffers(context, removeLine),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.surfaceContainerDark : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark ? AppTheme.borderDark : const Color(0xFFE2E8F0),
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.03),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product thumbnail — opens the product detail page.
+            GestureDetector(
+              onTap: () => context.push(AppRoutes.productPath(item.product.id)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: hasImage
+                      ? Image.network(
+                          item.product.images.first.trim(),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => _thumbFallback(isDark),
+                        )
+                      : _thumbFallback(isDark),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Details, stepper and live subtotal.
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Name + small remove icon (kept for precise one-tap use).
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.product.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color:
+                                isDark ? Colors.white : const Color(0xFF1E2229),
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: removeLine,
+                        borderRadius: BorderRadius.circular(12),
+                        child: const Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+
+                  // Variant subtext (e.g. "Size M, Red") / pack size.
+                  Text(
+                    item.subLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Unit price, small and muted, above the stepper row.
+                  Text(
+                    _unitPriceLabel,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Stepper (unit-aware) + stock chip + live line subtotal.
+                  Row(
+                    children: [
+                      _Stepper(
+                        label: item.stepperLabel,
+                        canAdd: canAdd && item.isInStock,
+                        isDark: isDark,
+                        onRemove: () => cubit.decrement(
+                          companyId,
+                          item.product.id,
+                          variantSku: variantSku,
+                        ),
+                        onAdd: () => cubit.increment(
+                          companyId,
+                          item.product.id,
+                          variantSku: variantSku,
+                        ),
+                      ),
+                      if (stockWarning != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          key: Key('stock-warning-${item.cartKey}'),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7E6),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFFFD591)),
+                          ),
+                          child: Text(
+                            stockWarning,
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFFD46B08),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const Spacer(),
+                      Text(
+                        formatCurrency(item.lineTotal),
+                        key: Key('line-total-${item.cartKey}'),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  if (!item.isInStock)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Text(
+                        'Out of stock',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _thumbFallback(bool isDark) => Container(
+    color: isDark ? AppTheme.surfaceDark : Colors.grey.shade100,
+    child: const Icon(
+      Icons.shopping_bag_outlined,
+      color: Colors.grey,
+    ),
+  );
+
+  /// "₹48 per 500 g" / "₹68 each" — the price of ONE stepper step.
+  String get _unitPriceLabel {
+    final price = formatCurrency(item.effectivePrice, symbol: '₹');
+    if (item.product.type == 'weight_based' && item.product.unit > 0) {
+      return '$price per ${CartItem.formatAmount(item.product.unit, item.product.unitType)}';
+    }
+    return '$price each';
+  }
+
+  /// Removes the line and immediately offers the way to keep the product.
+  void _removeWithOffers(BuildContext context, VoidCallback removeLine) {
+    final wishlist = context.read<WishlistCubit>();
+    final removed = item;
+    removeLine();
+
+    // "Move to Wishlist" is the alternative to deleting the item outright.
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${removed.product.name} removed from cart'),
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'MOVE TO WISHLIST',
+            onPressed: () {
+              wishlist.addFromCart(removed);
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: '${removed.product.name} saved to your wishlist',
+                    duration: const Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+            },
+          ),
+        ),
+      );
+  }
+}
+
+/// "– 500 g +" stepper whose middle label is the product's real unit.
+class _Stepper extends StatelessWidget {
+  final String label;
+  final bool canAdd;
+  final bool isDark;
+  final VoidCallback onRemove;
+  final VoidCallback onAdd;
+
+  const _Stepper({
+    required this.label,
+    required this.canAdd,
+    required this.isDark,
+    required this.onRemove,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = isDark ? Colors.white70 : const Color(0xFF475569);
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.surfaceDark : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark ? AppTheme.borderDark : const Color(0xFFCBD5E1),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: onRemove,
+            borderRadius: const BorderRadius.horizontal(
+              left: Radius.circular(8),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+              child: Icon(Icons.remove, size: 16, color: fg),
+            ),
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 46),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                key: Key('stepper-label-${label}'),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: isDark ? Colors.white : const Color(0xFF1E293B),
+                ),
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: canAdd ? onAdd : null,
+            borderRadius: const BorderRadius.horizontal(
+              right: Radius.circular(8),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+              child: Icon(
+                Icons.add,
+                size: 16,
+                color: canAdd
+                    ? fg
+                    : (isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

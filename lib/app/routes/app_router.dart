@@ -248,6 +248,7 @@ final GoRouter appRouter = GoRouter(
       builder: (_, state) => CategoryViewScreen(
         categoryId: state.pathParameters['id'] ?? '',
         categoryName: state.uri.queryParameters['name'] ?? '',
+        companyId: state.uri.queryParameters['companyId'] ?? '',
       ),
     ),
     GoRoute(
@@ -255,7 +256,13 @@ final GoRouter appRouter = GoRouter(
       builder: (_, state) =>
           ProductDetailsScreen(productId: state.pathParameters['id'] ?? ''),
     ),
-    GoRoute(path: AppRoutes.search, builder: (_, s) => const SearchScreen()),
+    GoRoute(
+      path: AppRoutes.search,
+      builder: (_, state) => SearchScreen(
+        companyId: state.uri.queryParameters['companyId'] ?? '',
+        companyName: state.uri.queryParameters['name'] ?? '',
+      ),
+    ),
     GoRoute(path: AppRoutes.cart, builder: (_, s) => const CartScreen()),
     GoRoute(
       path: AppRoutes.checkout,
@@ -278,6 +285,8 @@ final GoRouter appRouter = GoRouter(
       builder: (_, state) => LeaveReviewScreen(
         orderId: state.pathParameters['orderId'] ?? '',
         orderCompanyId: state.uri.queryParameters['companyId'] ?? '',
+        initialRating:
+            int.tryParse(state.uri.queryParameters['rating'] ?? '') ?? 5,
       ),
     ),
     GoRoute(

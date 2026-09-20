@@ -21,10 +21,15 @@ class CategoryViewScreen extends StatefulWidget {
   final String categoryId;
   final String categoryName;
 
+  /// When set, the explorer lists only this store's products — the company
+  /// storefront's "See All" links land here pre-filtered.
+  final String companyId;
+
   const CategoryViewScreen({
     super.key,
     required this.categoryId,
     this.categoryName = '',
+    this.companyId = '',
   });
 
   @override
@@ -75,6 +80,9 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                 snap.data ?? const <Product>[],
                 CatalogQuery(
                   categoryIds: ids,
+                  companyIds: widget.companyId.isEmpty
+                      ? const <String>{}
+                      : {widget.companyId},
                   sort: _sort,
                   inStockOnly: _inStockOnly,
                 ),

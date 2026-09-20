@@ -12,6 +12,7 @@ import 'core/services/notification_service.dart';
 import 'core/services/service_locator.dart';
 import 'features/auth/auth_cubit.dart';
 import 'features/checkout/cart/cart_cubit.dart';
+import 'features/checkout/cart/wishlist_cubit.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -106,6 +107,7 @@ class _BootstrapState extends State<Bootstrap> {
   final LocaleCubit _localeCubit = LocaleCubit();
   final AuthCubit _authCubit = AuthCubit();
   final CartCubit _cartCubit = CartCubit();
+  final WishlistCubit _wishlistCubit = WishlistCubit();
 
   @override
   void initState() {
@@ -121,6 +123,7 @@ class _BootstrapState extends State<Bootstrap> {
         BlocProvider<LocaleCubit>.value(value: _localeCubit),
         BlocProvider<AuthCubit>.value(value: _authCubit),
         BlocProvider<CartCubit>.value(value: _cartCubit),
+        BlocProvider<WishlistCubit>.value(value: _wishlistCubit),
       ],
       firebaseReady: widget.firebaseReady,
     );

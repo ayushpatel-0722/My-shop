@@ -29,7 +29,12 @@ enum ProductSort {
   nameAsc,
   nameDesc,
   priceAsc,
-  priceDesc;
+  priceDesc,
+
+  /// "Top rated first". Products carry no star ratings of their own yet, so
+  /// the store's recommended picks act as the ranking signal — this keeps the
+  /// store-front filter honest instead of inventing numbers.
+  rating;
 
   String get label {
     switch (this) {
@@ -43,6 +48,8 @@ enum ProductSort {
         return 'Price (low to high)';
       case ProductSort.priceDesc:
         return 'Price (high to low)';
+      case ProductSort.rating:
+        return 'Rating (top picks first)';
     }
   }
 }
@@ -171,6 +178,11 @@ class Catalog {
         break;
       case ProductSort.priceDesc:
         filtered.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case ProductSort.rating:
+        filtered.sort(
+          (a, b) => (b.isRecommended ? 1 : 0).compareTo(a.isRecommended ? 1 : 0),
+        );
         break;
       case ProductSort.relevance:
         break;

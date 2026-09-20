@@ -1,18 +1,21 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/domain/order_eta.dart';
 import '../../../core/domain/order_status.dart';
+import '../../../core/models/company.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
+import '../../checkout/cart/cart_cubit.dart';
 import '../../marketplace/widgets/marketplace_bottom_nav.dart';
 
 /// The shopper's order history.
@@ -224,14 +227,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Widget _orderCard(BuildContext context, Order order, AppLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final preview = order.items
-        .take(2)
-        .map((e) {
-          final hasVariant = e.variantTitle.isNotEmpty;
-          return hasVariant ? '${e.name} (${e.variantTitle})' : e.name;
-        })
-        .where((e) => e.isNotEmpty)
-        .join(', ');
 
     return Container(
       key: Key('order-card-${order.id}'),
@@ -252,74 +247,102 @@ class _OrdersScreenState extends State<OrdersScreen> {
       child: InkWell(
         onTap: () => context.push(AppRoutes.orderPath(order.id)),
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: FutureBuilder<Company?>(
+          future: repo.company(order.companyId),
+          builder: (context, companySnap) {
+            final company = companySnap.data;
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Order ${order.reference}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: isDark ? Colors.white : const Color(0xFF1E2229),
-                    ),
-                  ),
-                  OrderStatusBadge(status: order.orderStatus),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Divider(
-                height: 1,
-                color: isDark ? AppTheme.borderDark : const Color(0xFFF3F4F6),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${order.itemCount} '
-                          '${order.itemCount == 1 ? 'item' : 'items'}',
+                  // Top row: store identity + payment hint + status.
+                  Row(
+                    children: [
+                      _StoreAvatar(
+                        logoUrl: company?.logoUrl ?? '',
+                        name: order.companyName,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          order.companyName.isEmpty
+                              ? 'Store'
+                              : order.companyName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF4B5563),
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color:
+                                isDark ? Colors.white : const Color(0xFF1E2229),
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          formatDate(order.createdAt),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF9CA3AF),
-                          ),
-                        ),
-                        if (preview.isNotEmpty) ...[
-                          const SizedBox(height: 4),
+                      ),
+                      const SizedBox(width: 6),
+                      _PaymentIcon(paid: order.isPaid),
+                      const SizedBox(width: 8),
+                      OrderStatusBadge(status: order.orderStatus),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Meta row: reference + date, progress bar along its edge.
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
                           Text(
-                            preview,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            'Order ${order.reference}',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
                               color: isDark
                                   ? const Color(0xFFCBD5E1)
-                                  : const Color(0xFF6B7280),
+                                  : const Color(0xFF4B5563),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            formatDate(order.createdAt),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF9CA3AF),
                             ),
                           ),
                         ],
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(2),
+                        child: LinearProgressIndicator(
+                          key: Key('order-progress-${order.id}'),
+                          value: OrderEta.progress(order.orderStatus),
+                          minHeight: 4,
+                          backgroundColor:
+                              isDark ? AppTheme.borderDark : const Color(0xFFF3F4F6),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            order.isCancelled
+                                ? const Color(0xFFDC2626)
+                                : order.isCompleted
+                                    ? const Color(0xFF1E8F66)
+                                    : const Color(0xFFFF5247),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 12),
+
+                  // Item preview: thumbnails + "+N more".
+                  _ItemPreview(order: order, isDark: isDark),
+                  const SizedBox(height: 12),
+
+                  // Delivery ETA while the parcel is actually moving.
+                  _etaLine(order, company),
+
+                  // Bottom row: total + payment status.
                   Row(
                     children: [
                       Text(
@@ -327,48 +350,349 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: isDark
-                              ? Colors.white
-                              : const Color(0xFF1E2229),
+                          color:
+                              isDark ? Colors.white : const Color(0xFF1E2229),
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Color(0xFF9CA3AF),
-                        size: 20,
-                      ),
+                      const Spacer(),
+                      _PaymentChip(paid: order.isPaid),
                     ],
                   ),
+
+                  // Action row.
+                  _actionRow(context, order),
                 ],
               ),
-              if (!order.isOpen) ...[
-                const SizedBox(height: 8),
-                Text(
-                  order.isCancelled
-                      ? 'Cancelled ${_fmtDate(order.cancelledAt)}'
-                      : 'Delivered ${_fmtDate(order.createdAt)}',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-              ] else
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    icon: const Icon(Icons.info_outline, size: 16),
-                    label: const Text('Track order'),
-                    onPressed: () =>
-                        context.push(AppRoutes.orderPath(order.id)),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// The one-line ETA shown under the item preview for moving orders.
+  Widget _etaLine(Order order, Company? company) {
+    final text = OrderEta.label(order, company, DateTime.now());
+    if (text == null) return const SizedBox.shrink();
+    final pickup = order.isSelfPickup;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(
+            pickup ? Icons.store_outlined : Icons.local_shipping_outlined,
+            size: 14,
+            color: pickup ? const Color(0xFF7C3AED) : const Color(0xFF2563EB),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            key: Key('order-eta-${order.id}'),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: pickup ? const Color(0xFF7C3AED) : const Color(0xFF2563EB),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Status-dependent actions: track, one-tap reorder, and the tappable
+  /// star-rating shortcut on completed-but-unreviewed orders.
+  Widget _actionRow(BuildContext context, Order order) {
+    final canReview = order.isCompleted && (order.reviewId ?? '').isEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          if (order.isOpen)
+            TextButton.icon(
+              icon: const Icon(Icons.info_outline, size: 16),
+              label: const Text('Track order'),
+              onPressed: () =>
+                  context.push(AppRoutes.orderPath(order.id)),
+            ),
+          const Spacer(),
+
+          // Rate directly from the card: tapping a star opens the review
+          // sheet pre-filled with that rating.
+          if (canReview) ...[
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(5, (i) {
+                return InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => context.push(
+                    '${AppRoutes.leaveReview.replaceFirst(':orderId', order.id)}'
+                    '?companyId=${order.companyId}&rating=${i + 1}',
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: Icon(
+                      Icons.star_outline,
+                      size: 22,
+                      color: Colors.amber.shade700,
+                    ),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(width: 8),
+          ],
+
+          // One-tap reorder, available whatever the status.
+          _ReorderButton(order: order),
+        ],
+      ),
+    );
+  }
+}
+
+/// Circular store logo with a letter fallback.
+class _StoreAvatar extends StatelessWidget {
+  final String logoUrl;
+  final String name;
+
+  const _StoreAvatar({required this.logoUrl, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLogo = logoUrl.trim().isNotEmpty;
+    final initial = name.trim().isNotEmpty ? name.trim().substring(0, 1).toUpperCase() : 'S';
+    return CircleAvatar(
+      radius: 14,
+      backgroundColor: const Color(0xFFFFEBEA),
+      foregroundColor: const Color(0xFFB3261E),
+      child: ClipOval(
+        child: hasLogo
+            ? Image.network(
+                logoUrl.trim(),
+                width: 28,
+                height: 28,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Text(
+                  initial,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-            ],
+              )
+            : Text(
+                initial,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+/// Wallet icon hinting the payment state, next to the status badge.
+class _PaymentIcon extends StatelessWidget {
+  final bool paid;
+
+  const _PaymentIcon({required this.paid});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: paid ? 'Paid' : 'Payment on delivery',
+      child: Icon(
+        paid ? Icons.check_circle : Icons.account_balance_wallet_outlined,
+        size: 16,
+        color: paid ? const Color(0xFF1E8F66) : const Color(0xFF9CA3AF),
+      ),
+    );
+  }
+}
+
+/// Small "Paid" / "Pay on delivery" chip in the bottom row.
+class _PaymentChip extends StatelessWidget {
+  final bool paid;
+
+  const _PaymentChip({required this.paid});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = paid ? const Color(0xFF1E8F66) : const Color(0xFFD46B08);
+    final bg = paid ? const Color(0xFFE6F7F2) : const Color(0xFFFFF7E6);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        paid ? 'Paid' : 'Pay on delivery',
+        style: TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+/// Thumbnails of the first lines plus a "+N more" chip.
+class _ItemPreview extends StatelessWidget {
+  final Order order;
+  final bool isDark;
+
+  const _ItemPreview({required this.order, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final shown = order.items.take(3).toList();
+    final remaining = order.items.length - shown.length;
+
+    return Row(
+      children: [
+        for (final line in shown)
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: _previewThumb(line.image, line.name, isDark),
+          ),
+        if (remaining > 0)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: isDark ? AppTheme.surfaceDark : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDark ? AppTheme.borderDark : const Color(0xFFE2E8F0),
+              ),
+            ),
+            child: Text(
+              '+$remaining more',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _previewThumb(String image, String name, bool isDark) {
+    final hasImage = image.trim().isNotEmpty;
+    return CircleAvatar(
+      radius: 15,
+      backgroundColor: isDark ? AppTheme.surfaceDark : const Color(0xFFF1F5F9),
+      child: ClipOval(
+        child: hasImage
+            ? Image.network(
+                image.trim(),
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 14,
+                  color: Color(0xFF94A3B8),
+                ),
+              )
+            : const Icon(
+                Icons.shopping_bag_outlined,
+                size: 14,
+                color: Color(0xFF94A3B8),
+              ),
+      ),
+    );
+  }
+}
+
+/// Circular one-tap "add these same items to cart" button.
+class _ReorderButton extends StatelessWidget {
+  final Order order;
+
+  const _ReorderButton({required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Reorder',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _reorder(context),
+        child: Container(
+          key: Key('reorder-${order.id}'),
+          padding: const EdgeInsets.all(6),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFFFFEBEA),
+          ),
+          child: const Icon(
+            Icons.refresh,
+            size: 16,
+            color: Color(0xFFB3261E),
           ),
         ),
       ),
     );
   }
 
-  static String _fmtDate(DateTime? date) =>
-      date == null ? '' : DateFormat('dd MMM').format(date);
+  Future<void> _reorder(BuildContext context) async {
+    final cart = context.read<CartCubit>();
+    var added = 0;
+    var missing = 0;
+
+    for (final line in order.items) {
+      final product = await repo.product(line.productId);
+      if (product == null) {
+        missing++;
+        continue;
+      }
+      final variant = line.variantSku.isEmpty
+          ? null
+          : product.variants
+                .firstWhereOrNull((v) => v.sku == line.variantSku);
+      cart.add(
+        product,
+        variant: variant,
+        companyId: order.companyId,
+        companyName: order.companyName,
+        qty: line.qty,
+      );
+      added++;
+    }
+
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
+    if (added > 0) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            missing > 0
+                ? '$added item${added == 1 ? '' : 's'} added to cart · $missing no longer available'
+                : '$added item${added == 1 ? '' : 's'} added to cart',
+          ),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'VIEW CART',
+            onPressed: () => context.push(AppRoutes.cart),
+          ),
+        ),
+      );
+    } else {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('These products are no longer available'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 }
 
 /// Status filter chips with live counts for the signed-in shopper.
