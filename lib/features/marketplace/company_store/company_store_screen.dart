@@ -21,6 +21,7 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
+import '../widgets/common_carousel.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/store_shelf_card.dart';
 
@@ -170,27 +171,26 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               return StreamBuilder<List<OfferBanner>>(
                 stream: repo.offerBanners(company.id),
                 builder: (context, bannerSnap) {
-                  final offerBanners =
-                      bannerSnap.data ?? const <OfferBanner>[];
+                  final offerBanners = bannerSnap.data ?? const <OfferBanner>[];
                   return StreamBuilder<List<Voucher>>(
                     stream: repo.vouchers(company.id),
                     builder: (context, voucherSnap) {
-                      final activeVouchers = (voucherSnap.data ??
-                              const <Voucher>[])
-                          .where(
-                            (v) => v.isLiveAt(DateTime.now()) && !v.isExhausted,
-                          )
-                          .toList();
+                      final activeVouchers =
+                          (voucherSnap.data ?? const <Voucher>[])
+                              .where(
+                                (v) =>
+                                    v.isLiveAt(DateTime.now()) &&
+                                    !v.isExhausted,
+                              )
+                              .toList();
                       return StreamBuilder<List<Review>>(
                         stream: repo.reviews(company.id),
                         builder: (context, reviewSnap) {
-                          final reviews =
-                              reviewSnap.data ?? const <Review>[];
+                          final reviews = reviewSnap.data ?? const <Review>[];
                           return StreamBuilder<List<Order>>(
                             stream: repo.orders(companyId: company.id),
                             builder: (context, orderSnap) {
-                              final orders =
-                                  orderSnap.data ?? const <Order>[];
+                              final orders = orderSnap.data ?? const <Order>[];
                               return _buildContent(
                                 context,
                                 company,
@@ -326,7 +326,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
           const SizedBox(height: 20),
         ],
 
-        // 3. One shelf per category this store sells in.
+        // 3. Category shelves (one shelf per category this store sells in).
         _buildCategoryShelves(context, company, categories, allProducts),
 
         // 4. Trending Now — this store's own order velocity.
@@ -349,10 +349,26 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   void _openBannerTarget(BuildContext context, OfferBanner banner) {
     if (banner.targetProdId != null && banner.targetProdId!.isNotEmpty) {
       context.push(AppRoutes.productPath(banner.targetProdId!));
-    } else if (banner.targetCatId != null &&
-        banner.targetCatId!.isNotEmpty) {
+    } else if (banner.targetCatId != null && banner.targetCatId!.isNotEmpty) {
       context.push(AppRoutes.categoryPath(banner.targetCatId!));
     }
+  }
+
+  static bool _productMatchesCategory(Product p, Category cat) {
+    final catId = p.categoryId.trim();
+    if (catId.isNotEmpty) {
+      if (catId == cat.id) return true;
+      if (catId.toLowerCase() == cat.id.toLowerCase()) return true;
+      if (catId.toLowerCase() == cat.name.toLowerCase()) return true;
+      if (catId.replaceAll(' ', '-').toLowerCase() == cat.id.toLowerCase()) {
+        return true;
+      }
+      if (catId.replaceAll('-', ' ').toLowerCase() == cat.name.toLowerCase()) {
+        return true;
+      }
+    }
+    if (cat.productList.contains(p.id)) return true;
+    return false;
   }
 
   // ---------------------------------------------------------------------------
@@ -364,29 +380,32 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
     List<Category> categories,
     List<Product> allProducts,
   ) {
-    // Every category the store actually sells in, in catalogue order —
-    // including shelves with fewer than four products: the store's structure
-    // stays legible instead of collapsing into one endless grid.
-    final usedIds = Catalog.usedCategoryIds(allProducts);
-    final shelves = categories.where((c) => usedIds.contains(c.id)).toList()
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    // For each category, collect all products that match. Categories with 0
+    // products are skipped so empty headers or placeholders are not shown.
+    final categoryEntries = <MapEntry<Category, List<Product>>>[];
+    for (final cat in categories) {
+      final prods = allProducts
+          .where((p) => _productMatchesCategory(p, cat))
+          .toList();
+      if (prods.isNotEmpty) {
+        categoryEntries.add(MapEntry(cat, prods));
+      }
+    }
 
-    if (shelves.isEmpty) return const SizedBox.shrink();
+    if (categoryEntries.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final category in shelves)
+        for (final entry in categoryEntries)
           _CategoryShelf(
-            key: Key('store-shelf-${category.id}'),
-            category: category,
-            products: allProducts
-                .where((p) => p.categoryId == category.id)
-                .toList(),
+            key: Key('store-shelf-${entry.key.id}'),
+            category: entry.key,
+            products: entry.value,
             company: company,
             onAddToCart: (p) => _handleAddToCart(context, p),
             onSeeAll: () => context.push(
-              '${AppRoutes.categoryPath(category.id)}?name=${Uri.encodeComponent(category.name)}&companyId=${company.id}',
+              '${AppRoutes.categoryPath(entry.key.id)}?name=${Uri.encodeComponent(entry.key.name)}&companyId=${company.id}',
             ),
           ),
       ],
@@ -413,11 +432,12 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
     }
 
     final byId = {for (final p in allProducts) p.id: p};
-    final trending = score.entries
-        .map((e) => MapEntry(byId[e.key], e.value))
-        .where((e) => e.key != null)
-        .toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final trending =
+        score.entries
+            .map((e) => MapEntry(byId[e.key], e.value))
+            .where((e) => e.key != null)
+            .toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     var products = trending.map((e) => e.key!).toList();
     if (products.isEmpty) {
@@ -455,25 +475,28 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               const SizedBox(width: 6),
               Text(
                 'in ${company.name}',
-                style: const TextStyle(fontSize: 11.5, color: Color(0xFF6C757D)),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  color: Color(0xFF6C757D),
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 242,
+          height: 236,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: products.length,
             separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, i) => StoreShelfCard(
               product: products[i],
               company: company,
-              width: 155,
-              onTap: () =>
-                  context.push(AppRoutes.productPath(products[i].id)),
+              width: 148,
+              onTap: () => context.push(AppRoutes.productPath(products[i].id)),
               onAddToCart: () => _handleAddToCart(context, products[i]),
             ),
           ),
@@ -484,7 +507,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // 5. All Products grid (filter pills + 2-column paginated grid)
+  // 5. All Products grid (filter pills + responsive catalog grid)
   // ---------------------------------------------------------------------------
   Widget _buildAllProducts(
     BuildContext context,
@@ -528,7 +551,8 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               _FilterPill(
                 key: const Key('filter-pill-price'),
                 label: _priceSortLabel(),
-                active: _sort == ProductSort.priceAsc ||
+                active:
+                    _sort == ProductSort.priceAsc ||
                     _sort == ProductSort.priceDesc,
                 onTap: () => setState(() {
                   _sort = _sort == ProductSort.priceAsc
@@ -584,29 +608,25 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final crossAxisCount = constraints.maxWidth > 900
-                    ? 4
-                    : constraints.maxWidth > 600
-                    ? 3
-                    : 2;
+                final crossAxisCount = (constraints.maxWidth / 165)
+                    .floor()
+                    .clamp(2, 8);
                 return GridView.builder(
                   key: const Key('all-products-grid'),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: 0.58,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 14,
-                      ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: 0.65,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 14,
+                  ),
                   itemCount: visible.length,
                   itemBuilder: (context, i) => StoreShelfCard(
                     product: visible[i],
                     company: company,
-                    onTap: () => context.push(
-                      AppRoutes.productPath(visible[i].id),
-                    ),
+                    onTap: () =>
+                        context.push(AppRoutes.productPath(visible[i].id)),
                     onAddToCart: () => _handleAddToCart(context, visible[i]),
                   ),
                 );
@@ -1040,7 +1060,7 @@ class _ShopDetailsBlock extends StatelessWidget {
 /// Pages come from the store's own uploaded banners; when there are none the
 /// store's live vouchers become promo pages, so the block only disappears
 /// when the store genuinely has nothing to promote.
-class _OfferCarousel extends StatefulWidget {
+class _OfferCarousel extends StatelessWidget {
   final List<OfferBanner> banners;
   final List<Voucher> vouchers;
   final PageController controller;
@@ -1059,133 +1079,50 @@ class _OfferCarousel extends StatefulWidget {
     required this.onBannerTap,
   });
 
-  @override
-  State<_OfferCarousel> createState() => _OfferCarouselState();
-}
-
-class _OfferCarouselState extends State<_OfferCarousel> {
-  Timer? _timer;
-  bool _userDragging = false;
-
-  int get _pageCount =>
-      widget.banners.length + (widget.vouchers.isEmpty ? 0 : 1);
-
-  @override
-  void initState() {
-    super.initState();
-    _start();
-  }
-
-  @override
-  void didUpdateWidget(covariant _OfferCarousel old) {
-    super.didUpdateWidget(old);
-    if (old.page != widget.page) {
-      // The page changed (user swipe or our own animation) — restart the
-      // dwell timer from zero.
-      _start();
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _start() {
-    _timer?.cancel();
-    if (_pageCount <= 1) return;
-    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!widget.controller.hasClients || !mounted || _userDragging) return;
-      final next = (widget.page + 1) % _pageCount;
-      widget.controller.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOutCubic,
-      );
-    });
-  }
+  int get _pageCount => banners.length + (vouchers.isEmpty ? 0 : 1);
 
   @override
   Widget build(BuildContext context) {
-    final hasBanners = widget.banners.isNotEmpty;
-    if (!hasBanners && widget.vouchers.isEmpty) {
+    final hasBanners = banners.isNotEmpty;
+    if (!hasBanners && vouchers.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Column(
+    return Container(
       key: const Key('store-banner-carousel'),
-      children: [
-        SizedBox(
-          height: 150,
-          child: NotificationListener<ScrollNotification>(
-            // Never fight the shopper for control of the carousel.
-            onNotification: (notification) {
-              if (notification is ScrollStartNotification &&
-                  notification.dragDetails != null) {
-                _userDragging = true;
-                _timer?.cancel();
-              } else if (notification is ScrollEndNotification) {
-                _userDragging = false;
-                _start();
-              }
-              return false;
-            },
-            child: PageView.builder(
-              controller: widget.controller,
-              itemCount: _pageCount,
-              onPageChanged: widget.onPageChanged,
-              itemBuilder: (context, i) {
-                if (i < widget.banners.length) {
-                  final banner = widget.banners[i];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _bannerPage(banner),
-                  );
-                }
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _voucherPage(widget.vouchers),
-                );
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        // Dot pagination.
-        if (_pageCount > 1)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(_pageCount, (i) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: i == widget.page ? 18 : 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: i == widget.page
-                      ? const Color(0xFFFF5247)
-                      : const Color(0xFFD1D5DB),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              );
-            }),
-          ),
-      ],
+      child: CommonCarousel.banner(
+        itemCount: _pageCount,
+        controller: controller,
+        initialPage: page,
+        onPageChanged: onPageChanged,
+        maxHeightFactor: 0.60,
+        itemBuilder: (context, i) {
+          if (i < banners.length) {
+            final banner = banners[i];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _bannerPage(banner),
+            );
+          }
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _voucherPage(vouchers),
+          );
+        },
+      ),
     );
   }
 
   Widget _bannerPage(OfferBanner banner) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => widget.onBannerTap(banner),
+      onTap: () => onBannerTap(banner),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Image.network(
           banner.image.trim(),
           width: double.infinity,
-          height: 150,
+          height: double.infinity,
           fit: BoxFit.cover,
           errorBuilder: (_, _, _) => Container(
             decoration: const BoxDecoration(
@@ -1284,7 +1221,7 @@ class _OfferCarouselState extends State<_OfferCarousel> {
                 ),
                 const SizedBox(height: 9),
                 InkWell(
-                  onTap: () => widget.onClaimVoucher(top.code),
+                  onTap: () => onClaimVoucher(top.code),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -1315,11 +1252,7 @@ class _OfferCarouselState extends State<_OfferCarousel> {
               color: Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.local_offer,
-              size: 34,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.local_offer, size: 34, color: Colors.white),
           ),
         ],
       ),
@@ -1327,8 +1260,8 @@ class _OfferCarouselState extends State<_OfferCarousel> {
   }
 }
 
-/// One "aisle": header (category name + See All) + horizontal product rail +
-/// a thin divider before the next shelf begins.
+/// One "aisle": header (category avatar + name + count + See All) +
+/// horizontal product rail + a clean divider before the next shelf begins.
 class _CategoryShelf extends StatelessWidget {
   final Category category;
   final List<Product> products;
@@ -1349,102 +1282,75 @@ class _CategoryShelf extends StatelessWidget {
   Widget build(BuildContext context) {
     if (products.isEmpty) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Category Header Row (title left-aligned, optional See All on right)
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              if (category.iconUrl.length <= 4)
-                Text(category.iconUrl, style: const TextStyle(fontSize: 17))
-              else
-                const Icon(
-                  Icons.category_outlined,
-                  size: 17,
-                  color: Color(0xFFB3261E),
-                ),
-              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   category.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1E2229),
+                  style: TextStyle(
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : const Color(0xFF1E2229),
+                    letterSpacing: -0.2,
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F3F5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '${products.length}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF6C757D),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
               InkWell(
                 key: Key('shelf-see-all-${category.id}'),
                 onTap: onSeeAll,
-                borderRadius: BorderRadius.circular(6),
-                child: const Row(
-                  children: [
-                    Text(
-                      'See All',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFB3261E),
-                      ),
+                borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 4,
+                  ),
+                  child: Text(
+                    'See All',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? const Color(0xFFFF8A80)
+                          : const Color(0xFFB3261E),
                     ),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 16,
-                      color: Color(0xFFB3261E),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+
+        // Horizontal Product Rail for this category
         SizedBox(
-          height: 242,
+          height: 236,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: products.length,
             separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, i) => StoreShelfCard(
               product: products[i],
               company: company,
-              width: 155,
-              onTap: () =>
-                  context.push(AppRoutes.productPath(products[i].id)),
+              width: 148,
+              onTap: () => context.push(AppRoutes.productPath(products[i].id)),
               onAddToCart: () => onAddToCart(products[i]),
             ),
           ),
         ),
 
-        // Thin divider: each shelf reads as its own aisle.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-          child: Container(height: 1, color: const Color(0xFFECEEF1)),
-        ),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -1456,7 +1362,12 @@ class _FilterPill extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-  const _FilterPill({super.key, required this.label, required this.active, required this.onTap});
+  const _FilterPill({
+    super.key,
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1479,7 +1390,9 @@ class _FilterPill extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: active ? FontWeight.bold : FontWeight.w600,
-                color: active ? const Color(0xFFB3261E) : const Color(0xFF495057),
+                color: active
+                    ? const Color(0xFFB3261E)
+                    : const Color(0xFF495057),
               ),
             ),
           ],

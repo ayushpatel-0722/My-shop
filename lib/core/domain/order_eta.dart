@@ -21,21 +21,22 @@ class OrderEta {
     switch (order.orderStatus) {
       case OrderStatus.packing:
         return pickup
-            ? 'Ready for pickup by ${_fmt(now.add(Duration(minutes: handling)))}'
-            : 'Arriving by ${_fmt(now.add(Duration(minutes: handling + delivery)))}';
+            ? 'Ready for pickup by ${_fmt(now.add(Duration(minutes: handling)), now)}'
+            : 'Arriving by ${_fmt(now.add(Duration(minutes: handling + delivery)), now)}';
       case OrderStatus.ready:
         return pickup
-            ? 'Ready for pickup by ${_fmt(now.add(const Duration(minutes: 10)))}'
-            : 'Arriving by ${_fmt(now.add(Duration(minutes: delivery)))}';
+            ? 'Ready for pickup by ${_fmt(now.add(const Duration(minutes: 10)), now)}'
+            : 'Arriving by ${_fmt(now.add(Duration(minutes: delivery)), now)}';
       case OrderStatus.onTheWay:
-        return 'Arriving by ${_fmt(now.add(Duration(minutes: delivery)))}';
+        return 'Arriving by ${_fmt(now.add(Duration(minutes: delivery)), now)}';
       default:
         return null;
     }
   }
 
   /// "6:30 PM today" / "9:00 AM tomorrow".
-  static String _fmt(DateTime t) {
+  static String _fmt(DateTime t, [DateTime? refNow]) {
+    final now = refNow ?? DateTime.now();
     final suffix = t.hour >= 12 ? 'PM' : 'AM';
     var h12 = t.hour % 12;
     if (h12 == 0) h12 = 12;
@@ -44,8 +45,10 @@ class OrderEta {
         : '$h12:${t.minute.toString().padLeft(2, '0')} $suffix';
 
     final tomorrow = now.add(const Duration(days: 1));
-    final sameDay = t.year == now.year && t.month == now.month && t.day == now.day;
-    final isTomorrow = t.year == tomorrow.year &&
+    final sameDay =
+        t.year == now.year && t.month == now.month && t.day == now.day;
+    final isTomorrow =
+        t.year == tomorrow.year &&
         t.month == tomorrow.month &&
         t.day == tomorrow.day;
 

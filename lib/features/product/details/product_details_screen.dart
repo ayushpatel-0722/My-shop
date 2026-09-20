@@ -496,7 +496,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: AspectRatio(
-                  aspectRatio: 16 / 9,
+                  aspectRatio: 3 / 2,
                   child: Stack(
                     children: [
                       GestureDetector(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/order.dart';
+import 'package:myshop/core/models/product.dart';
 import 'package:myshop/features/checkout/cart/cart_cubit.dart';
 import 'package:myshop/features/marketplace/company_store/company_store_screen.dart';
 
@@ -19,16 +20,15 @@ void main() {
     WidgetTester tester, {
     CartCubit? cartCubit,
     String slug = 'greenleaf-organics',
-  }) =>
-      pumpTestApp(
-        tester,
-        CompanyStoreScreen(slug: slug),
-        user: TestHarness.shopper,
-        cartCubit: cartCubit,
-        // Tall frame so every shelf, trending and the grid are all built by
-        // the lazy ListView in one frame.
-        size: const Size(430, 6000),
-      );
+  }) => pumpTestApp(
+    tester,
+    CompanyStoreScreen(slug: slug),
+    user: TestHarness.shopper,
+    cartCubit: cartCubit,
+    // Tall frame so every shelf, trending and the grid are all built by
+    // the lazy ListView in one frame.
+    size: const Size(430, 6000),
+  );
 
   testWidgets('shop details: logo, verified badge, rating, followers, pill', (
     tester,
@@ -64,7 +64,9 @@ void main() {
     expect(find.textContaining('Use Code: FRESH20'), findsOneWidget);
   });
 
-  testWidgets('one shelf per category, each with a See All link', (tester) async {
+  testWidgets('one shelf per category, each with a See All link', (
+    tester,
+  ) async {
     await pumpStore(tester);
 
     // GreenLeaf sells in exactly these three categories.
@@ -118,10 +120,7 @@ void main() {
 
     expect(find.byKey(const Key('trending-shelf')), findsOneWidget);
     expect(find.text('Trending Now'), findsOneWidget);
-    expect(
-      find.byIcon(Icons.local_fire_department_rounded),
-      findsOneWidget,
-    );
+    expect(find.byIcon(Icons.local_fire_department_rounded), findsOneWidget);
   });
 
   testWidgets('trending is driven by this store\'s order velocity', (
@@ -136,7 +135,12 @@ void main() {
           companyId: 'c_organic',
           companyName: 'GreenLeaf Organics',
           items: const [
-            OrderItem(productId: 'p_milk', qty: 2, unitPrice: 68, name: 'Organic Cow Milk'),
+            OrderItem(
+              productId: 'p_milk',
+              qty: 2,
+              unitPrice: 68,
+              name: 'Organic Cow Milk',
+            ),
           ],
         ),
       );
@@ -148,7 +152,12 @@ void main() {
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',
         items: const [
-          OrderItem(productId: 'p_tomato', qty: 1, unitPrice: 48, name: 'Fresh Tomatoes'),
+          OrderItem(
+            productId: 'p_tomato',
+            qty: 1,
+            unitPrice: 48,
+            name: 'Fresh Tomatoes',
+          ),
         ],
       ),
     );
@@ -212,7 +221,9 @@ void main() {
     expect(find.text('Sold Out Kale'), findsOneWidget);
   });
 
-  testWidgets('the price pill cycles ascending then descending', (tester) async {
+  testWidgets('the price pill cycles ascending then descending', (
+    tester,
+  ) async {
     await pumpStore(tester);
 
     expect(find.text('Price'), findsOneWidget);

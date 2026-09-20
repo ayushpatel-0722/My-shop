@@ -170,11 +170,8 @@ class _CartLineCard extends StatelessWidget {
         item.product.images.isNotEmpty &&
         item.product.images.first.trim().isNotEmpty;
 
-    void removeLine() => cubit.remove(
-      companyId,
-      item.product.id,
-      variantSku: variantSku,
-    );
+    void removeLine() =>
+        cubit.remove(companyId, item.product.id, variantSku: variantSku);
 
     return Dismissible(
       key: Key('cart-line-${item.cartKey}'),
@@ -272,8 +269,9 @@ class _CartLineCard extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color:
-                                isDark ? Colors.white : const Color(0xFF1E2229),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1E2229),
                           ),
                         ),
                       ),
@@ -367,7 +365,9 @@ class _CartLineCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                     ],
@@ -396,10 +396,7 @@ class _CartLineCard extends StatelessWidget {
 
   Widget _thumbFallback(bool isDark) => Container(
     color: isDark ? AppTheme.surfaceDark : Colors.grey.shade100,
-    child: const Icon(
-      Icons.shopping_bag_outlined,
-      color: Colors.grey,
-    ),
+    child: const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
   );
 
   /// "₹48 per 500 g" / "₹68 each" — the price of ONE stepper step.
@@ -433,7 +430,9 @@ class _CartLineCard extends StatelessWidget {
                 ..hideCurrentSnackBar()
                 ..showSnackBar(
                   SnackBar(
-                    content: '${removed.product.name} saved to your wishlist',
+                    content: Text(
+                      '${removed.product.name} saved to your wishlist',
+                    ),
                     duration: const Duration(seconds: 2),
                     behavior: SnackBarBehavior.floating,
                   ),
@@ -492,7 +491,7 @@ class _Stepper extends StatelessWidget {
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                key: Key('stepper-label-${label}'),
+                key: Key('stepper-label-$label'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
