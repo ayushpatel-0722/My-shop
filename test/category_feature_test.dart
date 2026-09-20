@@ -249,10 +249,18 @@ void main() {
 
       expect(find.text('Beverages'), findsOneWidget);
       expect(find.text('ID: cat_beverages'), findsOneWidget);
-      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
 
-      await tester.tap(find.text('ID: cat_beverages'));
-      await tester.pump();
+      // The id badge is part of every category row, so scope the assertions
+      // to the tile we just created (global seed categories are listed too).
+      final tile = find.byKey(const Key('category-tile-cat_beverages'));
+      expect(tile, findsOneWidget);
+      expect(
+        find.descendant(of: tile, matching: find.byIcon(Icons.copy_rounded)),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const Key('category-id-cat_beverages')));
+      await tester.pumpAndSettle();
       expect(
         find.text('Category ID copied to clipboard: cat_beverages'),
         findsOneWidget,

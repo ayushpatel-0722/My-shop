@@ -642,6 +642,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                           ),
                           const SizedBox(height: 16),
                           DropdownButtonFormField<String?>(
+                            isExpanded: true,
                             initialValue:
                                 validParentCategories.any(
                                   (c) => c.id == _selectedParentId,
@@ -655,16 +656,23 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                             items: [
                               const DropdownMenuItem<String?>(
                                 value: null,
-                                child: Text('None (Top-Level Category)'),
-                              ),
-                              ...validParentCategories.map(
-                                (c) => DropdownMenuItem<String?>(
-                                  value: c.id,
-                                  child: Text(
-                                    '${c.iconUrl.isNotEmpty ? c.iconUrl : "📁"} ${c.name}',
-                                  ),
+                                child: Text(
+                                  'None (Top-Level Category)',
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              ...validParentCategories.map((c) {
+                                final prefix = (c.hasIcon && !c.hasImageIcon)
+                                    ? '${c.iconUrl} '
+                                    : '📁 ';
+                                return DropdownMenuItem<String?>(
+                                  value: c.id,
+                                  child: Text(
+                                    '$prefix${c.name}',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }),
                             ],
                             onChanged: (val) =>
                                 setState(() => _selectedParentId = val),

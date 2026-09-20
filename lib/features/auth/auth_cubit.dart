@@ -48,6 +48,22 @@ class AuthCubit extends Cubit<AuthState> {
     _restoreSession();
   }
 
+  /// Creates a cubit that is already signed in as [user].
+  ///
+  /// Used by widget tests, previews and deep-link entry points that already
+  /// know the actor — it skips the (async, platform dependent) session
+  /// restore and publishes the user to [AuthSession] straight away.
+  AuthCubit.seeded(AppUser user)
+      : super(
+          AuthState(
+            status: AuthStatus.authenticated,
+            user: user,
+            restoring: false,
+          ),
+        ) {
+    AuthSession.set(user, restoring: false);
+  }
+
   final _repo = repo;
   final _cache = SecureSessionCache.instance;
 

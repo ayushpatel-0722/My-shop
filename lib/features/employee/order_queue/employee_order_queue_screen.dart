@@ -31,14 +31,37 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
         ],
       ),
       body: StreamBuilder<List<Order>>(
-        stream: repo.orders(),
+        // Only this store's orders — the queue used to read every order of
+        // every company on the platform.
+        stream: repo.orders(
+          companyId: context.watch<AuthCubit>().currentUser?.companyId ?? '',
+        ),
         builder: (context, snap) {
+          final employeeId =
+              context.watch<AuthCubit>().currentUser?.id ?? '';
           final orders = (snap.data ?? const <Order>[])
-              .where((o) => o.orderStatus == OrderStatus.packing)
+              .where(
+                (o) =>
+                    o.orderStatus == OrderStatus.packing &&
+                    (o.assignedEmployeeId == null ||
+                        o.assignedEmployeeId!.isEmpty ||
+                        o.assignedEmployeeId == employeeId),
+              )
               .toList();
-          if (orders.isEmpty) {
-            return const Center(child: Text('No packing tasks assigned'));
+
+          if (snap.connectionState == ConnectionState.waiting &&
+              orders.isEmpty) {
+            return const Center(child: CircularProgressIndicator(strokeWidth: 2));
           }
+          if (orders.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(28),
+                child: Text('No packing tasks assigned'),
+              ),
+            );
+          }
+
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: orders.length,
@@ -48,13 +71,19 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   leading: const Icon(Icons.inventory_2, size: 32),
-                  title: Text('#${o.id.substring(0, 6).toUpperCase()}',
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    o.reference,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   subtitle: Text(
-                      '${o.items.length} items · ${o.deliveryType == 'self_pickup' ? 'Pickup' : 'Delivery'}'),
+                    '${o.itemCount} items · '
+                    '${o.isSelfPickup ? 'Pickup' : 'Delivery'}'
+                    '${o.employeePackingDone ? ' · packed' : ''}',
+                  ),
                   trailing: FilledButton(
-                    onPressed: () =>
-                        context.go(AppRoutes.packing.replaceFirst(':orderId', o.id)),
+                    onPressed: () => context.go(
+                      AppRoutes.packing.replaceFirst(':orderId', o.id),
+                    ),
                     child: const Text('Pack'),
                   ),
                 ),

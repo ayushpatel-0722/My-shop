@@ -2,6 +2,7 @@ import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/models/order.dart';
+import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../admin_shell.dart';
 
@@ -12,12 +13,14 @@ class AdminReportsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Reports used to sum every company on the platform.
+    final companyId = AuthSession.currentUser?.companyId ?? '';
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
       title: 'Reports',
       child: StreamBuilder<List<Order>>(
-        stream: repo.orders(),
+        stream: repo.orders(companyId: companyId),
         builder: (context, snap) {
           final orders = snap.data ?? const <Order>[];
           final revenue = orders.fold(0.0, (s, o) => s + o.totalAmount);
@@ -89,7 +92,8 @@ class AdminReportsScreen extends StatelessWidget {
   }
 
   Future<void> _exportWord(BuildContext context) async {
-    final products = await repo.products().first;
+    final companyId = AuthSession.currentUser?.companyId ?? '';
+    final products = await repo.products(companyId: companyId).first;
     final bytes = await reports.buildCatalogDoc(products);
     await reports.saveWord(bytes, 'catalog_sheet');
   }

@@ -9,18 +9,26 @@ import '../../core/services/service_locator.dart';
 import '../auth/auth_cubit.dart';
 
 /// Post-completion review prompt (Section 14.1): 1-5 stars + optional message.
+///
+/// [initialRating] pre-selects the stars — the order-history card opens this
+/// screen with the star the shopper tapped.
 class LeaveReviewScreen extends StatefulWidget {
   final String orderId;
   final String orderCompanyId;
-  const LeaveReviewScreen(
-      {super.key, required this.orderId, this.orderCompanyId = ''});
+  final int initialRating;
+  const LeaveReviewScreen({
+    super.key,
+    required this.orderId,
+    this.orderCompanyId = '',
+    this.initialRating = 5,
+  });
 
   @override
   State<LeaveReviewScreen> createState() => _LeaveReviewScreenState();
 }
 
 class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
-  int _rating = 5;
+  late int _rating = widget.initialRating.clamp(1, 5).toInt();
   final _messageCtrl = TextEditingController();
 
   @override

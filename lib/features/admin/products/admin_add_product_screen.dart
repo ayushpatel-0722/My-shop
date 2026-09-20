@@ -355,12 +355,42 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                   ),
                   ActionChip(
                     label: const Text(
+                      'Grocery: Weight (1kg, 5kg, 10kg, 50kg)',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    onPressed: () {
+                      nameCtrl.text = 'Weight';
+                      valuesCtrl.text = '1kg, 5kg, 10kg, 50kg';
+                    },
+                  ),
+                  ActionChip(
+                    label: const Text(
                       'Food: Weight (250g, 500g, 1kg)',
                       style: TextStyle(fontSize: 11),
                     ),
                     onPressed: () {
                       nameCtrl.text = 'Weight';
                       valuesCtrl.text = '250g, 500g, 1kg';
+                    },
+                  ),
+                  ActionChip(
+                    label: const Text(
+                      'Liquids (250ml, 500ml, 1L, 2L)',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    onPressed: () {
+                      nameCtrl.text = 'Volume';
+                      valuesCtrl.text = '250ml, 500ml, 1L, 2L';
+                    },
+                  ),
+                  ActionChip(
+                    label: const Text(
+                      'Multipack (Pack of 1, Pack of 2, Pack of 5)',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    onPressed: () {
+                      nameCtrl.text = 'Pack';
+                      valuesCtrl.text = 'Pack of 1, Pack of 2, Pack of 5';
                     },
                   ),
                   ActionChip(
@@ -427,7 +457,254 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     setState(() => _options.removeAt(index));
   }
 
-  /// Computes the Cartesian Product matrix of all options.
+  /// Converts a quantity and unit string into a standard canonical dimension.
+  /// Standard canonical dimensions:
+  /// - Weight: grams (g)
+  /// - Volume: milliliters (ml)
+  /// - Quantity/Count: count (pcs)
+  double? _toCanonicalUnit(double qty, String unit, String measurementType) {
+    final u = unit.trim().toLowerCase();
+    if (qty <= 0) return null;
+
+    // Weight conversions (canonical: grams)
+    if (u == 'g' || u == 'gm' || u == 'gms' || u == 'gram' || u == 'grams') {
+      return qty * 1.0;
+    }
+    if (u == 'kg' ||
+        u == 'kgs' ||
+        u == 'kilo' ||
+        u == 'kilos' ||
+        u == 'kilogram' ||
+        u == 'kilograms') {
+      return qty * 1000.0;
+    }
+    if (u == 'mg' || u == 'milligram' || u == 'milligrams') {
+      return qty * 0.001;
+    }
+    if (u == 'quintal' || u == 'qtl') {
+      return qty * 100000.0;
+    }
+    if (u == 'ton' || u == 'tonne' || u == 'metric ton') {
+      return qty * 1000000.0;
+    }
+    if (u == 'lb' || u == 'lbs' || u == 'pound' || u == 'pounds') {
+      return qty * 453.592;
+    }
+    if (u == 'oz' || u == 'ounce' || u == 'ounces') {
+      return qty * 28.3495;
+    }
+
+    // Volume conversions (canonical: ml)
+    if (u == 'ml' ||
+        u == 'milliliter' ||
+        u == 'milliliters' ||
+        u == 'millilitre' ||
+        u == 'millilitres') {
+      return qty * 1.0;
+    }
+    if (u == 'l' ||
+        u == 'ltr' ||
+        u == 'ltrs' ||
+        u == 'liter' ||
+        u == 'liters' ||
+        u == 'litre' ||
+        u == 'litres') {
+      return qty * 1000.0;
+    }
+    if (u == 'cl') {
+      return qty * 10.0;
+    }
+    if (u == 'gal' || u == 'gallon' || u == 'gallons') {
+      return qty * 3785.41;
+    }
+
+    // Quantity / Count conversions (canonical: pieces)
+    if (u == 'pcs' ||
+        u == 'pc' ||
+        u == 'piece' ||
+        u == 'pieces' ||
+        u == 'unit' ||
+        u == 'units' ||
+        u == 'item' ||
+        u == 'items' ||
+        u == 'nos' ||
+        u == 'no' ||
+        u == 'count' ||
+        u == 'pack' ||
+        u == 'packs' ||
+        u == 'packet' ||
+        u == 'packets' ||
+        u == 'pkt' ||
+        u == 'pkts' ||
+        u == 'box' ||
+        u == 'boxes' ||
+        u == 'bottle' ||
+        u == 'bottles' ||
+        u == 'can' ||
+        u == 'cans' ||
+        u == 'jar' ||
+        u == 'jars' ||
+        u == 'pouch' ||
+        u == 'pouches' ||
+        u == 'strip' ||
+        u == 'strips' ||
+        u == 'bag' ||
+        u == 'bags' ||
+        u == 'tin' ||
+        u == 'tins' ||
+        u == 'roll' ||
+        u == 'rolls' ||
+        u == 'set' ||
+        u == 'sets') {
+      return qty * 1.0;
+    }
+    if (u == 'pair' || u == 'pairs') {
+      return qty * 2.0;
+    }
+    if (u == 'dozen' || u == 'doz') {
+      return qty * 12.0;
+    }
+    if (u == 'half dozen' || u == 'half-dozen') {
+      return qty * 6.0;
+    }
+
+    // Fallback based on measurement type
+    if (measurementType == 'weight_based') {
+      return qty * 1000.0; // Default to kg
+    }
+    return qty;
+  }
+
+  /// Parses an option value string (e.g., "5kg", "500g", "Pack of 5", "2 pcs", "10", "1.5L")
+  /// and returns a MapEntry of (quantity, unit).
+  MapEntry<double, String>? _parseQuantityAndUnit(
+    String rawValue,
+    String optionName,
+    String defaultUnit,
+  ) {
+    final val = rawValue.trim().toLowerCase();
+    if (val.isEmpty) return null;
+
+    // 1. Check for phrases like "half dozen" or "dozen"
+    if (val == 'half dozen' || val == 'half-dozen') {
+      return const MapEntry(6.0, 'pcs');
+    }
+    if (val == 'dozen' || val == '1 dozen') {
+      return const MapEntry(12.0, 'pcs');
+    }
+    if (val == 'pair' || val == '1 pair') {
+      return const MapEntry(2.0, 'pcs');
+    }
+
+    // 2. Check for "pack of N" / "box of N" / "set of N"
+    final packOfMatch = RegExp(
+      r'(?:pack|box|set|bundle|case)\s*(?:of)?\s*(\d+(?:\.\d+)?)',
+    ).firstMatch(val);
+    if (packOfMatch != null) {
+      final q = double.tryParse(packOfMatch.group(1) ?? '');
+      if (q != null && q > 0) return MapEntry(q, 'pcs');
+    }
+
+    // 3. Check for "N x" or "Nx" (e.g. "2x", "5x")
+    final multiplierMatch = RegExp(r'^(\d+(?:\.\d+)?)\s*x$').firstMatch(val);
+    if (multiplierMatch != null) {
+      final q = double.tryParse(multiplierMatch.group(1) ?? '');
+      if (q != null && q > 0) return MapEntry(q, 'pcs');
+    }
+
+    // 4. Check for fraction patterns like "1/2 kg", "1/4 kg", "1/2 liter", "1/2 l"
+    final fractionMatch = RegExp(
+      r'(\d+)\s*/\s*(\d+)\s*([a-zA-Z]+)?',
+    ).firstMatch(val);
+    if (fractionMatch != null) {
+      final num = double.tryParse(fractionMatch.group(1) ?? '') ?? 1.0;
+      final den = double.tryParse(fractionMatch.group(2) ?? '') ?? 1.0;
+      final unitStr = (fractionMatch.group(3) ?? defaultUnit).trim();
+      if (den > 0) {
+        return MapEntry(num / den, unitStr.isNotEmpty ? unitStr : defaultUnit);
+      }
+    }
+
+    // 5. Check for standard number + unit pattern (e.g., "5kg", "500 g", "1.5 Liters", "250ml", "10 pcs")
+    final numUnitMatch = RegExp(
+      r'(\d+(?:\.\d+)?)\s*([a-zA-Z]+)',
+    ).firstMatch(val);
+    if (numUnitMatch != null) {
+      final q = double.tryParse(numUnitMatch.group(1) ?? '');
+      final u = (numUnitMatch.group(2) ?? '').trim();
+      if (q != null && q > 0) {
+        return MapEntry(q, u.isNotEmpty ? u : defaultUnit);
+      }
+    }
+
+    // 6. Check for standalone number (e.g. "5", "10", "50")
+    final standaloneNum = double.tryParse(val);
+    if (standaloneNum != null && standaloneNum > 0) {
+      return MapEntry(standaloneNum, defaultUnit);
+    }
+
+    return null;
+  }
+
+  /// Calculates the proportional price override for a variant combo based on base price, base unit, unit type, and measurement type.
+  double _calculateAutoPriceOverride(
+    Map<String, String> combo,
+    double basePrice,
+    double baseUnitQty,
+    String baseUnitType,
+    String measurementType,
+  ) {
+    if (basePrice <= 0) return 0.0;
+    final effectiveBaseQty = baseUnitQty > 0 ? baseUnitQty : 1.0;
+    final normalizedBaseUnit = baseUnitType.trim().toLowerCase();
+
+    final baseCanonical = _toCanonicalUnit(
+      effectiveBaseQty,
+      normalizedBaseUnit,
+      measurementType,
+    );
+
+    double totalMultiplier = 1.0;
+    bool foundDimension = false;
+
+    for (final entry in combo.entries) {
+      final optName = entry.key.trim().toLowerCase();
+      final parsed = _parseQuantityAndUnit(
+        entry.value,
+        optName,
+        normalizedBaseUnit,
+      );
+      if (parsed != null) {
+        final parsedQty = parsed.key;
+        final parsedUnit = parsed.value;
+
+        final variantCanonical = _toCanonicalUnit(
+          parsedQty,
+          parsedUnit,
+          measurementType,
+        );
+
+        if (baseCanonical != null &&
+            variantCanonical != null &&
+            baseCanonical > 0) {
+          totalMultiplier *= (variantCanonical / baseCanonical);
+          foundDimension = true;
+        } else if (parsedQty > 0) {
+          totalMultiplier *= (parsedQty / effectiveBaseQty);
+          foundDimension = true;
+        }
+      }
+    }
+
+    if (!foundDimension) {
+      return basePrice;
+    }
+
+    final computedPrice = basePrice * totalMultiplier;
+    return double.parse(computedPrice.toStringAsFixed(2));
+  }
+
+  /// Computes the Cartesian Product matrix of all options with intelligent auto-pricing.
   void _generateVariantMatrix() {
     if (_options.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -464,6 +741,16 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         : (int.tryParse(_stockCtrl.text) ?? 10);
     final isUnlimited = _stockMode == 'unlimited';
 
+    final baseSellingPrice = double.tryParse(_discountPriceCtrl.text) ?? 0.0;
+    final baseMrp = double.tryParse(_priceCtrl.text) ?? 0.0;
+    final effectiveBasePrice = baseSellingPrice > 0
+        ? baseSellingPrice
+        : baseMrp;
+    final baseUnitQty = double.tryParse(_unitCtrl.text) ?? 1.0;
+    final baseUnitType = _unitTypeCtrl.text.trim().isNotEmpty
+        ? _unitTypeCtrl.text.trim()
+        : 'pieces';
+
     final List<ProductVariant> newVariants = combinations.map((combo) {
       final comboTitle = combo.values.join(' / ');
       final skuSuffix = combo.values
@@ -471,33 +758,46 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           .join('-');
       final sku = '$baseSku-$skuSuffix';
 
-      // Check if we have an existing variant with matching attributes to preserve overrides
-      final existing = _variants.firstWhere(
-        (v) {
-          if (v.attributes.length != combo.length) return false;
-          for (final entry in combo.entries) {
-            if (v.attributes[entry.key] != entry.value) return false;
-          }
-          return true;
-        },
-        orElse: () => ProductVariant(
-          sku: sku,
-          title: comboTitle,
-          attributes: combo,
-          stockQty: baseStock,
-          isUnlimitedStock: isUnlimited,
-          priceOverride: 0.0,
-        ),
+      final autoPrice = _calculateAutoPriceOverride(
+        combo,
+        effectiveBasePrice,
+        baseUnitQty,
+        baseUnitType,
+        _measurementType,
       );
 
+      // Check if we have an existing variant with matching attributes to preserve custom overrides
+      final existingIndex = _variants.indexWhere((v) {
+        if (v.attributes.length != combo.length) return false;
+        for (final entry in combo.entries) {
+          if (v.attributes[entry.key] != entry.value) return false;
+        }
+        return true;
+      });
+
+      final existing = existingIndex >= 0 ? _variants[existingIndex] : null;
+
+      final finalPrice = (existing != null && existing.priceOverride > 0)
+          ? existing.priceOverride
+          : autoPrice;
+
       return ProductVariant(
-        sku: existing.sku.isNotEmpty ? existing.sku : sku,
+        sku: (existing != null && existing.sku.isNotEmpty) ? existing.sku : sku,
         title: comboTitle,
         attributes: combo,
-        stockQty: existing.stockQty > 0 ? existing.stockQty : baseStock,
-        isUnlimitedStock: existing.isUnlimitedStock || isUnlimited,
-        priceOverride: existing.priceOverride,
-        size: combo['Size'] ?? '',
+        stockQty: (existing != null && existing.stockQty > 0)
+            ? existing.stockQty
+            : baseStock,
+        isUnlimitedStock:
+            (existing != null && existing.isUnlimitedStock) || isUnlimited,
+        priceOverride: finalPrice,
+        size:
+            combo['Size'] ??
+            combo['Weight'] ??
+            combo['Quantity'] ??
+            combo['Pack'] ??
+            combo['Volume'] ??
+            '',
         color: combo['Color'] ?? '',
       );
     }).toList();
@@ -509,7 +809,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Generated ${_variants.length} variant combinations!'),
+        content: Text(
+          'Generated ${_variants.length} variant combinations with auto-calculated prices!',
+        ),
         backgroundColor: Colors.green.shade700,
       ),
     );
@@ -1025,10 +1327,13 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 prefixIcon: Icon(Icons.category_outlined),
                               ),
                               items: categories.map((c) {
+                                final prefix = (c.hasIcon && !c.hasImageIcon)
+                                    ? '${c.iconUrl} '
+                                    : '📁 ';
                                 return DropdownMenuItem<String>(
                                   value: c.id,
                                   child: Text(
-                                    '${c.iconUrl.isNotEmpty ? c.iconUrl : "📁"} ${c.name} (${c.type})',
+                                    '$prefix${c.name} (${c.type})',
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 );
@@ -1927,7 +2232,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              'Stock: ${_variants[idx].isUnlimitedStock ? "Unlimited" : _variants[idx].stockQty} • ${_variants[idx].priceOverride > 0 ? "Price Override: ₹${_variants[idx].priceOverride}" : "Base Price"}${_variants[idx].attributes.isNotEmpty ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}" : ""}',
+                                              'Stock: ${_variants[idx].isUnlimitedStock ? "Unlimited" : _variants[idx].stockQty} • ${_variants[idx].priceOverride > 0 ? "Price: ₹${_variants[idx].priceOverride % 1 == 0 ? _variants[idx].priceOverride.toInt() : _variants[idx].priceOverride}" : "Base Price"}${_variants[idx].attributes.isNotEmpty ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}" : ""}',
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 color: isDark

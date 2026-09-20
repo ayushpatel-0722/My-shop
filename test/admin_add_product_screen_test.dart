@@ -181,12 +181,25 @@ void main() {
 
     expect(find.text('Organic Honey'), findsOneWidget);
     expect(find.text('ID: p_101'), findsOneWidget);
-    expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.delete_outline), findsOneWidget);
 
-    await tester.tap(find.text('ID: p_101'));
-    await tester.pump();
+    // Seed products are listed as well, so assert against this product's row.
+    final tile = find.byKey(const Key('product-tile-p_101'));
+    expect(tile, findsOneWidget);
+    expect(
+      find.descendant(of: tile, matching: find.byIcon(Icons.copy_rounded)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: tile, matching: find.byIcon(Icons.edit_outlined)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: tile, matching: find.byIcon(Icons.delete_outline)),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('product-id-p_101')));
+    await tester.pumpAndSettle();
     expect(find.text('Product ID copied to clipboard: p_101'), findsOneWidget);
   });
 

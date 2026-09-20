@@ -23,6 +23,10 @@ class MockData {
       currency: 'INR',
       deliveryTypes: const ['self_pickup', 'home_delivery'],
       weeklyHours: Company.defaultWeek(),
+      isVerified: true,
+      followers: 128,
+      handlingMinutes: 30,
+      deliveryMinutes: 20,
     ),
     Company(
       id: 'c_techtronics',
@@ -37,6 +41,8 @@ class MockData {
       currency: 'INR',
       deliveryTypes: const ['home_delivery'],
       weeklyHours: Company.defaultWeek(),
+      isVerified: false,
+      followers: 42,
     ),
   ];
 
@@ -146,6 +152,37 @@ class MockData {
         'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&auto=format&fit=crop&q=80',
       ],
       stockQty: 200,
+    ),
+    const Product(
+      id: 'p_banana',
+      companyId: 'c_organic',
+      categoryId: 'cat_fruit',
+      name: 'Robusta Bananas',
+      details: 'Naturally ripened, potassium-rich bananas.',
+      type: 'weight_based',
+      unit: 500,
+      unitType: 'grams',
+      amount: 55,
+      discountAmt: 45,
+      images: [
+        'https://images.unsplash.com/photo-1528825871115-3581a5387919?w=400&auto=format&fit=crop&q=80',
+      ],
+      stockQty: 90,
+    ),
+    const Product(
+      id: 'p_curd',
+      companyId: 'c_organic',
+      categoryId: 'cat_dairy',
+      name: 'Set Curd (Dahi)',
+      details: 'Thick, farm-set curd in a reusable jar.',
+      type: 'quantity_based',
+      unit: 400,
+      unitType: 'grams',
+      amount: 60,
+      images: [
+        'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&auto=format&fit=crop&q=80',
+      ],
+      stockQty: 3,
     ),
     // TechTronics Hub
     const Product(

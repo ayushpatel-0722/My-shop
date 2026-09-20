@@ -7,6 +7,11 @@ import '../../core/services/auth_session.dart';
 import '../auth/auth_cubit.dart';
 
 /// Shared scaffold for admin modules with a navigation drawer.
+///
+/// The shell listens to [AuthSession] (a plain `ChangeNotifier` kept in sync
+/// by [AuthCubit]) rather than requiring an [AuthCubit] in the widget tree.
+/// Admin screens therefore render inside a bare `MaterialApp`, which is what
+/// the widget tests do.
 class AdminShell extends StatelessWidget {
   final String title;
   final Widget child;
@@ -31,11 +36,16 @@ class AdminShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      builder: (context, authState) {
-        final user = authState.user ?? AuthSession.currentUser;
+    return AnimatedBuilder(
+      animation: AuthSession.instance,
+      builder: (context, _) {
+        final user = AuthSession.currentUser;
         final companyName = user?.companyName ?? '';
-        final isRestoring = authState.restoring || AuthSession.isRestoring;
+
+        // Only block while we genuinely have nobody to show. Widget tests and
+        // deep links set the session without a restoring phase, and they must
+        // not be stuck on a spinner.
+        final blocking = AuthSession.isRestoring && user == null;
 
         return Scaffold(
           appBar: AppBar(
@@ -173,7 +183,7 @@ class AdminShell extends StatelessWidget {
               ),
             ),
           ),
-          body: isRestoring
+          body: blocking
               ? const Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

@@ -16,6 +16,18 @@ class Company {
   final List<WeeklyHours> weeklyHours;
   final DateTime? openingDate;
 
+  /// Profile badge shown next to the store name (managed by the platform).
+  final bool isVerified;
+
+  /// Number of shoppers following this store (denormalised counter).
+  final int followers;
+
+  /// Minutes the store needs to pick & pack an order (ETA on order cards).
+  final int handlingMinutes;
+
+  /// Minutes a parcel takes once it leaves the store (ETA on order cards).
+  final int deliveryMinutes;
+
   const Company({
     required this.id,
     required this.name,
@@ -30,6 +42,10 @@ class Company {
     this.deliveryTypes = const ['self_pickup', 'home_delivery'],
     this.weeklyHours = const [],
     this.openingDate,
+    this.isVerified = false,
+    this.followers = 0,
+    this.handlingMinutes = 45,
+    this.deliveryMinutes = 30,
   });
 
   factory Company.fromMap(String id, Map<String, dynamic> map) => Company(
@@ -50,6 +66,12 @@ class Company {
     openingDate: map['openingDate'] != null
         ? DateTime.tryParse(map['openingDate'].toString())
         : null,
+    isVerified: map['isVerified'] is bool
+        ? map['isVerified'] as bool
+        : map['verified'] == true,
+    followers: _asInt(map['followers']),
+    handlingMinutes: _asIntWithDefault(map['handlingMinutes'], 45),
+    deliveryMinutes: _asIntWithDefault(map['deliveryMinutes'], 30),
   );
 
   Map<String, dynamic> toMap() => {
@@ -65,7 +87,22 @@ class Company {
     'deliveryTypes': deliveryTypes,
     'weeklyHours': weeklyHours.map((e) => e.toMap()).toList(),
     'openingDate': openingDate?.toIso8601String(),
+    'isVerified': isVerified,
+    'followers': followers,
+    'handlingMinutes': handlingMinutes,
+    'deliveryMinutes': deliveryMinutes,
   };
+
+  static int _asInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.round();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static int _asIntWithDefault(Object? value, int fallback) {
+    final parsed = _asInt(value);
+    return parsed <= 0 ? fallback : parsed;
+  }
 
   bool get isActive => status == 'active';
 

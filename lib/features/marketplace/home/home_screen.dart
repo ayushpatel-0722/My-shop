@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: SectionHeader(
                       title: 'Shops Near You',
-                      onViewAll: () => context.go(AppRoutes.categories),
+                      onViewAll: () => _showAllShopsSheet(context, companies),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: SectionHeader(
                       title: 'Trending Now 🔥',
-                      onViewAll: () => context.go(AppRoutes.search),
+                      onViewAll: () => context.push(AppRoutes.search),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -162,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: SectionHeader(
                       title: l10n.recommendedForYou,
-                      onViewAll: () => context.go(AppRoutes.search),
+                      onViewAll: () => context.push(AppRoutes.search),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -263,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         size: 22,
                       ),
                     ),
-                    onPressed: () => context.go(AppRoutes.notifications),
+                    onPressed: () => context.push(AppRoutes.notifications),
                   ),
 
                   // Shopping Cart Icon with Count Badge
@@ -288,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             size: 22,
                           ),
                         ),
-                        onPressed: () => context.go(AppRoutes.cart),
+                        onPressed: () => context.push(AppRoutes.cart),
                       );
                     },
                   ),
@@ -320,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Search Bar Pill
               InkWell(
-                onTap: () => context.go(AppRoutes.search),
+                onTap: () => context.push(AppRoutes.search),
                 borderRadius: BorderRadius.circular(28),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -565,7 +565,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     elevation: 0,
                   ),
-                  onPressed: () => context.go(AppRoutes.search),
+                  onPressed: () => context.push(AppRoutes.search),
                   child: const Text(
                     'Shop Now',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
@@ -661,7 +661,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final bgColor = _pastelColors[i % _pastelColors.length];
 
               return InkWell(
-                onTap: () => context.go(
+                onTap: () => context.push(
                   '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
                 ),
                 borderRadius: BorderRadius.circular(16),
@@ -757,39 +757,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return StreamBuilder<List<Voucher>>(
       stream: vouchers,
       builder: (context, snap) {
-        final list = snap.data ?? const <Voucher>[];
-        if (list.isEmpty) {
-          final defaultVouchers = [
-            Voucher(
-              id: 'v1',
-              code: 'WELCOME50',
-              discountValue: 50,
-              discountType: 'percentage',
-              companyId: '',
-              minOrderAmt: 199,
-              expiryDate: DateTime.now().add(const Duration(days: 7)),
-            ),
-            Voucher(
-              id: 'v2',
-              code: 'FLAT100',
-              discountValue: 100,
-              discountType: 'flat',
-              companyId: '',
-              minOrderAmt: 499,
-              expiryDate: DateTime.now().add(const Duration(days: 5)),
-            ),
-            Voucher(
-              id: 'v3',
-              code: 'FREESHIP',
-              discountValue: 40,
-              discountType: 'flat',
-              companyId: '',
-              minOrderAmt: 299,
-              expiryDate: DateTime.now().add(const Duration(days: 10)),
-            ),
-          ];
-          return _buildVoucherList(defaultVouchers);
+        // Never advertise a code the shopper cannot redeem: expired, paused
+        // and exhausted vouchers are filtered out (previously the rail fell
+        // back to three invented "WELCOME50 / FLAT100 / FREESHIP" coupons
+        // that did not exist in any store).
+        final now = DateTime.now();
+        final list = (snap.data ?? const <Voucher>[])
+            .where((v) => v.isLiveAt(now) && !v.isExhausted)
+            .toList();
+
+        if (snap.connectionState == ConnectionState.waiting && list.isEmpty) {
+          return const SizedBox(
+            height: 72,
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
         }
+        if (list.isEmpty) return const SizedBox.shrink();
         return _buildVoucherList(list);
       },
     );
@@ -810,10 +793,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _voucherCard(BuildContext context, Voucher v) {
     final isClaimed = _claimedVouchers.contains(v.id);
-    final isPercent = v.discountType == 'percentage';
-    final discountStr = isPercent
-        ? '${v.discountValue}% OFF'
-        : '₹${v.discountValue} OFF';
+    final discountStr = v.discountLabel;
 
     return Container(
       width: 210,
@@ -873,6 +853,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (v.minOrderAmt > 0)
+                  Text(
+                    'Min ₹${v.minOrderAmt.toStringAsFixed(0)}',
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
               ],
             ),
           ),
@@ -912,6 +897,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // Shops Near You Rail
   // ---------------------------------------------------------------------------
   Widget _shopsNearYouRail(Stream<List<Company>> companies) {
@@ -922,7 +908,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (list.isEmpty) return const SizedBox.shrink();
 
         return SizedBox(
-          height: 140,
+          height: 148,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -940,20 +926,21 @@ class _HomeScreenState extends State<HomeScreen> {
     final times = ['15-25 min', '20-30 min', '25-35 min', '10-20 min'];
     final rating = ratings[index % ratings.length];
     final deliveryTime = times[index % times.length];
+    final isOpen = company.isOpenNow();
 
     return InkWell(
-      onTap: () => context.go(AppRoutes.companyPath(company.slug)),
+      onTap: () => context.push(AppRoutes.companyPath(company.slug)),
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        width: 140,
+        width: 154,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF0F2F5)),
+          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.03),
+              color: Color.fromRGBO(0, 0, 0, 0.04),
               blurRadius: 8,
               offset: Offset(0, 2),
             ),
@@ -961,12 +948,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFEBEA),
                     borderRadius: BorderRadius.circular(12),
@@ -993,12 +982,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 2,
+                    horizontal: 6,
+                    vertical: 3,
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF3C7),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1012,7 +1001,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         '$rating',
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: 10.5,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF92400E),
                         ),
@@ -1022,41 +1011,63 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const Spacer(),
-            Row(
+            const SizedBox(height: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: Text(
-                    company.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: Color(0xFF1E2229),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        company.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Color(0xFF1E2229),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 3),
+                    const Icon(
+                      Icons.verified,
+                      color: Color(0xFF1E8F66),
+                      size: 14,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 3),
-                const Icon(Icons.verified, color: Color(0xFF1E8F66), size: 14),
-              ],
-            ),
-            const SizedBox(height: 3),
-            Row(
-              children: [
-                const Icon(
-                  Icons.bolt_rounded,
-                  size: 12,
-                  color: Color(0xFFFF5247),
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  deliveryTime,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF6B7280),
-                    fontWeight: FontWeight.w500,
-                  ),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.timer_outlined,
+                      size: 12,
+                      color: isOpen ? const Color(0xFF1E8F66) : Colors.grey,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      deliveryTime,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: isOpen
+                            ? const Color(0xFF1E8F66)
+                            : const Color(0xFF6B7280),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isOpen
+                            ? const Color(0xFF1E8F66)
+                            : Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1106,7 +1117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 165,
                 child: ProductCard(
                   product: list[i],
-                  onTap: () => context.go(AppRoutes.productPath(list[i].id)),
+                  onTap: () => context.push(AppRoutes.productPath(list[i].id)),
                 ),
               );
             },
@@ -1163,7 +1174,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: products.length,
         itemBuilder: (context, i) => ProductCard(
           product: products[i],
-          onTap: () => context.go(AppRoutes.productPath(products[i].id)),
+          onTap: () => context.push(AppRoutes.productPath(products[i].id)),
         ),
       ),
     );
@@ -1247,6 +1258,180 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showAllShopsSheet(
+    BuildContext context,
+    Stream<List<Company>> companies,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.65,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (sheetContext, scrollController) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'All Shops & Stores',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: StreamBuilder<List<Company>>(
+                  stream: companies,
+                  builder: (context, snap) {
+                    final list = snap.data ?? const <Company>[];
+                    if (list.isEmpty) {
+                      return const Center(child: Text('No shops available'));
+                    }
+                    return ListView.separated(
+                      controller: scrollController,
+                      itemCount: list.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, i) {
+                        final c = list[i];
+                        final isOpen = c.isOpenNow();
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          ),
+                          leading: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFEBEA),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child:
+                                  c.logoUrl.isNotEmpty &&
+                                      (c.logoUrl.startsWith('http://') ||
+                                          c.logoUrl.startsWith('https://'))
+                                  ? Image.network(
+                                      c.logoUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) =>
+                                          _shopFallbackAvatar(c),
+                                    )
+                                  : _shopFallbackAvatar(c),
+                            ),
+                          ),
+                          title: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  c.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.verified,
+                                color: Color(0xFF1E8F66),
+                                size: 14,
+                              ),
+                            ],
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  size: 8,
+                                  color: isOpen
+                                      ? const Color(0xFF1E8F66)
+                                      : Colors.grey,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isOpen ? 'Open Now' : 'Closed',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isOpen
+                                        ? const Color(0xFF1E8F66)
+                                        : Colors.grey,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                if (c.details.isNotEmpty) ...[
+                                  const Text(
+                                    ' • ',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      c.details,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: Colors.grey,
+                          ),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            context.push(AppRoutes.companyPath(c.slug));
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
