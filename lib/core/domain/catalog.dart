@@ -1,3 +1,4 @@
+import '../models/category.dart';
 import '../models/product.dart';
 
 /// Stock health of a product, shared by the admin list and the store front.
@@ -59,6 +60,7 @@ class CatalogQuery {
   final String search;
   final Set<String> categoryIds;
   final Set<String> companyIds;
+  final List<Category>? categories;
   final bool inStockOnly;
   final bool discountedOnly;
   final bool includeOutOfStockLast;
@@ -71,6 +73,7 @@ class CatalogQuery {
     this.search = '',
     this.categoryIds = const <String>{},
     this.companyIds = const <String>{},
+    this.categories,
     this.inStockOnly = false,
     this.discountedOnly = false,
     this.includeOutOfStockLast = true,
@@ -82,23 +85,23 @@ class CatalogQuery {
     String? search,
     Set<String>? categoryIds,
     Set<String>? companyIds,
+    List<Category>? categories,
     bool? inStockOnly,
     bool? discountedOnly,
     bool? includeOutOfStockLast,
     ProductSort? sort,
     int? lowStockThreshold,
-  }) =>
-      CatalogQuery(
-        search: search ?? this.search,
-        categoryIds: categoryIds ?? this.categoryIds,
-        companyIds: companyIds ?? this.companyIds,
-        inStockOnly: inStockOnly ?? this.inStockOnly,
-        discountedOnly: discountedOnly ?? this.discountedOnly,
-        includeOutOfStockLast:
-            includeOutOfStockLast ?? this.includeOutOfStockLast,
-        sort: sort ?? this.sort,
-        lowStockThreshold: lowStockThreshold ?? this.lowStockThreshold,
-      );
+  }) => CatalogQuery(
+    search: search ?? this.search,
+    categoryIds: categoryIds ?? this.categoryIds,
+    companyIds: companyIds ?? this.companyIds,
+    categories: categories ?? this.categories,
+    inStockOnly: inStockOnly ?? this.inStockOnly,
+    discountedOnly: discountedOnly ?? this.discountedOnly,
+    includeOutOfStockLast: includeOutOfStockLast ?? this.includeOutOfStockLast,
+    sort: sort ?? this.sort,
+    lowStockThreshold: lowStockThreshold ?? this.lowStockThreshold,
+  );
 
   bool get hasSearch => search.trim().isNotEmpty;
   bool get hasCategoryFilter => categoryIds.isNotEmpty;
@@ -134,6 +137,76 @@ class Catalog {
     return true;
   }
 
+  /// Flexible category matching that checks:
+  /// 1. Direct match on p.categoryId with categoryIds / names / slugs
+  /// 2. If categories list is provided, checks if category productList contains product.id
+  ///    or if product.categoryId matches category id/name/type.
+  static bool matchesCategory(
+    Product product,
+    Set<String> categoryTargets, [
+    List<Category>? categories,
+  ]) {
+    if (categoryTargets.isEmpty) return true;
+
+    final pCat = product.categoryId.trim();
+
+    // 1. Direct match with target category IDs/names/slugs
+    if (pCat.isNotEmpty) {
+      for (final t in categoryTargets) {
+        final target = t.trim();
+        if (target.isEmpty) continue;
+        if (pCat == target) return true;
+        if (pCat.toLowerCase() == target.toLowerCase()) return true;
+        if (pCat.replaceAll(' ', '-').toLowerCase() == target.toLowerCase()) {
+          return true;
+        }
+        if (pCat.replaceAll('-', ' ').toLowerCase() == target.toLowerCase()) {
+          return true;
+        }
+        if (pCat.replaceAll('_', '-').toLowerCase() == target.toLowerCase()) {
+          return true;
+        }
+        if (pCat.replaceAll('-', '_').toLowerCase() == target.toLowerCase()) {
+          return true;
+        }
+      }
+    }
+
+    // 2. Check against full category entities if available
+    if (categories != null && categories.isNotEmpty) {
+      for (final cat in categories) {
+        final catMatchesTarget = categoryTargets.any((t) {
+          final target = t.trim().toLowerCase();
+          return cat.id.toLowerCase() == target ||
+              cat.name.toLowerCase() == target ||
+              cat.id.replaceAll('_', '-').toLowerCase() == target ||
+              cat.id.replaceAll('-', '_').toLowerCase() == target ||
+              cat.name.replaceAll(' ', '-').toLowerCase() == target ||
+              cat.name.replaceAll('-', ' ').toLowerCase() == target;
+        });
+
+        if (catMatchesTarget) {
+          // Check if this product belongs to this matched category
+          if (cat.productList.contains(product.id)) return true;
+          if (pCat.isNotEmpty) {
+            if (pCat == cat.id ||
+                pCat.toLowerCase() == cat.id.toLowerCase() ||
+                pCat.toLowerCase() == cat.name.toLowerCase() ||
+                pCat.replaceAll(' ', '-').toLowerCase() ==
+                    cat.id.toLowerCase() ||
+                pCat.replaceAll('-', ' ').toLowerCase() ==
+                    cat.name.toLowerCase() ||
+                pCat.toLowerCase() == cat.type.toLowerCase()) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   /// Stock health for a product, honouring the "unlimited" flag.
   static StockStatus stockStatus(
     Product product, {
@@ -146,15 +219,13 @@ class Catalog {
   }
 
   /// Applies [query] to [source] and returns a new list (input untouched).
-  static List<Product> apply(
-    Iterable<Product> source,
-    CatalogQuery query,
-  ) {
+  static List<Product> apply(Iterable<Product> source, CatalogQuery query) {
     final filtered = source.where((p) {
       if (query.hasCompanyFilter && !query.companyIds.contains(p.companyId)) {
         return false;
       }
-      if (query.hasCategoryFilter && !query.categoryIds.contains(p.categoryId)) {
+      if (query.hasCategoryFilter &&
+          !matchesCategory(p, query.categoryIds, query.categories)) {
         return false;
       }
       if (query.inStockOnly && !p.isInStock) return false;
@@ -181,7 +252,8 @@ class Catalog {
         break;
       case ProductSort.rating:
         filtered.sort(
-          (a, b) => (b.isRecommended ? 1 : 0).compareTo(a.isRecommended ? 1 : 0),
+          (a, b) =>
+              (b.isRecommended ? 1 : 0).compareTo(a.isRecommended ? 1 : 0),
         );
         break;
       case ProductSort.relevance:
@@ -217,13 +289,13 @@ class Catalog {
   static List<Product> lowStock(
     Iterable<Product> products, {
     int lowStockThreshold = 20,
-  }) =>
-      products
-          .where(
-            (p) => stockStatus(p, lowStockThreshold: lowStockThreshold) ==
-                StockStatus.lowStock,
-          )
-          .toList();
+  }) => products
+      .where(
+        (p) =>
+            stockStatus(p, lowStockThreshold: lowStockThreshold) ==
+            StockStatus.lowStock,
+      )
+      .toList();
 
   /// Catalogue health summary for the admin dashboard.
   static CatalogSummary summarize(

@@ -181,6 +181,15 @@ String? appRouteRedirect(String loc) {
     }
   }
 
+  // Shopper-only routes require a logged-in user.
+  if (AuthSession.currentUser == null &&
+      (loc == AppRoutes.cart ||
+          loc == AppRoutes.checkout ||
+          loc == AppRoutes.orders ||
+          loc.startsWith('/order/'))) {
+    return AppRoutes.userLogin;
+  }
+
   // Protect only the admin area ("/admin" and its subpaths), not the
   // admin-login route. Similarly protect only the employee area.
   if ((loc == AppRoutes.admin || loc.startsWith('${AppRoutes.admin}/')) &&

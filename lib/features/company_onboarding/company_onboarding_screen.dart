@@ -27,11 +27,13 @@ class CompanyOnboardingScreen extends StatefulWidget {
 class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
   int _step = 0;
   final _nameCtrl = TextEditingController();
+  final _categoryCtrl = TextEditingController();
   final _detailsCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  // Company image URL (optional) — replace image upload with URL input.
-  final _imageUrlCtrl = TextEditingController();
+  final _logoUrlCtrl = TextEditingController();
+  final _bannerUrlCtrl = TextEditingController();
+  final _profileImageUrlCtrl = TextEditingController();
   String _currency = 'INR';
   final List<WeeklyHours> _hours = Company.defaultWeek();
   final Set<String> _deliveryTypes = {'self_pickup', 'home_delivery'};
@@ -46,10 +48,13 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _categoryCtrl.dispose();
     _detailsCtrl.dispose();
     _addressCtrl.dispose();
     _passwordCtrl.dispose();
-    _imageUrlCtrl.dispose();
+    _logoUrlCtrl.dispose();
+    _bannerUrlCtrl.dispose();
+    _profileImageUrlCtrl.dispose();
     _adminNameCtrl.dispose();
     _adminEmailCtrl.dispose();
     _adminPassCtrl.dispose();
@@ -108,7 +113,17 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _nameCtrl,
               decoration: InputDecoration(
                 labelText: l10n.companyName,
+                hintText: 'e.g. Om Mart Express',
                 prefixIcon: const Icon(Icons.business),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _categoryCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Store Category',
+                hintText: 'e.g. Grocery & Staples, Supermarket, Electronics',
+                prefixIcon: Icon(Icons.category_outlined),
               ),
             ),
             const SizedBox(height: 16),
@@ -117,6 +132,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: l10n.appSubtitle,
+                hintText: 'e.g. Fresh organic groceries delivered daily',
                 prefixIcon: const Icon(Icons.description_outlined),
               ),
             ),
@@ -125,6 +141,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _addressCtrl,
               decoration: InputDecoration(
                 labelText: l10n.address,
+                hintText: 'e.g. 12 Market Street, Ahmedabad',
                 prefixIcon: const Icon(Icons.location_on_outlined),
               ),
             ),
@@ -237,14 +254,39 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            const SizedBox(height: 24),
+            Text(
+              'Company Branding & Images',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             TextField(
-              controller: _imageUrlCtrl,
+              controller: _logoUrlCtrl,
               keyboardType: TextInputType.url,
               decoration: const InputDecoration(
-                labelText: 'Company Image URL (optional)',
+                labelText: 'Company Logo URL',
                 hintText: 'https://example.com/logo.png',
-                prefixIcon: Icon(Icons.link),
+                prefixIcon: Icon(Icons.photo_size_select_actual_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _bannerUrlCtrl,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                labelText: 'Company Banner URL',
+                hintText: 'https://example.com/store_banner.jpg',
+                prefixIcon: Icon(Icons.panorama_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _profileImageUrlCtrl,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                labelText: 'Company Storefront / Profile Image URL',
+                hintText: 'https://example.com/storefront_photo.jpg',
+                prefixIcon: Icon(Icons.storefront_outlined),
               ),
             ),
             const SizedBox(height: 24),
@@ -399,8 +441,11 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
         slug: companyName.toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
         companyPassword: companyPass,
         details: _detailsCtrl.text.trim(),
+        category: _categoryCtrl.text.trim(),
         address: _addressCtrl.text.trim(),
-        logoUrl: _imageUrlCtrl.text.trim(),
+        logoUrl: _logoUrlCtrl.text.trim(),
+        bannerUrl: _bannerUrlCtrl.text.trim(),
+        profileImageUrl: _profileImageUrlCtrl.text.trim(),
         currency: _currency,
         deliveryTypes: _deliveryTypes.toList(),
         weeklyHours: _hours,
@@ -459,7 +504,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
 
       // 4. Save media link if an image URL was specified
       // User is now authenticated, so media_links rules (auth != null) allow the write!
-      final logoUrl = _imageUrlCtrl.text.trim();
+      final logoUrl = _logoUrlCtrl.text.trim();
       if (logoUrl.isNotEmpty) {
         final media = MediaUrlPayload(
           id: companyId,

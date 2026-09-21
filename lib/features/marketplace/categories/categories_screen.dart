@@ -9,6 +9,8 @@ import '../../../core/models/company.dart';
 import '../../../core/models/order.dart' show DeliveryType;
 import '../../../core/domain/category_tree.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/services/auth_session.dart';
+import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/section_header.dart';
@@ -72,7 +74,16 @@ class CategoriesScreen extends StatelessWidget {
                     color: Color(0xFF1E2229),
                   ),
                 ),
-                onPressed: () => context.push(AppRoutes.cart),
+                onPressed: () async {
+                  if (AuthSession.currentUser == null) {
+                    final ok = await AuthBottomSheet.show(context);
+                    if (ok && context.mounted) {
+                      context.push(AppRoutes.cart);
+                    }
+                    return;
+                  }
+                  context.push(AppRoutes.cart);
+                },
               );
             },
           ),

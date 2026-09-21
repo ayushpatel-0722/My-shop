@@ -11,6 +11,11 @@ class Company {
   final String address;
   final String location; // maps link
   final String logoUrl;
+  final String bannerUrl;
+  final String profileImageUrl;
+  final String category;
+  final double rating;
+  final int reviewCount;
   final String currency; // INR | USD
   final List<String> deliveryTypes; // self_pickup | home_delivery
   final List<WeeklyHours> weeklyHours;
@@ -38,6 +43,11 @@ class Company {
     this.address = '',
     this.location = '',
     this.logoUrl = '',
+    this.bannerUrl = '',
+    this.profileImageUrl = '',
+    this.category = '',
+    this.rating = 0.0,
+    this.reviewCount = 0,
     this.currency = 'INR',
     this.deliveryTypes = const ['self_pickup', 'home_delivery'],
     this.weeklyHours = const [],
@@ -57,7 +67,18 @@ class Company {
     details: map['details'] ?? '',
     address: map['address'] ?? '',
     location: map['location'] ?? '',
-    logoUrl: map['logoUrl'] ?? '',
+    logoUrl: map['logoUrl'] ?? map['logo'] ?? '',
+    bannerUrl: map['bannerUrl'] ?? map['banner'] ?? '',
+    profileImageUrl:
+        map['profileImageUrl'] ?? map['profileImage'] ?? map['image'] ?? '',
+    category: map['category'] ?? '',
+    rating:
+        (map['rating'] as num?)?.toDouble() ??
+        (map['ratingAverage'] as num?)?.toDouble() ??
+        0.0,
+    reviewCount: _asInt(
+      map['reviewCount'] ?? map['reviewsCount'] ?? map['reviews'],
+    ),
     currency: map['currency'] ?? 'INR',
     deliveryTypes: List<String>.from(map['deliveryTypes'] ?? const []),
     weeklyHours: (map['weeklyHours'] as List? ?? const [])
@@ -83,6 +104,11 @@ class Company {
     'address': address,
     'location': location,
     'logoUrl': logoUrl,
+    'bannerUrl': bannerUrl,
+    'profileImageUrl': profileImageUrl,
+    'category': category,
+    'rating': rating,
+    'reviewCount': reviewCount,
     'currency': currency,
     'deliveryTypes': deliveryTypes,
     'weeklyHours': weeklyHours.map((e) => e.toMap()).toList(),
@@ -92,6 +118,64 @@ class Company {
     'handlingMinutes': handlingMinutes,
     'deliveryMinutes': deliveryMinutes,
   };
+
+  Company copyWith({
+    String? id,
+    String? name,
+    String? slug,
+    String? companyPassword,
+    String? status,
+    String? details,
+    String? address,
+    String? location,
+    String? logoUrl,
+    String? bannerUrl,
+    String? profileImageUrl,
+    String? category,
+    double? rating,
+    int? reviewCount,
+    String? currency,
+    List<String>? deliveryTypes,
+    List<WeeklyHours>? weeklyHours,
+    DateTime? openingDate,
+    bool? isVerified,
+    int? followers,
+    int? handlingMinutes,
+    int? deliveryMinutes,
+  }) => Company(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    slug: slug ?? this.slug,
+    companyPassword: companyPassword ?? this.companyPassword,
+    status: status ?? this.status,
+    details: details ?? this.details,
+    address: address ?? this.address,
+    location: location ?? this.location,
+    logoUrl: logoUrl ?? this.logoUrl,
+    bannerUrl: bannerUrl ?? this.bannerUrl,
+    profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+    category: category ?? this.category,
+    rating: rating ?? this.rating,
+    reviewCount: reviewCount ?? this.reviewCount,
+    currency: currency ?? this.currency,
+    deliveryTypes: deliveryTypes ?? this.deliveryTypes,
+    weeklyHours: weeklyHours ?? this.weeklyHours,
+    openingDate: openingDate ?? this.openingDate,
+    isVerified: isVerified ?? this.isVerified,
+    followers: followers ?? this.followers,
+    handlingMinutes: handlingMinutes ?? this.handlingMinutes,
+    deliveryMinutes: deliveryMinutes ?? this.deliveryMinutes,
+  );
+
+  /// Priority image for company card and storefront displays.
+  String get displayImage => profileImageUrl.isNotEmpty
+      ? profileImageUrl
+      : (bannerUrl.isNotEmpty ? bannerUrl : logoUrl);
+
+  /// Priority banner for storefront header.
+  String get bannerImage => bannerUrl.isNotEmpty
+      ? bannerUrl
+      : (profileImageUrl.isNotEmpty ? profileImageUrl : logoUrl);
 
   static int _asInt(Object? value) {
     if (value is int) return value;

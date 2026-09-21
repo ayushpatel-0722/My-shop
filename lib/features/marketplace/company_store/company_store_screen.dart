@@ -48,6 +48,9 @@ class CompanyStoreScreen extends StatefulWidget {
 class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   Company? _company;
 
+  /// Selected category filter chip above shelves (null means 'All').
+  String? _selectedCategoryId;
+
   // All Products grid controls.
   ProductSort _sort = ProductSort.relevance;
   bool _onlyInStock = false;
@@ -157,7 +160,6 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      extendBodyBehindAppBar: true,
       appBar: _buildAppBar(context, company),
       bottomNavigationBar: const MarketplaceBottomNav(currentIndex: 0),
       body: StreamBuilder<List<Product>>(
@@ -217,63 +219,86 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // 1. Top App Bar — transparent, overlays the header banner.
+  // 1. Top App Bar — clean white app bar with search, reviews, and cart
   // ---------------------------------------------------------------------------
   PreferredSizeWidget _buildAppBar(BuildContext context, Company company) {
     return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 12, top: 6),
-        child: _CircleIconButton(
-          icon: Icons.arrow_back,
-          onTap: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppRoutes.home);
-            }
-          },
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0.5,
+      shadowColor: const Color.fromRGBO(0, 0, 0, 0.08),
+      automaticallyImplyLeading: false,
+      titleSpacing: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1E2229)),
+        tooltip: 'Back',
+        onPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go(AppRoutes.home);
+          }
+        },
+      ),
+      title: Text(
+        company.name,
+        style: const TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w800,
+          color: Color(0xFF1E2229),
         ),
       ),
-      title: const SizedBox.shrink(),
       actions: [
-        Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: _CircleIconButton(
-            icon: Icons.search,
-            tooltip: 'Search in this store',
-            onTap: () => context.push(
-              '${AppRoutes.search}?companyId=${company.id}&name=${Uri.encodeComponent(company.name)}',
-            ),
+        IconButton(
+          icon: const Icon(Icons.search_rounded, color: Color(0xFF1E2229)),
+          tooltip: 'Search in this store',
+          onPressed: () => context.push(
+            '${AppRoutes.search}?companyId=${company.id}&name=${Uri.encodeComponent(company.name)}',
           ),
         ),
-        const SizedBox(width: 8),
-        Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: _CircleIconButton(
-            icon: Icons.rate_review_outlined,
-            tooltip: 'Store reviews',
-            onTap: () => context.push(
-              AppRoutes.reviews.replaceFirst(':companyId', company.id),
-            ),
+        IconButton(
+          icon: const Icon(
+            Icons.rate_review_outlined,
+            color: Color(0xFF1E2229),
+          ),
+          tooltip: 'Store reviews',
+          onPressed: () => context.push(
+            AppRoutes.reviews.replaceFirst(':companyId', company.id),
           ),
         ),
-        const SizedBox(width: 8),
-        Padding(
-          padding: const EdgeInsets.only(top: 6, right: 12),
-          child: BlocBuilder<CartCubit, CartState>(
-            builder: (context, state) {
-              final count = state.totalItems;
-              return _CircleIconButton(
-                icon: Icons.shopping_cart_outlined,
-                onTap: () => context.push(AppRoutes.cart),
-                badge: count > 0 ? '$count' : null,
-              );
-            },
-          ),
+        BlocBuilder<CartCubit, CartState>(
+          builder: (context, state) {
+            final count = state.totalItems;
+            return IconButton(
+              icon: Badge(
+                isLabelVisible: count > 0,
+                label: Text(
+                  '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+                backgroundColor: const Color(0xFFFF5247),
+                child: const Icon(
+                  Icons.shopping_cart_outlined,
+                  color: Color(0xFF1E2229),
+                ),
+              ),
+              tooltip: 'Cart',
+              onPressed: () async {
+                if (AuthSession.currentUser == null) {
+                  final ok = await AuthBottomSheet.show(context);
+                  if (ok && context.mounted) context.go(AppRoutes.cart);
+                  return;
+                }
+                context.go(AppRoutes.cart);
+              },
+            );
+          },
         ),
+        const SizedBox(width: 6),
       ],
     );
   }
@@ -298,7 +323,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         // 1. Shop details block (banner + logo + meta).
         _ShopDetailsBlock(
           company: company,
-          bannerImage: _bannerImage(offerBanners),
+          bannerImage: _bannerImage(company, offerBanners),
           stats: StoreStats.fromReviews(
             reviews,
             followerCount: company.followers + (_isFollowing ? 1 : 0),
@@ -323,22 +348,35 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             onClaimVoucher: (code) => _handleClaimVoucher(context, code),
             onBannerTap: (banner) => _openBannerTarget(context, banner),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
         ],
 
-        // 3. Category shelves (one shelf per category this store sells in).
+        // 3. Offers from this store coupon row.
+        if (vouchers.isNotEmpty) ...[
+          _StoreCouponsSection(
+            vouchers: vouchers,
+            onClaimVoucher: (code) => _handleClaimVoucher(context, code),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // 4. Horizontal category filter pills row (All, Category 1, Category 2, ...).
+        _buildCategoryChips(context, categories, allProducts),
+
+        // 5. Category shelves (one shelf per category this store sells in).
         _buildCategoryShelves(context, company, categories, allProducts),
 
-        // 4. Trending Now — this store's own order velocity.
+        // 6. Trending Now — this store's own order velocity.
         _buildTrendingShelf(context, company, allProducts, orders),
 
-        // 5. All Products grid with filter pills.
+        // 7. All Products grid with filter pills.
         _buildAllProducts(context, company, allProducts),
       ],
     );
   }
 
-  String? _bannerImage(List<OfferBanner> banners) {
+  String? _bannerImage(Company company, List<OfferBanner> banners) {
+    if (company.bannerImage.isNotEmpty) return company.bannerImage;
     for (final b in banners) {
       final image = b.image.trim();
       if (image.isNotEmpty) return image;
@@ -350,7 +388,9 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
     if (banner.targetProdId != null && banner.targetProdId!.isNotEmpty) {
       context.push(AppRoutes.productPath(banner.targetProdId!));
     } else if (banner.targetCatId != null && banner.targetCatId!.isNotEmpty) {
-      context.push(AppRoutes.categoryPath(banner.targetCatId!));
+      context.push(
+        '${AppRoutes.categoryPath(banner.targetCatId!)}?companyId=${_company?.id ?? ''}',
+      );
     }
   }
 
@@ -372,7 +412,61 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // 3. Per-category product shelves
+  // 3. Horizontal category filter chips row (All, Cat 1, Cat 2, ...)
+  // ---------------------------------------------------------------------------
+  Widget _buildCategoryChips(
+    BuildContext context,
+    List<Category> categories,
+    List<Product> allProducts,
+  ) {
+    // Only show categories that have at least 1 product matching in this store
+    final activeCategories = categories.where((cat) {
+      return allProducts.any((p) => _productMatchesCategory(p, cat));
+    }).toList();
+
+    if (activeCategories.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 38,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            physics: const BouncingScrollPhysics(),
+            itemCount: activeCategories.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                final isSelected = _selectedCategoryId == null;
+                return _CategoryChip(
+                  key: const Key('category-chip-all'),
+                  label: 'All',
+                  isSelected: isSelected,
+                  onTap: () => setState(() => _selectedCategoryId = null),
+                );
+              }
+              final cat = activeCategories[index - 1];
+              final isSelected = _selectedCategoryId == cat.id;
+              return _CategoryChip(
+                key: Key('category-chip-${cat.id}'),
+                label: cat.name,
+                isSelected: isSelected,
+                onTap: () => setState(() {
+                  _selectedCategoryId = isSelected ? null : cat.id;
+                }),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 4. Per-category product shelves
   // ---------------------------------------------------------------------------
   Widget _buildCategoryShelves(
     BuildContext context,
@@ -388,7 +482,9 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
           .where((p) => _productMatchesCategory(p, cat))
           .toList();
       if (prods.isNotEmpty) {
-        categoryEntries.add(MapEntry(cat, prods));
+        if (_selectedCategoryId == null || _selectedCategoryId == cat.id) {
+          categoryEntries.add(MapEntry(cat, prods));
+        }
       }
     }
 
@@ -662,77 +758,6 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
 // Building blocks
 // =============================================================================
 
-/// Round, semi-transparent white app-bar button (back / search / reviews /
-/// cart with badge) that stays legible over the header banner.
-class _CircleIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-  final String? badge;
-  final String? tooltip;
-
-  const _CircleIconButton({
-    required this.icon,
-    this.onTap,
-    this.badge,
-    this.tooltip,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final button = Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.82),
-        shape: BoxShape.circle,
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(15, 23, 42, 0.18),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(7),
-              child: Icon(icon, size: 20, color: const Color(0xFF1E2229)),
-            ),
-            if (badge != null)
-              Positioned(
-                top: -2,
-                right: -2,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  constraints: const BoxConstraints(minWidth: 16),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFB3261E),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    badge!,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-
-    if (tooltip == null) return button;
-    return Tooltip(message: tooltip!, child: button);
-  }
-}
-
 /// Shop details block: banner, overlapping logo, name + verified badge,
 /// tappable rating row, open/closed pill, follower count + follow button.
 class _ShopDetailsBlock extends StatelessWidget {
@@ -759,14 +784,14 @@ class _ShopDetailsBlock extends StatelessWidget {
     final hasLogo = company.logoUrl.trim().isNotEmpty;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Backdrop banner (~120 px) with the logo overlapping its bottom edge.
+        // Backdrop banner (~160 px) with the logo overlapping its bottom-left edge.
         Stack(
           clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
           children: [
             SizedBox(
-              height: 120,
+              height: 160,
               width: double.infinity,
               child: bannerImage != null
                   ? Image.network(
@@ -777,70 +802,92 @@ class _ShopDetailsBlock extends StatelessWidget {
                   : _bannerFallback(),
             ),
             Container(
-              height: 120,
+              height: 160,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.black.withValues(alpha: 0.0),
-                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.45),
                   ],
                 ),
               ),
             ),
             Positioned(
+              left: 16,
               bottom: -34,
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0, 0.15),
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 82,
+                    height: 82,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.15),
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(3),
-                child: CircleAvatar(
-                  key: const Key('store-logo'),
-                  backgroundColor: const Color(0xFFFFEBEA),
-                  child: ClipOval(
-                    child: hasLogo
-                        ? Image.network(
-                            company.logoUrl.trim(),
-                            fit: BoxFit.cover,
-                            width: 74,
-                            height: 74,
-                            errorBuilder: (_, _, _) => _logoFallback(),
-                          )
-                        : _logoFallback(),
+                    padding: const EdgeInsets.all(3.5),
+                    child: CircleAvatar(
+                      key: const Key('store-logo'),
+                      backgroundColor: const Color(0xFFFFEBEA),
+                      child: ClipOval(
+                        child: hasLogo
+                            ? Image.network(
+                                company.logoUrl.trim(),
+                                fit: BoxFit.cover,
+                                width: 75,
+                                height: 75,
+                                errorBuilder: (_, _, _) => _logoFallback(),
+                              )
+                            : _logoFallback(),
+                      ),
+                    ),
                   ),
-                ),
+                  if (company.isVerified)
+                    Positioned(
+                      right: 0,
+                      bottom: 2,
+                      child: Container(
+                        padding: const EdgeInsets.all(1.5),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.verified,
+                          size: 20,
+                          color: Color(0xFF3D38D9),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
         ),
         const SizedBox(height: 42),
 
-        // Name + verified badge.
+        // Name + verified badge (Left-Aligned).
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Flexible(
                 child: Text(
                   company.name,
-                  textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 21,
+                    fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF1E2229),
                     letterSpacing: -0.3,
@@ -848,12 +895,36 @@ class _ShopDetailsBlock extends StatelessWidget {
                 ),
               ),
               if (company.isVerified) ...[
-                const SizedBox(width: 6),
-                const Icon(
-                  Icons.verified_rounded,
-                  key: Key('verified-badge'),
-                  size: 18,
-                  color: Color(0xFF3D38D9),
+                const SizedBox(width: 8),
+                Container(
+                  key: const Key('verified-badge'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00796B),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 3),
+                      Text(
+                        'Verified',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ],
@@ -861,76 +932,66 @@ class _ShopDetailsBlock extends StatelessWidget {
         ),
         if (company.details.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+            padding: const EdgeInsets.fromLTRB(16, 3, 16, 0),
             child: Text(
               company.details,
               maxLines: 2,
-              textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12.5, color: Color(0xFF6C757D)),
             ),
           ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
 
-        // Rating row (tappable → all reviews) + follower count + follow.
+        // Rating row (tappable → all reviews) • Open/Closed pill • Follower count + Follow (Left-Aligned).
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 5,
             children: [
               InkWell(
                 key: const Key('store-rating-row'),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(6),
                 onTap: () => context.push(
                   AppRoutes.reviews.replaceFirst(':companyId', company.id),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        stats.reviewCount == 0
-                            ? Icons.star_outline_rounded
-                            : Icons.star_rounded,
-                        size: 16,
-                        color: const Color(0xFFFFB800),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.star_rounded,
+                      size: 16.5,
+                      color: Color(0xFFFFB800),
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      stats.ratingLabel,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: Color(0xFF1E2229),
                       ),
-                      const SizedBox(width: 3),
-                      Text(
-                        stats.ratingLabel,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.5,
-                          color: Color(0xFF1E2229),
-                        ),
+                    ),
+                    Text(
+                      ' (${stats.reviewCount} ${stats.reviewCount == 1 ? 'review' : 'reviews'})',
+                      style: const TextStyle(
+                        color: Color(0xFF6C757D),
+                        fontSize: 12,
                       ),
-                      Text(
-                        ' · ${stats.reviewCount} '
-                        '${stats.reviewCount == 1 ? 'review' : 'reviews'}',
-                        style: const TextStyle(
-                          color: Color(0xFF6C757D),
-                          fontSize: 12.5,
-                        ),
-                      ),
-                      const SizedBox(width: 3),
-                      const Icon(
-                        Icons.chevron_right,
-                        size: 15,
-                        color: Color(0xFF94A3B8),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const Text(
+                '•',
+                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
+              ),
 
-              // Open / Closed pill, driven by the weekly hours.
+              // Open / Closed pill, driven by weekly hours.
               Container(
                 key: const Key('open-closed-pill'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: open
                       ? const Color(0xFFE6F7F2)
@@ -947,16 +1008,16 @@ class _ShopDetailsBlock extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.circle,
-                      size: 7,
+                      size: 6,
                       color: open
                           ? const Color(0xFF0CA678)
                           : const Color(0xFFE03131),
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 4),
                     Text(
                       open ? openLabel : closedLabel,
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: open
                             ? const Color(0xFF087F5B)
@@ -966,53 +1027,76 @@ class _ShopDetailsBlock extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const Text(
+                '•',
+                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
+              ),
 
-              // Follower count + outlined Follow button.
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    stats.followerLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF6C757D),
-                    ),
+              Text(
+                stats.followerLabel,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF6C757D)),
+              ),
+
+              OutlinedButton(
+                key: const Key('follow-button'),
+                onPressed: onToggleFollow,
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: isFollowing
+                      ? const Color(0xFFFFF0EE)
+                      : Colors.white,
+                  foregroundColor: const Color(0xFFB3261E),
+                  side: const BorderSide(color: Color(0xFFB3261E), width: 1.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  const SizedBox(width: 10),
-                  OutlinedButton(
-                    key: const Key('follow-button'),
-                    onPressed: onToggleFollow,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: isFollowing
-                          ? const Color(0xFFFFF0EE)
-                          : Colors.white,
-                      foregroundColor: const Color(0xFFB3261E),
-                      side: const BorderSide(
-                        color: Color(0xFFB3261E),
-                        width: 1.2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      minimumSize: const Size(0, 30),
-                    ),
-                    child: Text(
-                      isFollowing ? '✓ Following' : '+ Follow',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 2,
                   ),
-                ],
+                  minimumSize: const Size(0, 24),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  isFollowing ? '✓ Following' : '+ Follow',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10.5,
+                    letterSpacing: 0.2,
+                  ),
+                ),
               ),
             ],
+          ),
+        ),
+
+        // Express delivery info pill (Left-Aligned).
+        Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.bolt_rounded,
+                  color: Color(0xFFE03131),
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Express ${company.deliveryMinutes > 0 ? '${company.deliveryMinutes} mins ' : '30 mins '}delivery • Min order ₹199',
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF334155),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -1397,6 +1481,242 @@ class _FilterPill extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Category pill chip styled like the reference UI (solid red pill for selected,
+/// clean outlined white pill for unselected).
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CategoryChip({
+    super.key,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFB3261E) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFFB3261E)
+                  : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFFB3261E).withValues(alpha: 0.28),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : const [
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.04),
+                      blurRadius: 4,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected ? Colors.white : const Color(0xFF1E2229),
+                letterSpacing: -0.1,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Horizontal store coupons / offers section styled matching the reference design.
+class _StoreCouponsSection extends StatelessWidget {
+  final List<Voucher> vouchers;
+  final ValueChanged<String> onClaimVoucher;
+
+  const _StoreCouponsSection({
+    required this.vouchers,
+    required this.onClaimVoucher,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (vouchers.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.confirmation_number_outlined,
+                color: Color(0xFFB3261E),
+                size: 18,
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Offers from this store',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1E2229),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 72,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: vouchers.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final v = vouchers[index];
+              return _StoreCouponCard(
+                voucher: v,
+                onApply: () => onClaimVoucher(v.code),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Compact coupon card with discount, requirement, code, and Apply button.
+class _StoreCouponCard extends StatelessWidget {
+  final Voucher voucher;
+  final VoidCallback onApply;
+
+  const _StoreCouponCard({required this.voucher, required this.onApply});
+
+  @override
+  Widget build(BuildContext context) {
+    final discountTitle = voucher.discountType == 'percentage'
+        ? '${voucher.discountValue.toStringAsFixed(0)}% OFF'
+        : voucher.discountType == 'free_shipping'
+        ? 'FREE DEL'
+        : '₹${voucher.discountValue.toStringAsFixed(0)} OFF';
+
+    final sub = voucher.minOrderAmt > 0
+        ? 'Orders over ₹${voucher.minOrderAmt.toStringAsFixed(0)}'
+        : 'No min. order';
+
+    final isFreeDel = voucher.discountType == 'free_shipping';
+
+    return Container(
+      width: 218,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.03),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  discountTitle,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: isFreeDel
+                        ? const Color(0xFF0F766E)
+                        : const Color(0xFFB3261E),
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  sub,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: Color(0xFF6C757D),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  voucher.code.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF495057),
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: 36,
+            width: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            color: const Color(0xFFE2E8F0),
+          ),
+          InkWell(
+            onTap: onApply,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEBEA),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Apply',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFB3261E),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

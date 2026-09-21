@@ -10,9 +10,12 @@ import '../../../core/models/banner.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
+import '../../../core/models/review.dart';
 import '../../../core/models/voucher.dart';
+import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../auth/auth_cubit.dart';
+import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/product_card.dart';
@@ -104,69 +107,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildListDelegate([
                   const SizedBox(height: 14),
 
-                  // Promotional Banner Carousel
+                  // 1. Promotional Banner Carousel (hides if empty)
                   _adsCarousel(ads),
-                  const SizedBox(height: 18),
 
-                  // Explore Categories
-                  Padding(
-                    key: _categoryKey,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(
-                      title: 'Explore Categories',
-                      onViewAll: () => context.go(AppRoutes.categories),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _categoryRail(categories),
-                  const SizedBox(height: 20),
+                  // 2. Explore Categories (hides if empty, See All -> CategoriesScreen)
+                  _exploreCategoriesSection(categories),
 
-                  // Store Vouchers & Deals
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(
-                      title: 'Store Vouchers & Deals',
-                      onViewAll: () => _showAllVouchersSheet(context, vouchers),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _vouchersRail(vouchers),
-                  const SizedBox(height: 20),
+                  // 3. Store Vouchers & Deals (hides if empty, See All -> Vouchers Sheet)
+                  _storeVouchersSection(vouchers),
 
-                  // Shops Near You
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(
-                      title: 'Shops Near You',
-                      onViewAll: () => _showAllShopsSheet(context, companies),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _shopsNearYouRail(companies),
-                  const SizedBox(height: 22),
+                  // 4. Shops Near You (hides if empty, See All -> All Shops Sheet)
+                  _shopsNearYouSection(companies),
 
-                  // Trending Now Rail
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(
-                      title: 'Trending Now 🔥',
-                      onViewAll: () => context.push(AppRoutes.search),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _trendingProductsRail(allProducts),
-                  const SizedBox(height: 22),
+                  // 5. Trending Now Rail (hides if empty, See All -> Search/Trending)
+                  _trendingProductsSection(allProducts),
 
-                  // Recommended For You Grid
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SectionHeader(
-                      title: l10n.recommendedForYou,
-                      onViewAll: () => context.push(AppRoutes.search),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _recommendationsGrid(recs, allProducts),
+                  // 6. Recommended For You Grid (hides if empty, See All -> Search)
+                  _recommendationsSection(recs, allProducts, l10n),
                 ]),
               ),
             ),
@@ -288,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             size: 22,
                           ),
                         ),
-                        onPressed: () => context.push(AppRoutes.cart),
+                        onPressed: () => _openCartSafely(context),
                       );
                     },
                   ),
@@ -376,6 +333,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _openCartSafely(BuildContext context) async {
+    if (AuthSession.currentUser == null) {
+      final ok = await AuthBottomSheet.show(context);
+      if (ok && context.mounted) {
+        context.go(AppRoutes.cart);
+      }
+      return;
+    }
+    context.go(AppRoutes.cart);
   }
 
   // ---------------------------------------------------------------------------
@@ -642,72 +610,96 @@ class _HomeScreenState extends State<HomeScreen> {
   // ---------------------------------------------------------------------------
   // Categories Rail
   // ---------------------------------------------------------------------------
-  Widget _categoryRail(Stream<List<Category>> categories) {
+  // ---------------------------------------------------------------------------
+  // Explore Categories Section
+  // ---------------------------------------------------------------------------
+  Widget _exploreCategoriesSection(Stream<List<Category>> categories) {
     return StreamBuilder<List<Category>>(
       stream: categories,
       builder: (context, snap) {
         final list = snap.data ?? const <Category>[];
         if (list.isEmpty) return const SizedBox.shrink();
 
-        return SizedBox(
-          height: 94,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: list.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 14),
-            itemBuilder: (context, i) {
-              final cat = list[i];
-              final bgColor = _pastelColors[i % _pastelColors.length];
-
-              return InkWell(
-                onTap: () => context.push(
-                  '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
-                ),
-                borderRadius: BorderRadius.circular(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        color: bgColor,
-                        shape: BoxShape.circle,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.04),
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: Center(child: _buildCategoryIcon(cat)),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    SizedBox(
-                      width: 68,
-                      child: Text(
-                        cat.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF2D3139),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+        return Column(
+          children: [
+            Padding(
+              key: _categoryKey,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SectionHeader(
+                title: 'Explore Categories',
+                onViewAll: () => context.go(AppRoutes.categories),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _categoryRailContent(list),
+            const SizedBox(height: 22),
+          ],
         );
       },
+    );
+  }
+
+  Widget _categoryRailContent(List<Category> list) {
+    return SizedBox(
+      height: 104,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: list.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 14),
+        itemBuilder: (context, i) {
+          final cat = list[i];
+          final bgColor = _pastelColors[i % _pastelColors.length];
+
+          return InkWell(
+            onTap: () => context.push(
+              '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
+            ),
+            borderRadius: BorderRadius.circular(18),
+            child: SizedBox(
+              width: 72,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 66,
+                    height: 66,
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 1.5,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.05),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(child: _buildCategoryIcon(cat)),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    cat.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E2229),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -716,8 +708,8 @@ class _HomeScreenState extends State<HomeScreen> {
         cat.iconUrl.startsWith('https://')) {
       return Image.network(
         cat.iconUrl,
-        width: 28,
-        height: 28,
+        width: 32,
+        height: 32,
         fit: BoxFit.contain,
         errorBuilder: (_, _, _) => _fallbackCategoryIcon(cat),
       );
@@ -727,58 +719,62 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _fallbackCategoryIcon(Category cat) {
     if (cat.iconUrl.isNotEmpty && cat.iconUrl.runes.length <= 4) {
-      return Text(cat.iconUrl, style: const TextStyle(fontSize: 24));
+      return Text(cat.iconUrl, style: const TextStyle(fontSize: 28));
     }
     final name = cat.name.toLowerCase();
     if (name.contains('cloth') ||
         name.contains('fashion') ||
         name.contains('wear')) {
-      return const Icon(Icons.checkroom, color: Color(0xFFFF5247), size: 26);
+      return const Icon(Icons.checkroom, color: Color(0xFFFF5247), size: 28);
     } else if (name.contains('sweet') ||
         name.contains('cake') ||
         name.contains('dessert')) {
-      return const Icon(Icons.cake, color: Color(0xFFFF9800), size: 26);
+      return const Icon(Icons.cake, color: Color(0xFFFF9800), size: 28);
     } else if (name.contains('food') ||
         name.contains('snack') ||
         name.contains('grocery')) {
-      return const Icon(Icons.fastfood, color: Color(0xFF4CAF50), size: 26);
+      return const Icon(Icons.fastfood, color: Color(0xFF4CAF50), size: 28);
     } else if (name.contains('electr') ||
         name.contains('gadget') ||
         name.contains('phone')) {
-      return const Icon(Icons.devices, color: Color(0xFF2196F3), size: 26);
+      return const Icon(Icons.devices, color: Color(0xFF2196F3), size: 28);
     }
-    return const Icon(Icons.category, color: Color(0xFFFF5247), size: 26);
+    return const Icon(Icons.category, color: Color(0xFFFF5247), size: 28);
   }
 
   // ---------------------------------------------------------------------------
-  // Store Vouchers & Deals Rail
+  // Store Vouchers & Deals Section
   // ---------------------------------------------------------------------------
-  Widget _vouchersRail(Stream<List<Voucher>> vouchers) {
+  Widget _storeVouchersSection(Stream<List<Voucher>> vouchers) {
     return StreamBuilder<List<Voucher>>(
       stream: vouchers,
       builder: (context, snap) {
-        // Never advertise a code the shopper cannot redeem: expired, paused
-        // and exhausted vouchers are filtered out (previously the rail fell
-        // back to three invented "WELCOME50 / FLAT100 / FREESHIP" coupons
-        // that did not exist in any store).
         final now = DateTime.now();
         final list = (snap.data ?? const <Voucher>[])
             .where((v) => v.isLiveAt(now) && !v.isExhausted)
             .toList();
 
-        if (snap.connectionState == ConnectionState.waiting && list.isEmpty) {
-          return const SizedBox(
-            height: 72,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          );
-        }
         if (list.isEmpty) return const SizedBox.shrink();
-        return _buildVoucherList(list);
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SectionHeader(
+                title: 'Store Vouchers & Deals',
+                onViewAll: () => _showAllVouchersSheet(context, vouchers),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _vouchersRailContent(list),
+            const SizedBox(height: 20),
+          ],
+        );
       },
     );
   }
 
-  Widget _buildVoucherList(List<Voucher> list) {
+  Widget _vouchersRailContent(List<Voucher> list) {
     return SizedBox(
       height: 72,
       child: ListView.separated(
@@ -897,198 +893,213 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ---------------------------------------------------------------------------
+  // Shops Near You Section
   // ---------------------------------------------------------------------------
-  // Shops Near You Rail
-  // ---------------------------------------------------------------------------
-  Widget _shopsNearYouRail(Stream<List<Company>> companies) {
+  Widget _shopsNearYouSection(Stream<List<Company>> companies) {
     return StreamBuilder<List<Company>>(
       stream: companies,
       builder: (context, snap) {
-        final list = snap.data ?? const <Company>[];
+        final list = (snap.data ?? const <Company>[])
+            .where((c) => c.status != 'inactive' && c.status != 'suspended')
+            .toList();
         if (list.isEmpty) return const SizedBox.shrink();
 
-        return SizedBox(
-          height: 148,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: list.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 14),
-            itemBuilder: (context, i) => _shopCard(context, list[i], i),
-          ),
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SectionHeader(
+                title: 'Shops near you',
+                subtitle: 'Verified local merchants',
+                onViewAll: () => _showAllShopsSheet(context, list),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _shopsNearYouRailContent(list),
+            const SizedBox(height: 24),
+          ],
         );
       },
     );
   }
 
+  Widget _shopsNearYouRailContent(List<Company> list) {
+    return SizedBox(
+      height: 198,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: list.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 14),
+        itemBuilder: (context, i) => _shopCard(context, list[i], i),
+      ),
+    );
+  }
+
   Widget _shopCard(BuildContext context, Company company, int index) {
-    final ratings = [4.8, 4.9, 4.7, 4.6];
-    final times = ['15-25 min', '20-30 min', '25-35 min', '10-20 min'];
-    final rating = ratings[index % ratings.length];
-    final deliveryTime = times[index % times.length];
-    final isOpen = company.isOpenNow();
+    final photoUrl = company.displayImage;
+    final hasPhoto = photoUrl.isNotEmpty &&
+        (photoUrl.startsWith('http://') || photoUrl.startsWith('https://'));
+    final categoryOrDetails = company.category.isNotEmpty
+        ? company.category
+        : (company.details.isNotEmpty ? company.details : 'Grocery & Staples');
 
     return InkWell(
-      onTap: () => context.push(AppRoutes.companyPath(company.slug)),
+      onTap: () => context.push(
+        AppRoutes.companyPath(
+          company.slug.isNotEmpty ? company.slug : company.id,
+        ),
+      ),
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        width: 154,
-        padding: const EdgeInsets.all(12),
+        width: 144,
+        height: 196,
         decoration: BoxDecoration(
-          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
           boxShadow: const [
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.04),
+              color: Color.fromRGBO(0, 0, 0, 0.12),
               blurRadius: 8,
-              offset: Offset(0, 2),
+              offset: Offset(0, 3),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFEBEA),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFFFFD6D3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child:
-                        company.logoUrl.isNotEmpty &&
-                            (company.logoUrl.startsWith('http://') ||
-                                company.logoUrl.startsWith('https://'))
-                        ? Image.network(
-                            company.logoUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) =>
-                                _shopFallbackAvatar(company),
-                          )
-                        : _shopFallbackAvatar(company),
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 13,
-                        color: Color(0xFFD97706),
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        '$rating',
-                        style: const TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF92400E),
-                        ),
-                      ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Storefront / Company background image
+              hasPhoto
+                  ? Image.network(
+                      photoUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) =>
+                          _shopCardFallbackBackground(company),
+                    )
+                  : _shopCardFallbackBackground(company),
+
+              // 2. Dark gradient overlay for clear contrast
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.05),
+                      Colors.black.withValues(alpha: 0.72),
+                      Colors.black.withValues(alpha: 0.94),
                     ],
+                    stops: const [0.0, 0.4, 0.72, 1.0],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+              ),
+
+              // 3. Bottom text overlay
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
-                      child: Text(
-                        company.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: Color(0xFF1E2229),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 3),
-                    const Icon(
-                      Icons.verified,
-                      color: Color(0xFF1E8F66),
-                      size: 14,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.timer_outlined,
-                      size: 12,
-                      color: isOpen ? const Color(0xFF1E8F66) : Colors.grey,
-                    ),
-                    const SizedBox(width: 3),
+                    // Company Name
                     Text(
-                      deliveryTime,
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        color: isOpen
-                            ? const Color(0xFF1E8F66)
-                            : const Color(0xFF6B7280),
-                        fontWeight: FontWeight.w600,
+                      company.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: Colors.white,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const Spacer(),
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isOpen
-                            ? const Color(0xFF1E8F66)
-                            : Colors.grey.shade400,
+
+                    // Rating & Review count — only displayed if at least 5 reviews
+                    StreamBuilder<List<Review>>(
+                      stream: repo.reviews(company.id),
+                      builder: (context, reviewSnap) {
+                        final reviews = reviewSnap.data ?? const <Review>[];
+                        final reviewCount = reviews.isNotEmpty
+                            ? reviews.length
+                            : company.reviewCount;
+                        if (reviewCount < 5) return const SizedBox.shrink();
+
+                        final avgRating = reviews.isNotEmpty
+                            ? (reviews.fold<double>(0.0, (s, r) => s + r.rating) /
+                                reviews.length)
+                            : (company.rating > 0 ? company.rating : 4.8);
+
+                        final countStr = reviewCount >= 1000
+                            ? '${(reviewCount / 1000).toStringAsFixed(1)}k'
+                            : '$reviewCount';
+
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.star_rounded,
+                                size: 14,
+                                color: Color(0xFFFFC107),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${avgRating.toStringAsFixed(1)} ($countStr)',
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFFFD54F),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
+                    // Store Category / Details
+                    const SizedBox(height: 2),
+                    Text(
+                      categoryOrDetails,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFFE2E8F0),
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _shopFallbackAvatar(Company company) {
+  Widget _shopCardFallbackBackground(Company company) {
     return Container(
-      color: const Color(0xFFFFEBEA),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF8E0E00), Color(0xFF1F1C18)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
       child: Center(
         child: Text(
           company.name.isNotEmpty
               ? company.name.substring(0, 1).toUpperCase()
               : 'S',
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFFF5247),
+            color: Colors.white30,
           ),
         ),
       ),
@@ -1096,63 +1107,87 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Trending Products Rail
+  // Trending Products Section
   // ---------------------------------------------------------------------------
-  Widget _trendingProductsRail(Stream<List<Product>> products) {
+  Widget _trendingProductsSection(Stream<List<Product>> products) {
     return StreamBuilder<List<Product>>(
       stream: products,
       builder: (context, snap) {
         final list = snap.data ?? const <Product>[];
         if (list.isEmpty) return const SizedBox.shrink();
 
-        return SizedBox(
-          height: 285,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: list.length > 8 ? 8 : list.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 14),
-            itemBuilder: (context, i) {
-              return SizedBox(
-                width: 165,
-                child: ProductCard(
-                  product: list[i],
-                  onTap: () => context.push(AppRoutes.productPath(list[i].id)),
-                ),
-              );
-            },
-          ),
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SectionHeader(
+                title: 'Trending Now 🔥',
+                onViewAll: () => context.push(AppRoutes.search),
+              ),
+            ),
+            const SizedBox(height: 10),
+            _trendingProductsRailContent(list),
+            const SizedBox(height: 22),
+          ],
         );
       },
     );
   }
 
+  Widget _trendingProductsRailContent(List<Product> list) {
+    return SizedBox(
+      height: 285,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: list.length > 8 ? 8 : list.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 14),
+        itemBuilder: (context, i) {
+          return SizedBox(
+            width: 165,
+            child: ProductCard(
+              product: list[i],
+              onTap: () => context.push(AppRoutes.productPath(list[i].id)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   // ---------------------------------------------------------------------------
-  // Recommendations Grid (2-Column)
+  // Recommendations Section (2-Column Grid)
   // ---------------------------------------------------------------------------
-  Widget _recommendationsGrid(
+  Widget _recommendationsSection(
     Future<List<Product>> recs,
     Stream<List<Product>> allProducts,
+    AppLocalizations l10n,
   ) {
-    return FutureBuilder<List<Product>>(
-      future: recs,
-      builder: (context, snapRecs) {
-        final recList = snapRecs.data ?? const <Product>[];
-        if (recList.isNotEmpty) {
-          return _buildProductGridView(recList);
-        }
+    return StreamBuilder<List<Product>>(
+      stream: allProducts,
+      builder: (context, snapAll) {
+        final allList = snapAll.data ?? const <Product>[];
+        if (allList.isEmpty) return const SizedBox.shrink();
 
-        return StreamBuilder<List<Product>>(
-          stream: allProducts,
-          builder: (context, snapAll) {
-            final allList = snapAll.data ?? const <Product>[];
-            if (allList.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: Text('No products available')),
-              );
-            }
-            return _buildProductGridView(allList);
+        return FutureBuilder<List<Product>>(
+          future: recs,
+          builder: (context, snapRecs) {
+            final recList = snapRecs.data ?? const <Product>[];
+            final productsToShow = recList.isNotEmpty ? recList : allList;
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SectionHeader(
+                    title: l10n.recommendedForYou,
+                    onViewAll: () => context.push(AppRoutes.search),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _buildProductGridView(productsToShow),
+              ],
+            );
           },
         );
       },
@@ -1265,7 +1300,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showAllShopsSheet(
     BuildContext context,
-    Stream<List<Company>> companies,
+    List<Company> initialList,
   ) {
     showModalBottomSheet(
       context: context,
@@ -1274,9 +1309,9 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.65,
+        initialChildSize: 0.7,
         minChildSize: 0.4,
-        maxChildSize: 0.9,
+        maxChildSize: 0.92,
         expand: false,
         builder: (sheetContext, scrollController) => Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
@@ -1297,9 +1332,25 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'All Shops & Stores',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'All Shops & Stores',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Verified local merchants',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -1310,9 +1361,15 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               Expanded(
                 child: StreamBuilder<List<Company>>(
-                  stream: companies,
+                  stream: repo.companies(),
+                  initialData: initialList,
                   builder: (context, snap) {
-                    final list = snap.data ?? const <Company>[];
+                    final list = (snap.data ?? initialList)
+                        .where(
+                          (c) =>
+                              c.status != 'inactive' && c.status != 'suspended',
+                        )
+                        .toList();
                     if (list.isEmpty) {
                       return const Center(child: Text('No shops available'));
                     }
@@ -1323,35 +1380,35 @@ class _HomeScreenState extends State<HomeScreen> {
                       itemBuilder: (context, i) {
                         final c = list[i];
                         final isOpen = c.isOpenNow();
+                        final img = c.displayImage;
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 14,
-                            vertical: 6,
+                            vertical: 8,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                             side: const BorderSide(color: Color(0xFFE5E7EB)),
                           ),
                           leading: Container(
-                            width: 48,
-                            height: 48,
+                            width: 52,
+                            height: 52,
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFEBEA),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child:
-                                  c.logoUrl.isNotEmpty &&
-                                      (c.logoUrl.startsWith('http://') ||
-                                          c.logoUrl.startsWith('https://'))
+                              child: img.isNotEmpty &&
+                                      (img.startsWith('http://') ||
+                                          img.startsWith('https://'))
                                   ? Image.network(
-                                      c.logoUrl,
+                                      img,
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, _, _) =>
-                                          _shopFallbackAvatar(c),
+                                          _shopCardFallbackBackground(c),
                                     )
-                                  : _shopFallbackAvatar(c),
+                                  : _shopCardFallbackBackground(c),
                             ),
                           ),
                           title: Row(
@@ -1361,7 +1418,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   c.name,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontSize: 14.5,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -1370,49 +1427,51 @@ class _HomeScreenState extends State<HomeScreen> {
                               const Icon(
                                 Icons.verified,
                                 color: Color(0xFF1E8F66),
-                                size: 14,
+                                size: 15,
                               ),
                             ],
                           ),
                           subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Row(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 8,
-                                  color: isOpen
-                                      ? const Color(0xFF1E8F66)
-                                      : Colors.grey,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  isOpen ? 'Open Now' : 'Closed',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isOpen
-                                        ? const Color(0xFF1E8F66)
-                                        : Colors.grey,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                if (c.details.isNotEmpty) ...[
-                                  const Text(
-                                    ' • ',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      c.details,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
+                                if (c.category.isNotEmpty ||
+                                    c.details.isNotEmpty)
+                                  Text(
+                                    c.category.isNotEmpty
+                                        ? c.category
+                                        : c.details,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF64748B),
                                     ),
                                   ),
-                                ],
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      size: 8,
+                                      color: isOpen
+                                          ? const Color(0xFF1E8F66)
+                                          : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      isOpen ? 'Open Now' : 'Closed',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: isOpen
+                                            ? const Color(0xFF1E8F66)
+                                            : Colors.grey,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
@@ -1422,7 +1481,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           onTap: () {
                             Navigator.pop(ctx);
-                            context.push(AppRoutes.companyPath(c.slug));
+                            context.push(
+                              AppRoutes.companyPath(
+                                c.slug.isNotEmpty ? c.slug : c.id,
+                              ),
+                            );
                           },
                         );
                       },

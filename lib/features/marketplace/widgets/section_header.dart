@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 /// Reusable section title with an optional "view all" action.
 class SectionHeader extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final VoidCallback? onViewAll;
 
-  const SectionHeader({super.key, required this.title, this.onViewAll});
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.onViewAll,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +21,32 @@ class SectionHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF1E2229),
-              letterSpacing: -0.3,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1E2229),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           if (onViewAll != null)
