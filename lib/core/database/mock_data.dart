@@ -34,6 +34,7 @@ class MockData {
       reviewCount: 1240,
       handlingMinutes: 30,
       deliveryMinutes: 20,
+      minOrderAmount: 199,
     ),
     Company(
       id: 'c_techtronics',
@@ -57,6 +58,7 @@ class MockData {
       followers: 42,
       rating: 4.6,
       reviewCount: 320,
+      minOrderAmount: 499,
     ),
   ];
 

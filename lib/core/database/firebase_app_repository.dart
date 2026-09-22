@@ -867,9 +867,13 @@ class FirebaseAppRepository implements AppRepository {
   // ----------------------------------------------------------------- Reads --
 
   @override
-  Stream<List<Company>> companies() => _companiesCol().snapshots().map(
-    (s) => s.docs.map((d) => Company.fromMap(d.id, _asMap(d.data()))).toList(),
-  );
+  Stream<List<Company>> companies() => _companiesCol()
+      .snapshots()
+      .map(
+        (s) =>
+            s.docs.map((d) => Company.fromMap(d.id, _asMap(d.data()))).toList(),
+      )
+      .asBroadcastStream();
 
   @override
   Future<Company?> company(String id) async {
@@ -888,26 +892,28 @@ class FirebaseAppRepository implements AppRepository {
         ? _categoriesCol(companyId).snapshots()
         : _db.collectionGroup('categories').snapshots();
 
-    return stream.map(
-      (s) => s.docs
-          .map((d) {
-            final map = _asMap(d.data());
-            final parentCompanyId = d.reference.parent.parent?.id ?? '';
-            if ((map['companyId'] == null ||
-                    (map['companyId'] as String).isEmpty) &&
-                parentCompanyId.isNotEmpty) {
-              map['companyId'] = parentCompanyId;
-            }
-            return Category.fromMap(d.id, map);
-          })
-          .where(
-            (c) =>
-                companyId.isEmpty ||
-                c.companyId == companyId ||
-                c.companyId.isEmpty,
-          )
-          .toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs
+              .map((d) {
+                final map = _asMap(d.data());
+                final parentCompanyId = d.reference.parent.parent?.id ?? '';
+                if ((map['companyId'] == null ||
+                        (map['companyId'] as String).isEmpty) &&
+                    parentCompanyId.isNotEmpty) {
+                  map['companyId'] = parentCompanyId;
+                }
+                return Category.fromMap(d.id, map);
+              })
+              .where(
+                (c) =>
+                    companyId.isEmpty ||
+                    c.companyId == companyId ||
+                    c.companyId.isEmpty,
+              )
+              .toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -954,25 +960,28 @@ class FirebaseAppRepository implements AppRepository {
         ? _productsCol(companyId)
         : _db.collectionGroup('products');
     if (categoryId.isNotEmpty) q = q.where('categoryId', isEqualTo: categoryId);
-    return q.snapshots().map(
-      (s) => s.docs
-          .map((d) {
-            final map = _asMap(d.data());
-            final parentCompanyId = d.reference.parent.parent?.id ?? '';
-            if ((map['companyId'] == null ||
-                    (map['companyId'] as String).isEmpty) &&
-                parentCompanyId.isNotEmpty) {
-              map['companyId'] = parentCompanyId;
-            }
-            return Product.fromMap(d.id, map);
-          })
-          .where(
-            (p) =>
-                search.isEmpty ||
-                p.name.toLowerCase().contains(search.toLowerCase()),
-          )
-          .toList(),
-    );
+    return q
+        .snapshots()
+        .map(
+          (s) => s.docs
+              .map((d) {
+                final map = _asMap(d.data());
+                final parentCompanyId = d.reference.parent.parent?.id ?? '';
+                if ((map['companyId'] == null ||
+                        (map['companyId'] as String).isEmpty) &&
+                    parentCompanyId.isNotEmpty) {
+                  map['companyId'] = parentCompanyId;
+                }
+                return Product.fromMap(d.id, map);
+              })
+              .where(
+                (p) =>
+                    search.isEmpty ||
+                    p.name.toLowerCase().contains(search.toLowerCase()),
+              )
+              .toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1037,7 +1046,8 @@ class FirebaseAppRepository implements AppRepository {
         (s) => s.docs
             .map((d) => AdBanner.fromMap(d.id, _asMap(d.data())))
             .toList(),
-      );
+      )
+      .asBroadcastStream();
 
   @override
   Stream<List<OfferBanner>> offerBanners(String companyId) {
@@ -1046,18 +1056,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _bannersCol(companyId).snapshots()
         : _db.collectionGroup('banners').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return OfferBanner.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return OfferBanner.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1067,18 +1079,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _vouchersCol(companyId).snapshots()
         : _db.collectionGroup('vouchers').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return Voucher.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return Voucher.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1147,18 +1161,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _deliveryChargesCol(companyId).snapshots()
         : _db.collectionGroup('delivery_charges').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return DeliveryCharge.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return DeliveryCharge.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1174,7 +1190,7 @@ class FirebaseAppRepository implements AppRepository {
         orders.add(await _orderFromDoc(doc));
       }
       return orders;
-    });
+    }).asBroadcastStream();
   }
 
   @override
@@ -1188,7 +1204,7 @@ class FirebaseAppRepository implements AppRepository {
 
   @override
   Stream<Order?> watchOrder(String orderId) {
-    final controller = StreamController<Order?>();
+    final controller = StreamController<Order?>.broadcast();
 
     Future<void> emit(DocumentSnapshot<Map<String, dynamic>> snap) async {
       if (!snap.exists) {
@@ -1242,18 +1258,20 @@ class FirebaseAppRepository implements AppRepository {
               .orderBy('createdAt', descending: true)
               .snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return Review.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return Review.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1266,7 +1284,8 @@ class FirebaseAppRepository implements AppRepository {
         (s) => s.docs
             .map((d) => AppNotification.fromMap(d.id, _asMap(d.data())))
             .toList(),
-      );
+      )
+      .asBroadcastStream();
 
   @override
   Stream<List<Employee>> employees(String companyId) {
@@ -1275,18 +1294,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _employeesCol(companyId).snapshots()
         : _db.collectionGroup('employees').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return Employee.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return Employee.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override

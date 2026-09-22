@@ -166,7 +166,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              childAspectRatio: 0.65,
+                              childAspectRatio: 0.63,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 14,
                             ),
@@ -365,7 +365,7 @@ class _SearchScreenState extends State<SearchScreen> {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.65,
+              childAspectRatio: 0.63,
               crossAxisSpacing: 12,
               mainAxisSpacing: 14,
             ),

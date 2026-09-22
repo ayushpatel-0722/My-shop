@@ -19,11 +19,12 @@ import '../../../core/models/review.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/formatters.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/common_carousel.dart';
 import '../widgets/marketplace_bottom_nav.dart';
-import '../widgets/store_shelf_card.dart';
+import '../widgets/product_card.dart';
 
 /// Company micro-storefront, restructured into clear "aisles":
 ///
@@ -581,19 +582,22 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 236,
+          height: 285,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: products.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, i) => StoreShelfCard(
-              product: products[i],
-              company: company,
-              width: 148,
-              onTap: () => context.push(AppRoutes.productPath(products[i].id)),
-              onAddToCart: () => _handleAddToCart(context, products[i]),
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, i) => SizedBox(
+              width: 165,
+              child: ProductCard(
+                product: products[i],
+                company: company,
+                showBrand: false,
+                onTap: () =>
+                    context.push(AppRoutes.productPath(products[i].id)),
+              ),
             ),
           ),
         ),
@@ -704,26 +708,34 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final crossAxisCount = (constraints.maxWidth / 165)
-                    .floor()
-                    .clamp(2, 8);
+                final width = constraints.maxWidth;
+                final crossAxisCount = width >= 1000
+                    ? 4
+                    : width >= 700
+                    ? 3
+                    : 2;
+                final childAspectRatio = width >= 1000
+                    ? 0.68
+                    : width >= 700
+                    ? 0.65
+                    : 0.63;
                 return GridView.builder(
                   key: const Key('all-products-grid'),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
-                    childAspectRatio: 0.65,
+                    childAspectRatio: childAspectRatio,
                     crossAxisSpacing: 12,
-                    mainAxisSpacing: 14,
+                    mainAxisSpacing: 12,
                   ),
                   itemCount: visible.length,
-                  itemBuilder: (context, i) => StoreShelfCard(
+                  itemBuilder: (context, i) => ProductCard(
                     product: visible[i],
                     company: company,
+                    showBrand: false,
                     onTap: () =>
                         context.push(AppRoutes.productPath(visible[i].id)),
-                    onAddToCart: () => _handleAddToCart(context, visible[i]),
                   ),
                 );
               },
@@ -942,7 +954,7 @@ class _ShopDetailsBlock extends StatelessWidget {
           ),
         const SizedBox(height: 6),
 
-        // Rating row (tappable → all reviews) • Open/Closed pill • Follower count + Follow (Left-Aligned).
+        // Rating row (tappable → all reviews, only if >= 5 reviews) • Open/Closed pill (Left-Aligned).
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Wrap(
@@ -950,43 +962,45 @@ class _ShopDetailsBlock extends StatelessWidget {
             spacing: 6,
             runSpacing: 5,
             children: [
-              InkWell(
-                key: const Key('store-rating-row'),
-                borderRadius: BorderRadius.circular(6),
-                onTap: () => context.push(
-                  AppRoutes.reviews.replaceFirst(':companyId', company.id),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.star_rounded,
-                      size: 16.5,
-                      color: Color(0xFFFFB800),
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      stats.ratingLabel,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                        color: Color(0xFF1E2229),
+              if (stats.reviewCount >= 5) ...[
+                InkWell(
+                  key: const Key('store-rating-row'),
+                  borderRadius: BorderRadius.circular(6),
+                  onTap: () => context.push(
+                    AppRoutes.reviews.replaceFirst(':companyId', company.id),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 16.5,
+                        color: Color(0xFFFFB800),
                       ),
-                    ),
-                    Text(
-                      ' (${stats.reviewCount} ${stats.reviewCount == 1 ? 'review' : 'reviews'})',
-                      style: const TextStyle(
-                        color: Color(0xFF6C757D),
-                        fontSize: 12,
+                      const SizedBox(width: 3),
+                      Text(
+                        stats.ratingLabel,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          color: Color(0xFF1E2229),
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        ' (${stats.reviewCount} ${stats.reviewCount == 1 ? 'review' : 'reviews'})',
+                        style: const TextStyle(
+                          color: Color(0xFF6C757D),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Text(
-                '•',
-                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
-              ),
+                const Text(
+                  '•',
+                  style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
+                ),
+              ],
 
               // Open / Closed pill, driven by weekly hours.
               Container(
@@ -1027,79 +1041,74 @@ class _ShopDetailsBlock extends StatelessWidget {
                   ],
                 ),
               ),
-              const Text(
-                '•',
-                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
-              ),
-
-              Text(
-                stats.followerLabel,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF6C757D)),
-              ),
-
-              OutlinedButton(
-                key: const Key('follow-button'),
-                onPressed: onToggleFollow,
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: isFollowing
-                      ? const Color(0xFFFFF0EE)
-                      : Colors.white,
-                  foregroundColor: const Color(0xFFB3261E),
-                  side: const BorderSide(color: Color(0xFFB3261E), width: 1.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 2,
-                  ),
-                  minimumSize: const Size(0, 24),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  isFollowing ? '✓ Following' : '+ Follow',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10.5,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
 
-        // Express delivery info pill (Left-Aligned).
+        // Delivery / Service info pill (Left-Aligned).
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.bolt_rounded,
-                  color: Color(0xFFE03131),
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Express ${company.deliveryMinutes > 0 ? '${company.deliveryMinutes} mins ' : '30 mins '}delivery • Min order ₹199',
-                  style: const TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF334155),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          child: _buildDeliveryInfoPill(company),
         ),
       ],
+    );
+  }
+
+  Widget _buildDeliveryInfoPill(Company company) {
+    final symbol = company.currencySymbol;
+    final hasMinOrder = company.minOrderAmount > 0;
+    final minOrderFormatted = formatCurrency(
+      company.minOrderAmount,
+      symbol: symbol,
+    );
+
+    final IconData icon;
+    final Color iconColor;
+    final String label;
+
+    if (company.isSelfPickupOnly ||
+        (!company.allowsHomeDelivery && company.allowsSelfPickup)) {
+      // Self pickup only
+      icon = Icons.storefront_outlined;
+      iconColor = const Color(0xFF0F766E);
+      label = hasMinOrder
+          ? 'Self-Pickup only • Min order $minOrderFormatted'
+          : 'Self-Pickup only';
+    } else if (company.allowsHomeDelivery) {
+      // Home delivery allowed
+      icon = Icons.local_shipping_outlined;
+      iconColor = const Color(0xFFE03131);
+      label = hasMinOrder
+          ? 'Home Delivery available • Min order $minOrderFormatted'
+          : 'Home Delivery available • No min order';
+    } else {
+      // Neither or fallback
+      icon = Icons.storefront_outlined;
+      iconColor = const Color(0xFF64748B);
+      label = 'Storefront service';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: iconColor, size: 16),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF334155),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1417,19 +1426,22 @@ class _CategoryShelf extends StatelessWidget {
 
         // Horizontal Product Rail for this category
         SizedBox(
-          height: 236,
+          height: 285,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: products.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, i) => StoreShelfCard(
-              product: products[i],
-              company: company,
-              width: 148,
-              onTap: () => context.push(AppRoutes.productPath(products[i].id)),
-              onAddToCart: () => onAddToCart(products[i]),
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, i) => SizedBox(
+              width: 165,
+              child: ProductCard(
+                product: products[i],
+                company: company,
+                showBrand: false,
+                onTap: () =>
+                    context.push(AppRoutes.productPath(products[i].id)),
+              ),
             ),
           ),
         ),

@@ -265,7 +265,9 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                                   : 2;
                               final childAspectRatio = width >= 1000
                                   ? 0.68
-                                  : 0.70;
+                                  : width >= 700
+                                  ? 0.65
+                                  : 0.62;
                               return GridView.builder(
                                 padding: const EdgeInsets.all(16),
                                 physics: const BouncingScrollPhysics(),

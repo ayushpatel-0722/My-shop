@@ -34,6 +34,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
   final _logoUrlCtrl = TextEditingController();
   final _bannerUrlCtrl = TextEditingController();
   final _profileImageUrlCtrl = TextEditingController();
+  final _minOrderCtrl = TextEditingController();
   String _currency = 'INR';
   final List<WeeklyHours> _hours = Company.defaultWeek();
   final Set<String> _deliveryTypes = {'self_pickup', 'home_delivery'};
@@ -55,6 +56,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     _logoUrlCtrl.dispose();
     _bannerUrlCtrl.dispose();
     _profileImageUrlCtrl.dispose();
+    _minOrderCtrl.dispose();
     _adminNameCtrl.dispose();
     _adminEmailCtrl.dispose();
     _adminPassCtrl.dispose();
@@ -244,6 +246,19 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               onChanged: (v) => _toggleDelivery('home_delivery', v),
               title: const Text('Home Delivery'),
             ),
+            if (_deliveryTypes.contains('home_delivery')) ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: _minOrderCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText:
+                      'Minimum Order for Delivery (${_currency == 'USD' ? '\$' : '₹'})',
+                  hintText: 'e.g. 199 (0 for no minimum)',
+                  prefixIcon: const Icon(Icons.shopping_bag_outlined),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             TextField(
               controller: _passwordCtrl,
@@ -450,6 +465,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
         deliveryTypes: _deliveryTypes.toList(),
         weeklyHours: _hours,
         openingDate: DateTime.now(),
+        minOrderAmount: double.tryParse(_minOrderCtrl.text.trim()) ?? 0.0,
       );
 
       // Save to Cloud Firestore

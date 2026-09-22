@@ -87,7 +87,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final categories = repo.categories();
     final ads = repo.adBanners();
     final recs = repo.recommendations();
-    final allProducts = repo.products();
+    final trendingProducts = repo.products();
+    final recommendedProducts = repo.products();
     final vouchers = repo.vouchers('');
 
     return Scaffold(
@@ -120,10 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   _shopsNearYouSection(companies),
 
                   // 5. Trending Now Rail (hides if empty, See All -> Search/Trending)
-                  _trendingProductsSection(allProducts),
+                  _trendingProductsSection(trendingProducts),
 
                   // 6. Recommended For You Grid (hides if empty, See All -> Search)
-                  _recommendationsSection(recs, allProducts, l10n),
+                  _recommendationsSection(recs, recommendedProducts, l10n),
                 ]),
               ),
             ),
@@ -641,7 +642,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _categoryRailContent(List<Category> list) {
     return SizedBox(
-      height: 104,
+      height: 116,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -668,10 +669,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: BoxDecoration(
                       color: bgColor,
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: Colors.white, width: 1.5),
                       boxShadow: const [
                         BoxShadow(
                           color: Color.fromRGBO(0, 0, 0, 0.05),
@@ -939,7 +937,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _shopCard(BuildContext context, Company company, int index) {
     final photoUrl = company.displayImage;
-    final hasPhoto = photoUrl.isNotEmpty &&
+    final hasPhoto =
+        photoUrl.isNotEmpty &&
         (photoUrl.startsWith('http://') || photoUrl.startsWith('https://'));
     final categoryOrDetails = company.category.isNotEmpty
         ? company.category
@@ -1028,8 +1027,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (reviewCount < 5) return const SizedBox.shrink();
 
                         final avgRating = reviews.isNotEmpty
-                            ? (reviews.fold<double>(0.0, (s, r) => s + r.rating) /
-                                reviews.length)
+                            ? (reviews.fold<double>(
+                                    0.0,
+                                    (s, r) => s + r.rating,
+                                  ) /
+                                  reviews.length)
                             : (company.rating > 0 ? company.rating : 4.8);
 
                         final countStr = reviewCount >= 1000
@@ -1298,10 +1300,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showAllShopsSheet(
-    BuildContext context,
-    List<Company> initialList,
-  ) {
+  void _showAllShopsSheet(BuildContext context, List<Company> initialList) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1399,7 +1398,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: img.isNotEmpty &&
+                              child:
+                                  img.isNotEmpty &&
                                       (img.startsWith('http://') ||
                                           img.startsWith('https://'))
                                   ? Image.network(

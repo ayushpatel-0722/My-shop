@@ -23,12 +23,18 @@ class ProductCard extends StatelessWidget {
   final Product product;
   final Company? company;
   final VoidCallback? onTap;
+  final VoidCallback? onAddToCart;
+  final double? width;
+  final bool showBrand;
 
   const ProductCard({
     super.key,
     required this.product,
     this.company,
     this.onTap,
+    this.onAddToCart,
+    this.width,
+    this.showBrand = true,
   });
 
   @override
@@ -37,22 +43,28 @@ class ProductCard extends StatelessWidget {
     final symbol = company?.currencySymbol ?? '₹';
     final hasImage =
         product.images.isNotEmpty && product.images.first.trim().isNotEmpty;
+    final soldOut = !product.isInStock;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Card(
+    Widget card = Card(
       elevation: 0,
       clipBehavior: Clip.antiAlias,
+      color: isDark ? const Color(0xFF1E293B) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFE2E6EC), width: 1),
+        side: BorderSide(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E6EC),
+          width: 1,
+        ),
       ),
       child: InkWell(
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with Overlays (Discount Tag & Floating Add Button)
+            // Image with Overlays (Discount Tag, Out of Stock, & Floating Add Button)
             AspectRatio(
-              aspectRatio: 1.1,
+              aspectRatio: 1.15,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -87,7 +99,7 @@ class ProductCard extends StatelessWidget {
                     _fallbackImage(context),
 
                   // Discount Badge (Top Left)
-                  if (product.isDiscounted)
+                  if (product.isDiscounted && !soldOut)
                     Positioned(
                       top: 8,
                       left: 8,
@@ -121,51 +133,86 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
 
-                  // Floating '+' Add to Cart Button (Bottom Right)
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Material(
-                      color: const Color(0xFFFF5247),
-                      shape: const CircleBorder(),
-                      elevation: 3,
-                      shadowColor: const Color(
-                        0xFFFF5247,
-                      ).withValues(alpha: 0.4),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () {
-                          if (AuthSession.currentUser == null) {
-                            AuthBottomSheet.show(
-                              context,
-                              onAuthenticated: () {
-                                _doAddToCart(context);
-                              },
-                            );
-                          } else {
-                            _doAddToCart(context);
-                          }
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.all(7.5),
-                          child: Icon(Icons.add, color: Colors.white, size: 20),
+                  // Sold out veil
+                  if (soldOut)
+                    Positioned.fill(
+                      child: Container(
+                        color: (isDark ? Colors.black : Colors.white)
+                            .withValues(alpha: 0.65),
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFB3261E),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Out of stock',
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+
+                  // Floating '+' Add to Cart Button (Bottom Right)
+                  if (!soldOut)
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Material(
+                        color: const Color(0xFFFF5247),
+                        shape: const CircleBorder(),
+                        elevation: 3,
+                        shadowColor: const Color(
+                          0xFFFF5247,
+                        ).withValues(alpha: 0.4),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () {
+                            if (onAddToCart != null) {
+                              onAddToCart!();
+                            } else if (AuthSession.currentUser == null) {
+                              AuthBottomSheet.show(
+                                context,
+                                onAuthenticated: () {
+                                  _doAddToCart(context);
+                                },
+                              );
+                            } else {
+                              _doAddToCart(context);
+                            }
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.all(7.5),
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
 
             // Product Details
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Brand / Company Name (Royal Blue)
-                  if (company != null && company!.name.isNotEmpty)
+                  if (showBrand && company != null && company!.name.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
@@ -292,6 +339,11 @@ class ProductCard extends StatelessWidget {
         ),
       ),
     );
+
+    if (width != null) {
+      return SizedBox(width: width, child: card);
+    }
+    return card;
   }
 
   int _discountPercent() {

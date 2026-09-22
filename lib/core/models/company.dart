@@ -33,6 +33,9 @@ class Company {
   /// Minutes a parcel takes once it leaves the store (ETA on order cards).
   final int deliveryMinutes;
 
+  /// Minimum order amount required for delivery (or 0 if no minimum).
+  final double minOrderAmount;
+
   const Company({
     required this.id,
     required this.name,
@@ -56,6 +59,7 @@ class Company {
     this.followers = 0,
     this.handlingMinutes = 45,
     this.deliveryMinutes = 30,
+    this.minOrderAmount = 0.0,
   });
 
   factory Company.fromMap(String id, Map<String, dynamic> map) => Company(
@@ -93,6 +97,11 @@ class Company {
     followers: _asInt(map['followers']),
     handlingMinutes: _asIntWithDefault(map['handlingMinutes'], 45),
     deliveryMinutes: _asIntWithDefault(map['deliveryMinutes'], 30),
+    minOrderAmount:
+        (map['minOrderAmount'] as num?)?.toDouble() ??
+        (map['minOrder'] as num?)?.toDouble() ??
+        (map['minOrderAmt'] as num?)?.toDouble() ??
+        0.0,
   );
 
   Map<String, dynamic> toMap() => {
@@ -117,6 +126,7 @@ class Company {
     'followers': followers,
     'handlingMinutes': handlingMinutes,
     'deliveryMinutes': deliveryMinutes,
+    'minOrderAmount': minOrderAmount,
   };
 
   Company copyWith({
@@ -142,6 +152,7 @@ class Company {
     int? followers,
     int? handlingMinutes,
     int? deliveryMinutes,
+    double? minOrderAmount,
   }) => Company(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -165,6 +176,7 @@ class Company {
     followers: followers ?? this.followers,
     handlingMinutes: handlingMinutes ?? this.handlingMinutes,
     deliveryMinutes: deliveryMinutes ?? this.deliveryMinutes,
+    minOrderAmount: minOrderAmount ?? this.minOrderAmount,
   );
 
   /// Priority image for company card and storefront displays.
@@ -176,6 +188,10 @@ class Company {
   String get bannerImage => bannerUrl.isNotEmpty
       ? bannerUrl
       : (profileImageUrl.isNotEmpty ? profileImageUrl : logoUrl);
+
+  bool get allowsHomeDelivery => deliveryTypes.contains('home_delivery');
+  bool get allowsSelfPickup => deliveryTypes.contains('self_pickup');
+  bool get isSelfPickupOnly => allowsSelfPickup && !allowsHomeDelivery;
 
   static int _asInt(Object? value) {
     if (value is int) return value;
