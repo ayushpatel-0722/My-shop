@@ -54,6 +54,8 @@ class ProductVariant {
   final int stockQty;
   final bool isUnlimitedStock;
   final double priceOverride;
+  final double unitValue;
+  final String unitType;
   final String size;
   final String color;
 
@@ -64,11 +66,39 @@ class ProductVariant {
     this.stockQty = 0,
     this.isUnlimitedStock = false,
     this.priceOverride = 0,
+    this.unitValue = 0,
+    this.unitType = '',
     this.size = '',
     this.color = '',
   });
 
   bool get isInStock => isUnlimitedStock || stockQty > 0;
+
+  ProductVariant copyWith({
+    String? sku,
+    String? title,
+    Map<String, String>? attributes,
+    int? stockQty,
+    bool? isUnlimitedStock,
+    double? priceOverride,
+    double? unitValue,
+    String? unitType,
+    String? size,
+    String? color,
+  }) {
+    return ProductVariant(
+      sku: sku ?? this.sku,
+      title: title ?? this.title,
+      attributes: attributes ?? this.attributes,
+      stockQty: stockQty ?? this.stockQty,
+      isUnlimitedStock: isUnlimitedStock ?? this.isUnlimitedStock,
+      priceOverride: priceOverride ?? this.priceOverride,
+      unitValue: unitValue ?? this.unitValue,
+      unitType: unitType ?? this.unitType,
+      size: size ?? this.size,
+      color: color ?? this.color,
+    );
+  }
 
   factory ProductVariant.fromMap(Map<String, dynamic> map) {
     final rawAttrs = map['attributes'] as Map?;
@@ -96,6 +126,8 @@ class ProductVariant {
       stockQty: asInt(map['stockQty']),
       isUnlimitedStock: asBool(map['isUnlimitedStock']),
       priceOverride: asDouble(map['priceOverride']),
+      unitValue: asDouble(map['unitValue'] ?? map['unit']),
+      unitType: map['unitType']?.toString() ?? '',
       size: rawSize,
       color: rawColor,
     );
@@ -108,6 +140,8 @@ class ProductVariant {
     'stockQty': stockQty,
     'isUnlimitedStock': isUnlimitedStock,
     'priceOverride': priceOverride,
+    'unitValue': unitValue,
+    'unitType': unitType,
     'size': size,
     'color': color,
   };
@@ -132,6 +166,7 @@ class Product {
   final List<ProductSpec> specifications;
   final String policy;
   final String sku;
+  final String color;
   final int stockQty;
   final bool isUnlimitedStock;
   final bool isRecommended;
@@ -154,6 +189,7 @@ class Product {
     this.specifications = const [],
     this.policy = '',
     this.sku = '',
+    this.color = '',
     this.stockQty = 0,
     this.isUnlimitedStock = false,
     this.isRecommended = false,
@@ -231,6 +267,7 @@ class Product {
     ).map(ProductSpec.fromMap).toList(),
     policy: asString(map['policy']),
     sku: asString(map['sku']),
+    color: asString(map['color']),
     stockQty: asInt(map['stockQty']),
     isUnlimitedStock: asBool(map['isUnlimitedStock']),
     isRecommended: asBool(map['isRecommended']),
@@ -253,6 +290,7 @@ class Product {
     'specifications': specifications.map((e) => e.toMap()).toList(),
     'policy': policy,
     'sku': sku,
+    'color': color,
     'stockQty': stockQty,
     'isUnlimitedStock': isUnlimitedStock,
     'isRecommended': isRecommended,
@@ -276,6 +314,7 @@ class Product {
     List<ProductSpec>? specifications,
     String? policy,
     String? sku,
+    String? color,
     int? stockQty,
     bool? isUnlimitedStock,
     bool? isRecommended,
@@ -298,6 +337,7 @@ class Product {
       specifications: specifications ?? this.specifications,
       policy: policy ?? this.policy,
       sku: sku ?? this.sku,
+      color: color ?? this.color,
       stockQty: stockQty ?? this.stockQty,
       isUnlimitedStock: isUnlimitedStock ?? this.isUnlimitedStock,
       isRecommended: isRecommended ?? this.isRecommended,

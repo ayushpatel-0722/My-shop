@@ -9,6 +9,9 @@ import '../../../core/models/company.dart';
 import '../../../core/models/order.dart' show DeliveryType;
 import '../../../core/domain/category_tree.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/services/auth_session.dart';
+import '../../../core/widgets/modern_shimmer.dart';
+import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/section_header.dart';
@@ -72,7 +75,16 @@ class CategoriesScreen extends StatelessWidget {
                     color: Color(0xFF1E2229),
                   ),
                 ),
-                onPressed: () => context.push(AppRoutes.cart),
+                onPressed: () async {
+                  if (AuthSession.currentUser == null) {
+                    final ok = await AuthBottomSheet.show(context);
+                    if (ok && context.mounted) {
+                      context.push(AppRoutes.cart);
+                    }
+                    return;
+                  }
+                  context.push(AppRoutes.cart);
+                },
               );
             },
           ),
@@ -158,11 +170,47 @@ class CategoriesScreen extends StatelessWidget {
     return StreamBuilder<List<Category>>(
       stream: categoriesStream,
       builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 8,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.76,
+              ),
+              itemBuilder: (context, i) => Column(
+                children: const [
+                  M3ShadowCardContainer(
+                    padding: EdgeInsets.zero,
+                    width: 62,
+                    height: 62,
+                    borderRadius: 31,
+                    child: ClipOval(
+                      child: ModernShimmer(width: 62, height: 62),
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  ModernShimmer.rectangular(
+                    width: 50,
+                    height: 10,
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         final list = snap.data ?? const <Category>[];
         if (list.isEmpty) {
           return const SizedBox(
             height: 120,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            child: Center(child: Text('No categories yet')),
           );
         }
 
@@ -283,6 +331,18 @@ class CategoriesScreen extends StatelessWidget {
     return StreamBuilder<List<Company>>(
       stream: companiesStream,
       builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
+          return SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, i) => const M3ShopCardSkeleton(),
+                childCount: 3,
+              ),
+            ),
+          );
+        }
+
         final list = snap.data ?? const <Company>[];
         if (list.isEmpty) {
           return const SliverToBoxAdapter(

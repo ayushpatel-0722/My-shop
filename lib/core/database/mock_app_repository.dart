@@ -77,6 +77,32 @@ class MockAppRepository implements AppRepository {
       name: 'Demo User',
       mobileNumber: '9876543210',
       role: 'user',
+      addresses: [
+        AddressEntry(
+          id: 'addr_1',
+          name: 'Demo User',
+          phone: '9876543210',
+          houseNo: 'Flat 402, Shivalik Heights',
+          address: 'Near Vastrapur Lake',
+          city: 'Ahmedabad',
+          state: 'Gujarat',
+          pincode: '380015',
+          label: 'Home',
+          isDefault: true,
+        ),
+        AddressEntry(
+          id: 'addr_2',
+          name: 'Demo User',
+          phone: '9876543210',
+          houseNo: 'Floor 3, Tech Park',
+          address: 'SG Highway, Bodakdev',
+          city: 'Ahmedabad',
+          state: 'Gujarat',
+          pincode: '380054',
+          label: 'Work',
+          isDefault: false,
+        ),
+      ],
     );
     _admins['admin@greenleaf.in'] = const AppUser(
       id: 'a_1',
@@ -280,21 +306,55 @@ class MockAppRepository implements AppRepository {
   Future<void> saveUserAddress(String userId, AddressEntry address) async {
     if (_currentUser != null) {
       final list = List<AddressEntry>.from(_currentUser!.addresses);
-      if (address.isDefault || list.isEmpty) {
+      final id = address.id.isEmpty
+          ? 'addr_${DateTime.now().millisecondsSinceEpoch}'
+          : address.id;
+      final entry = address.copyWith(id: id);
+
+      if (entry.isDefault || list.isEmpty) {
         for (var i = 0; i < list.length; i++) {
-          final a = list[i];
-          list[i] = AddressEntry(
-            houseNo: a.houseNo,
-            address: a.address,
-            pincode: a.pincode,
-            isDefault: false,
-            label: a.label,
-            lat: a.lat,
-            lng: a.lng,
-          );
+          list[i] = list[i].copyWith(isDefault: false);
         }
       }
-      list.add(address);
+
+      final existingIndex = list.indexWhere((a) => a.id == id);
+      if (existingIndex >= 0) {
+        list[existingIndex] = entry;
+      } else {
+        list.add(entry);
+      }
+
+      final updated = _currentUser!.copyWith(addresses: list);
+      _currentUser = updated;
+      if (updated.mobileNumber.isNotEmpty) {
+        _usersByMobile[updated.mobileNumber] = updated;
+      }
+    }
+  }
+
+  @override
+  Future<void> deleteUserAddress(String userId, String addressId) async {
+    if (_currentUser != null) {
+      final list = List<AddressEntry>.from(_currentUser!.addresses);
+      list.removeWhere((a) => a.id == addressId);
+      if (list.isNotEmpty && !list.any((a) => a.isDefault)) {
+        list[0] = list[0].copyWith(isDefault: true);
+      }
+      final updated = _currentUser!.copyWith(addresses: list);
+      _currentUser = updated;
+      if (updated.mobileNumber.isNotEmpty) {
+        _usersByMobile[updated.mobileNumber] = updated;
+      }
+    }
+  }
+
+  @override
+  Future<void> setDefaultAddress(String userId, String addressId) async {
+    if (_currentUser != null) {
+      final list = List<AddressEntry>.from(_currentUser!.addresses);
+      for (var i = 0; i < list.length; i++) {
+        list[i] = list[i].copyWith(isDefault: list[i].id == addressId);
+      }
       final updated = _currentUser!.copyWith(addresses: list);
       _currentUser = updated;
       if (updated.mobileNumber.isNotEmpty) {
@@ -563,6 +623,9 @@ class MockAppRepository implements AppRepository {
     final doc = Order(
       id: id,
       userId: order.userId,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone,
       companyId: order.companyId,
       companyName: order.companyName,
       items: order.items,
@@ -894,13 +957,30 @@ class MockAppRepository implements AppRepository {
     final i = _deliveryCharges.indexWhere(
       (d) =>
           d.pincode == charge.pincode &&
-          (charge.companyId.isEmpty || d.companyId == charge.companyId),
+          (charge.companyId.isEmpty ||
+              d.companyId.isEmpty ||
+              d.companyId == charge.companyId),
     );
     if (i == -1) {
       _deliveryCharges.add(charge);
     } else {
       _deliveryCharges[i] = charge;
     }
+    _pushDelivery();
+  }
+
+  @override
+  Future<void> deleteDeliveryCharge(
+    String pincode, {
+    String companyId = '',
+  }) async {
+    _deliveryCharges.removeWhere(
+      (d) =>
+          d.pincode == pincode &&
+          (companyId.isEmpty ||
+              d.companyId.isEmpty ||
+              d.companyId == companyId),
+    );
     _pushDelivery();
   }
 

@@ -9,6 +9,8 @@ import '../../../core/models/cart_item.dart';
 import '../../../core/models/company.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../auth/auth_cubit.dart';
+import '../../auth/widgets/auth_bottom_sheet.dart';
 import 'cart_cubit.dart';
 import 'wishlist_cubit.dart';
 
@@ -26,6 +28,25 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final authCubit = context.watch<AuthCubit>();
+    if (!authCubit.isLoggedIn) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.cart),
+          leading: BackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(AppRoutes.home);
+              }
+            },
+          ),
+        ),
+        body: _buildGuestView(context),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cart),
@@ -77,6 +98,72 @@ class CartScreen extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildGuestView(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFEBEA),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.shopping_cart_outlined,
+                size: 56,
+                color: Color(0xFFFF5247),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Sign In to View Cart',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E2229),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add products to your cart after signing in to continue checkout.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF5247),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 0,
+              ),
+              onPressed: () async {
+                final ok = await AuthBottomSheet.show(context);
+                if (ok && context.mounted) {
+                  context.go(AppRoutes.cart);
+                }
+              },
+              icon: const Icon(Icons.login),
+              label: const Text(
+                'Continue with Google',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -164,14 +251,19 @@ class _CartLineCard extends StatelessWidget {
     final cubit = context.read<CartCubit>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final variantSku = item.variant?.sku ?? '';
+    final variantTitle = item.variant?.title ?? '';
     final canAdd = item.qty < item.maxQty;
     final stockWarning = item.stockWarningLabel();
     final hasImage =
         item.product.images.isNotEmpty &&
         item.product.images.first.trim().isNotEmpty;
 
-    void removeLine() =>
-        cubit.remove(companyId, item.product.id, variantSku: variantSku);
+    void removeLine() => cubit.remove(
+      companyId,
+      item.product.id,
+      variantSku: variantSku,
+      variantTitle: variantTitle,
+    );
 
     return Dismissible(
       key: Key('cart-line-${item.cartKey}'),
@@ -328,11 +420,13 @@ class _CartLineCard extends StatelessWidget {
                           companyId,
                           item.product.id,
                           variantSku: variantSku,
+                          variantTitle: variantTitle,
                         ),
                         onAdd: () => cubit.increment(
                           companyId,
                           item.product.id,
                           variantSku: variantSku,
+                          variantTitle: variantTitle,
                         ),
                       ),
                       if (stockWarning != null) ...[

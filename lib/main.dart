@@ -23,19 +23,38 @@ Future<void> main() async {
   // ------------------------------------------------------------------
   var firebaseReady = false;
   try {
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
+    } catch (initErr) {
+      if (initErr.toString().contains('duplicate-app') ||
+          Firebase.apps.isNotEmpty) {
+        debugPrint('Firebase default app already initialized.');
+      } else {
+        rethrow;
+      }
     }
     firebaseReady = true;
 
     // App Check (blocks non-genuine clients). Skip on web (needs reCAPTCHA).
-    await _initAppCheck();
+    try {
+      await _initAppCheck();
+    } catch (appCheckErr) {
+      debugPrint('App Check init warning: $appCheckErr');
+    }
 
     // FCM background handler (works even when the app is terminated).
     if (!kIsWeb) {
-      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      try {
+        FirebaseMessaging.onBackgroundMessage(
+          firebaseMessagingBackgroundHandler,
+        );
+      } catch (fcmErr) {
+        debugPrint('FCM background handler setup warning: $fcmErr');
+      }
     }
   } catch (e) {
     debugPrint(

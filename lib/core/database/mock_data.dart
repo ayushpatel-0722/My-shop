@@ -12,21 +12,29 @@ class MockData {
   static final companies = <Company>[
     Company(
       id: 'c_organic',
-      name: 'GreenLeaf Organics',
-      slug: 'greenleaf-organics',
+      name: 'Om Mart Express',
+      slug: 'om-mart-express',
       companyPassword: 'green@123',
       details: 'Farm-fresh organic groceries delivered daily.',
+      category: 'Grocery & Staples',
       address: '12 Market Street, Ahmedabad',
       location: 'https://maps.google.com/?q=Ahmedabad',
       logoUrl:
           'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80',
+      bannerUrl:
+          'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&auto=format&fit=crop&q=80',
+      profileImageUrl:
+          'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=600&auto=format&fit=crop&q=80',
       currency: 'INR',
       deliveryTypes: const ['self_pickup', 'home_delivery'],
       weeklyHours: Company.defaultWeek(),
       isVerified: true,
       followers: 128,
+      rating: 4.8,
+      reviewCount: 1240,
       handlingMinutes: 30,
       deliveryMinutes: 20,
+      minOrderAmount: 199,
     ),
     Company(
       id: 'c_techtronics',
@@ -34,15 +42,23 @@ class MockData {
       slug: 'techtronics-hub',
       companyPassword: 'tech@123',
       details: 'Gadgets, accessories and smart electronics.',
+      category: 'Electronics & Gadgets',
       address: '45 Circuit Avenue, Ahmedabad',
       location: 'https://maps.google.com/?q=Ahmedabad',
       logoUrl:
           'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=200&auto=format&fit=crop&q=80',
+      bannerUrl:
+          'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80',
+      profileImageUrl:
+          'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80',
       currency: 'INR',
       deliveryTypes: const ['home_delivery'],
       weeklyHours: Company.defaultWeek(),
-      isVerified: false,
+      isVerified: true,
       followers: 42,
+      rating: 4.6,
+      reviewCount: 320,
+      minOrderAmount: 499,
     ),
   ];
 

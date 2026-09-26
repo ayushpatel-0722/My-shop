@@ -5,6 +5,7 @@ import '../../app/l10n/app_localizations.dart';
 import '../../app/routes/app_router.dart';
 import '../../core/models/review.dart';
 import '../../core/services/service_locator.dart';
+import '../../core/widgets/modern_shimmer.dart';
 
 /// Lists all visible reviews for a company (Section 14.2, user side).
 class ReviewsScreen extends StatelessWidget {
@@ -30,6 +31,14 @@ class ReviewsScreen extends StatelessWidget {
       body: StreamBuilder<List<Review>>(
         stream: repo.reviews(companyId),
         builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting &&
+              !snap.hasData) {
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: 4,
+              itemBuilder: (_, _) => const M3ListTileSkeleton(),
+            );
+          }
           final list = (snap.data ?? const <Review>[])
               .where((r) => r.isVisible)
               .toList();

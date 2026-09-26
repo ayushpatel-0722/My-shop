@@ -6,6 +6,7 @@ import '../../app/l10n/app_localizations.dart';
 import '../../app/routes/app_router.dart';
 import '../../core/models/notification.dart';
 import '../../core/services/service_locator.dart';
+import '../../core/widgets/modern_shimmer.dart';
 import '../auth/auth_cubit.dart';
 
 /// In-app notification centre (Section 16).
@@ -34,6 +35,14 @@ class NotificationsScreen extends StatelessWidget {
           return StreamBuilder<List<AppNotification>>(
             stream: repo.notifications(userId),
             builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting &&
+                  !snap.hasData) {
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: 5,
+                  itemBuilder: (_, _) => const M3ListTileSkeleton(),
+                );
+              }
               final list = snap.data ?? const <AppNotification>[];
               if (list.isEmpty) {
                 return const Center(child: Text('No notifications'));

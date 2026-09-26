@@ -31,7 +31,8 @@ class ProductAssignmentPicker extends StatefulWidget {
   });
 
   @override
-  State<ProductAssignmentPicker> createState() => _ProductAssignmentPickerState();
+  State<ProductAssignmentPicker> createState() =>
+      _ProductAssignmentPickerState();
 }
 
 class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
@@ -108,23 +109,32 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Header & Live Counter
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.inventory_2_outlined, color: theme.colorScheme.primary, size: 20),
+                Icon(
+                  Icons.inventory_2_outlined,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Product Assignment',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
             // Live Counter Badge
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: widget.selectedProductIds.isEmpty
                     ? (isDark ? Colors.grey.shade800 : Colors.grey.shade200)
@@ -143,19 +153,21 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     widget.selectedProductIds.isEmpty
                         ? Icons.check_box_outline_blank
                         : Icons.check_circle_outline,
-                    size: 16,
+                    size: 15,
                     color: widget.selectedProductIds.isEmpty
                         ? Colors.grey
                         : theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '${widget.selectedProductIds.length} products selected',
+                    '${widget.selectedProductIds.length} selected',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: widget.selectedProductIds.isEmpty
-                          ? (isDark ? Colors.grey.shade400 : Colors.grey.shade700)
+                          ? (isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade700)
                           : theme.colorScheme.primary,
                     ),
                   ),
@@ -170,7 +182,9 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
         Text(
           'Swipe right or tap + on available products to assign. Swipe left or tap – to remove.',
           style: theme.textTheme.bodySmall?.copyWith(
-            color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+            color: isDark
+                ? AppTheme.textSecondaryDark
+                : AppTheme.textSecondaryLight,
           ),
         ),
         const SizedBox(height: 14),
@@ -190,7 +204,10 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     },
                   )
                 : null,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
           onChanged: (val) => setState(() => _searchQuery = val.trim()),
         ),
@@ -255,7 +272,8 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                       ),
                     ],
                     selected: {_mobileTab},
-                    onSelectionChanged: (val) => setState(() => _mobileTab = val.first),
+                    onSelectionChanged: (val) =>
+                        setState(() => _mobileTab = val.first),
                   ),
                   const SizedBox(height: 14),
                   if (_mobileTab == 0)
@@ -326,26 +344,41 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     Icon(
                       isAssignedPanel ? Icons.check_box : Icons.grid_view,
                       size: 16,
-                      color: isAssignedPanel ? Colors.green.shade600 : theme.colorScheme.primary,
+                      color: isAssignedPanel
+                          ? Colors.green.shade600
+                          : theme.colorScheme.primary,
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         title,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        _searchQuery.isNotEmpty ? '$count of $totalCount' : '$count',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                        _searchQuery.isNotEmpty
+                            ? '$count of $totalCount'
+                            : '$count',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -368,7 +401,10 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                   ),
-                  child: const Text('Clear All', style: TextStyle(fontSize: 12)),
+                  child: const Text(
+                    'Clear All',
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
             ],
           ),
@@ -383,7 +419,9 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    isAssignedPanel ? Icons.folder_open_outlined : Icons.check_circle_outline,
+                    isAssignedPanel
+                        ? Icons.folder_open_outlined
+                        : Icons.check_circle_outline,
                     size: 36,
                     color: Colors.grey.shade500,
                   ),
@@ -391,11 +429,11 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   Text(
                     isAssignedPanel
                         ? (_searchQuery.isNotEmpty
-                            ? 'No assigned products match search'
-                            : 'No products assigned yet')
+                              ? 'No assigned products match search'
+                              : 'No products assigned yet')
                         : (_searchQuery.isNotEmpty
-                            ? 'No available products match search'
-                            : 'All products are assigned!'),
+                              ? 'No available products match search'
+                              : 'All products are assigned!'),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
@@ -421,12 +459,18 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, Product product, bool isAssigned) {
+  Widget _buildProductCard(
+    BuildContext context,
+    Product product,
+    bool isAssigned,
+  ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     // Price: discountAmt if set and > 0, else amount
-    final effectivePrice = (product.discountAmt > 0) ? product.discountAmt : product.amount;
+    final effectivePrice = (product.discountAmt > 0)
+        ? product.discountAmt
+        : product.amount;
 
     final cardContent = ModernCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -444,7 +488,10 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   product.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 3),
                 Row(
@@ -455,7 +502,9 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: product.isDiscounted ? Colors.green.shade600 : null,
+                        color: product.isDiscounted
+                            ? Colors.green.shade600
+                            : null,
                       ),
                     ),
                     if (product.isDiscounted) ...[
@@ -470,17 +519,25 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                       ),
                     ],
                     const SizedBox(width: 8),
-                    const Text('•', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                    const Text(
+                      '•',
+                      style: TextStyle(color: Colors.grey, fontSize: 10),
+                    ),
                     const SizedBox(width: 8),
                     // Product ID (short/mono)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: isDark ? Colors.black26 : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        product.id.length > 12 ? '${product.id.substring(0, 10)}…' : product.id,
+                        product.id.length > 12
+                            ? '${product.id.substring(0, 10)}…'
+                            : product.id,
                         style: const TextStyle(
                           fontFamily: 'monospace',
                           fontSize: 11,
@@ -534,7 +591,11 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
               SizedBox(width: 8),
               Text(
                 'Assign',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ],
           ),
@@ -558,7 +619,11 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
             children: [
               Text(
                 'Remove',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
               SizedBox(width: 8),
               Icon(Icons.remove_circle, color: Colors.white, size: 20),

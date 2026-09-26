@@ -8,8 +8,10 @@ import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
 
 /// Product management for the signed-in store.
@@ -161,7 +163,11 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
 
                 if (snap.connectionState == ConnectionState.waiting &&
                     products.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: 5,
+                    itemBuilder: (_, _) => const M3ListTileSkeleton(),
+                  );
                 }
                 if (products.isEmpty) {
                   return _EmptyProducts(
@@ -279,121 +285,353 @@ class _ProductTile extends StatelessWidget {
         ? Colors.orange
         : Colors.green;
 
+    if (context.isMobile) {
+      return _buildMobileCard(context, status, statusColor);
+    }
+    return _buildDesktopCard(context, status, statusColor);
+  }
+
+  Widget _buildMobileCard(
+    BuildContext context,
+    StockStatus status,
+    Color statusColor,
+  ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return ModernCard(
       key: Key('product-tile-${product.id}'),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            width: 48,
-            height: 48,
-            child:
-                product.imageUrl.isNotEmpty &&
-                    product.imageUrl.startsWith('http')
-                ? Image.network(
-                    product.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const Icon(Icons.image),
-                  )
-                : const Icon(Icons.image),
-          ),
-        ),
-        title: Text(
-          product.name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 2),
-            Wrap(
-              spacing: 6,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  formatCurrency(product.price),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: product.isDiscounted ? Colors.green.shade700 : null,
-                  ),
+      padding: const EdgeInsets.all(12),
+      onTap: onEdit,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: 58,
+                  height: 58,
+                  color: isDark ? Colors.white10 : Colors.grey.shade100,
+                  child:
+                      product.imageUrl.isNotEmpty &&
+                          product.imageUrl.startsWith('http')
+                      ? Image.network(
+                          product.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const Icon(
+                            Icons.image,
+                            color: Colors.grey,
+                            size: 28,
+                          ),
+                        )
+                      : const Icon(Icons.image, color: Colors.grey, size: 28),
                 ),
-                if (product.isDiscounted)
-                  Text(
-                    formatCurrency(product.amount),
-                    style: const TextStyle(
-                      decoration: TextDecoration.lineThrough,
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                if (product.variants.isNotEmpty)
-                  Text(
-                    '• ${product.variants.length} variants',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Text(
-              categoryName.isEmpty ? 'Uncategorised' : categoryName,
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
-            ),
-            const SizedBox(height: 6),
-            CopyableIdBadge(
-              key: Key('product-id-${product.id}'),
-              id: product.id,
-              label: 'Product',
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            status.label,
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      categoryName.isEmpty ? 'Uncategorised' : categoryName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
                     Text(
                       product.isUnlimitedStock
-                          ? 'Unlimited'
-                          : '${product.stockQty} ${product.unitType}',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      status.label,
+                          ? 'Stock: Unlimited'
+                          : 'Stock: ${product.stockQty} ${product.unitType}',
                       style: TextStyle(
-                        color: statusColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 20),
-                  tooltip: 'Edit Product',
-                  onPressed: onEdit,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: theme.dividerColor.withValues(alpha: 0.15),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          formatCurrency(product.price),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: product.isDiscounted
+                                ? Colors.green.shade700
+                                : null,
+                          ),
+                        ),
+                        if (product.isDiscounted)
+                          Text(
+                            formatCurrency(product.amount),
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        if (product.variants.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white12
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '${product.variants.length} var',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    CopyableIdBadge(
+                      key: Key('product-id-${product.id}'),
+                      id: product.id,
+                      label: 'Product',
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: Colors.redAccent,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 20,
+                    icon: const Icon(Icons.edit_outlined),
+                    tooltip: 'Edit Product',
+                    onPressed: onEdit,
                   ),
-                  tooltip: 'Delete Product',
-                  onPressed: onDelete,
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 20,
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.redAccent,
+                    ),
+                    tooltip: 'Delete Product',
+                    onPressed: onDelete,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopCard(
+    BuildContext context,
+    StockStatus status,
+    Color statusColor,
+  ) {
+    return ModernCard(
+      key: Key('product-tile-${product.id}'),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      onTap: onEdit,
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 52,
+              height: 52,
+              child:
+                  product.imageUrl.isNotEmpty &&
+                      product.imageUrl.startsWith('http')
+                  ? Image.network(
+                      product.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => const Icon(Icons.image),
+                    )
+                  : const Icon(Icons.image),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Wrap(
+                  spacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      formatCurrency(product.price),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: product.isDiscounted
+                            ? Colors.green.shade700
+                            : null,
+                      ),
+                    ),
+                    if (product.isDiscounted)
+                      Text(
+                        formatCurrency(product.amount),
+                        style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    if (product.variants.isNotEmpty)
+                      Text(
+                        '• ${product.variants.length} variants',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  categoryName.isEmpty ? 'Uncategorised' : categoryName,
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+                const SizedBox(height: 6),
+                CopyableIdBadge(
+                  key: Key('product-id-${product.id}'),
+                  id: product.id,
+                  label: 'Product',
                 ),
               ],
             ),
-          ],
-        ),
-        onTap: onEdit,
+          ),
+          const SizedBox(width: 16),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                product.isUnlimitedStock
+                    ? 'Unlimited'
+                    : '${product.stockQty} ${product.unitType}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  status.label,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 20),
+            tooltip: 'Edit Product',
+            onPressed: onEdit,
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.delete_outline,
+              size: 20,
+              color: Colors.redAccent,
+            ),
+            tooltip: 'Delete Product',
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }

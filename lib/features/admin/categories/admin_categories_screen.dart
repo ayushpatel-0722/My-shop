@@ -6,8 +6,10 @@ import '../../../core/domain/category_tree.dart';
 import '../../../core/models/category.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
 
 /// Admin category manager with a real hierarchy view.
@@ -86,7 +88,11 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
 
                 if (snap.connectionState == ConnectionState.waiting &&
                     categories.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: 5,
+                    itemBuilder: (_, _) => const M3ListTileSkeleton(),
+                  );
                 }
                 if (categories.isEmpty) {
                   return _EmptyCategories(
@@ -292,26 +298,33 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = context.isMobile;
     return Expanded(
       child: ModernCard(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 8 : 12,
+          vertical: isMobile ? 10 : 12,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: isMobile ? 16 : 18,
+                fontWeight: FontWeight.bold,
               ),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isMobile ? 10 : 11,
+                color: Colors.grey,
               ),
-            ],
-          ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
@@ -339,22 +352,39 @@ class _CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final effectiveIndent = context.isMobile
+        ? (indent * 0.6).clamp(0.0, 36.0)
+        : indent;
 
     return Padding(
-      padding: EdgeInsets.only(left: indent),
-      child: ModernCard(
-        key: Key('category-tile-${node.id}'),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          ),
-          leading: Row(
-            mainAxisSize: MainAxisSize.min,
+      padding: EdgeInsets.only(left: effectiveIndent),
+      child: context.isMobile
+          ? _buildMobileCard(context)
+          : _buildDesktopCard(context),
+    );
+  }
+
+  Widget _buildMobileCard(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ModernCard(
+      key: Key('category-tile-${node.id}'),
+      padding: const EdgeInsets.all(12),
+      onTap: onEdit,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (onToggle != null)
+              if (onToggle != null) ...[
                 IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 28,
+                    minHeight: 28,
+                  ),
                   icon: Icon(
                     collapsed
                         ? Icons.keyboard_arrow_right
@@ -363,92 +393,241 @@ class _CategoryTile extends StatelessWidget {
                   ),
                   tooltip: collapsed ? 'Expand' : 'Collapse',
                   onPressed: onToggle,
-                )
-              else
-                const SizedBox(width: 24),
-              const SizedBox(width: 4),
+                ),
+                const SizedBox(width: 4),
+              ],
               _CategoryGlyph(category: node.category),
-            ],
-          ),
-          title: Row(
-            children: [
-              Flexible(
-                child: Text(
-                  node.category.name,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            node.category.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.12,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            node.children.isEmpty
+                                ? '${node.directProductCount} products'
+                                : '${node.totalProductCount} products',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${node.category.type.isEmpty ? 'Uncategorised type' : node.category.type}'
+                      '${node.category.companyId.isNotEmpty ? ' • Store' : ' • Global'}'
+                      '${node.children.isNotEmpty ? ' • ${node.descendantCount} sub' : ''}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.65,
+                        ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (pathLabel.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Under: $pathLabel',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: theme.dividerColor.withValues(alpha: 0.15),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: CopyableIdBadge(
+                  key: Key('category-id-${node.id}'),
+                  id: node.id,
+                  label: 'Category',
                 ),
-                child: Text(
-                  node.children.isEmpty
-                      ? '${node.directProductCount} products'
-                      : '${node.totalProductCount} products',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.primary,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 20,
+                    icon: const Icon(Icons.edit_outlined),
+                    tooltip: 'Edit Category',
+                    onPressed: onEdit,
                   ),
-                ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 20,
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.redAccent,
+                    ),
+                    tooltip: 'Delete Category',
+                    onPressed: onDelete,
+                  ),
+                ],
               ),
             ],
           ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                '${node.category.type.isEmpty ? 'Uncategorised type' : node.category.type}'
-                '${node.category.companyId.isNotEmpty ? ' • Store' : ' • Global'}'
-                '${node.children.isNotEmpty ? ' • ${node.descendantCount} sub' : ''}',
-                style: const TextStyle(fontSize: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopCard(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ModernCard(
+      key: Key('category-tile-${node.id}'),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      onTap: onEdit,
+      child: Row(
+        children: [
+          if (onToggle != null)
+            IconButton(
+              icon: Icon(
+                collapsed
+                    ? Icons.keyboard_arrow_right
+                    : Icons.keyboard_arrow_down,
+                size: 20,
               ),
-              if (pathLabel.isNotEmpty) ...[
-                const SizedBox(height: 2),
+              tooltip: collapsed ? 'Expand' : 'Collapse',
+              onPressed: onToggle,
+            )
+          else
+            const SizedBox(width: 40),
+          const SizedBox(width: 4),
+          _CategoryGlyph(category: node.category),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        node.category.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.12,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        node.children.isEmpty
+                            ? '${node.directProductCount} products'
+                            : '${node.totalProductCount} products',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
                 Text(
-                  'Under: $pathLabel',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
+                  '${node.category.type.isEmpty ? 'Uncategorised type' : node.category.type}'
+                  '${node.category.companyId.isNotEmpty ? ' • Store' : ' • Global'}'
+                  '${node.children.isNotEmpty ? ' • ${node.descendantCount} sub' : ''}',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                if (pathLabel.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Under: $pathLabel',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
+                ],
+                const SizedBox(height: 6),
+                CopyableIdBadge(
+                  key: Key('category-id-${node.id}'),
+                  id: node.id,
+                  label: 'Category',
                 ),
               ],
-              const SizedBox(height: 6),
-              CopyableIdBadge(
-                key: Key('category-id-${node.id}'),
-                id: node.id,
-                label: 'Category',
-              ),
-            ],
+            ),
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 20),
-                tooltip: 'Edit Category',
-                onPressed: onEdit,
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  size: 20,
-                  color: Colors.redAccent,
-                ),
-                tooltip: 'Delete Category',
-                onPressed: onDelete,
-              ),
-            ],
+          const SizedBox(width: 12),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 20),
+            tooltip: 'Edit Category',
+            onPressed: onEdit,
           ),
-          onTap: onEdit,
-        ),
+          IconButton(
+            icon: const Icon(
+              Icons.delete_outline,
+              size: 20,
+              color: Colors.redAccent,
+            ),
+            tooltip: 'Delete Category',
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }

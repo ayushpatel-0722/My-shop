@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
-import '../../../core/models/category.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
@@ -44,6 +43,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   final _priceCtrl = TextEditingController();
   final _discountPriceCtrl = TextEditingController();
   final _baseSkuCtrl = TextEditingController();
+  final _colorCtrl = TextEditingController();
   final _unitCtrl = TextEditingController(text: '1');
   final _unitTypeCtrl = TextEditingController(text: 'pieces');
   final _stockCtrl = TextEditingController(text: '10');
@@ -73,16 +73,42 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
   bool get isEditMode => widget.product != null || widget.productId != null;
 
-  static const List<String> _commonUnitTypes = [
+  static const List<String> _weightUnitTypes = ['kg', 'g', 'mg', 'lb'];
+  static const List<String> _quantityUnitTypes = [
     'pieces',
-    'kg',
-    'grams',
-    'liters',
-    'ml',
+    'box',
     'pack',
     'bottle',
-    'box',
+    'unit',
   ];
+
+  List<String> get _currentUnitTypes => _measurementType == 'weight_based'
+      ? _weightUnitTypes
+      : _quantityUnitTypes;
+
+  /// Check whether all prerequisite primary product data is entered to enable variant configuration.
+  bool get _isVariantSectionEnabled {
+    final hasName = _nameCtrl.text.trim().isNotEmpty;
+    final price = double.tryParse(_priceCtrl.text.trim()) ?? 0;
+    final hasPrice = price > 0;
+    final unit = double.tryParse(_unitCtrl.text.trim()) ?? 0;
+    final hasUnit = unit > 0;
+    final hasSku = _baseSkuCtrl.text.trim().isNotEmpty;
+
+    return hasName && hasPrice && hasUnit && hasSku;
+  }
+
+  /// List of missing required fields before variant configuration can be unlocked.
+  List<String> get _missingBaseFields {
+    final missing = <String>[];
+    if (_nameCtrl.text.trim().isEmpty) missing.add('Product Title');
+    final price = double.tryParse(_priceCtrl.text.trim()) ?? 0;
+    if (price <= 0) missing.add('Base MRP / Price');
+    final unit = double.tryParse(_unitCtrl.text.trim()) ?? 0;
+    if (unit <= 0) missing.add('Base Unit Value');
+    if (_baseSkuCtrl.text.trim().isEmpty) missing.add('Base SKU');
+    return missing;
+  }
 
   @override
   void initState() {
@@ -114,6 +140,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     _baseSkuCtrl.text = p.sku.isNotEmpty
         ? p.sku
         : 'PROD-${p.id.isNotEmpty ? p.id : DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    _colorCtrl.text = p.color;
     _priceCtrl.text = p.amount > 0
         ? (p.amount == p.amount.roundToDouble()
               ? p.amount.toInt().toString()
@@ -207,6 +234,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     _priceCtrl.dispose();
     _discountPriceCtrl.dispose();
     _baseSkuCtrl.dispose();
+    _colorCtrl.dispose();
     _unitCtrl.dispose();
     _unitTypeCtrl.dispose();
     _stockCtrl.dispose();
@@ -283,10 +311,305 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     });
   }
 
+  /// Dynamic synchronization when the base product unit type is changed.
+  void _syncUnitTypeToVariantsAndOptions(String newUnitType) {
+    final oldUnit = _unitTypeCtrl.text.trim().toLowerCase();
+    final cleanNewUnit = newUnitType.trim().toLowerCase();
+    if (oldUnit == cleanNewUnit &&
+        _variants.every((v) => v.unitType == cleanNewUnit)) {
+      return;
+    }
+
+    setState(() {
+      _unitTypeCtrl.text = cleanNewUnit;
+
+      // 1. Synchronize all variants
+      for (int i = 0; i < _variants.length; i++) {
+        final v = _variants[i];
+        final updatedAttrs = Map<String, String>.from(v.attributes);
+        updatedAttrs.forEach((k, val) {
+          if (oldUnit.isNotEmpty && val.toLowerCase().contains(oldUnit)) {
+            updatedAttrs[k] = val.replaceAll(
+              RegExp(oldUnit, caseSensitive: false),
+              cleanNewUnit,
+            );
+          }
+        });
+
+        String updatedTitle = v.title;
+        if (oldUnit.isNotEmpty &&
+            updatedTitle.toLowerCase().contains(oldUnit)) {
+          updatedTitle = updatedTitle.replaceAll(
+            RegExp(oldUnit, caseSensitive: false),
+            cleanNewUnit,
+          );
+        } else if (!updatedTitle.toLowerCase().contains(cleanNewUnit) &&
+            v.unitValue > 0) {
+          updatedTitle =
+              '${v.unitValue == v.unitValue.roundToDouble() ? v.unitValue.toInt() : v.unitValue} $cleanNewUnit${v.color.isNotEmpty ? " / ${v.color}" : ""}';
+        }
+
+        _variants[i] = v.copyWith(
+          unitType: cleanNewUnit,
+          title: updatedTitle,
+          attributes: updatedAttrs,
+        );
+      }
+
+      // 2. Synchronize existing configured options
+      for (int i = 0; i < _options.length; i++) {
+        final opt = _options[i];
+        final updatedValues = opt.values.map((val) {
+          if (oldUnit.isNotEmpty && val.toLowerCase().contains(oldUnit)) {
+            return val.replaceAll(
+              RegExp(oldUnit, caseSensitive: false),
+              cleanNewUnit,
+            );
+          }
+          return val;
+        }).toList();
+
+        String updatedName = opt.name;
+        if (oldUnit.isNotEmpty &&
+            (updatedName.toLowerCase() == oldUnit ||
+                (updatedName.toLowerCase() == 'box' && cleanNewUnit != 'box') ||
+                (updatedName.toLowerCase() == 'pack' &&
+                    cleanNewUnit != 'pack') ||
+                (updatedName.toLowerCase() == 'weight' &&
+                    _measurementType != 'weight_based'))) {
+          updatedName = _measurementType == 'weight_based'
+              ? 'Weight'
+              : 'Quantity';
+        }
+
+        _options[i] = ProductOption(name: updatedName, values: updatedValues);
+      }
+    });
+  }
+
+  List<Widget> _buildQuickOptionTemplateChips(
+    TextEditingController nameCtrl,
+    TextEditingController valuesCtrl,
+    String currentUnit,
+  ) {
+    final chips = <Widget>[];
+
+    // 1. Unit/Dimension templates strictly tailored to currentUnit
+    if (currentUnit == 'pieces' || currentUnit == 'unit') {
+      chips.add(
+        ActionChip(
+          label: Text(
+            'Quantity (1 $currentUnit, 2 $currentUnit, 5 $currentUnit, 10 $currentUnit)',
+            style: const TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Quantity';
+            valuesCtrl.text =
+                '1 $currentUnit, 2 $currentUnit, 5 $currentUnit, 10 $currentUnit';
+          },
+        ),
+      );
+      chips.add(
+        ActionChip(
+          label: Text(
+            'Quantity (2 $currentUnit, 4 $currentUnit, 6 $currentUnit)',
+            style: const TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Quantity';
+            valuesCtrl.text = '2 $currentUnit, 4 $currentUnit, 6 $currentUnit';
+          },
+        ),
+      );
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Clothing Size (S, M, L, XL, XXL)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Size';
+            valuesCtrl.text = 'S, M, L, XL, XXL';
+          },
+        ),
+      );
+    } else if (currentUnit == 'kg') {
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Weight (1kg, 2kg, 5kg, 10kg)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Weight';
+            valuesCtrl.text = '1kg, 2kg, 5kg, 10kg';
+          },
+        ),
+      );
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Weight (500g, 1kg, 2kg, 5kg)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Weight';
+            valuesCtrl.text = '500g, 1kg, 2kg, 5kg';
+          },
+        ),
+      );
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Weight (250g, 500g, 1kg)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Weight';
+            valuesCtrl.text = '250g, 500g, 1kg';
+          },
+        ),
+      );
+    } else if (currentUnit == 'g') {
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Weight (50g, 100g, 250g, 500g)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Weight';
+            valuesCtrl.text = '50g, 100g, 250g, 500g';
+          },
+        ),
+      );
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Weight (100g, 200g, 500g, 1000g)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Weight';
+            valuesCtrl.text = '100g, 200g, 500g, 1000g';
+          },
+        ),
+      );
+    } else if (currentUnit == 'mg') {
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Weight (50mg, 100mg, 250mg, 500mg)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Weight';
+            valuesCtrl.text = '50mg, 100mg, 250mg, 500mg';
+          },
+        ),
+      );
+    } else if (currentUnit == 'lb') {
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Weight (1lb, 2lb, 5lb, 10lb)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Weight';
+            valuesCtrl.text = '1lb, 2lb, 5lb, 10lb';
+          },
+        ),
+      );
+    } else if (currentUnit == 'box') {
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Box (1 box, 2 boxes, 5 boxes, 10 boxes)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Box';
+            valuesCtrl.text = '1 box, 2 boxes, 5 boxes, 10 boxes';
+          },
+        ),
+      );
+    } else if (currentUnit == 'pack') {
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Pack (1 pack, 2 packs, 5 packs, 10 packs)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Pack';
+            valuesCtrl.text = '1 pack, 2 packs, 5 packs, 10 packs';
+          },
+        ),
+      );
+    } else if (currentUnit == 'bottle') {
+      chips.add(
+        ActionChip(
+          label: const Text(
+            'Bottle (1 bottle, 2 bottles, 4 bottles, 6 bottles)',
+            style: TextStyle(fontSize: 11),
+          ),
+          onPressed: () {
+            nameCtrl.text = 'Bottle';
+            valuesCtrl.text = '1 bottle, 2 bottles, 4 bottles, 6 bottles';
+          },
+        ),
+      );
+    }
+
+    // 2. Color templates (Always available for every product type)
+    chips.add(
+      ActionChip(
+        label: const Text(
+          'Color (Red, Blue, Black, White, Green)',
+          style: TextStyle(fontSize: 11),
+        ),
+        onPressed: () {
+          nameCtrl.text = 'Color';
+          valuesCtrl.text = 'Red, Blue, Black, White, Green';
+        },
+      ),
+    );
+    chips.add(
+      ActionChip(
+        label: const Text(
+          'Color (Navy, Crimson, Olive, Gold)',
+          style: TextStyle(fontSize: 11),
+        ),
+        onPressed: () {
+          nameCtrl.text = 'Color';
+          valuesCtrl.text = 'Navy, Crimson, Olive, Gold';
+        },
+      ),
+    );
+
+    return chips;
+  }
+
   // --- Step 4 Helpers: Dynamic Options & Cartesian Matrix Generator ---
   void _showAddOptionDialog() {
+    if (!_isVariantSectionEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please complete the required product details above (${_missingBaseFields.join(", ")}) before configuring options.',
+          ),
+          backgroundColor: Colors.orange.shade800,
+        ),
+      );
+      return;
+    }
+
     final nameCtrl = TextEditingController();
     final valuesCtrl = TextEditingController();
+    final currentUnit = _unitTypeCtrl.text.trim().toLowerCase().isNotEmpty
+        ? _unitTypeCtrl.text.trim().toLowerCase()
+        : (_measurementType == 'weight_based' ? 'kg' : 'pieces');
 
     showDialog(
       context: context,
@@ -297,31 +620,61 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Define a variation type and its choices (e.g. Size, Color, Weight, Storage, Box Type).',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    ctx,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      size: 14,
+                      color: Theme.of(ctx).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Unit options strictly synchronized with "$currentUnit"',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(ctx).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: nameCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Option Name *',
-                  hintText: 'e.g. Size, Weight, Color, Storage',
+                  hintText: 'e.g. Quantity, Size, Color',
                   prefixIcon: Icon(Icons.tune),
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: valuesCtrl,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Option Values (comma separated) *',
-                  hintText: 'e.g. S, M, L, XL or 250g, 500g, 1kg',
-                  prefixIcon: Icon(Icons.list),
+                  hintText:
+                      'e.g. 1 $currentUnit, 2 $currentUnit, 5 $currentUnit',
+                  prefixIcon: const Icon(Icons.list),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                'Quick Templates:',
+                'Quick Templates (Strictly for $currentUnit):',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -332,78 +685,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
               Wrap(
                 spacing: 6,
                 runSpacing: 4,
-                children: [
-                  ActionChip(
-                    label: const Text(
-                      'Clothing: Size (S, M, L, XL)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () {
-                      nameCtrl.text = 'Size';
-                      valuesCtrl.text = 'S, M, L, XL';
-                    },
-                  ),
-                  ActionChip(
-                    label: const Text(
-                      'Color (Pink, Blue, Black)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () {
-                      nameCtrl.text = 'Color';
-                      valuesCtrl.text = 'Pink, Blue, Black';
-                    },
-                  ),
-                  ActionChip(
-                    label: const Text(
-                      'Grocery: Weight (1kg, 5kg, 10kg, 50kg)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () {
-                      nameCtrl.text = 'Weight';
-                      valuesCtrl.text = '1kg, 5kg, 10kg, 50kg';
-                    },
-                  ),
-                  ActionChip(
-                    label: const Text(
-                      'Food: Weight (250g, 500g, 1kg)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () {
-                      nameCtrl.text = 'Weight';
-                      valuesCtrl.text = '250g, 500g, 1kg';
-                    },
-                  ),
-                  ActionChip(
-                    label: const Text(
-                      'Liquids (250ml, 500ml, 1L, 2L)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () {
-                      nameCtrl.text = 'Volume';
-                      valuesCtrl.text = '250ml, 500ml, 1L, 2L';
-                    },
-                  ),
-                  ActionChip(
-                    label: const Text(
-                      'Multipack (Pack of 1, Pack of 2, Pack of 5)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () {
-                      nameCtrl.text = 'Pack';
-                      valuesCtrl.text = 'Pack of 1, Pack of 2, Pack of 5';
-                    },
-                  ),
-                  ActionChip(
-                    label: const Text(
-                      'Electronics: RAM (8GB, 16GB)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () {
-                      nameCtrl.text = 'RAM';
-                      valuesCtrl.text = '8GB, 16GB';
-                    },
-                  ),
-                ],
+                children: _buildQuickOptionTemplateChips(
+                  nameCtrl,
+                  valuesCtrl,
+                  currentUnit,
+                ),
               ),
             ],
           ),
@@ -427,6 +713,34 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                   .toList();
 
               if (parsedValues.isEmpty) return;
+
+              // Restrict contradicting unit option names
+              const allKnownUnits = [
+                'box',
+                'pack',
+                'bottle',
+                'kg',
+                'g',
+                'pieces',
+                'unit',
+                'mg',
+                'lb',
+              ];
+              final conflictingUnits = allKnownUnits
+                  .where((u) => u != currentUnit)
+                  .toList();
+
+              if (conflictingUnits.contains(optName.toLowerCase())) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Cannot add "$optName" option. The product unit is locked to "$currentUnit". Please use Quantity or Size/Color.',
+                    ),
+                    backgroundColor: Colors.orange.shade800,
+                  ),
+                );
+                return;
+              }
 
               setState(() {
                 final existingIdx = _options.indexWhere(
@@ -646,6 +960,42 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     return null;
   }
 
+  /// Proportional auto-pricing helper for a single variant unit value based on the primary product's base price and base unit.
+  double _calculateVariantAutoPrice({required double variantUnitValue}) {
+    final baseSellingPrice = double.tryParse(_discountPriceCtrl.text) ?? 0.0;
+    final baseMrp = double.tryParse(_priceCtrl.text) ?? 0.0;
+    final effectiveBasePrice = baseSellingPrice > 0
+        ? baseSellingPrice
+        : baseMrp;
+    final baseUnitQty = double.tryParse(_unitCtrl.text) ?? 1.0;
+    final baseUnitType = _unitTypeCtrl.text.trim().toLowerCase();
+
+    if (effectiveBasePrice <= 0 || baseUnitQty <= 0 || variantUnitValue <= 0) {
+      return effectiveBasePrice;
+    }
+
+    final baseCanonical = _toCanonicalUnit(
+      baseUnitQty,
+      baseUnitType,
+      _measurementType,
+    );
+    final variantCanonical = _toCanonicalUnit(
+      variantUnitValue,
+      baseUnitType,
+      _measurementType,
+    );
+
+    if (baseCanonical != null &&
+        variantCanonical != null &&
+        baseCanonical > 0) {
+      final computed = (variantCanonical / baseCanonical) * effectiveBasePrice;
+      return double.parse(computed.toStringAsFixed(2));
+    }
+
+    final computed = (variantUnitValue / baseUnitQty) * effectiveBasePrice;
+    return double.parse(computed.toStringAsFixed(2));
+  }
+
   /// Calculates the proportional price override for a variant combo based on base price, base unit, unit type, and measurement type.
   double _calculateAutoPriceOverride(
     Map<String, String> combo,
@@ -704,8 +1054,20 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     return double.parse(computedPrice.toStringAsFixed(2));
   }
 
-  /// Computes the Cartesian Product matrix of all options with intelligent auto-pricing.
+  /// Computes the Cartesian Product matrix of all options with intelligent auto-pricing and locked unit type.
   void _generateVariantMatrix() {
+    if (!_isVariantSectionEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please complete the required product details above (${_missingBaseFields.join(", ")}) before generating matrix.',
+          ),
+          backgroundColor: Colors.orange.shade800,
+        ),
+      );
+      return;
+    }
+
     if (_options.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -748,8 +1110,8 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         : baseMrp;
     final baseUnitQty = double.tryParse(_unitCtrl.text) ?? 1.0;
     final baseUnitType = _unitTypeCtrl.text.trim().isNotEmpty
-        ? _unitTypeCtrl.text.trim()
-        : 'pieces';
+        ? _unitTypeCtrl.text.trim().toLowerCase()
+        : (_measurementType == 'weight_based' ? 'kg' : 'pieces');
 
     final List<ProductVariant> newVariants = combinations.map((combo) {
       final comboTitle = combo.values.join(' / ');
@@ -765,6 +1127,20 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         baseUnitType,
         _measurementType,
       );
+
+      // Extract variant unit value from combo attributes
+      double variantUnitVal = baseUnitQty;
+      for (final entry in combo.entries) {
+        final parsed = _parseQuantityAndUnit(
+          entry.value,
+          entry.key,
+          baseUnitType,
+        );
+        if (parsed != null) {
+          variantUnitVal = parsed.key;
+          break;
+        }
+      }
 
       // Check if we have an existing variant with matching attributes to preserve custom overrides
       final existingIndex = _variants.indexWhere((v) {
@@ -791,6 +1167,10 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         isUnlimitedStock:
             (existing != null && existing.isUnlimitedStock) || isUnlimited,
         priceOverride: finalPrice,
+        unitValue: (existing != null && existing.unitValue > 0)
+            ? existing.unitValue
+            : variantUnitVal,
+        unitType: baseUnitType, // Globally locked to base product unit type
         size:
             combo['Size'] ??
             combo['Weight'] ??
@@ -810,7 +1190,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Generated ${_variants.length} variant combinations with auto-calculated prices!',
+          'Generated ${_variants.length} variant combinations with locked "$baseUnitType" unit & auto-calculated prices!',
         ),
         backgroundColor: Colors.green.shade700,
       ),
@@ -818,12 +1198,31 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   }
 
   void _showAddManualVariantDialog() {
+    if (!_isVariantSectionEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please complete the required product details above (${_missingBaseFields.join(", ")}) before adding variants.',
+          ),
+          backgroundColor: Colors.orange.shade800,
+        ),
+      );
+      return;
+    }
+
+    final lockedUnitType = _unitTypeCtrl.text.trim().toLowerCase().isNotEmpty
+        ? _unitTypeCtrl.text.trim().toLowerCase()
+        : (_measurementType == 'weight_based' ? 'kg' : 'pieces');
+
     final skuCtrl = TextEditingController(
       text:
           'SKU-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
     );
-    final sizeCtrl = TextEditingController();
-    final colorCtrl = TextEditingController();
+    final unitValCtrl = TextEditingController(
+      text: _unitCtrl.text.trim().isNotEmpty ? _unitCtrl.text.trim() : '1',
+    );
+    final colorCtrl = TextEditingController(text: _colorCtrl.text.trim());
+    final labelCtrl = TextEditingController();
     final stockCtrl = TextEditingController(text: '10');
     final priceOverrideCtrl = TextEditingController();
     bool variantUnlimited = _stockMode == 'unlimited';
@@ -831,112 +1230,238 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Add Product Variant'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: skuCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'SKU *',
-                    hintText: 'e.g. SKU-RED-L',
+        builder: (context, setDialogState) {
+          final typedUnitVal = double.tryParse(unitValCtrl.text.trim()) ?? 0.0;
+          final calculatedAutoPrice = _calculateVariantAutoPrice(
+            variantUnitValue: typedUnitVal > 0 ? typedUnitVal : 1.0,
+          );
+
+          return AlertDialog(
+            title: const Text('Add Product Variant'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Locked Unit Type Badge
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Unit Type: $lockedUnitType (Locked from Base Product)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: sizeCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Size',
-                    hintText: 'e.g. S, M, L, XL, 500g',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: colorCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Color',
-                    hintText: 'e.g. Navy, Crimson',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text(
-                    'Unlimited Inventory',
-                    style: TextStyle(fontSize: 13),
-                  ),
-                  value: variantUnlimited,
-                  onChanged: (val) =>
-                      setDialogState(() => variantUnlimited = val),
-                ),
-                if (!variantUnlimited) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 14),
+
+                  // 1. Unit Value (Required)
                   TextField(
-                    controller: stockCtrl,
-                    keyboardType: TextInputType.number,
+                    controller: unitValCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Unit Value *',
+                      hintText: 'e.g. 500, 1, 2, 5',
+                      suffixText: lockedUnitType,
+                      prefixIcon: const Icon(Icons.scale),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Color Variant Field
+                  TextField(
+                    controller: colorCtrl,
                     decoration: const InputDecoration(
-                      labelText: 'Stock Quantity',
+                      labelText: 'Color (Optional)',
+                      hintText: 'e.g. Red, Midnight Blue, Black',
+                      prefixIcon: Icon(Icons.palette_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Optional Variant Title / Label
+                  TextField(
+                    controller: labelCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Variant Label / Name (Optional)',
+                      hintText: 'e.g. Large / 500$lockedUnitType / Pack of 2',
+                      prefixIcon: const Icon(Icons.label_outline),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // SKU
+                  TextField(
+                    controller: skuCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'SKU *',
+                      hintText: 'e.g. SKU-500G-01',
+                      prefixIcon: Icon(Icons.qr_code_2),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 2. Stock Availability (Required)
+                  Text(
+                    'Stock Availability *',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(
+                      'Unlimited Inventory',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    value: variantUnlimited,
+                    onChanged: (val) =>
+                        setDialogState(() => variantUnlimited = val),
+                  ),
+                  if (!variantUnlimited) ...[
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: stockCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Stock Quantity *',
+                        prefixIcon: Icon(Icons.warehouse_outlined),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+
+                  // 3. Price & Auto-Calculation
+                  TextField(
+                    controller: priceOverrideCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Price (₹) *',
+                      hintText:
+                          'Auto: ₹${calculatedAutoPrice.toStringAsFixed(2)}',
+                      helperText: priceOverrideCtrl.text.trim().isEmpty
+                          ? 'Blank auto-calculates to ₹${calculatedAutoPrice.toStringAsFixed(2)} based on base price'
+                          : 'Custom price override applied',
+                      helperMaxLines: 2,
+                      prefixIcon: const Icon(Icons.currency_rupee),
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
-                TextField(
-                  controller: priceOverrideCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Price Override (Optional)',
-                    hintText: 'Leave empty or 0 to use base price',
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final sku = skuCtrl.text.trim();
-                if (sku.isEmpty) return;
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final sku = skuCtrl.text.trim();
+                  if (sku.isEmpty) return;
 
-                final sizeVal = sizeCtrl.text.trim();
-                final colorVal = colorCtrl.text.trim();
-                final attrs = <String, String>{};
-                if (sizeVal.isNotEmpty) attrs['Size'] = sizeVal;
-                if (colorVal.isNotEmpty) attrs['Color'] = colorVal;
+                  final unitVal =
+                      double.tryParse(unitValCtrl.text.trim()) ??
+                      (double.tryParse(_unitCtrl.text) ?? 1.0);
+                  final enteredPrice = double.tryParse(
+                    priceOverrideCtrl.text.trim(),
+                  );
+                  final finalPrice = (enteredPrice != null && enteredPrice > 0)
+                      ? enteredPrice
+                      : _calculateVariantAutoPrice(variantUnitValue: unitVal);
 
-                final variant = ProductVariant(
-                  sku: sku,
-                  attributes: attrs,
-                  size: sizeVal,
-                  color: colorVal,
-                  isUnlimitedStock: variantUnlimited,
-                  stockQty: variantUnlimited
-                      ? 0
-                      : (int.tryParse(stockCtrl.text) ?? 0),
-                  priceOverride: double.tryParse(priceOverrideCtrl.text) ?? 0.0,
-                );
+                  final customLabel = labelCtrl.text.trim();
+                  final colorVal = colorCtrl.text.trim();
+                  final defaultTitle =
+                      '$unitVal $lockedUnitType${colorVal.isNotEmpty ? " / $colorVal" : ""}';
+                  final title = customLabel.isNotEmpty
+                      ? customLabel
+                      : defaultTitle;
 
-                setState(() => _variants.add(variant));
-                Navigator.pop(ctx);
-              },
-              child: const Text('Add Variant'),
-            ),
-          ],
-        ),
+                  final attrs = <String, String>{
+                    'Unit': '$unitVal $lockedUnitType',
+                    if (colorVal.isNotEmpty) 'Color': colorVal,
+                    if (customLabel.isNotEmpty) 'Option': customLabel,
+                  };
+
+                  final variant = ProductVariant(
+                    sku: sku,
+                    title: title,
+                    attributes: attrs,
+                    size: title,
+                    color: colorVal,
+                    unitValue: unitVal,
+                    unitType: lockedUnitType,
+                    isUnlimitedStock: variantUnlimited,
+                    stockQty: variantUnlimited
+                        ? 0
+                        : (int.tryParse(stockCtrl.text) ?? 0),
+                    priceOverride: finalPrice,
+                  );
+
+                  setState(() => _variants.add(variant));
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Add Variant'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   void _editVariant(int index) {
     final v = _variants[index];
+    final lockedUnitType = _unitTypeCtrl.text.trim().toLowerCase().isNotEmpty
+        ? _unitTypeCtrl.text.trim().toLowerCase()
+        : (_measurementType == 'weight_based' ? 'kg' : 'pieces');
+
     final skuCtrl = TextEditingController(text: v.sku);
+    final unitValCtrl = TextEditingController(
+      text: v.unitValue > 0
+          ? (v.unitValue == v.unitValue.roundToDouble()
+                ? v.unitValue.toInt().toString()
+                : v.unitValue.toString())
+          : (_unitCtrl.text.trim().isNotEmpty ? _unitCtrl.text.trim() : '1'),
+    );
+    final colorCtrl = TextEditingController(text: v.color);
     final stockCtrl = TextEditingController(text: v.stockQty.toString());
     final priceCtrl = TextEditingController(
       text: v.priceOverride > 0
@@ -950,80 +1475,197 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text('Edit Variant (${v.title.isNotEmpty ? v.title : v.sku})'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: skuCtrl,
-                  decoration: const InputDecoration(labelText: 'SKU'),
-                ),
-                const SizedBox(height: 12),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text(
-                    'Unlimited Inventory',
-                    style: TextStyle(fontSize: 13),
+        builder: (context, setDialogState) {
+          final typedUnitVal = double.tryParse(unitValCtrl.text.trim()) ?? 0.0;
+          final calculatedAutoPrice = _calculateVariantAutoPrice(
+            variantUnitValue: typedUnitVal > 0 ? typedUnitVal : 1.0,
+          );
+
+          return AlertDialog(
+            title: Text(
+              'Edit Variant (${v.title.isNotEmpty ? v.title : v.sku})',
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Locked Unit Type Badge
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Unit Type: $lockedUnitType (Locked from Base Product)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  value: variantUnlimited,
-                  onChanged: (val) =>
-                      setDialogState(() => variantUnlimited = val),
-                ),
-                if (!variantUnlimited) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 14),
+
+                  // 1. Unit Value (Required)
                   TextField(
-                    controller: stockCtrl,
-                    keyboardType: TextInputType.number,
+                    controller: unitValCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Unit Value *',
+                      hintText: 'e.g. 500, 1, 2, 5',
+                      suffixText: lockedUnitType,
+                      prefixIcon: const Icon(Icons.scale),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Color Variant Field
+                  TextField(
+                    controller: colorCtrl,
                     decoration: const InputDecoration(
-                      labelText: 'Stock Quantity',
+                      labelText: 'Color (Optional)',
+                      hintText: 'e.g. Red, Midnight Blue, Black',
+                      prefixIcon: Icon(Icons.palette_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // SKU
+                  TextField(
+                    controller: skuCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'SKU',
+                      prefixIcon: Icon(Icons.qr_code_2),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 2. Stock Availability (Required)
+                  Text(
+                    'Stock Availability *',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(
+                      'Unlimited Inventory',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    value: variantUnlimited,
+                    onChanged: (val) =>
+                        setDialogState(() => variantUnlimited = val),
+                  ),
+                  if (!variantUnlimited) ...[
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: stockCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Stock Quantity *',
+                        prefixIcon: Icon(Icons.warehouse_outlined),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+
+                  // 3. Price & Auto-Calculation
+                  TextField(
+                    controller: priceCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Price (₹) *',
+                      hintText:
+                          'Auto: ₹${calculatedAutoPrice.toStringAsFixed(2)}',
+                      helperText: priceCtrl.text.trim().isEmpty
+                          ? 'Blank auto-calculates to ₹${calculatedAutoPrice.toStringAsFixed(2)} based on base price'
+                          : 'Custom price override applied',
+                      helperMaxLines: 2,
+                      prefixIcon: const Icon(Icons.currency_rupee),
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
-                TextField(
-                  controller: priceCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Price Override (₹)',
-                    hintText: 'Leave empty for base price',
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                setState(() {
-                  _variants[index] = ProductVariant(
-                    sku: skuCtrl.text.trim().isNotEmpty
-                        ? skuCtrl.text.trim()
-                        : v.sku,
-                    title: v.title,
-                    attributes: v.attributes,
-                    isUnlimitedStock: variantUnlimited,
-                    stockQty: variantUnlimited
-                        ? 0
-                        : (int.tryParse(stockCtrl.text) ?? v.stockQty),
-                    priceOverride: double.tryParse(priceCtrl.text) ?? 0.0,
-                    size: v.size,
-                    color: v.color,
-                  );
-                });
-                Navigator.pop(ctx);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final unitVal =
+                      double.tryParse(unitValCtrl.text.trim()) ??
+                      (v.unitValue > 0 ? v.unitValue : 1.0);
+                  final enteredPrice = double.tryParse(priceCtrl.text.trim());
+                  final finalPrice = (enteredPrice != null && enteredPrice > 0)
+                      ? enteredPrice
+                      : _calculateVariantAutoPrice(variantUnitValue: unitVal);
+                  final colorVal = colorCtrl.text.trim();
+                  final updatedAttrs = Map<String, String>.from(v.attributes);
+                  if (colorVal.isNotEmpty) {
+                    updatedAttrs['Color'] = colorVal;
+                  } else {
+                    updatedAttrs.remove('Color');
+                  }
+
+                  setState(() {
+                    _variants[index] = v.copyWith(
+                      sku: skuCtrl.text.trim().isNotEmpty
+                          ? skuCtrl.text.trim()
+                          : v.sku,
+                      unitValue: unitVal,
+                      unitType: lockedUnitType,
+                      color: colorVal,
+                      attributes: updatedAttrs,
+                      isUnlimitedStock: variantUnlimited,
+                      stockQty: variantUnlimited
+                          ? 0
+                          : (int.tryParse(stockCtrl.text) ?? v.stockQty),
+                      priceOverride: finalPrice,
+                    );
+                  });
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -1100,6 +1742,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         name: _nameCtrl.text.trim(),
         details: _detailsCtrl.text.trim(),
         subDetails: _subDetailsCtrl.text.trim(),
+        color: _colorCtrl.text.trim(),
         type: _measurementType,
         unit: unitValue,
         unitType: _unitTypeCtrl.text.trim(),
@@ -1296,6 +1939,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _nameCtrl,
+                          onChanged: (_) => setState(() {}),
                           decoration: const InputDecoration(
                             labelText: 'Product Title *',
                             hintText:
@@ -1305,43 +1949,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Product title is required'
                               : null,
-                        ),
-                        const SizedBox(height: 16),
-                        StreamBuilder<List<Category>>(
-                          stream: repo.categories(companyId: _companyId),
-                          builder: (context, snapshot) {
-                            final categories =
-                                snapshot.data ?? const <Category>[];
-                            return DropdownButtonFormField<String>(
-                              initialValue:
-                                  categories.any(
-                                    (c) => c.id == _selectedCategoryId,
-                                  )
-                                  ? _selectedCategoryId
-                                  : null,
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Category *',
-                                hintText:
-                                    'Select category (Clothing, Food, Electronics, etc.)',
-                                prefixIcon: Icon(Icons.category_outlined),
-                              ),
-                              items: categories.map((c) {
-                                final prefix = (c.hasIcon && !c.hasImageIcon)
-                                    ? '${c.iconUrl} '
-                                    : '📁 ';
-                                return DropdownMenuItem<String>(
-                                  value: c.id,
-                                  child: Text(
-                                    '$prefix${c.name} (${c.type})',
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (val) =>
-                                  setState(() => _selectedCategoryId = val),
-                            );
-                          },
                         ),
                         const SizedBox(height: 16),
                         Row(
@@ -1676,6 +2283,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
                         final skuField = TextFormField(
                           controller: _baseSkuCtrl,
+                          onChanged: (_) => setState(() {}),
                           decoration: const InputDecoration(
                             labelText: 'Base SKU / Product Code *',
                             hintText: 'e.g. PROD-HONEY-01',
@@ -1684,6 +2292,15 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Required'
                               : null,
+                        );
+
+                        final colorField = TextFormField(
+                          controller: _colorCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Product Base Color (Optional)',
+                            hintText: 'e.g. Red / Midnight Blue / Matte Black',
+                            prefixIcon: Icon(Icons.palette_outlined),
+                          ),
                         );
 
                         final stockField = TextFormField(
@@ -1709,6 +2326,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
                         final unitValField = TextFormField(
                           controller: _unitCtrl,
+                          onChanged: (_) => setState(() {}),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -1721,12 +2339,31 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               : null,
                         );
 
-                        final unitTypeField = TextFormField(
-                          controller: _unitTypeCtrl,
+                        final unitTypeField = DropdownButtonFormField<String>(
+                          key: ValueKey(
+                            'unit_type_${_measurementType}_${_unitTypeCtrl.text}',
+                          ),
+                          initialValue:
+                              _currentUnitTypes.contains(
+                                _unitTypeCtrl.text.trim().toLowerCase(),
+                              )
+                              ? _unitTypeCtrl.text.trim().toLowerCase()
+                              : _currentUnitTypes.first,
                           decoration: const InputDecoration(
                             labelText: 'Unit Type *',
-                            hintText: 'e.g. kg, pieces, box',
+                            prefixIcon: Icon(Icons.straighten),
                           ),
+                          items: _currentUnitTypes.map((u) {
+                            return DropdownMenuItem<String>(
+                              value: u,
+                              child: Text(u),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              _syncUnitTypeToVariantsAndOptions(val);
+                            }
+                          },
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Required'
                               : null,
@@ -1766,7 +2403,18 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 ],
                               ),
                             const SizedBox(height: 16),
-                            skuField,
+                            if (isNarrow) ...[
+                              skuField,
+                              const SizedBox(height: 14),
+                              colorField,
+                            ] else
+                              Row(
+                                children: [
+                                  Expanded(child: skuField),
+                                  const SizedBox(width: 16),
+                                  Expanded(child: colorField),
+                                ],
+                              ),
                             const SizedBox(height: 20),
 
                             // Stock Availability Selection (Specific Count / Unlimited / Finished)
@@ -1930,9 +2578,17 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   ),
                                 ],
                                 selected: {_measurementType},
-                                onSelectionChanged: (set) => setState(
-                                  () => _measurementType = set.first,
-                                ),
+                                onSelectionChanged: (set) => setState(() {
+                                  _measurementType = set.first;
+                                  final available = _currentUnitTypes;
+                                  final targetUnit =
+                                      available.contains(
+                                        _unitTypeCtrl.text.trim().toLowerCase(),
+                                      )
+                                      ? _unitTypeCtrl.text.trim().toLowerCase()
+                                      : available.first;
+                                  _syncUnitTypeToVariantsAndOptions(targetUnit);
+                                }),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -1952,14 +2608,14 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             Wrap(
                               spacing: 6,
                               runSpacing: 6,
-                              children: _commonUnitTypes.map((u) {
+                              children: _currentUnitTypes.map((u) {
                                 return ActionChip(
                                   label: Text(
                                     u,
                                     style: const TextStyle(fontSize: 11),
                                   ),
                                   onPressed: () =>
-                                      setState(() => _unitTypeCtrl.text = u),
+                                      _syncUnitTypeToVariantsAndOptions(u),
                                 );
                               }).toList(),
                             ),
@@ -2010,7 +2666,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               children: [
                                 Icon(
                                   Icons.tune,
-                                  color: theme.colorScheme.primary,
+                                  color: _isVariantSectionEnabled
+                                      ? theme.colorScheme.primary
+                                      : Colors.grey,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
@@ -2020,6 +2678,81 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                const SizedBox(width: 10),
+                                if (_isVariantSectionEnabled)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.green.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle_outline,
+                                          size: 13,
+                                          color: Colors.green,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Ready',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green.shade800,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.amber.withValues(
+                                          alpha: 0.4,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.lock_outline,
+                                          size: 13,
+                                          color: Colors.amber.shade900,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Locked',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.amber.shade900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ),
                             Wrap(
@@ -2027,12 +2760,16 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               runSpacing: 6,
                               children: [
                                 OutlinedButton.icon(
-                                  onPressed: _showAddOptionDialog,
+                                  onPressed: _isVariantSectionEnabled
+                                      ? _showAddOptionDialog
+                                      : null,
                                   icon: const Icon(Icons.add, size: 16),
                                   label: const Text('Add Option'),
                                 ),
                                 FilledButton.icon(
-                                  onPressed: _generateVariantMatrix,
+                                  onPressed: _isVariantSectionEnabled
+                                      ? _generateVariantMatrix
+                                      : null,
                                   icon: const Icon(
                                     Icons.auto_awesome,
                                     size: 16,
@@ -2040,7 +2777,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   label: const Text('Generate Matrix'),
                                 ),
                                 FilledButton.tonalIcon(
-                                  onPressed: _showAddManualVariantDialog,
+                                  onPressed: _isVariantSectionEnabled
+                                      ? _showAddManualVariantDialog
+                                      : null,
                                   icon: const Icon(Icons.add, size: 16),
                                   label: const Text('Add Variant'),
                                 ),
@@ -2058,6 +2797,93 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
+
+                        if (!_isVariantSectionEnabled) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.amber.withValues(alpha: 0.35),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.lock_outline,
+                                      size: 16,
+                                      color: Colors.amber.shade900,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Variant Configuration Locked',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber.shade900,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Please enter the required primary product details above to unlock variant options and matrix generation:',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.amber.shade900,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: _missingBaseFields.map((field) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.shade100,
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: Colors.amber.shade400,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.arrow_upward,
+                                            size: 10,
+                                            color: Colors.amber.shade900,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            field,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.amber.shade900,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
 
                         // Option Types List
                         if (_options.isNotEmpty) ...[
@@ -2232,7 +3058,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              'Stock: ${_variants[idx].isUnlimitedStock ? "Unlimited" : _variants[idx].stockQty} • ${_variants[idx].priceOverride > 0 ? "Price: ₹${_variants[idx].priceOverride % 1 == 0 ? _variants[idx].priceOverride.toInt() : _variants[idx].priceOverride}" : "Base Price"}${_variants[idx].attributes.isNotEmpty ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}" : ""}',
+                                              'Unit: ${_variants[idx].unitValue > 0 ? (_variants[idx].unitValue == _variants[idx].unitValue.roundToDouble() ? _variants[idx].unitValue.toInt() : _variants[idx].unitValue) : (_variants[idx].size.isNotEmpty ? _variants[idx].size : "1")} ${_variants[idx].unitType.isNotEmpty ? _variants[idx].unitType : _unitTypeCtrl.text.trim()} • Stock: ${_variants[idx].isUnlimitedStock ? "Unlimited" : _variants[idx].stockQty} • ${_variants[idx].priceOverride > 0 ? "Price: ₹${_variants[idx].priceOverride % 1 == 0 ? _variants[idx].priceOverride.toInt() : _variants[idx].priceOverride.toStringAsFixed(2)}" : "Base Price"}${_variants[idx].attributes.isNotEmpty ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}" : ""}',
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 color: isDark

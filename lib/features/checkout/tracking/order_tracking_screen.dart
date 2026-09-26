@@ -7,6 +7,7 @@ import '../../../core/domain/order_status.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 
 /// Pizza-tracker-style order timeline (Section 17.3 / Section 11).
@@ -42,7 +43,7 @@ class OrderTrackingScreen extends StatelessWidget {
 
           if (order == null) {
             if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const M3CenterLoader(message: 'Loading order details...');
             }
             return const Center(
               child: Padding(
@@ -72,6 +73,19 @@ class OrderTrackingScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              if (order.customerName.isNotEmpty ||
+                  order.customerPhone.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.person_outline),
+                    title: const Text('Customer details'),
+                    subtitle: Text(
+                      '${order.customerName}${order.customerPhone.isNotEmpty ? " · ${order.customerPhone}" : ""}${order.customerEmail.isNotEmpty ? " (${order.customerEmail})" : ""}',
+                    ),
+                  ),
+                ),
+              ],
               if (order.address.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Card(

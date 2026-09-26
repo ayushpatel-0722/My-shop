@@ -7,6 +7,7 @@ import '../../../core/models/category.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
 import 'widgets/product_assignment_picker.dart';
@@ -367,89 +368,73 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 24,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.isMobile ? 14 : 20,
+                    vertical: context.isMobile ? 16 : 24,
                   ),
                   children: [
                     // Header Info
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    if (context.isMobile)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 isEditMode
                                     ? 'Edit Category'
                                     : 'Category Details',
-                                style: theme.textTheme.headlineSmall?.copyWith(
+                                style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Configure hierarchy, catalog classification, and assigned products.',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: isDark
-                                      ? AppTheme.textSecondaryDark
-                                      : AppTheme.textSecondaryLight,
-                                ),
-                              ),
+                              _buildCompanyPill(theme),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Read-only Company Scope Pill (Auto-assigned)
-                        Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                          const SizedBox(height: 4),
+                          Text(
+                            'Configure hierarchy, catalog classification, and assigned products.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? AppTheme.textSecondaryDark
+                                  : AppTheme.textSecondaryLight,
                             ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.1,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: theme.colorScheme.primary.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.store,
-                                  size: 16,
-                                  color: theme.colorScheme.primary,
+                                Text(
+                                  isEditMode
+                                      ? 'Edit Category'
+                                      : 'Category Details',
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    _companyName.isNotEmpty
-                                        ? _companyName
-                                        : (_companyId.isNotEmpty
-                                              ? 'Company Scope'
-                                              : 'Global Scope'),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Configure hierarchy, catalog classification, and assigned products.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: isDark
+                                        ? AppTheme.textSecondaryDark
+                                        : AppTheme.textSecondaryLight,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
+                          const SizedBox(width: 16),
+                          _buildCompanyPill(theme),
+                        ],
+                      ),
+                    const SizedBox(height: 20),
 
                     // Card 1: Core Information (Name, Type, Details)
                     ModernCard(
@@ -735,6 +720,40 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCompanyPill(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.store, size: 15, color: theme.colorScheme.primary),
+          const SizedBox(width: 5),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 150),
+            child: Text(
+              _companyName.isNotEmpty
+                  ? _companyName
+                  : (_companyId.isNotEmpty ? 'Company Scope' : 'Global Scope'),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

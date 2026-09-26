@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
+import '../../../core/models/cart_item.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 
@@ -56,9 +58,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       setState(() {
         _product = p;
         _company = c;
+        if (p != null && p.variants.isNotEmpty && _selectedVariantIndex == -1) {
+          _selectedVariantIndex = 0;
+        }
         _loading = false;
       });
     }
+  }
+
+  ProductVariant? get _selectedVariant {
+    final p = _product;
+    if (p == null || p.variants.isEmpty) return null;
+    if (_selectedVariantIndex >= 0 &&
+        _selectedVariantIndex < p.variants.length) {
+      return p.variants[_selectedVariantIndex];
+    }
+    return p.variants.first;
   }
 
   @override
@@ -75,8 +90,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     if (_loading) {
       return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(leading: BackButton(onPressed: handleBack)),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const M3ProductDetailSkeleton(),
       );
     }
 
@@ -103,10 +119,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     final p = _product!;
     final symbol = _company?.currencySymbol ?? '₹';
-    final selectedVariant =
-        _selectedVariantIndex >= 0 && _selectedVariantIndex < p.variants.length
-        ? p.variants[_selectedVariantIndex]
-        : null;
+    final selectedVariant = _selectedVariant;
     final effectivePrice =
         (selectedVariant != null && selectedVariant.priceOverride > 0)
         ? selectedVariant.priceOverride
@@ -251,7 +264,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           runSpacing: 8,
                           children: List.generate(p.variants.length, (i) {
                             final v = p.variants[i];
-                            final isSelected = _selectedVariantIndex == i;
+                            final isSelected =
+                                (_selectedVariantIndex >= 0
+                                    ? _selectedVariantIndex
+                                    : 0) ==
+                                i;
                             final labelText = v.title.isNotEmpty
                                 ? v.title
                                 : (v.color.isNotEmpty
@@ -270,10 +287,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 ),
                               ),
                               selected: isSelected,
-                              onSelected: (_) => setState(() {
-                                _selectedVariantIndex =
-                                    _selectedVariantIndex == i ? -1 : i;
-                              }),
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    _selectedVariantIndex = i;
+                                  });
+                                }
+                              },
                             );
                           }),
                         ),
@@ -787,8 +807,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _bottomBar(Product p, String symbol, ProductVariant? selectedVariant) {
     final l10n = AppLocalizations.of(context);
-    final isUnlimited = selectedVariant?.isUnlimitedStock ?? p.isUnlimitedStock;
-    final stock = selectedVariant?.stockQty ?? p.stockQty;
+    final activeVariant = _selectedVariant ?? selectedVariant;
+    final isUnlimited = activeVariant?.isUnlimitedStock ?? p.isUnlimitedStock;
+    final stock = activeVariant?.stockQty ?? p.stockQty;
     final inStock = isUnlimited || stock > 0;
 
     return Container(
@@ -813,17 +834,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 onPressed: inStock
                     ? () {
                         void doAddToCart() {
+                          final currentVariant =
+                              _selectedVariant ?? selectedVariant;
                           context.read<CartCubit>().add(
                             p,
-                            variant: selectedVariant,
+                            variant: currentVariant,
                             company: _company,
                             qty: _qty,
                           );
                           final variantLabel =
-                              selectedVariant != null &&
-                                  selectedVariant.title.isNotEmpty
-                              ? ' (${selectedVariant.title})'
-                              : '';
+                              currentVariant != null &&
+                                  currentVariant.title.isNotEmpty
+                              ? ' (${currentVariant.title})'
+                              : (currentVariant != null &&
+                                        currentVariant.sku.isNotEmpty
+                                    ? ' (${currentVariant.sku})'
+                                    : '');
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -858,13 +884,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 onPressed: inStock
                     ? () {
                         void doBuyNow() {
-                          context.read<CartCubit>().add(
-                            p,
-                            variant: selectedVariant,
-                            company: _company,
+                          final currentVariant =
+                              _selectedVariant ?? selectedVariant;
+                          final directItem = CartItem(
+                            companyId: _company?.id ?? p.companyId,
+                            companyName: _company?.name ?? '',
+                            product: p,
+                            variant: currentVariant,
                             qty: _qty,
                           );
-                          context.go(AppRoutes.cart);
+                          context.push(AppRoutes.checkout, extra: directItem);
                         }
 
                         if (AuthSession.currentUser == null) {

@@ -9,6 +9,8 @@ import '../../../core/domain/voucher_evaluator.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/models/order.dart';
 import '../../../core/models/voucher.dart';
+import '../../../core/services/auth_session.dart';
+import '../../../core/services/email_service.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../auth/auth_cubit.dart';
@@ -30,13 +32,17 @@ import '../cart/cart_cubit.dart';
 ///    only, expiry) were never checked — now [VoucherEvaluator] decides and
 ///    explains the rejection.
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+  final List<CartItem>? directItems;
+  const CheckoutScreen({super.key, this.directItems});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
   final _pincodeCtrl = TextEditingController();
 
@@ -57,25 +63,54 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _placing = false;
   int _previousOrderCount = 0;
 
+  bool get _isDirectBuy =>
+      widget.directItems != null && widget.directItems!.isNotEmpty;
+
+  CartState _effectiveCartState(CartState cubitState) {
+    if (_isDirectBuy) {
+      return CartState(items: widget.directItems!);
+    }
+    return cubitState;
+  }
+
   @override
   void initState() {
     super.initState();
-    final user = context.read<AuthCubit>().currentUser;
-    final defaultAddr = user?.defaultAddress;
-    if (defaultAddr != null) {
-      _addressCtrl.text = defaultAddr.formattedAddress;
-      if (defaultAddr.pincode.isNotEmpty) {
-        _pincodeCtrl.text = defaultAddr.pincode;
+    final user =
+        context.read<AuthCubit>().currentUser ?? AuthSession.currentUser;
+    if (user != null) {
+      if (user.name.isNotEmpty) _nameCtrl.text = user.name;
+      if (user.email.isNotEmpty) _emailCtrl.text = user.email;
+      if (user.phone.isNotEmpty) {
+        _phoneCtrl.text = user.phone;
+      } else if (user.mobileNumber.isNotEmpty) {
+        _phoneCtrl.text = user.mobileNumber;
+      }
+      final defaultAddr = user.defaultAddress;
+      if (defaultAddr != null) {
+        if (_phoneCtrl.text.isEmpty && defaultAddr.phone.isNotEmpty) {
+          _phoneCtrl.text = defaultAddr.phone;
+        }
+        _addressCtrl.text = defaultAddr.formattedAddress;
+        if (defaultAddr.pincode.isNotEmpty) {
+          _pincodeCtrl.text = defaultAddr.pincode;
+        }
       }
     }
+    final initialItems = _isDirectBuy
+        ? widget.directItems!
+        : context.read<CartCubit>().state.items;
     if (_pincodeCtrl.text.isNotEmpty) {
-      _lookupDelivery(_companiesOf(context.read<CartCubit>().state));
+      _lookupDelivery(_companiesOf(CartState(items: initialItems)));
     }
     _loadOrderHistory(user?.id ?? '');
   }
 
   @override
   void dispose() {
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _phoneCtrl.dispose();
     _addressCtrl.dispose();
     _pincodeCtrl.dispose();
     for (final c in _voucherCtrls.values) {
@@ -188,9 +223,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (state.items.isEmpty) return;
 
+    final name = _nameCtrl.text.trim();
+    final email = _emailCtrl.text.trim();
+    final phone = _phoneCtrl.text.trim();
     final address = _addressCtrl.text.trim();
     final pincode = _pincodeCtrl.text.trim();
 
+    if (name.isEmpty) {
+      _snack('Please enter your name.');
+      return;
+    }
+    if (phone.isEmpty) {
+      _snack('Please enter your mobile number.');
+      return;
+    }
+    if (email.isNotEmpty && !email.contains('@')) {
+      _snack('Please enter a valid email address.');
+      return;
+    }
     if (address.isEmpty) {
       _snack('Please enter a delivery address.');
       return;
@@ -222,6 +272,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         final order = Order(
           id: '',
           userId: user?.id ?? 'guest',
+          customerName: name,
+          customerEmail: email,
+          customerPhone: phone,
           companyId: entry.key,
           companyName: bill.companyName,
           items: bill.lines
@@ -246,13 +299,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           pincode: pincode,
           voucherId: bill.voucher?.id,
           voucherCode: bill.voucher?.code ?? '',
+          paymentStatus: PaymentStatus.pending,
+          orderStatus: OrderStatus.pending,
           deliveryType: _deliveryType,
         );
-        placed.add(await repo.placeOrder(order));
+        final savedOrder = await repo.placeOrder(order);
+        placed.add(savedOrder);
+        // Send / trigger order placed email notification to ayush123@gmail.com
+        EmailService.sendOrderPlacedEmail(order: savedOrder);
       }
 
       if (!mounted) return;
-      context.read<CartCubit>().clear();
+      if (!_isDirectBuy) {
+        context.read<CartCubit>().clear();
+      }
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.orderPlaced)));
@@ -279,9 +339,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.checkout)),
+      appBar: AppBar(
+        title: Text(_isDirectBuy ? 'Direct Order Details' : l10n.checkout),
+      ),
       body: BlocBuilder<CartCubit, CartState>(
-        builder: (context, cartState) {
+        builder: (context, cubitState) {
+          final cartState = _effectiveCartState(cubitState);
           if (cartState.items.isEmpty) {
             return Center(
               child: Column(
@@ -323,30 +386,106 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              TextField(
-                key: const Key('checkout-address-field'),
-                controller: _addressCtrl,
-                decoration: InputDecoration(labelText: l10n.address),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                key: const Key('checkout-pincode-field'),
-                controller: _pincodeCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Pincode',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    tooltip: 'Check delivery',
-                    onPressed: () => _lookupDelivery(companies),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
                   ),
                 ),
-                onChanged: (value) {
-                  if (value.trim().length >= 4) {
-                    _lookupDelivery(companies);
-                  }
-                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.person_pin_outlined,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Customer & Delivery Details',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      TextField(
+                        key: const Key('checkout-name-field'),
+                        controller: _nameCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Full Name *',
+                          prefixIcon: Icon(Icons.person_outline),
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('checkout-phone-field'),
+                        controller: _phoneCtrl,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          labelText: 'Mobile Number *',
+                          prefixIcon: Icon(Icons.phone_outlined),
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('checkout-email-field'),
+                        controller: _emailCtrl,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email Address (Optional)',
+                          prefixIcon: Icon(Icons.email_outlined),
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('checkout-address-field'),
+                        controller: _addressCtrl,
+                        decoration: InputDecoration(
+                          labelText: '${l10n.address} *',
+                          prefixIcon: const Icon(Icons.home_outlined),
+                          isDense: true,
+                          border: const OutlineInputBorder(),
+                        ),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('checkout-pincode-field'),
+                        controller: _pincodeCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Pincode *',
+                          prefixIcon: const Icon(Icons.pin_drop_outlined),
+                          isDense: true,
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.search),
+                            tooltip: 'Check delivery',
+                            onPressed: () => _lookupDelivery(companies),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          if (value.trim().length >= 4) {
+                            _lookupDelivery(companies);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -413,6 +552,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.amber.shade700.withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.payments_outlined,
+                      color: Colors.amber.shade900,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Manual / Offline Payment',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: Colors.amber.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Pay directly (Cash/UPI on delivery or pickup). Payment status will default to Pending and can be marked as Done by the admin.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade800,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               FilledButton(
                 key: const Key('checkout-place-order-button'),
@@ -423,7 +608,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         width: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text('${l10n.checkout} · ${formatCurrency(total)}'),
+                    : Text(
+                        _isDirectBuy
+                            ? 'Place Direct Order · ${formatCurrency(total)}'
+                            : 'Confirm & Place Order · ${formatCurrency(total)}',
+                      ),
               ),
               const SizedBox(height: 24),
             ],

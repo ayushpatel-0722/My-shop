@@ -638,8 +638,11 @@ class FirebaseAppRepository implements AppRepository {
     if (doc.exists && doc.data()?['addresses'] is List) {
       list = List.from(doc.data()!['addresses']);
     }
+    final id = address.id.isEmpty ? _uuid.v4() : address.id;
+    final entry = address.copyWith(id: id);
+
     // If setting as default, clear other defaults
-    if (address.isDefault || list.isEmpty) {
+    if (entry.isDefault || list.isEmpty) {
       list = list.map((e) {
         if (e is Map) {
           final m = Map<String, dynamic>.from(e);
@@ -649,7 +652,55 @@ class FirebaseAppRepository implements AppRepository {
         return e;
       }).toList();
     }
-    list.add(address.toMap());
+
+    final existingIndex = list.indexWhere((e) => e is Map && e['id'] == id);
+    if (existingIndex >= 0) {
+      list[existingIndex] = entry.toMap();
+    } else {
+      list.add(entry.toMap());
+    }
+
+    await _db.collection('users').doc(uid).set({
+      'addresses': list,
+    }, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> deleteUserAddress(String userId, String addressId) async {
+    final uid = userId.isNotEmpty ? userId : (_auth.currentUser?.uid ?? '');
+    if (uid.isEmpty) return;
+    final doc = await _db.collection('users').doc(uid).get();
+    if (!doc.exists || doc.data()?['addresses'] is! List) return;
+    List<dynamic> list = List.from(doc.data()!['addresses']);
+    list.removeWhere((e) => e is Map && e['id'] == addressId);
+    if (list.isNotEmpty &&
+        !list.any((e) => e is Map && e['isDefault'] == true)) {
+      if (list.first is Map) {
+        final m = Map<String, dynamic>.from(list.first as Map);
+        m['isDefault'] = true;
+        list[0] = m;
+      }
+    }
+    await _db.collection('users').doc(uid).set({
+      'addresses': list,
+    }, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> setDefaultAddress(String userId, String addressId) async {
+    final uid = userId.isNotEmpty ? userId : (_auth.currentUser?.uid ?? '');
+    if (uid.isEmpty) return;
+    final doc = await _db.collection('users').doc(uid).get();
+    if (!doc.exists || doc.data()?['addresses'] is! List) return;
+    List<dynamic> list = List.from(doc.data()!['addresses']);
+    list = list.map((e) {
+      if (e is Map) {
+        final m = Map<String, dynamic>.from(e);
+        m['isDefault'] = (m['id'] == addressId);
+        return m;
+      }
+      return e;
+    }).toList();
     await _db.collection('users').doc(uid).set({
       'addresses': list,
     }, SetOptions(merge: true));
@@ -867,9 +918,13 @@ class FirebaseAppRepository implements AppRepository {
   // ----------------------------------------------------------------- Reads --
 
   @override
-  Stream<List<Company>> companies() => _companiesCol().snapshots().map(
-    (s) => s.docs.map((d) => Company.fromMap(d.id, _asMap(d.data()))).toList(),
-  );
+  Stream<List<Company>> companies() => _companiesCol()
+      .snapshots()
+      .map(
+        (s) =>
+            s.docs.map((d) => Company.fromMap(d.id, _asMap(d.data()))).toList(),
+      )
+      .asBroadcastStream();
 
   @override
   Future<Company?> company(String id) async {
@@ -888,26 +943,28 @@ class FirebaseAppRepository implements AppRepository {
         ? _categoriesCol(companyId).snapshots()
         : _db.collectionGroup('categories').snapshots();
 
-    return stream.map(
-      (s) => s.docs
-          .map((d) {
-            final map = _asMap(d.data());
-            final parentCompanyId = d.reference.parent.parent?.id ?? '';
-            if ((map['companyId'] == null ||
-                    (map['companyId'] as String).isEmpty) &&
-                parentCompanyId.isNotEmpty) {
-              map['companyId'] = parentCompanyId;
-            }
-            return Category.fromMap(d.id, map);
-          })
-          .where(
-            (c) =>
-                companyId.isEmpty ||
-                c.companyId == companyId ||
-                c.companyId.isEmpty,
-          )
-          .toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs
+              .map((d) {
+                final map = _asMap(d.data());
+                final parentCompanyId = d.reference.parent.parent?.id ?? '';
+                if ((map['companyId'] == null ||
+                        (map['companyId'] as String).isEmpty) &&
+                    parentCompanyId.isNotEmpty) {
+                  map['companyId'] = parentCompanyId;
+                }
+                return Category.fromMap(d.id, map);
+              })
+              .where(
+                (c) =>
+                    companyId.isEmpty ||
+                    c.companyId == companyId ||
+                    c.companyId.isEmpty,
+              )
+              .toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -954,25 +1011,28 @@ class FirebaseAppRepository implements AppRepository {
         ? _productsCol(companyId)
         : _db.collectionGroup('products');
     if (categoryId.isNotEmpty) q = q.where('categoryId', isEqualTo: categoryId);
-    return q.snapshots().map(
-      (s) => s.docs
-          .map((d) {
-            final map = _asMap(d.data());
-            final parentCompanyId = d.reference.parent.parent?.id ?? '';
-            if ((map['companyId'] == null ||
-                    (map['companyId'] as String).isEmpty) &&
-                parentCompanyId.isNotEmpty) {
-              map['companyId'] = parentCompanyId;
-            }
-            return Product.fromMap(d.id, map);
-          })
-          .where(
-            (p) =>
-                search.isEmpty ||
-                p.name.toLowerCase().contains(search.toLowerCase()),
-          )
-          .toList(),
-    );
+    return q
+        .snapshots()
+        .map(
+          (s) => s.docs
+              .map((d) {
+                final map = _asMap(d.data());
+                final parentCompanyId = d.reference.parent.parent?.id ?? '';
+                if ((map['companyId'] == null ||
+                        (map['companyId'] as String).isEmpty) &&
+                    parentCompanyId.isNotEmpty) {
+                  map['companyId'] = parentCompanyId;
+                }
+                return Product.fromMap(d.id, map);
+              })
+              .where(
+                (p) =>
+                    search.isEmpty ||
+                    p.name.toLowerCase().contains(search.toLowerCase()),
+              )
+              .toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1037,7 +1097,8 @@ class FirebaseAppRepository implements AppRepository {
         (s) => s.docs
             .map((d) => AdBanner.fromMap(d.id, _asMap(d.data())))
             .toList(),
-      );
+      )
+      .asBroadcastStream();
 
   @override
   Stream<List<OfferBanner>> offerBanners(String companyId) {
@@ -1046,18 +1107,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _bannersCol(companyId).snapshots()
         : _db.collectionGroup('banners').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return OfferBanner.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return OfferBanner.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1067,18 +1130,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _vouchersCol(companyId).snapshots()
         : _db.collectionGroup('vouchers').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return Voucher.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return Voucher.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1147,18 +1212,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _deliveryChargesCol(companyId).snapshots()
         : _db.collectionGroup('delivery_charges').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return DeliveryCharge.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return DeliveryCharge.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1174,7 +1241,7 @@ class FirebaseAppRepository implements AppRepository {
         orders.add(await _orderFromDoc(doc));
       }
       return orders;
-    });
+    }).asBroadcastStream();
   }
 
   @override
@@ -1188,7 +1255,7 @@ class FirebaseAppRepository implements AppRepository {
 
   @override
   Stream<Order?> watchOrder(String orderId) {
-    final controller = StreamController<Order?>();
+    final controller = StreamController<Order?>.broadcast();
 
     Future<void> emit(DocumentSnapshot<Map<String, dynamic>> snap) async {
       if (!snap.exists) {
@@ -1242,18 +1309,20 @@ class FirebaseAppRepository implements AppRepository {
               .orderBy('createdAt', descending: true)
               .snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return Review.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return Review.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1266,7 +1335,8 @@ class FirebaseAppRepository implements AppRepository {
         (s) => s.docs
             .map((d) => AppNotification.fromMap(d.id, _asMap(d.data())))
             .toList(),
-      );
+      )
+      .asBroadcastStream();
 
   @override
   Stream<List<Employee>> employees(String companyId) {
@@ -1275,18 +1345,20 @@ class FirebaseAppRepository implements AppRepository {
         ? _employeesCol(companyId).snapshots()
         : _db.collectionGroup('employees').snapshots();
 
-    return stream.map(
-      (s) => s.docs.map((d) {
-        final map = _asMap(d.data());
-        final parentCompanyId = d.reference.parent.parent?.id ?? '';
-        if ((map['companyId'] == null ||
-                (map['companyId'] as String).isEmpty) &&
-            parentCompanyId.isNotEmpty) {
-          map['companyId'] = parentCompanyId;
-        }
-        return Employee.fromMap(d.id, map);
-      }).toList(),
-    );
+    return stream
+        .map(
+          (s) => s.docs.map((d) {
+            final map = _asMap(d.data());
+            final parentCompanyId = d.reference.parent.parent?.id ?? '';
+            if ((map['companyId'] == null ||
+                    (map['companyId'] as String).isEmpty) &&
+                parentCompanyId.isNotEmpty) {
+              map['companyId'] = parentCompanyId;
+            }
+            return Employee.fromMap(d.id, map);
+          }).toList(),
+        )
+        .asBroadcastStream();
   }
 
   @override
@@ -1435,6 +1507,9 @@ class FirebaseAppRepository implements AppRepository {
     final orderMap = <String, dynamic>{
       'id': ref.id,
       'userId': order.userId,
+      'customerName': order.customerName,
+      'customerEmail': order.customerEmail,
+      'customerPhone': order.customerPhone,
       'companyId': order.companyId,
       'companyName': order.companyName,
       // Full bill: the receipt must survive later catalogue edits.
@@ -1471,6 +1546,9 @@ class FirebaseAppRepository implements AppRepository {
     return Order(
       id: ref.id,
       userId: order.userId,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone,
       companyId: order.companyId,
       companyName: order.companyName,
       items: order.items,
@@ -1941,6 +2019,14 @@ class FirebaseAppRepository implements AppRepository {
         .collection('delivery_charges')
         .doc(charge.pincode)
         .set(charge.toMap());
+  }
+
+  @override
+  Future<void> deleteDeliveryCharge(String pincode, {String companyId = ''}) {
+    if (companyId.isNotEmpty) {
+      return _deliveryChargesCol(companyId).doc(pincode).delete();
+    }
+    return _db.collection('delivery_charges').doc(pincode).delete();
   }
 
   @override

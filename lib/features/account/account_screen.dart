@@ -6,6 +6,7 @@ import '../../app/routes/app_router.dart';
 import '../../app/theme/app_theme.dart';
 import '../auth/auth_cubit.dart';
 import '../auth/widgets/auth_bottom_sheet.dart';
+import '../marketplace/widgets/location_picker_sheet.dart';
 import '../marketplace/widgets/marketplace_bottom_nav.dart';
 
 /// Full-screen Account/Profile screen with AppBar and MarketplaceBottomNav.
@@ -272,40 +273,49 @@ class AccountScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 14),
-          _sectionHeader(context, 'Portals & Admin'),
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+          if (user != null && (user.isAdmin || user.isEmployee)) ...[
+            const SizedBox(height: 14),
+            _sectionHeader(context, 'Portals & Admin'),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 0,
+              color: Colors.white,
+              child: Column(
+                children: [
+                  if (user.isAdmin)
+                    ListTile(
+                      leading: const Icon(
+                        Icons.admin_panel_settings_outlined,
+                        color: Color(0xFFFF5247),
+                      ),
+                      title: const Text('Admin Dashboard'),
+                      subtitle: const Text(
+                        'Manage products, categories & orders',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.go(AppRoutes.adminLogin),
+                    ),
+                  if (user.isAdmin && user.isEmployee)
+                    const Divider(height: 1, indent: 56),
+                  if (user.isEmployee)
+                    ListTile(
+                      leading: const Icon(
+                        Icons.badge_outlined,
+                        color: Color(0xFF3D38D9),
+                      ),
+                      title: const Text('Employee Portal'),
+                      subtitle: const Text(
+                        'Packing, order queue & fulfillment',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.go(AppRoutes.employeeLogin),
+                    ),
+                ],
+              ),
             ),
-            elevation: 0,
-            color: Colors.white,
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(
-                    Icons.admin_panel_settings_outlined,
-                    color: Color(0xFFFF5247),
-                  ),
-                  title: const Text('Admin Dashboard'),
-                  subtitle: const Text('Manage products, categories & orders'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.go(AppRoutes.adminLogin),
-                ),
-                const Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: const Icon(
-                    Icons.badge_outlined,
-                    color: Color(0xFF3D38D9),
-                  ),
-                  title: const Text('Employee Portal'),
-                  subtitle: const Text('Packing, order queue & fulfillment'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.go(AppRoutes.employeeLogin),
-                ),
-              ],
-            ),
-          ),
+          ],
 
           const SizedBox(height: 14),
           _sectionHeader(context, 'Account Settings'),
@@ -320,19 +330,25 @@ class AccountScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined),
                   title: const Text('Saved Addresses'),
-                  subtitle: user?.defaultAddress != null
-                      ? Text(user!.defaultAddress!.address)
-                      : const Text('Add delivery location'),
+                  subtitle: user != null && user.addresses.isNotEmpty
+                      ? Text(
+                          '${user.defaultAddress?.label ?? 'Default'}: ${user.defaultAddress?.shortLocation ?? user.defaultAddress?.formattedAddress ?? ''} (${user.addresses.length}/3)',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : const Text('Manage delivery locations (0/3)'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+                  onTap: () {
+                    LocationPickerSheet.show(context);
+                  },
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.help_outline),
                   title: const Text('Help & Support'),
-                  subtitle: const Text('Contact customer helpline'),
+                  subtitle: const Text('FAQs, customer helpline & query form'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+                  onTap: () => context.push(AppRoutes.helpSupport),
                 ),
               ],
             ),

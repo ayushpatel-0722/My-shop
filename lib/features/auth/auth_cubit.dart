@@ -54,13 +54,13 @@ class AuthCubit extends Cubit<AuthState> {
   /// know the actor — it skips the (async, platform dependent) session
   /// restore and publishes the user to [AuthSession] straight away.
   AuthCubit.seeded(AppUser user)
-      : super(
-          AuthState(
-            status: AuthStatus.authenticated,
-            user: user,
-            restoring: false,
-          ),
-        ) {
+    : super(
+        AuthState(
+          status: AuthStatus.authenticated,
+          user: user,
+          restoring: false,
+        ),
+      ) {
     AuthSession.set(user, restoring: false);
   }
 
@@ -332,36 +332,107 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  /// Saves a structured address for the currently authenticated user.
+  /// Saves a structured address for the currently authenticated user (or guest active location).
   Future<bool> saveUserAddress(AddressEntry address) async {
     final current = currentUser;
-    if (current == null) return false;
+    if (current == null) {
+      AuthSession.setActiveAddress(address);
+      return true;
+    }
     try {
-      await _repo.saveUserAddress(current.id, address);
+      final id = address.id.isEmpty
+          ? 'addr_${DateTime.now().millisecondsSinceEpoch}'
+          : address.id;
+      final entry = address.copyWith(id: id);
+
+      await _repo.saveUserAddress(current.id, entry);
       final updatedList = List<AddressEntry>.from(current.addresses);
-      if (address.isDefault || updatedList.isEmpty) {
+      if (entry.isDefault || updatedList.isEmpty) {
         for (var i = 0; i < updatedList.length; i++) {
-          final a = updatedList[i];
-          updatedList[i] = AddressEntry(
-            houseNo: a.houseNo,
-            address: a.address,
-            pincode: a.pincode,
-            isDefault: false,
-            label: a.label,
-            lat: a.lat,
-            lng: a.lng,
-          );
+          updatedList[i] = updatedList[i].copyWith(isDefault: false);
         }
       }
-      updatedList.add(address);
+
+      final existingIndex = updatedList.indexWhere((a) => a.id == id);
+      if (existingIndex >= 0) {
+        updatedList[existingIndex] = entry;
+      } else {
+        updatedList.add(entry);
+      }
+
       final updatedUser = current.copyWith(addresses: updatedList);
       AuthSession.set(updatedUser);
+      if (entry.isDefault) {
+        AuthSession.setActiveAddress(entry);
+      }
       await _cache.save(updatedUser);
       emit(AuthState(status: AuthStatus.authenticated, user: updatedUser));
       return true;
     } catch (e) {
       debugPrint('[AuthCubit] saveUserAddress error: $e');
       return false;
+    }
+  }
+
+  /// Deletes a saved address for the current user.
+  Future<bool> deleteUserAddress(String addressId) async {
+    final current = currentUser;
+    if (current == null) return false;
+    try {
+      await _repo.deleteUserAddress(current.id, addressId);
+      final updatedList = List<AddressEntry>.from(current.addresses);
+      updatedList.removeWhere((a) => a.id == addressId);
+      if (updatedList.isNotEmpty && !updatedList.any((a) => a.isDefault)) {
+        updatedList[0] = updatedList[0].copyWith(isDefault: true);
+      }
+      final updatedUser = current.copyWith(addresses: updatedList);
+      AuthSession.set(updatedUser);
+      if (AuthSession.activeAddress?.id == addressId) {
+        AuthSession.setActiveAddress(
+          updatedList.isNotEmpty ? updatedList.first : null,
+        );
+      }
+      await _cache.save(updatedUser);
+      emit(AuthState(status: AuthStatus.authenticated, user: updatedUser));
+      return true;
+    } catch (e) {
+      debugPrint('[AuthCubit] deleteUserAddress error: $e');
+      return false;
+    }
+  }
+
+  /// Sets an address as the default / active delivery address.
+  Future<bool> setDefaultAddress(String addressId) async {
+    final current = currentUser;
+    if (current == null) return false;
+    try {
+      await _repo.setDefaultAddress(current.id, addressId);
+      final updatedList = List<AddressEntry>.from(current.addresses);
+      AddressEntry? defaultAddr;
+      for (var i = 0; i < updatedList.length; i++) {
+        final isDef = updatedList[i].id == addressId;
+        updatedList[i] = updatedList[i].copyWith(isDefault: isDef);
+        if (isDef) defaultAddr = updatedList[i];
+      }
+      final updatedUser = current.copyWith(addresses: updatedList);
+      AuthSession.set(updatedUser);
+      if (defaultAddr != null) {
+        AuthSession.setActiveAddress(defaultAddr);
+      }
+      await _cache.save(updatedUser);
+      emit(AuthState(status: AuthStatus.authenticated, user: updatedUser));
+      return true;
+    } catch (e) {
+      debugPrint('[AuthCubit] setDefaultAddress error: $e');
+      return false;
+    }
+  }
+
+  /// Selects the active delivery address for the current session.
+  void selectActiveAddress(AddressEntry address) {
+    AuthSession.setActiveAddress(address);
+    if (currentUser != null && address.id.isNotEmpty) {
+      setDefaultAddress(address.id);
     }
   }
 

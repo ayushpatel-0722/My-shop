@@ -7,6 +7,7 @@ import '../../../core/models/order.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
 
@@ -41,17 +42,19 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
   String get _companyId => AuthSession.currentUser?.companyId ?? '';
 
-  /// Matches the reference, customer id, pincode, address or any item name.
+  /// Matches the reference, customer name/phone/email, customer id, pincode, address or any item name.
   bool _matches(Order order, String query) {
     if (query.isEmpty) return true;
     final q = query.toLowerCase();
     if (order.id.toLowerCase().contains(q)) return true;
+    if (order.customerName.toLowerCase().contains(q)) return true;
+    if (order.customerPhone.toLowerCase().contains(q)) return true;
+    if (order.customerEmail.toLowerCase().contains(q)) return true;
     if (order.pincode.toLowerCase().contains(q)) return true;
     if (order.address.toLowerCase().contains(q)) return true;
     if (order.userId.toLowerCase().contains(q)) return true;
     if (order.companyName.toLowerCase().contains(q)) return true;
-    return order.items
-        .any((item) => item.name.toLowerCase().contains(q));
+    return order.items.any((item) => item.name.toLowerCase().contains(q));
   }
 
   @override
@@ -107,13 +110,18 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
                 if (snap.connectionState == ConnectionState.waiting &&
                     all.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    itemCount: 4,
+                    itemBuilder: (_, _) => const M3OrderCardSkeleton(),
+                  );
                 }
                 if (all.isEmpty) {
                   return const _CenteredMessage(
                     icon: Icons.receipt_long_outlined,
                     message: 'No orders yet',
-                    detail: 'Orders from your store will appear here instantly.',
+                    detail:
+                        'Orders from your store will appear here instantly.',
                   );
                 }
                 if (visible.isEmpty) {
@@ -374,6 +382,46 @@ class _OrderCard extends StatelessWidget {
                 DateFormat('dd MMM, hh:mm a').format(order.createdAt!),
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
+            if (order.customerName.isNotEmpty ||
+                order.customerPhone.isNotEmpty ||
+                order.customerEmail.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.4,
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.person_outline,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '${order.customerName.isNotEmpty ? order.customerName : "Customer"}'
+                        '${order.customerPhone.isNotEmpty ? " · ${order.customerPhone}" : ""}'
+                        '${order.customerEmail.isNotEmpty ? " (${order.customerEmail})" : ""}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (order.address.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
@@ -386,13 +434,44 @@ class _OrderCard extends StatelessWidget {
             const SizedBox(height: 8),
             _BillBreakdown(order: order),
             const Divider(height: 16),
-            SwitchListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Paid', style: TextStyle(fontSize: 13)),
-              value: order.isPaid,
-              onChanged: (_) => repo.togglePaymentStatus(order.id),
+            Container(
+              decoration: BoxDecoration(
+                color: order.isPaid
+                    ? Colors.green.withValues(alpha: 0.08)
+                    : Colors.orange.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: order.isPaid
+                      ? Colors.green.withValues(alpha: 0.3)
+                      : Colors.orange.withValues(alpha: 0.3),
+                ),
+              ),
+              child: SwitchListTile(
+                dense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                title: Text(
+                  order.isPaid
+                      ? 'Payment: Done (Received)'
+                      : 'Payment: Pending (Manual / Offline)',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: order.isPaid
+                        ? Colors.green.shade800
+                        : Colors.orange.shade900,
+                  ),
+                ),
+                subtitle: Text(
+                  order.isPaid
+                      ? 'Payment confirmed by store'
+                      : 'Customer will pay offline. Toggle to mark as Done.',
+                  style: const TextStyle(fontSize: 11),
+                ),
+                value: order.isPaid,
+                onChanged: (_) => repo.togglePaymentStatus(order.id),
+              ),
             ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 if (next != null)
@@ -436,9 +515,9 @@ class _OrderCard extends StatelessWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not update order: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not update order: $e')));
     }
   }
 
@@ -472,9 +551,9 @@ class _OrderCard extends StatelessWidget {
       await repo.cancelOrder(order.id);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not cancel order: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not cancel order: $e')));
     }
   }
 }
@@ -490,9 +569,9 @@ class _BillBreakdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.4,
-            ),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
