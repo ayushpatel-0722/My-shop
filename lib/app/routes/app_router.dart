@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 
+import '../../core/models/cart_item.dart';
 import '../../core/models/category.dart';
+import '../../core/models/delivery_charge.dart';
 import '../../core/models/employee.dart';
 import '../../core/models/product.dart';
 import '../../core/services/auth_session.dart';
@@ -10,6 +12,7 @@ import '../../features/admin/banners/admin_banners_screen.dart';
 import '../../features/admin/categories/admin_add_category_screen.dart';
 import '../../features/admin/categories/admin_categories_screen.dart';
 import '../../features/admin/dashboard/admin_dashboard_screen.dart';
+import '../../features/admin/delivery_charges/admin_add_delivery_charge_screen.dart';
 import '../../features/admin/delivery_charges/admin_delivery_charges_screen.dart';
 import '../../features/admin/employees/admin_add_employee_screen.dart';
 import '../../features/admin/employees/admin_employees_screen.dart';
@@ -37,6 +40,8 @@ import '../../features/marketplace/categories/categories_screen.dart';
 import '../../features/marketplace/category_view/category_view_screen.dart';
 import '../../features/marketplace/company_store/company_store_screen.dart';
 import '../../features/marketplace/home/home_screen.dart';
+import '../../features/help_support/contact_support_screen.dart';
+import '../../features/help_support/help_support_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/account/account_screen.dart';
 import '../../features/product/details/product_details_screen.dart';
@@ -60,6 +65,8 @@ class AppRoutes {
   static const home = '/home';
   static const categories = '/categories';
   static const account = '/account';
+  static const helpSupport = '/help-support';
+  static const contactSupport = '/contact-support';
   static const companyStore = '/company/:slug';
   static const category = '/category/:id';
   static const product = '/product/:id';
@@ -86,6 +93,8 @@ class AppRoutes {
   static const adminEditEmployee = '/admin/employees/edit/:id';
   static const adminAdmins = '/admin/admins';
   static const adminDelivery = '/admin/delivery-charges';
+  static const adminAddDelivery = '/admin/delivery-charges/add';
+  static const adminEditDelivery = '/admin/delivery-charges/edit/:pincode';
   static const adminBanners = '/admin/banners';
   static const adminReviews = '/admin/reviews';
   static const adminRecommendations = '/admin/recommendations';
@@ -104,6 +113,8 @@ class AppRoutes {
   static String adminEditCategoryPath(String id) =>
       '/admin/categories/edit/$id';
   static String adminEditEmployeePath(String id) => '/admin/employees/edit/$id';
+  static String adminEditDeliveryPath(String pincode) =>
+      '/admin/delivery-charges/edit/$pincode';
   static String orderPath(String id) => '/order/$id';
 }
 
@@ -275,10 +286,32 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: AppRoutes.cart, builder: (_, s) => const CartScreen()),
     GoRoute(
       path: AppRoutes.checkout,
-      builder: (_, s) => const CheckoutScreen(),
+      builder: (_, state) {
+        final extra = state.extra;
+        List<CartItem>? directItems;
+        if (extra is List<CartItem>) {
+          directItems = extra;
+        } else if (extra is CartItem) {
+          directItems = [extra];
+        }
+        return CheckoutScreen(directItems: directItems);
+      },
     ),
     GoRoute(path: AppRoutes.orders, builder: (_, s) => const OrdersScreen()),
     GoRoute(path: AppRoutes.account, builder: (_, s) => const AccountScreen()),
+    GoRoute(
+      path: AppRoutes.helpSupport,
+      builder: (_, s) => const HelpSupportScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.contactSupport,
+      builder: (_, state) {
+        return ContactSupportScreen(
+          initialCategory: state.uri.queryParameters['category'],
+          initialOrderId: state.uri.queryParameters['orderId'],
+        );
+      },
+    ),
     GoRoute(
       path: AppRoutes.orderTracking,
       builder: (_, state) =>
@@ -381,6 +414,27 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.adminDelivery,
       builder: (_, s) => const AdminDeliveryChargesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.adminAddDelivery,
+      builder: (_, state) => AdminAddDeliveryChargeScreen(
+        deliveryCharge: state.extra is DeliveryCharge
+            ? state.extra as DeliveryCharge
+            : null,
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.adminEditDelivery,
+      builder: (_, state) {
+        final pincode = state.pathParameters['pincode'];
+        final charge = state.extra is DeliveryCharge
+            ? state.extra as DeliveryCharge
+            : null;
+        return AdminAddDeliveryChargeScreen(
+          deliveryCharge: charge,
+          pincode: pincode,
+        );
+      },
     ),
     GoRoute(
       path: AppRoutes.adminBanners,

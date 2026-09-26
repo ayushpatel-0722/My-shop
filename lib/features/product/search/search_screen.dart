@@ -6,6 +6,7 @@ import '../../../app/routes/app_router.dart';
 import '../../../core/domain/catalog.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../../marketplace/widgets/product_card.dart';
 
 /// Interactive keyword product search screen.
@@ -133,6 +134,16 @@ class _SearchScreenState extends State<SearchScreen> {
       body: StreamBuilder<List<Product>>(
         stream: repo.products(companyId: widget.companyId),
         builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting &&
+              !snap.hasData) {
+            return const SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: M3ProductGridSkeleton(itemCount: 6),
+              ),
+            );
+          }
+
           final allProducts = snap.data ?? const <Product>[];
 
           if (_query.isEmpty) {

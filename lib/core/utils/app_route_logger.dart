@@ -30,6 +30,8 @@ class AppRouteLogger extends NavigatorObserver {
     '/admin/employees/edit/:id': 'AdminAddEmployeeScreen',
     '/admin/admins': 'AdminAdminsScreen',
     '/admin/delivery-charges': 'AdminDeliveryChargesScreen',
+    '/admin/delivery-charges/add': 'AdminAddDeliveryChargeScreen',
+    '/admin/delivery-charges/edit/:pincode': 'AdminAddDeliveryChargeScreen',
     '/admin/banners': 'AdminBannersScreen',
     '/admin/reviews': 'AdminReviewsScreen',
     '/admin/recommendations': 'AdminRecommendationsScreen',

@@ -638,8 +638,11 @@ class FirebaseAppRepository implements AppRepository {
     if (doc.exists && doc.data()?['addresses'] is List) {
       list = List.from(doc.data()!['addresses']);
     }
+    final id = address.id.isEmpty ? _uuid.v4() : address.id;
+    final entry = address.copyWith(id: id);
+
     // If setting as default, clear other defaults
-    if (address.isDefault || list.isEmpty) {
+    if (entry.isDefault || list.isEmpty) {
       list = list.map((e) {
         if (e is Map) {
           final m = Map<String, dynamic>.from(e);
@@ -649,7 +652,55 @@ class FirebaseAppRepository implements AppRepository {
         return e;
       }).toList();
     }
-    list.add(address.toMap());
+
+    final existingIndex = list.indexWhere((e) => e is Map && e['id'] == id);
+    if (existingIndex >= 0) {
+      list[existingIndex] = entry.toMap();
+    } else {
+      list.add(entry.toMap());
+    }
+
+    await _db.collection('users').doc(uid).set({
+      'addresses': list,
+    }, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> deleteUserAddress(String userId, String addressId) async {
+    final uid = userId.isNotEmpty ? userId : (_auth.currentUser?.uid ?? '');
+    if (uid.isEmpty) return;
+    final doc = await _db.collection('users').doc(uid).get();
+    if (!doc.exists || doc.data()?['addresses'] is! List) return;
+    List<dynamic> list = List.from(doc.data()!['addresses']);
+    list.removeWhere((e) => e is Map && e['id'] == addressId);
+    if (list.isNotEmpty &&
+        !list.any((e) => e is Map && e['isDefault'] == true)) {
+      if (list.first is Map) {
+        final m = Map<String, dynamic>.from(list.first as Map);
+        m['isDefault'] = true;
+        list[0] = m;
+      }
+    }
+    await _db.collection('users').doc(uid).set({
+      'addresses': list,
+    }, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> setDefaultAddress(String userId, String addressId) async {
+    final uid = userId.isNotEmpty ? userId : (_auth.currentUser?.uid ?? '');
+    if (uid.isEmpty) return;
+    final doc = await _db.collection('users').doc(uid).get();
+    if (!doc.exists || doc.data()?['addresses'] is! List) return;
+    List<dynamic> list = List.from(doc.data()!['addresses']);
+    list = list.map((e) {
+      if (e is Map) {
+        final m = Map<String, dynamic>.from(e);
+        m['isDefault'] = (m['id'] == addressId);
+        return m;
+      }
+      return e;
+    }).toList();
     await _db.collection('users').doc(uid).set({
       'addresses': list,
     }, SetOptions(merge: true));
@@ -1456,6 +1507,9 @@ class FirebaseAppRepository implements AppRepository {
     final orderMap = <String, dynamic>{
       'id': ref.id,
       'userId': order.userId,
+      'customerName': order.customerName,
+      'customerEmail': order.customerEmail,
+      'customerPhone': order.customerPhone,
       'companyId': order.companyId,
       'companyName': order.companyName,
       // Full bill: the receipt must survive later catalogue edits.
@@ -1492,6 +1546,9 @@ class FirebaseAppRepository implements AppRepository {
     return Order(
       id: ref.id,
       userId: order.userId,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone,
       companyId: order.companyId,
       companyName: order.companyName,
       items: order.items,
@@ -1962,6 +2019,14 @@ class FirebaseAppRepository implements AppRepository {
         .collection('delivery_charges')
         .doc(charge.pincode)
         .set(charge.toMap());
+  }
+
+  @override
+  Future<void> deleteDeliveryCharge(String pincode, {String companyId = ''}) {
+    if (companyId.isNotEmpty) {
+      return _deliveryChargesCol(companyId).doc(pincode).delete();
+    }
+    return _db.collection('delivery_charges').doc(pincode).delete();
   }
 
   @override

@@ -55,6 +55,8 @@ abstract class AppRepository {
   });
   Future<void> updateUserMobile(String userId, String mobileNumber);
   Future<void> saveUserAddress(String userId, AddressEntry address);
+  Future<void> deleteUserAddress(String userId, String addressId);
+  Future<void> setDefaultAddress(String userId, String addressId);
   Future<Company> createCompany(Company company);
   Future<Admin> createAdminAccount(Admin admin, {required String password});
   Future<Employee> createEmployeeAccount(
@@ -82,6 +84,7 @@ abstract class AppRepository {
   Stream<List<AdBanner>> adBanners();
   Stream<List<OfferBanner>> offerBanners(String companyId);
   Stream<List<Voucher>> vouchers(String companyId);
+
   /// Case-insensitive lookup of a live voucher code inside [companyId].
   Future<Voucher?> voucherByCode(String companyId, String code);
   Future<DeliveryCharge?> deliveryCharge(String pincode, String companyId);
@@ -146,6 +149,7 @@ abstract class AppRepository {
   Future<void> saveEmployee(Employee employee);
   Future<void> deleteEmployee(String companyId, String employeeId);
   Future<void> saveDeliveryCharge(DeliveryCharge charge);
+  Future<void> deleteDeliveryCharge(String pincode, {String companyId = ''});
   Future<void> importDeliveryCharges(List<DeliveryCharge> charges);
   Future<void> setReviewVisibility(String reviewId, bool visible);
   Future<void> saveRecommendation(Recommendation rec);

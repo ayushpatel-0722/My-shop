@@ -24,9 +24,16 @@ class CartItem {
   double get lineTotal => effectivePrice * qty;
 
   /// Unique identifier key for cart grouping and item management.
-  String get cartKey => variant != null && variant!.sku.isNotEmpty
-      ? '${product.id}_${variant!.sku}'
-      : product.id;
+  String get cartKey {
+    if (variant != null) {
+      if (variant!.sku.isNotEmpty) return '${product.id}_${variant!.sku}';
+      if (variant!.title.isNotEmpty) return '${product.id}_${variant!.title}';
+      if (variant!.size.isNotEmpty || variant!.color.isNotEmpty) {
+        return '${product.id}_${variant!.size}_${variant!.color}';
+      }
+    }
+    return product.id;
+  }
 
   String get displayName => variant != null && variant!.title.isNotEmpty
       ? '${product.name} (${variant!.title})'

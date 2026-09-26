@@ -251,14 +251,19 @@ class _CartLineCard extends StatelessWidget {
     final cubit = context.read<CartCubit>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final variantSku = item.variant?.sku ?? '';
+    final variantTitle = item.variant?.title ?? '';
     final canAdd = item.qty < item.maxQty;
     final stockWarning = item.stockWarningLabel();
     final hasImage =
         item.product.images.isNotEmpty &&
         item.product.images.first.trim().isNotEmpty;
 
-    void removeLine() =>
-        cubit.remove(companyId, item.product.id, variantSku: variantSku);
+    void removeLine() => cubit.remove(
+      companyId,
+      item.product.id,
+      variantSku: variantSku,
+      variantTitle: variantTitle,
+    );
 
     return Dismissible(
       key: Key('cart-line-${item.cartKey}'),
@@ -415,11 +420,13 @@ class _CartLineCard extends StatelessWidget {
                           companyId,
                           item.product.id,
                           variantSku: variantSku,
+                          variantTitle: variantTitle,
                         ),
                         onAdd: () => cubit.increment(
                           companyId,
                           item.product.id,
                           variantSku: variantSku,
+                          variantTitle: variantTitle,
                         ),
                       ),
                       if (stockWarning != null) ...[

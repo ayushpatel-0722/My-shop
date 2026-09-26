@@ -12,6 +12,7 @@ import '../../../core/models/company.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
@@ -66,8 +67,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     builder: (context, snap) {
                       if (snap.connectionState == ConnectionState.waiting &&
                           (snap.data?.isEmpty ?? true)) {
-                        return const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                        return ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                          itemCount: 4,
+                          itemBuilder: (_, _) => const M3OrderCardSkeleton(),
                         );
                       }
                       final all = snap.data ?? const <Order>[];
@@ -274,8 +277,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
-                            color:
-                                isDark ? Colors.white : const Color(0xFF1E2229),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1E2229),
                           ),
                         ),
                       ),
@@ -320,14 +324,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           key: Key('order-progress-${order.id}'),
                           value: OrderEta.progress(order.orderStatus),
                           minHeight: 4,
-                          backgroundColor:
-                              isDark ? AppTheme.borderDark : const Color(0xFFF3F4F6),
+                          backgroundColor: isDark
+                              ? AppTheme.borderDark
+                              : const Color(0xFFF3F4F6),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             order.isCancelled
                                 ? const Color(0xFFDC2626)
                                 : order.isCompleted
-                                    ? const Color(0xFF1E8F66)
-                                    : const Color(0xFFFF5247),
+                                ? const Color(0xFF1E8F66)
+                                : const Color(0xFFFF5247),
                           ),
                         ),
                       ),
@@ -350,8 +355,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color:
-                              isDark ? Colors.white : const Color(0xFF1E2229),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF1E2229),
                         ),
                       ),
                       const Spacer(),
@@ -412,8 +418,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             TextButton.icon(
               icon: const Icon(Icons.info_outline, size: 16),
               label: const Text('Track order'),
-              onPressed: () =>
-                  context.push(AppRoutes.orderPath(order.id)),
+              onPressed: () => context.push(AppRoutes.orderPath(order.id)),
             ),
           const Spacer(),
 
@@ -461,7 +466,9 @@ class _StoreAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasLogo = logoUrl.trim().isNotEmpty;
-    final initial = name.trim().isNotEmpty ? name.trim().substring(0, 1).toUpperCase() : 'S';
+    final initial = name.trim().isNotEmpty
+        ? name.trim().substring(0, 1).toUpperCase()
+        : 'S';
     return CircleAvatar(
       radius: 14,
       backgroundColor: const Color(0xFFFFEBEA),
@@ -630,11 +637,7 @@ class _ReorderButton extends StatelessWidget {
             shape: BoxShape.circle,
             color: Color(0xFFFFEBEA),
           ),
-          child: const Icon(
-            Icons.refresh,
-            size: 16,
-            color: Color(0xFFB3261E),
-          ),
+          child: const Icon(Icons.refresh, size: 16, color: Color(0xFFB3261E)),
         ),
       ),
     );
@@ -653,8 +656,7 @@ class _ReorderButton extends StatelessWidget {
       }
       final variant = line.variantSku.isEmpty
           ? null
-          : product.variants
-                .firstWhereOrNull((v) => v.sku == line.variantSku);
+          : product.variants.firstWhereOrNull((v) => v.sku == line.variantSku);
       cart.add(
         product,
         variant: variant,

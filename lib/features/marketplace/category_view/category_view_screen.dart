@@ -10,6 +10,7 @@ import '../../../core/models/category.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/product_card.dart';
@@ -247,7 +248,12 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                   // Products Grid / Empty state / Loading
                   Expanded(
                     child: loading
-                        ? const Center(child: CircularProgressIndicator())
+                        ? const SingleChildScrollView(
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 12),
+                              child: M3ProductGridSkeleton(itemCount: 6),
+                            ),
+                          )
                         : products.isEmpty
                         ? _EmptyCategory(
                             categoryName: widget.categoryName,

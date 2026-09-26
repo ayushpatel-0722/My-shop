@@ -144,6 +144,9 @@ class OrderItem {
 class Order {
   final String id;
   final String userId;
+  final String customerName;
+  final String customerEmail;
+  final String customerPhone;
   final String companyId;
   final String companyName;
   final List<OrderItem> items;
@@ -180,6 +183,9 @@ class Order {
   Order({
     required this.id,
     required this.userId,
+    this.customerName = '',
+    this.customerEmail = '',
+    this.customerPhone = '',
     required this.companyId,
     this.companyName = '',
     this.items = const <OrderItem>[],
@@ -244,6 +250,9 @@ class Order {
     return Order(
       id: id,
       userId: asString(map['userId']),
+      customerName: asString(map['customerName']),
+      customerEmail: asString(map['customerEmail']),
+      customerPhone: asString(map['customerPhone']),
       companyId: asString(map['companyId']),
       companyName: asString(map['companyName']),
       items: items,
@@ -293,6 +302,9 @@ class Order {
   Map<String, dynamic> toMap() => <String, dynamic>{
     'id': id,
     'userId': userId,
+    'customerName': customerName,
+    'customerEmail': customerEmail,
+    'customerPhone': customerPhone,
     'companyId': companyId,
     'companyName': companyName,
     'items': items.map((e) => e.toMap()).toList(),
@@ -319,6 +331,9 @@ class Order {
 
   Order copyWith({
     String? id,
+    String? customerName,
+    String? customerEmail,
+    String? customerPhone,
     String? orderStatus,
     String? paymentStatus,
     String? assignedEmployeeId,
@@ -340,6 +355,9 @@ class Order {
   }) => Order(
     id: id ?? this.id,
     userId: userId,
+    customerName: customerName ?? this.customerName,
+    customerEmail: customerEmail ?? this.customerEmail,
+    customerPhone: customerPhone ?? this.customerPhone,
     companyId: companyId,
     companyName: companyName ?? this.companyName,
     items: items,
@@ -367,6 +385,9 @@ class Order {
   Order copyWithItems(List<OrderItem> newItems, {double? subtotal}) => Order(
     id: id,
     userId: userId,
+    customerName: customerName,
+    customerEmail: customerEmail,
+    customerPhone: customerPhone,
     companyId: companyId,
     companyName: companyName,
     items: newItems,

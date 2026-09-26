@@ -33,6 +33,7 @@ class AppUser {
   bool get isAdmin => role == 'admin';
   bool get isEmployee => role == 'employee';
   bool get isUser => role == 'user';
+  String get phone => mobileNumber;
 
   /// Primary or default address for delivery
   AddressEntry? get defaultAddress {

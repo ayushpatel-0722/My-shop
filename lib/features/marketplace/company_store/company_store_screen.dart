@@ -20,9 +20,11 @@ import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/common_carousel.dart';
+import '../widgets/location_picker_sheet.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/product_card.dart';
 
@@ -152,9 +154,37 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   @override
   Widget build(BuildContext context) {
     if (_company == null) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: BackButton(
+            color: const Color(0xFF1E2229),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(AppRoutes.home);
+              }
+            },
+          ),
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                SizedBox(height: 12),
+                M3BannerSkeleton(),
+                SizedBox(height: 18),
+                M3CategoryRailSkeleton(),
+                SizedBox(height: 18),
+                M3ProductGridSkeleton(itemCount: 4),
+              ],
+            ),
+          ),
+        ),
       );
     }
     final company = _company!;
@@ -166,6 +196,24 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       body: StreamBuilder<List<Product>>(
         stream: repo.products(companyId: company.id),
         builder: (context, productSnap) {
+          if (productSnap.connectionState == ConnectionState.waiting &&
+              !productSnap.hasData) {
+            return SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    SizedBox(height: 12),
+                    M3BannerSkeleton(),
+                    SizedBox(height: 18),
+                    M3CategoryRailSkeleton(),
+                    SizedBox(height: 18),
+                    M3ProductGridSkeleton(itemCount: 4),
+                  ],
+                ),
+              ),
+            );
+          }
           final allProducts = productSnap.data ?? const <Product>[];
           return StreamBuilder<List<Category>>(
             stream: repo.categories(companyId: company.id),
@@ -1048,13 +1096,13 @@ class _ShopDetailsBlock extends StatelessWidget {
         // Delivery / Service info pill (Left-Aligned).
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
-          child: _buildDeliveryInfoPill(company),
+          child: _buildDeliveryInfoPill(context, company),
         ),
       ],
     );
   }
 
-  Widget _buildDeliveryInfoPill(Company company) {
+  Widget _buildDeliveryInfoPill(BuildContext context, Company company) {
     final symbol = company.currencySymbol;
     final hasMinOrder = company.minOrderAmount > 0;
     final minOrderFormatted = formatCurrency(
@@ -1088,26 +1136,36 @@ class _ShopDetailsBlock extends StatelessWidget {
       label = 'Storefront service';
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: iconColor, size: 16),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF334155),
+    return InkWell(
+      onTap: () => LocationPickerSheet.show(context, company: company),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: iconColor, size: 16),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF334155),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.keyboard_arrow_down,
+              size: 14,
+              color: Color(0xFF64748B),
+            ),
+          ],
+        ),
       ),
     );
   }

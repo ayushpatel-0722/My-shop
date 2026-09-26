@@ -51,8 +51,13 @@ class Customer {
 }
 
 class AddressEntry {
+  final String id;
+  final String name;
+  final String phone;
   final String houseNo;
   final String address;
+  final String city;
+  final String state;
   final String pincode;
   final bool isDefault;
   final String label;
@@ -60,8 +65,13 @@ class AddressEntry {
   final double lng;
 
   const AddressEntry({
+    this.id = '',
+    this.name = '',
+    this.phone = '',
     this.houseNo = '',
     this.address = '',
+    this.city = '',
+    this.state = '',
     this.pincode = '',
     this.isDefault = false,
     this.label = 'Home',
@@ -72,33 +82,85 @@ class AddressEntry {
   /// Backwards compatibility for line1
   String get line1 => formattedAddress;
 
-  /// Returns full formatted string e.g. "Flat 102, Green Valley, 380001"
+  /// Returns full formatted string e.g. "Flat 102, Green Valley, Ahmedabad, Gujarat 380001"
   String get formattedAddress {
     final parts = [
       if (houseNo.trim().isNotEmpty) houseNo.trim(),
       if (address.trim().isNotEmpty) address.trim(),
+      if (city.trim().isNotEmpty) city.trim(),
+      if (state.trim().isNotEmpty) state.trim(),
       if (pincode.trim().isNotEmpty) pincode.trim(),
     ];
-    return parts.join(', ');
+    return parts.isEmpty ? 'Ahmedabad, Gujarat' : parts.join(', ');
   }
+
+  /// Returns short summary e.g. "Green Valley, Ahmedabad" or "Ahmedabad - 380001"
+  String get shortLocation {
+    final area = address.trim();
+    final c = city.trim();
+    final pin = pincode.trim();
+    if (area.isNotEmpty && c.isNotEmpty) return '$area, $c';
+    if (area.isNotEmpty) return area;
+    if (c.isNotEmpty && pin.isNotEmpty) return '$c - $pin';
+    if (c.isNotEmpty) return c;
+    return formattedAddress;
+  }
+
+  AddressEntry copyWith({
+    String? id,
+    String? name,
+    String? phone,
+    String? houseNo,
+    String? address,
+    String? city,
+    String? state,
+    String? pincode,
+    bool? isDefault,
+    String? label,
+    double? lat,
+    double? lng,
+  }) => AddressEntry(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    phone: phone ?? this.phone,
+    houseNo: houseNo ?? this.houseNo,
+    address: address ?? this.address,
+    city: city ?? this.city,
+    state: state ?? this.state,
+    pincode: pincode ?? this.pincode,
+    isDefault: isDefault ?? this.isDefault,
+    label: label ?? this.label,
+    lat: lat ?? this.lat,
+    lng: lng ?? this.lng,
+  );
 
   factory AddressEntry.fromMap(Map<String, dynamic> map) {
     final legacyLine1 = map['line1'] as String? ?? '';
     final rawAddress = map['address'] as String? ?? legacyLine1;
     return AddressEntry(
-      houseNo: map['houseNo'] ?? '',
+      id: map['id']?.toString() ?? '',
+      name: map['name']?.toString() ?? '',
+      phone: map['phone']?.toString() ?? '',
+      houseNo: map['houseNo']?.toString() ?? '',
       address: rawAddress,
-      pincode: map['pincode'] ?? '',
-      isDefault: map['isDefault'] ?? false,
-      label: map['label'] ?? 'Home',
+      city: map['city']?.toString() ?? '',
+      state: map['state']?.toString() ?? '',
+      pincode: map['pincode']?.toString() ?? '',
+      isDefault: map['isDefault'] == true,
+      label: map['label']?.toString() ?? 'Home',
       lat: (map['lat'] ?? 0).toDouble(),
       lng: (map['lng'] ?? 0).toDouble(),
     );
   }
 
   Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'phone': phone,
     'houseNo': houseNo,
     'address': address,
+    'city': city,
+    'state': state,
     'line1': formattedAddress,
     'pincode': pincode,
     'isDefault': isDefault,

@@ -30,6 +30,23 @@ class AuthSession with ChangeNotifier {
     hasCompletedInitialBoot = true;
   }
 
+  static AddressEntry? _guestActiveAddress;
+  static AddressEntry? _selectedAddress;
+
+  static AddressEntry? get activeAddress {
+    if (_selectedAddress != null) return _selectedAddress;
+    if (currentUser != null && currentUser!.addresses.isNotEmpty) {
+      return currentUser!.defaultAddress;
+    }
+    return _guestActiveAddress;
+  }
+
+  static void setActiveAddress(AddressEntry? address) {
+    _selectedAddress = address;
+    _guestActiveAddress = address;
+    instance.notifyListeners();
+  }
+
   static bool get isAdmin => currentUser?.isAdmin ?? false;
   static bool get isEmployee => currentUser?.isEmployee ?? false;
   static bool get isUser => currentUser?.isUser ?? false;

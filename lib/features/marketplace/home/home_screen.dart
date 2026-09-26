@@ -17,6 +17,7 @@ import '../../../core/services/service_locator.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
+import '../widgets/location_picker_sheet.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/product_card.dart';
 import '../widgets/section_header.dart';
@@ -141,6 +142,19 @@ class _HomeScreenState extends State<HomeScreen> {
   // Top Header with Location, Actions, and Search Bar
   // ---------------------------------------------------------------------------
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
+    final activeAddress = AuthSession.activeAddress;
+    final deliverToTitle =
+        activeAddress != null && activeAddress.name.isNotEmpty
+        ? 'Deliver to ${activeAddress.name}'
+        : activeAddress != null && activeAddress.label.isNotEmpty
+        ? 'Deliver to ${activeAddress.label}'
+        : 'Deliver to';
+    final deliverToAddress = activeAddress != null
+        ? (activeAddress.shortLocation.isNotEmpty
+              ? activeAddress.shortLocation
+              : activeAddress.formattedAddress)
+        : 'Ahmedabad, Gujarat 380001';
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -172,13 +186,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: InkWell(
                       onTap: () => _showLocationPicker(context),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Deliver to',
-                            style: TextStyle(
+                            deliverToTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               color: Color(0xFFFFDAD6),
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
@@ -188,17 +204,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Flexible(
                                 child: Text(
-                                  '12 Market Street, Ahmedabad',
+                                  deliverToAddress,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
-                              Icon(
+                              const Icon(
                                 Icons.keyboard_arrow_down,
                                 color: Colors.white,
                                 size: 16,
@@ -774,7 +790,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _vouchersRailContent(List<Voucher> list) {
     return SizedBox(
-      height: 72,
+      height: 94,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -785,18 +801,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _voucherCard(BuildContext context, Voucher v) {
+  Widget _voucherCard(BuildContext context, Voucher v, {bool isSheet = false}) {
     final isClaimed = _claimedVouchers.contains(v.id);
     final discountStr = v.discountLabel;
 
     return Container(
-      width: 210,
-      padding: const EdgeInsets.all(10),
+      width: isSheet ? double.infinity : 275,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isClaimed ? const Color(0xFF1E8F66) : const Color(0xFFFFD6D3),
+          color: isClaimed
+              ? const Color(0xFF1E8F66).withValues(alpha: 0.5)
+              : const Color(0xFFFFD6D3),
           width: 1.2,
         ),
         boxShadow: const [
@@ -809,16 +827,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
+          // Left Ticket Badge
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: isClaimed
-                  ? const Color(0xFFE8F5E9)
+                  ? const Color(0xFFEFFAF5)
                   : const Color(0xFFFFEBEA),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-              Icons.local_offer,
+              Icons.confirmation_number_outlined,
               color: isClaimed
                   ? const Color(0xFF1E8F66)
                   : const Color(0xFFFF5247),
@@ -826,10 +846,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(width: 10),
+
+          // Center Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   discountStr,
@@ -837,51 +860,124 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                     color: Color(0xFF1E2229),
+                    height: 1.2,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 3),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isClaimed
+                            ? const Color(0xFFEFFAF5)
+                            : const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isClaimed
+                              ? const Color(0xFF1E8F66).withValues(alpha: 0.3)
+                              : const Color(0xFFE5E7EB),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        v.code,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isClaimed
+                              ? const Color(0xFF1E8F66)
+                              : const Color(0xFFFF5247),
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
                 Text(
-                  v.code,
+                  v.minOrderAmt > 0
+                      ? 'Min order ₹${v.minOrderAmt.toStringAsFixed(0)}'
+                      : (v.firstTimeOnly
+                            ? 'First order only'
+                            : 'On all orders'),
                   style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFFFF5247),
-                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                    color: Color(0xFF6B7280),
+                    fontWeight: FontWeight.w500,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (v.minOrderAmt > 0)
-                  Text(
-                    'Min ₹${v.minOrderAmt.toStringAsFixed(0)}',
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
-                  ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
+
+          // Right Claim / Copy Action
           InkWell(
             onTap: () {
               setState(() => _claimedVouchers.add(v.id));
               Clipboard.setData(ClipboardData(text: v.code));
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Coupon ${v.code} claimed & copied!'),
+                  content: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text('Coupon ${v.code} copied! Apply at checkout'),
+                    ],
+                  ),
                   backgroundColor: const Color(0xFF1E8F66),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   duration: const Duration(seconds: 2),
                 ),
               );
             },
+            borderRadius: BorderRadius.circular(20),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: isClaimed
-                    ? const Color(0xFF1E8F66)
+                    ? const Color(0xFFEFFAF5)
                     : const Color(0xFFFF5247),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(20),
+                border: isClaimed
+                    ? Border.all(color: const Color(0xFF1E8F66))
+                    : null,
               ),
-              child: Text(
-                isClaimed ? 'CLAIMED' : 'CLAIM',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isClaimed ? Icons.check : Icons.copy_rounded,
+                    size: 12,
+                    color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isClaimed ? 'COPIED' : 'COPY',
+                    style: TextStyle(
+                      color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -1220,42 +1316,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // ---------------------------------------------------------------------------
   // Action Modals (Location, Vouchers Sheet, Mobile Prompt)
   // ---------------------------------------------------------------------------
-  void _showLocationPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Select Delivery Location',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.my_location, color: Color(0xFFFF5247)),
-              title: const Text('Use Current Location'),
-              subtitle: const Text('Ahmedabad, Gujarat'),
-              onTap: () => Navigator.pop(ctx),
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.home_outlined,
-                color: Color(0xFF3D38D9),
-              ),
-              title: const Text('Home: 12 Market Street'),
-              subtitle: const Text('Ahmedabad, 380001'),
-              onTap: () => Navigator.pop(ctx),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _showLocationPicker(BuildContext context) async {
+    final selected = await LocationPickerSheet.show(context);
+    if (selected != null && mounted) {
+      setState(() {});
+    }
   }
 
   void _showAllVouchersSheet(
@@ -1264,37 +1329,77 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'All Active Coupons',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: StreamBuilder<List<Voucher>>(
-                stream: vouchers,
-                builder: (context, snap) {
-                  final list = snap.data ?? const <Voucher>[];
-                  if (list.isEmpty) {
-                    return const Center(child: Text('No vouchers available'));
-                  }
-                  return ListView.separated(
-                    itemCount: list.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
-                    itemBuilder: (context, i) => _voucherCard(context, list[i]),
-                  );
-                },
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.85,
+        expand: false,
+        builder: (_, scrollController) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE5E7EB),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'All Active Coupons',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E2229),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: StreamBuilder<List<Voucher>>(
+                  stream: vouchers,
+                  builder: (context, snap) {
+                    final now = DateTime.now();
+                    final list = (snap.data ?? const <Voucher>[])
+                        .where((v) => v.isLiveAt(now) && !v.isExhausted)
+                        .toList();
+                    if (list.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No vouchers available right now.',
+                          style: TextStyle(color: Color(0xFF6B7280)),
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      controller: scrollController,
+                      itemCount: list.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, i) =>
+                          _voucherCard(context, list[i], isSheet: true),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

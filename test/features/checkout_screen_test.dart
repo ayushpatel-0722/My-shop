@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
+import 'package:myshop/core/models/cart_item.dart';
 import 'package:myshop/core/models/order.dart';
 import 'package:myshop/core/models/product.dart';
 import 'package:myshop/core/models/voucher.dart';
@@ -441,4 +442,58 @@ void main() {
 
     expect(find.text('Voucher applied'), findsOneWidget);
   });
+
+  testWidgets(
+    'directItems checkout supports direct buy now without touching cart',
+    (tester) async {
+      // Leave something in the general cart
+      cart.add(
+        tomatoes,
+        companyId: 'c_organic',
+        companyName: 'GreenLeaf Organics',
+        qty: 1,
+      );
+
+      // Open checkout with directItems (e.g. buying a phone directly)
+      final directItem = CartItem(
+        companyId: 'c_techtronics',
+        companyName: 'TechTronics Hub',
+        product: phone,
+        qty: 1,
+      );
+
+      await pumpTestApp(
+        tester,
+        CheckoutScreen(directItems: [directItem]),
+        user: TestHarness.shopper,
+        cartCubit: cart,
+      );
+      await enterAddressAndPincode(tester);
+
+      // Only the direct buy store should be shown
+      expect(
+        find.byKey(const Key('checkout-store-card-c_techtronics')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('checkout-store-card-c_organic')),
+        findsNothing,
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const Key('checkout-place-order-button')),
+      );
+      await tester.tap(find.byKey(const Key('checkout-place-order-button')));
+      await tester.pumpAndSettle();
+
+      final orders = await repo.orders(userId: TestHarness.shopper.id).first;
+      expect(orders.length, 1);
+      expect(orders.first.companyId, 'c_techtronics');
+      expect(orders.first.items.first.name, 'Nova X5 Smartphone');
+
+      // General cart should remain intact!
+      expect(cart.state.items.length, 1);
+      expect(cart.state.items.first.product.id, 'p_tomato');
+    },
+  );
 }

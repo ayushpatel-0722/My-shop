@@ -9,6 +9,7 @@ import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_card.dart';
+import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
 
 /// Voucher engine — create, edit, pause and audit per-store coupon codes.
@@ -134,7 +135,11 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
 
                 if (all.isEmpty) {
                   if (snap.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                      itemCount: 4,
+                      itemBuilder: (_, _) => const M3ListTileSkeleton(),
+                    );
                   }
                   return _EmptyState(
                     message: 'No vouchers yet',
