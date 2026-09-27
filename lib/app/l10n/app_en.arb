@@ -75,5 +75,1680 @@
   "totalAmount": "Total",
   "deliveryCharge": "Delivery charge",
   "discount": "Discount",
-  "subtotal": "Subtotal"
+  "subtotal": "Subtotal",
+  "account": "Account",
+  "guestCustomer": "Guest Customer",
+  "signInToSync": "Sign in to sync your cart and orders",
+  "signIn": "Sign In",
+  "verifiedMember": "Verified Member",
+  "vouchers": "Vouchers",
+  "savedItems": "Saved",
+  "view": "View",
+  "myActivity": "My Activity",
+  "myOrders": "My Orders",
+  "myOrdersSubtitle": "Orders, tracking & status",
+  "notificationsSubtitle": "Order updates & promo alerts",
+  "portalsAdmin": "Portals & Admin",
+  "adminDashboard": "Admin Dashboard",
+  "adminDashboardSubtitle": "Manage products, categories & orders",
+  "employeePortal": "Employee Portal",
+  "employeePortalSubtitle": "Packing, order queue & fulfillment",
+  "accountSettings": "Account Settings",
+  "savedAddresses": "Saved Addresses",
+  "addDeliveryLocation": "Add delivery location",
+  "helpSupport": "Help & Support",
+  "helpSupportSubtitle": "Contact customer helpline",
+  "logOutAction": "Log Out",
+  "chooseLanguage": "Choose your preferred language",
+  "splashTagline": "Multi-tenant commerce",
+  "exploreCategories": "Explore Categories",
+  "storeVouchersDeals": "Store Vouchers & Deals",
+  "shopsNearYou": "Shops Near You",
+  "trendingNowHot": "Trending Now 🔥",
+  "deliverTo": "Deliver to",
+  "searchProductsCategoriesStores": "Search products, categories, or stores...",
+  "limitedTimeOffer": "LIMITED TIME OFFER",
+  "grandFestiveMegaSale": "Grand Festive Mega Sale",
+  "flat50OffFreeDelivery": "Flat 50% Off + Free Delivery",
+  "promoCodeCopied": "Promo code {code} copied to clipboard!",
+  "@promoCodeCopied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherCodeLabel": "Code: {code}",
+  "@voucherCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "shopNow": "Shop Now",
+  "specialMarketplaceOffer": "Special Marketplace Offer",
+  "minOrderLabel": "Min ₹{amount}",
+  "@minOrderLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "couponClaimedCopied": "Coupon {code} claimed & copied!",
+  "@couponClaimedCopied": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "claimedLabel": "CLAIMED",
+  "claimLabel": "CLAIM",
+  "noProductsAvailable": "No products available",
+  "selectDeliveryLocation": "Select Delivery Location",
+  "useCurrentLocation": "Use Current Location",
+  "allActiveCoupons": "All Active Coupons",
+  "noVouchersAvailable": "No vouchers available",
+  "allShopsStores": "All Shops & Stores",
+  "noShopsAvailable": "No shops available",
+  "addMobileNumber": "Add Mobile Number",
+  "forInstantUpdates": "For instant order updates & delivery SMS",
+  "enter10DigitMobile": "Enter your 10-digit Indian mobile number",
+  "invalidMobileNumber": "Enter a valid 10-digit mobile number",
+  "mobileSaved": "Mobile number saved successfully!",
+  "saveMobileNumber": "Save Mobile Number",
+  "maybeLater": "Maybe Later",
+  "seeAll": "See All",
+  "saveAmount": "Save {amount}",
+  "@saveAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToCart": "{name} added to cart",
+  "@addedToCart": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCart": "View Cart",
+  "marketplaceLabel": "Marketplace",
+  "categoriesAndShops": "Categories & Shops",
+  "searchCategoriesBrandsShops": "Search categories, brands, or shops...",
+  "shopByCategory": "Shop by Category",
+  "exploreAllShopsStores": "Explore All Shops & Stores",
+  "noCategoriesYet": "No categories yet",
+  "noShopsRegistered": "No shops registered yet",
+  "deliveryAndPickup": "Delivery & pickup",
+  "homeDelivery": "Home delivery",
+  "selfPickup": "Self pickup",
+  "categoryLabel": "Category",
+  "productCountLabel": "{count} product",
+  "@productCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productCountLabelPlural": "{count} products",
+  "@productCountLabelPlural": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inStock": "In stock",
+  "noProductsInCategory": "No products in this category",
+  "categoryEmptyHint": "Products assigned to this category (or its sub-categories) will show up here.",
+  "showOutOfStockItems": "Show out-of-stock items",
+  "searchInStore": "Search in {store}",
+  "@searchInStore": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "searchInThisStore": "Search in this store",
+  "typeToSearchIn": "Type to search in {store}",
+  "@typeToSearchIn": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "typeToSearch": "Type to search",
+  "noResults": "No results",
+  "thisStore": "this store",
+  "productDetailsTitle": "Product Details",
+  "specificationsTitle": "Specifications",
+  "deliveryPoliciesTitle": "Delivery & Policies",
+  "productNotFound": "Product not found",
+  "goBack": "Go Back",
+  "skuLabel": "SKU: {sku}",
+  "@skuLabel": {
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      }
+    }
+  },
+  "selectVariant": "Select Variant",
+  "quantity": "Quantity",
+  "imageUnavailable": "Image unavailable",
+  "outOfStock": "Out of Stock",
+  "onlyLeft": "Only {count} left",
+  "@onlyLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "highlightsTitle": "Highlights",
+  "allDetailsTitle": "All Details",
+  "viewAllDetails": "View All Details",
+  "showLess": "Show Less",
+  "readMore": "Read more",
+  "cartEmpty": "Your cart is empty",
+  "storeFallback": "Store",
+  "noMoreStock": "No more stock available",
+  "removeItemTitle": "Remove item?",
+  "removeFromCartConfirm": "Remove {name} from your cart?",
+  "@removeFromCartConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeAction": "Remove",
+  "moveToWishlist": "Move to Wishlist?",
+  "outOfStockShort": "Out of stock",
+  "moveToWishlistAction": "MOVE TO WISHLIST",
+  "removedFromCart": "{name} removed from cart",
+  "@removedFromCart": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "savedToWishlist": "{name} saved to your wishlist",
+  "@savedToWishlist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "enterVoucherCode": "Enter a voucher code.",
+  "addNameMobileFirst": "Please add your name and mobile number in your profile before placing the order.",
+  "selectDeliveryAddressError": "Please select a delivery address.",
+  "itemsNoLongerAvailable": "The items in your cart are no longer available.",
+  "couldNotPlaceOrder": "Could not place the order: {error}",
+  "@couldNotPlaceOrder": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "placeOrderTitle": "Place Order",
+  "deliveryAddressTitle": "Delivery Address",
+  "placeOrderWithTotal": "Place Order · {total}",
+  "@placeOrderWithTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "applyAction": "Apply",
+  "itemsLabel": "Items",
+  "deliveryLabel": "Delivery",
+  "storeTotal": "Store total",
+  "addNewAddress": "Add New Address",
+  "maxAddressesNote": "You can save up to {count} addresses. Edit one to replace it.",
+  "@maxAddressesNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noSavedAddresses": "No saved addresses",
+  "addDeliveryAddressToOrder": "Add a delivery address to place your order.",
+  "addAddressAction": "Add Address",
+  "homeLabel": "Home",
+  "defaultLabel": "Default",
+  "landmarkLabel": "Landmark: {landmark}",
+  "@landmarkLabel": {
+    "placeholders": {
+      "landmark": {
+        "type": "String"
+      }
+    }
+  },
+  "editAddressTitle": "Edit Address",
+  "fullNameLabel": "Full name",
+  "phoneNumberLabel": "Phone number",
+  "phoneNumberRequired": "Phone number is required",
+  "houseFlatLabel": "House / Flat no.",
+  "addressLine1Label": "Address line 1",
+  "addressLine2Label": "Address line 2 (optional)",
+  "landmarkOptionalLabel": "Landmark (optional)",
+  "cityLabel": "City",
+  "stateLabel": "State",
+  "pincodeLabel": "Pincode",
+  "pincodeRequired": "Pincode is required",
+  "invalidPincode": "Enter a valid 6-digit pincode",
+  "labelLabel": "Label",
+  "workLabel": "Work",
+  "otherLabel": "Other",
+  "setDefaultAddress": "Set as default address",
+  "saveAddressAction": "Save Address",
+  "updateAddressAction": "Update Address",
+  "updateProfile": "Update Profile",
+  "mobileNumberMissing": "Mobile number missing",
+  "emailNotAdded": "Email not added",
+  "addMobileBeforeOrder": "Add a mobile number before placing the order.",
+  "noHomeDeliveryNote": "This shop does not offer home delivery — your order will be collected from the shop.",
+  "shopLabel": "Shop",
+  "productNoLongerAvailable": "This product is no longer available.",
+  "itemsWithCount": "Items ({count})",
+  "@itemsWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mrpDiscount": "MRP discount",
+  "totalAmountLabel": "Total Amount",
+  "noOrdersWithStatus": "No orders with this status",
+  "signInToViewOrders": "Sign In to View Orders",
+  "keepTrackHint": "Keep track of your active deliveries and past purchases.",
+  "continueWithGoogle": "Continue with Google",
+  "noOrdersYet": "No Orders Yet",
+  "exploreAndOrderHint": "Explore products and place your first order today!",
+  "startShopping": "Start Shopping",
+  "orderReference": "Order {reference}",
+  "@orderReference": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "trackOrder": "Track order",
+  "paidLabel": "Paid",
+  "paymentOnDelivery": "Payment on delivery",
+  "payOnDelivery": "Pay on delivery",
+  "reorderLabel": "Reorder",
+  "viewCartCaps": "VIEW CART",
+  "theseNoLongerAvailable": "These products are no longer available",
+  "allFilter": "All",
+  "reorderAddedOne": "{count} item added to cart",
+  "@reorderAddedOne": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reorderAddedMany": "{count} items added to cart",
+  "@reorderAddedMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reorderAddedMissingOne": "{count} item added to cart · {missing} no longer available",
+  "@reorderAddedMissingOne": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "reorderAddedMissingMany": "{count} items added to cart · {missing} no longer available",
+  "@reorderAddedMissingMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "orderNoLongerAvailable": "This order is no longer available.",
+  "deliveryAddressCard": "Delivery address",
+  "cancelThisOrder": "Cancel this order?",
+  "cancelOrderConfirm": "Order {reference} will be cancelled. This cannot be undone.",
+  "@cancelOrderConfirm": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "yesCancel": "Yes, cancel",
+  "couldNotCancelOrder": "Could not cancel order: {error}",
+  "@couldNotCancelOrder": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "cancelledOn": "Cancelled on {date}",
+  "@cancelledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noNotifications": "No notifications",
+  "noReviewsYet": "No reviews yet",
+  "writeShortMessage": "Write a short message",
+  "customerFallback": "Customer",
+  "voucherCopiedClipboard": "Voucher \"{code}\" copied to clipboard!",
+  "@voucherCopiedClipboard": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "storeReviews": "Store reviews",
+  "trendingIn": "in {name}",
+  "@trendingIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "allProductsCount": "All Products ({count})",
+  "@allProductsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingLabel": "Rating",
+  "inStockPill": "In-Stock",
+  "storeNoProducts": "This store has no products yet",
+  "noProductsMatchFilters": "No products match these filters",
+  "scrollMoreLeft": "Scroll for more ({count} left)",
+  "@scrollMoreLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "priceLabel": "Price",
+  "priceDescending": "Price ↓",
+  "priceAscending": "Price ↑",
+  "reviewCountOne": "{count} review",
+  "@reviewCountOne": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewCountMany": "{count} reviews",
+  "@reviewCountMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "specialOfferTag": "SPECIAL OFFER",
+  "liveOffersOne": "{sub} · {count} live offer",
+  "@liveOffersOne": {
+    "placeholders": {
+      "sub": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveOffersMany": "{sub} · {count} live offers",
+  "@liveOffersMany": {
+    "placeholders": {
+      "sub": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "useCode": "Use Code: {code}",
+  "@useCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "flatPercentOff": "Flat {value}% OFF",
+  "@flatPercentOff": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "freeDeliveryOrder": "Free Delivery on your order",
+  "flatAmountOff": "Flat {amount} OFF",
+  "@flatAmountOff": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "validOverMinOrder": "Valid on orders over {amount}",
+  "@validOverMinOrder": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "storeExclusiveDeal": "Store exclusive deal",
+  "mobileNumberLabel": "Mobile Number",
+  "changeAction": "Change",
+  "enter10DigitHelper": "Enter 10-digit number",
+  "otpLabel": "OTP",
+  "otpHelper": "Enter the 6-digit code sent via SMS",
+  "orDivider": "OR",
+  "signingIn": "Signing in...",
+  "signInWithGoogle": "Sign in with Google",
+  "enterMobileFirst": "Please enter your mobile number",
+  "invalidIndianMobile": "Enter a valid 10-digit Indian mobile number (e.g. 9876543210)",
+  "otpSentTo": "OTP sent to {mobile}",
+  "@otpSentTo": {
+    "placeholders": {
+      "mobile": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotSendOtp": "Could not send OTP. Please verify your number or try again.",
+  "errorPrefix": "Error: {message}",
+  "@errorPrefix": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResentTo": "OTP resent to {mobile}",
+  "@otpResentTo": {
+    "placeholders": {
+      "mobile": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotResendOtp": "Could not resend OTP. Try again.",
+  "enterOtpFirst": "Please enter the 6-digit OTP",
+  "invalidOtp": "Invalid OTP. Please check the code and try again.",
+  "verificationError": "Verification error: {message}",
+  "@verificationError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "yourFullNameHint": "Your full name",
+  "signingUp": "Signing up...",
+  "signUpWithGoogle": "Sign up with Google",
+  "alreadyHaveAccount": "Already have an account? Log In",
+  "enterNameFirst": "Please enter your name",
+  "couldNotSendOtpRetry": "Could not send OTP. Please try again.",
+  "invalidOtpRetry": "Invalid OTP. Please try again.",
+  "verificationFailed": "Verification failed: {message}",
+  "@verificationFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "enterCompanyNameAndPassword": "Please enter company name and company password.",
+  "companyNotFound": "Company \"{name}\" not found.",
+  "@companyNotFound": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "incorrectCompanyPassword": "Incorrect company password.",
+  "accessDeniedServer": "Access denied by server. Please check your internet connection and try again.",
+  "couldNotVerifyCompany": "Could not verify company. Please try again.",
+  "enterAdminEmailPassword": "Please enter admin email and password.",
+  "companyLabel": "Company: {name}",
+  "@companyLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noCompanyIdentified": "No company identified. Please ensure you are logged in to your company.",
+  "errorCreatingAdmin": "Error creating admin: {error}",
+  "@errorCreatingAdmin": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "signInFailed": "Sign-in failed. Please try again.",
+  "failedSaveMobile": "Failed to save mobile number. Try again.",
+  "failedSaveAddress": "Failed to save address. Try again.",
+  "welcomeToBazaar": "Welcome to Bazaar",
+  "signInBenefits": "Sign in to place orders, save cart & apply vouchers",
+  "termsNotice": "By continuing, you agree to our Terms & Privacy Policy",
+  "enterMobileNumberTitle": "Enter Mobile Number",
+  "forDeliveryTracking": "For delivery tracking & order SMS updates",
+  "enter10DigitIndian": "Enter 10-digit Indian mobile number",
+  "continueAction": "Continue",
+  "enterAddressTitle": "Enter your address for accurate delivery",
+  "houseFlatFloorLabel": "House / Flat / Floor No. *",
+  "houseFlatRequired": "House / Flat number is required",
+  "streetAreaLandmarkLabel": "Street / Area / Landmark *",
+  "streetOrAreaRequired": "Street or Area is required",
+  "pincodeRequiredLabel": "Pincode *",
+  "saveAddressContinue": "Save Address & Continue",
+  "openLabel": "Open",
+  "closeLabel": "Close",
+  "currencyLabel": "Currency",
+  "deliveryTypesLabel": "Delivery types",
+  "selfPickupHyphen": "Self-Pickup",
+  "homeDeliveryLabel": "Home Delivery",
+  "companyImageUrlOptional": "Company Image URL (optional)",
+  "firstAdminAccount": "First Admin Account",
+  "adminNameLabel": "Admin name",
+  "adminEmailLabel": "Admin email",
+  "passwordLabel": "Password",
+  "confirmPasswordLabel": "Confirm password",
+  "companyNamePassRequired": "Company name and password are required.",
+  "adminDetailsRequired": "Admin name, email, and password are required.",
+  "adminPasswordsDoNotMatch": "Admin passwords do not match.",
+  "adminPasswordMinLength": "Admin password must be at least 6 characters.",
+  "emailRegisteredPasswordMismatch": "This email is already registered, but the password provided does not match. Please enter your existing password, sign in via Admin Login, or use a different email.",
+  "addProductOption": "Add Product Option",
+  "defineVariationHint": "Define a variation type and its choices (e.g. Size, Color, Weight, Storage, Box Type).",
+  "optionNameLabel": "Option Name *",
+  "optionNameHint": "e.g. Size, Weight, Color, Storage",
+  "optionValuesLabel": "Option Values (comma separated) *",
+  "quickTemplates": "Quick Templates:",
+  "templateClothing": "Clothing: Size (S, M, L, XL)",
+  "templateColorChip": "Color (Pink, Blue, Black)",
+  "templateGrocery": "Grocery: Weight (1kg, 5kg, 10kg, 50kg)",
+  "templateFood": "Food: Weight (250g, 500g, 1kg)",
+  "templateLiquids": "Liquids (250ml, 500ml, 1L, 2L)",
+  "templateMultipack": "Multipack (Pack of 1, Pack of 2, Pack of 5)",
+  "templateElectronics": "Electronics: RAM (8GB, 16GB)",
+  "saveOption": "Save Option",
+  "addOptionFirst": "Please add at least one Option first to generate combinations.",
+  "addProductVariant": "Add Product Variant",
+  "sizeFieldLabel": "Size",
+  "sizeFieldHint": "e.g. S, M, L, XL, 500g",
+  "colorFieldLabel": "Color",
+  "colorFieldHint": "e.g. Navy, Crimson",
+  "unlimitedInventory": "Unlimited Inventory",
+  "stockQuantity": "Stock Quantity",
+  "priceOverrideOptional": "Price Override (Optional)",
+  "leaveEmptyOrZero": "Leave empty or 0 to use base price",
+  "addVariantAction": "Add Variant",
+  "editVariantTitle": "Edit Variant ({title})",
+  "@editVariantTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "priceOverrideRs": "Price Override (₹)",
+  "leaveEmptyForBase": "Leave empty for base price",
+  "checkRequiredFields": "Please check all required fields.",
+  "completeHighlightsDetails": "Please complete every highlight row and details section.",
+  "productUpdatedSuccess": "Product \"{name}\" updated successfully!",
+  "@productUpdatedSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productCreatedSuccess": "Product \"{name}\" created successfully!",
+  "@productCreatedSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveProduct": "Failed to save product: {error}",
+  "@failedToSaveProduct": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "editProductTitle": "Edit Product",
+  "addNewProductTitle": "Add New Product",
+  "productSpecification": "Product Specification",
+  "updateCatalogHint": "Update catalog item details, pricing, images, variants, and specifications.",
+  "createCatalogHint": "Create new catalog items with dynamic variants, custom options, gallery, and inventory controls.",
+  "companyScope": "Company Scope",
+  "globalScope": "Global Scope",
+  "basicInformation": "Basic Information",
+  "productTitleField": "Product Title *",
+  "productTitleHint": "e.g. Organic Hass Avocado / Chanderi Silk Saree / 15-in-1 Sweets Box",
+  "productTitleRequired": "Product title is required",
+  "categoryFieldLabel": "Category *",
+  "selectCategoryHint": "Select category (Clothing, Food, Electronics, etc.)",
+  "productHighlightsEditor": "Product Highlights",
+  "highlightsEditorHint": "Short Title + Value rows shown as a quick-scan list at the top of the product page.",
+  "allDetailsEditor": "All Details",
+  "allDetailsEditorHint": "Ordered sections shown under Highlights. \"Simple Text\" holds a paragraph; \"Title & Value\" holds label/value rows.",
+  "productGallery": "Product Gallery",
+  "imagesAdded": "{count} added",
+  "@imagesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "galleryHint": "Add multiple image URLs. The first image will automatically act as the Hero / Main product image.",
+  "imageUrlField": "Image URL",
+  "validImageUrl": "Please enter a valid HTTP or HTTPS image URL",
+  "heroMain": "Hero / Main",
+  "makeHero": "Make Hero",
+  "mrpFieldLabel": "MRP / Original Price (₹) *",
+  "enterPrice": "Enter price",
+  "validNumber": "Valid number",
+  "sellingPriceField": "Selling / Discounted Price (₹)",
+  "percentOff": "{percent}% OFF",
+  "@percentOff": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "baseSkuField": "Base SKU / Product Code *",
+  "requiredShort": "Required",
+  "availableInventoryUnits": "Available inventory units",
+  "enterInventoryCount": "Enter inventory count",
+  "validInteger": "Valid integer",
+  "unitValueField": "Unit Value *",
+  "unitTypeField": "Unit Type *",
+  "pricingMeasurement": "Pricing & Measurement",
+  "stockAvailabilityMode": "Stock Availability & Inventory Mode",
+  "countShort": "Count",
+  "specificCount": "Specific Count",
+  "unlimitedShort": "Unlimited",
+  "unlimitedStockLabel": "Unlimited Stock",
+  "finishedOutOfStock": "Finished / Out of Stock",
+  "unlimitedInventoryHint": "Unlimited Inventory: Product will always appear in stock for customers (ideal for digital goods or made-to-order items).",
+  "outOfStockModeHint": "Out of Stock / Finished: Product will show as sold out on the storefront until restocked.",
+  "baseMeasurementType": "Base Measurement Type",
+  "quantityShort": "Quantity",
+  "quantityBased": "Quantity Based",
+  "weightShort": "Weight",
+  "weightBased": "Weight Based",
+  "featuredRecommendation": "Featured Recommendation",
+  "featuredHint": "Flag this product to appear in the recommendations engine carousel.",
+  "variantMatrix": "Variant Matrix",
+  "addOption": "Add Option",
+  "generateMatrix": "Generate Matrix",
+  "variantMatrixHint": "Configure customizable option types (e.g. Size, Color, Weight, Storage) and automatically generate Cartesian combinations with distinct SKU, stock, and price overrides.",
+  "configuredOptionSets": "Configured Option Sets:",
+  "noVariantsHint": "No variants configured (single standard SKU). Tap \"Add Option\" to define dimensions, then \"Generate Matrix\".",
+  "stockPrefix": "Stock: ",
+  "priceWithValue": "Price: ₹{value}",
+  "@priceWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "basePriceLabel": "Base Price",
+  "editStockPriceTooltip": "Edit Stock & Price Override",
+  "specsPolicies": "Specifications & Policies",
+  "addSpecAction": "Add Spec",
+  "specsHint": "Add dynamic key-value specifications (e.g. Fabric, Shelf Life, Processor, Storage, Origin) and return/delivery policies.",
+  "specKeyField": "Spec Key",
+  "specValueField": "Spec Value",
+  "policyField": "Delivery & Return Policy",
+  "updateProduct": "Update Product",
+  "createProduct": "Create Product",
+  "skuFieldLabel": "SKU *",
+  "skuShortLabel": "SKU",
+  "optionValuesHint": "e.g. S, M, L, XL or 250g, 500g, 1kg",
+  "addLabel": "Add",
+  "policyHint": "e.g. Free shipping on orders above ₹499. Easy 7-day hassle-free replacement for defective products.",
+  "noHighlightsHint": "No highlights yet. Add short Title + Value rows like \"Origin — Kerala\" or \"Shelf Life — 12 months\".",
+  "titleRequired": "Title required",
+  "titleLabel": "Title",
+  "titleHintShort": "e.g. Origin",
+  "valueRequired": "Value required",
+  "valueLabel": "Value",
+  "valueHintShort": "e.g. Single-estate, Wayanad",
+  "deleteHighlightTooltip": "Delete highlight",
+  "addHighlight": "Add Highlight",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
+  "deleteSectionTitle": "Delete section?",
+  "deleteSectionConfirm": "\"{title}\" and all of its content will be removed.",
+  "@deleteSectionConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "untitledSection": "Untitled section",
+  "changeSectionTypeTitle": "Change section type?",
+  "changeSectionTypeConfirm": "Switching between \"Simple Text\" and \"Title & Value\" clears the content of this section. Continue?",
+  "changeTypeAction": "Change Type",
+  "noDetailSectionsHint": "No detail sections yet. Add one for the product description, specifications, care instructions…",
+  "addSection": "Add Section",
+  "titleAndValue": "Title & Value",
+  "simpleText": "Simple Text",
+  "moveSectionUp": "Move section up",
+  "moveSectionDown": "Move section down",
+  "deleteSectionTooltip": "Delete section",
+  "sectionTitleRequired": "Section title required",
+  "sectionTitleField": "Section Title",
+  "sectionTitleHint": "e.g. Product Details / Specifications",
+  "sectionTypeField": "Section Type",
+  "sectionTextRequired": "Section text required",
+  "textFieldLabel": "Text",
+  "textHint": "Paragraph shown under this section heading…",
+  "moveRowUp": "Move row up",
+  "moveRowDown": "Move row down",
+  "deleteRowTooltip": "Delete row",
+  "addRow": "Add Row",
+  "vouchersTitle": "Vouchers",
+  "createVoucher": "Create voucher",
+  "searchByCode": "Search by code",
+  "noVouchersYetAdmin": "No vouchers yet",
+  "createFirstCouponHint": "Create your first coupon code to run a promotion for this store.",
+  "noVouchersMatchFilters": "No vouchers match these filters",
+  "tryClearingFilters": "Try clearing the search box or choosing \"All\".",
+  "deleteVoucherTitle": "Delete voucher?",
+  "deleteVoucherConfirm": "\"{code}\" will be removed. Shoppers who saved this code will no longer get the discount.",
+  "@deleteVoucherConfirm": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherDeleted": "Voucher {code} deleted.",
+  "@voucherDeleted": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotDeleteVoucher": "Could not delete voucher: {error}",
+  "@couldNotDeleteVoucher": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "totalStat": "Total",
+  "liveStat": "Live",
+  "pausedStat": "Paused",
+  "expiredStat": "Expired",
+  "limitReached": "Limit reached",
+  "editVoucherTooltip": "Edit voucher",
+  "deleteVoucherTooltip": "Delete voucher",
+  "minOrderWithScope": "Min order ₹{amount} · {scope}",
+  "@minOrderWithScope": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "perShopperUsage": "{usage} · {limit} per shopper",
+  "@perShopperUsage": {
+    "placeholders": {
+      "usage": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "firstOrderOnlyTag": "first order only",
+  "expiresOn": "expires {date}",
+  "@expiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "neverExpires": "never",
+  "acceptingRedemptions": "Accepting redemptions",
+  "voucherExpiryHelp": "Voucher expiry",
+  "voucherUpdated": "Voucher {code} updated.",
+  "@voucherUpdated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherCreated": "Voucher {code} created.",
+  "@voucherCreated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotSaveVoucher": "Could not save voucher: {error}",
+  "@couldNotSaveVoucher": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "editVoucherTitle": "Edit Voucher",
+  "createVoucherTitle": "Create Voucher",
+  "codeField": "Code *",
+  "lettersNumbersOnly": "Letters and numbers only",
+  "discountTypeField": "Discount type",
+  "percentageLabel": "Percentage",
+  "fixedAmountLabel": "Fixed amount",
+  "freeShippingLabel": "Free shipping",
+  "discountPercentField": "Discount % *",
+  "discountAmountField": "Discount amount (₹) *",
+  "minOrderAmountField": "Minimum order amount (₹)",
+  "perShopperLimitField": "Per shopper limit",
+  "totalRedemptionsField": "Total redemptions",
+  "appliesToField": "Applies to",
+  "allCategoriesLabel": "All categories",
+  "specificCategoriesLabel": "Specific categories",
+  "specificProductsLabel": "Specific products",
+  "expiryDateTitle": "Expiry date",
+  "noExpiry": "No expiry",
+  "pickAction": "Pick",
+  "firstOrderOnlyTitle": "First order only",
+  "firstOrderOnlySubtitle": "Only shoppers without a previous order",
+  "activeTitle": "Active",
+  "pauseInsteadOfDelete": "Pause instead of deleting a campaign",
+  "saveChanges": "Save changes",
+  "freeDeliveryBadge": "FREE DELIVERY",
+  "amountOff": "₹{amount} OFF",
+  "@amountOff": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "noCategoriesForStore": "No categories found for this store.",
+  "noProductsForStore": "No products found for this store.",
+  "exitReorder": "Exit reorder",
+  "reorderCategories": "Reorder categories",
+  "clearSearchToReorder": "Clear search to reorder.",
+  "moreOptions": "More options",
+  "backfillOrder": "Backfill order",
+  "backfillSubtitle": "One-time migration for older categories",
+  "addCategory": "Add Category",
+  "searchCategoriesAdmin": "Search categories",
+  "noCategoriesMatchSearch": "No categories match this search",
+  "topLevel": "Top level",
+  "subCategoriesOf": "Sub-categories of \"{name}\"",
+  "@subCategoriesOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dragHandleHint": "Drag by the handle to set the order customers see. Changes are saved in one batch per move.",
+  "categoryGroup": "Category group",
+  "nothingToReorder": "Nothing to reorder — this group needs at least 2 categories.",
+  "productsAssigned": "{count} assigned",
+  "@productsAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveOrder": "Failed to save the new order: {error}",
+  "@failedToSaveOrder": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "backfillConfirmTitle": "Backfill category order?",
+  "backfillConfirmBody": "One-time migration: every category group gets explicit sortOrder values based on the current order. Only changed documents are written.",
+  "backfillAction": "Backfill",
+  "alreadyInOrder": "Categories were already in order — nothing to migrate.",
+  "orderMigratedOne": "Order migrated for {count} category.",
+  "@orderMigratedOne": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderMigratedMany": "Order migrated for {count} categories.",
+  "@orderMigratedMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backfillFailed": "Backfill failed: {error}",
+  "@backfillFailed": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "noCategoriesFoundAdmin": "No categories found",
+  "createFirstCategoryHint": "Create your first category and assign products to organize your store.",
+  "discardChangesTitle": "Discard changes?",
+  "unsavedCategoryChanges": "You have unsaved changes to this category, including any new product order.",
+  "keepEditing": "Keep editing",
+  "discardAction": "Discard",
+  "selectAtLeastOneProduct": "Please select at least one product for the category",
+  "categoryAlreadyExists": "A category named \"{name}\" already exists in this company.",
+  "@categoryAlreadyExists": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryCannotBeItsParent": "A category cannot have itself as its parent.",
+  "invalidParentCycle": "Invalid parent: Selecting a descendant category creates a cycle.",
+  "categoryUpdatedSuccess": "Category \"{name}\" updated successfully!",
+  "@categoryUpdatedSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryCreatedSuccess": "Category \"{name}\" created successfully!",
+  "@categoryCreatedSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveCategory": "Failed to save category: {error}",
+  "@failedToSaveCategory": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "loadingCategory": "Loading Category...",
+  "editCategoryTitle": "Edit Category",
+  "addNewCategoryTitle": "Add New Category",
+  "categoryDetailsTitle": "Category Details",
+  "configureCategoryHint": "Configure hierarchy, catalog classification, and assigned products.",
+  "categoryNameField": "Category Name *",
+  "categoryNameHint": "e.g. Fresh Organic Vegetables",
+  "categoryNameRequired": "Category name is required",
+  "classificationTypeField": "Classification / Type *",
+  "classificationHint": "e.g. Grocery, Electronics",
+  "classificationRequired": "Classification type is required",
+  "descriptionDetailsField": "Description / Details",
+  "descriptionHeaderHint": "Description shown on the category header...",
+  "iconVisuals": "Icon & Visuals",
+  "categoryIconField": "Category Icon (Image URL or Emoji)",
+  "iconFieldHint": "Enter image URL or emoji (e.g. 🛍️)",
+  "quickSelectEmoji": "Quick select emoji:",
+  "hierarchyNesting": "Hierarchy & Nesting",
+  "hierarchyHint": "Assign an existing parent category in the same company for nesting. Self and descendant categories are automatically blocked to prevent hierarchy cycles.",
+  "parentCategoryField": "Parent Category",
+  "noneTopLevel": "None (Top-Level Category)",
+  "blockedParentsNoteOne": "Note: {count} category (this category and its descendants) are blocked from being chosen as parent.",
+  "@blockedParentsNoteOne": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "blockedParentsNoteMany": "Note: {count} categories (this category and its descendants) are blocked from being chosen as parent.",
+  "@blockedParentsNoteMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "saveChangesButton": "Save Changes",
+  "createCategoryButton": "Create Category",
+  "productAssignment": "Product Assignment",
+  "assignmentHint": "Swipe right or tap + to assign, swipe left or tap – to remove. Drag ⠿ inside \"In This Category\" to set the display order.",
+  "searchProductsNameId": "Search products by name or ID...",
+  "allProductsPanel": "All Products",
+  "inThisCategoryPanel": "In This Category",
+  "allWithCount": "All ({count})",
+  "@allWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inCategoryWithCount": "In Category ({count})",
+  "@inCategoryWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addAll": "Add All",
+  "clearAll": "Clear All",
+  "clearSearchToReorderProducts": "Clear search to reorder products.",
+  "noAssignedMatchSearch": "No assigned products match search",
+  "noProductsAssignedYet": "No products assigned yet",
+  "noAvailableMatchSearch": "No available products match search",
+  "allProductsAreAssigned": "All products are assigned!",
+  "addToCategoryTooltip": "Add to Category",
+  "removeFromCategoryTooltip": "Remove from Category",
+  "assignAction": "Assign",
+  "noCompanyScopeFound": "No company scope found for current admin.",
+  "employeeUpdatedSuccess": "Employee \"{name}\" updated successfully!",
+  "@employeeUpdatedSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeProvisionedSuccess": "Employee \"{name}\" provisioned successfully!",
+  "@employeeProvisionedSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveEmployee": "Failed to save employee: {error}",
+  "@failedToSaveEmployee": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "loadingEmployee": "Loading Employee...",
+  "editEmployeeTitle": "Edit Employee",
+  "provisionEmployeeTitle": "Provision Employee",
+  "employeeProfileTitle": "Employee Profile",
+  "staffProvisioningTitle": "Staff Provisioning",
+  "manageStaffHint": "Manage staff account, designation, salary, and operational access.",
+  "fullNameFieldLabel": "Full Name *",
+  "fullNameHint": "e.g. Ramesh Kumar",
+  "fullNameRequired": "Full name is required",
+  "loginEmailField": "Login Email *",
+  "emailRequired": "Email is required",
+  "enterValidEmail": "Enter a valid email",
+  "initialPasswordField": "Initial Password *",
+  "minSixChars": "Minimum 6 characters",
+  "passwordMinLength": "Password must be at least 6 characters",
+  "designationRoleField": "Designation / Role *",
+  "genderLabel": "Gender",
+  "maleLabel": "Male",
+  "femaleLabel": "Female",
+  "otherGenderLabel": "Other",
+  "dateOfBirthField": "Date of Birth",
+  "selectDateOfBirth": "Select Date of Birth",
+  "residentialAddressField": "Residential Address",
+  "streetAreaCityHint": "Street, area, city, pincode...",
+  "notesQualificationsField": "Notes & Qualifications",
+  "notesQualificationsHint": "Emergency contact, certifications, qualifications...",
+  "compensationSalary": "Compensation & Salary",
+  "compensationHint": "Define staff compensation package and payment frequency.",
+  "salaryAmountField": "Salary Amount (₹)",
+  "salaryFrequency": "Salary Frequency",
+  "monthlySalary": "Monthly (₹/month)",
+  "yearlyCtc": "Yearly / CTC (₹/year)",
+  "shiftWorkStatus": "Shift & Work Status",
+  "shiftActive": "Shift Active",
+  "shiftActiveHint": "Gates login to scheduled working hours. When disabled, the employee cannot log into the mobile app.",
+  "operationalPermissions": "Operational Permissions",
+  "permissionsHint": "Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.",
+  "orderPackingPermission": "Order Packing (canPack)",
+  "orderPackingHint": "Access packing hub to verify items and mark orders as packed.",
+  "orderDispatchPermission": "Order Dispatch (canDispatch)",
+  "orderDispatchHint": "Assign delivery riders and dispatch orders for fulfillment.",
+  "inventoryPermission": "Inventory Management (canManageInventory)",
+  "inventoryHint": "View and update stock counts and warehouse alerts.",
+  "reportsPermission": "Reports & Analytics (canViewReports)",
+  "reportsPermissionHint": "View daily employee activity and operations logs.",
+  "provisionEmployeeAccount": "Provision Employee Account",
+  "deleteEmployeeAccount": "Delete Employee Account",
+  "removeEmployeeConfirm": "Are you sure you want to remove \"{name}\" ({email}) from the company?",
+  "@removeEmployeeConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeDeleted": "Employee \"{name}\" deleted.",
+  "@employeeDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteEmployee": "Failed to delete employee: {error}",
+  "@failedToDeleteEmployee": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "employeesTitle": "Employees",
+  "noEmployeesProvisioned": "No employees provisioned",
+  "provisionStaffHint": "Provision staff accounts with custom designations, salary, and operational access.",
+  "activeShift": "Active Shift",
+  "offShift": "Off Shift",
+  "editEmployeeTooltip": "Edit Employee",
+  "deleteEmployeeTooltip": "Delete Employee",
+  "salaryNotSpecified": "Salary: Not specified",
+  "packPermission": "Pack",
+  "dispatchPermission": "Dispatch",
+  "inventoryPermissionChip": "Inventory",
+  "reportsPermissionChip": "Reports",
+  "ordersPipeline": "Orders Pipeline",
+  "searchOrders": "Search orders",
+  "searchOrdersHint": "Reference, pincode, product…",
+  "noOrdersYetAdmin": "No orders yet",
+  "ordersAppearHereHint": "Orders from your store will appear here instantly.",
+  "noOrdersMatchFiltersAdmin": "No orders match these filters",
+  "clearSearchOrStatus": "Clear the search box or pick another status.",
+  "openOrdersMetric": "Open orders",
+  "allOrdersMetric": "All orders",
+  "revenueMetric": "Revenue",
+  "nothingHere": "Nothing here",
+  "itemsWithDelivery": "{count} item(s) · {delivery}",
+  "@itemsWithDelivery": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "delivery": {
+        "type": "String"
+      }
+    }
+  },
+  "markStatus": "Mark {status}",
+  "@markStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelOrderAction": "Cancel order",
+  "orderStatusChanged": "Order {reference} → {status}",
+  "@orderStatusChanged": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotUpdateOrder": "Could not update order: {error}",
+  "@couldNotUpdateOrder": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "cancelOrderAdminConfirm": "Order {reference} will be cancelled and the customer will see it under \"Cancelled\".",
+  "@cancelOrderAdminConfirm": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "keepAction": "Keep",
+  "discountWithCode": "Discount{code}",
+  "@discountWithCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payableLabel": "Payable",
+  "productLabelShort": "Product",
+  "lowStock": "Low stock",
+  "sortRelevance": "Relevance",
+  "sortNameAZ": "Name (A–Z)",
+  "sortNameZA": "Name (Z–A)",
+  "sortPriceLowHigh": "Price (low to high)",
+  "sortPriceHighLow": "Price (high to low)",
+  "sortRatingTop": "Rating (top picks first)",
+  "variantsCount": "• {count} variants",
+  "@variantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "uncategorised": "Uncategorised",
+  "stockWithUnit": "{count} {unit}",
+  "@stockWithUnit": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "productsTitleAdmin": "Products",
+  "searchProductsAdmin": "Search products",
+  "nameOrSku": "Name or SKU",
+  "soldOut": "Sold out",
+  "noProductsMatchFiltersAdmin": "No products match these filters",
+  "deleteProductTitle": "Delete Product",
+  "deleteProductConfirm": "Are you sure you want to delete \"{name}\"?",
+  "@deleteProductConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDeleted": "Product \"{name}\" deleted.",
+  "@productDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteProduct": "Failed to delete product: {error}",
+  "@failedToDeleteProduct": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "noProductsFoundAdmin": "No products found",
+  "addFirstProductHint": "Add your first product to start selling.",
+  "bannersTitle": "Banners",
+  "noOfferBanners": "No offer banners",
+  "createOfferBanner": "Create Offer Banner",
+  "tapActionField": "Tap action",
+  "externalUrl": "External URL",
+  "categoryIdField": "Category ID",
+  "productIdField": "Product ID",
+  "urlField": "URL",
+  "deliveryChargesTitle": "Delivery Charges",
+  "importCsv": "Import CSV",
+  "noPincodesConfigured": "No pincodes configured",
+  "importedPincodes": "Imported {count} pincodes",
+  "@importedPincodes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pincodeField": "Pincode",
+  "chargeField": "Charge (₹)",
+  "qrCodesTitle": "QR Codes",
+  "copyLink": "Copy link",
+  "pngLabel": "PNG",
+  "sendToPrinter": "Send to printer",
+  "recommendationsTitle": "Recommendations",
+  "fallbackStrategy": "Fallback strategy",
+  "topSellersTrendingCurated": "Top Sellers · Trending · Curated · Cross-sell",
+  "noPinnedRecommendations": "No pinned recommendations — using best-sellers",
+  "pinAProduct": "Pin a product",
+  "strategyField": "Strategy",
+  "topSellers": "Top sellers",
+  "reportsTitle": "Reports",
+  "summaryLabel": "Summary",
+  "ordersCountLabel": "Orders: {count}",
+  "@ordersCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "revenueLabel": "Revenue: ₹{amount}",
+  "@revenueLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlyOrderReport": "Monthly order report",
+  "yearlyOrderReport": "Yearly order report",
+  "excelXlsx": "Excel (.xlsx)",
+  "exportCatalogSheet": "Export catalog sheet",
+  "wordDocx": "Word (.docx)",
+  "latestInvoicePdf": "Latest invoice PDF",
+  "pdfLabel": "PDF",
+  "adminsTitle": "Admins",
+  "noAdminsYet": "No admins yet",
+  "adminChip": "Admin",
+  "reviewsTitleAdmin": "Reviews",
+  "noReviewsYetAdmin": "No reviews yet",
+  "adminConsole": "Admin Console",
+  "shopperApp": "Shopper App",
+  "packingQueue": "{packing} Queue",
+  "@packingQueue": {
+    "placeholders": {
+      "packing": {
+        "type": "String"
+      }
+    }
+  },
+  "noPackingTasks": "No packing tasks assigned",
+  "itemsWithMode": "{count} items · {mode}",
+  "@itemsWithMode": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "pickupMode": "Pickup",
+  "deliveryMode": "Delivery",
+  "packedTag": "packed",
+  "packAction": "Pack",
+  "orderNotFound": "Order not found",
+  "qtyWithSkuScan": "Qty: {qty} · SKU scan",
+  "@qtyWithSkuScan": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "scanAction": "Scan",
+  "packingDoneNotified": "Packing done — notified Admin",
+  "sentToAdmin": "Sent to Admin",
+  "packingDone": "Packing Done",
+  "scanQrBarcode": "Scan QR / Barcode",
+  "copyIdTooltip": "Copy {label} ID",
+  "@copyIdTooltip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "idCopiedToClipboard": "{label} ID copied to clipboard: {id}",
+  "@idCopiedToClipboard": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "idWithLabel": "ID: {id}",
+  "@idWithLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "newVersionAvailable": "A new version is available.",
+  "updateRequiredTitle": "Update Required",
+  "updateAction": "Update",
+  "deleteCategoryTitle": "Delete Category",
+  "deleteCategoryConfirm": "Delete \"{name}\"?",
+  "@deleteCategoryConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assignedProductsWillMove": "• {count} assigned product(s) will move to \"{parent}\"",
+  "@assignedProductsWillMove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "parent": {
+        "type": "String"
+      }
+    }
+  },
+  "subCategoriesWillMoveUp": "• {count} sub-category(ies) will move up one level",
+  "@subCategoriesWillMoveUp": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "thisCategoryIsEmpty": "This category is empty.",
+  "categoryDeleted": "Category \"{name}\" deleted.",
+  "@categoryDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteCategory": "Failed to delete category: {error}",
+  "@failedToDeleteCategory": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "companyLabelShort": "Company",
+  "noOrdersToInvoice": "No orders to invoice yet",
+  "companyRegisteredSuccess": "Company \"{name}\" registered successfully!",
+  "@companyRegisteredSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "authenticationErrorOccurred": "Authentication error occurred.",
+  "passwordTooWeak": "Password is too weak. Please use at least 6 characters.",
+  "emailAlreadyRegisteredAdmin": "That email is already registered. Please sign in via Admin Login or use a different email.",
+  "enterValidEmailAddress": "Please enter a valid email address.",
+  "invalidCredentialsExistingPassword": "Invalid credentials. If you already have an account, enter its existing password or sign in via Admin Login.",
+  "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
+  "deleteAction": "Delete",
+  "notificationsCentre": "Notifications",
+  "productsTitle": "Products",
+  "inStockBadge": "In Stock",
+  "readMoreShowLess": "Show less",
+  "followAction": "+ Follow",
+  "followingAction": "✓ Following",
+  "restoringSession": "Restoring session...",
+  "underPath": "Under: {path}",
+  "@underPath": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "productsSelectedOne": "{count} product selected",
+  "@productsSelectedOne": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsSelectedMany": "{count} products selected",
+  "@productsSelectedMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "variantsGenerated": "Generated {count} variant combinations with auto-calculated prices!",
+  "@variantsGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "variantsCombinationsLabel": "{count} Variant Combinations:",
+  "@variantsCombinationsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "curatedStrategy": "Curated",
+  "trendingStrategy": "Trending",
+  "crossSellStrategy": "Cross-sell",
+  "itemsWithDate": "{count} items · {date}",
+  "@itemsWithDate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plusMore": "+{count} more",
+  "@plusMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "packingManifest": "{packing} Manifest",
+  "@packingManifest": {
+    "placeholders": {
+      "packing": {
+        "type": "String"
+      }
+    }
+  },
+  "countReviews": "{count} reviews",
+  "@countReviews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryCategories": "Categories",
+  "assignedProductsLabel": "Assigned products",
+  "employeeEmailHint": "e.g. ramesh@company.com",
+  "salaryHint": "e.g. 25000",
+  "skuHint": "e.g. SKU-RED-L",
+  "mrpHint": "e.g. 999.00",
+  "sellingPriceHint": "e.g. 799.00",
+  "baseSkuHint": "e.g. PROD-HONEY-01",
+  "stockHint": "e.g. 1 or 500",
+  "unitTypeHint": "e.g. kg, pieces, box",
+  "attributeKeyHint": "e.g. Fabric / Shelf Life",
+  "attributeValueHint": "e.g. Pure Silk / 30 Days",
+  "sectionKeyHint": "e.g. Shelf Life",
+  "sectionValueHint": "e.g. 12 months",
+  "addressHouseHint": "e.g. Flat 302, Building A",
+  "addressStreetHint": "e.g. Green Valley Road, Near City Mall",
+  "invalidEmailPasswordOrCompany": "Invalid email, password, or company credentials.",
+  "invalidAdminEmailOrPassword": "Invalid admin email or password.",
+  "adminAccountDisabled": "This admin account has been disabled."
 }
