@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,8 @@ import '../../../app/routes/app_router.dart';
 import '../../../core/domain/order_pricing.dart';
 import '../../../core/domain/voucher_evaluator.dart';
 import '../../../core/models/cart_item.dart';
+import '../../../core/models/company.dart';
+import '../../../core/models/customer.dart';
 import '../../../core/models/order.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
@@ -15,22 +18,24 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../auth/auth_cubit.dart';
 import '../cart/cart_cubit.dart';
+import 'widgets/address_selector.dart';
+import 'widgets/customer_details_card.dart';
+import 'widgets/delivery_widgets.dart';
 
-/// Checkout with per-store vouchers, pincode based delivery charges and a
-/// single itemised bill (Sections 9 & 10).
+/// "Place Order" screen — used both for the cart checkout and for a direct
+/// "Buy Now" order ([directItems]).
 ///
-/// What was broken before, and how it is fixed:
-///  * the voucher was always validated against the hard-coded store
-///    `c_organic` — now each store group validates its own code;
-///  * only the **first** store in a multi-store cart was ordered and the rest
-///    was silently dropped — now one order is placed per store;
-///  * the persisted `totalAmount` ignored the discount **and** the delivery
-///    fee, so customers were charged a different amount than the receipt —
-///    now [OrderPricer] produces the bill and the order stores every line of
-///    it (`subtotal`, `discountAmount`, `deliveryCharge`, `totalAmount`);
-///  * voucher rules (min order, scope, per-user cap, global cap, first order
-///    only, expiry) were never checked — now [VoucherEvaluator] decides and
-///    explains the rejection.
+/// What it guarantees:
+///  * one order document PER SHOP (shop-wise bills and delivery types);
+///  * customer details are read-only snapshots from the user's profile;
+///  * delivery address comes from the saved addresses (max 3) and is only
+///    required when at least one shop uses Home Delivery;
+///  * a shop that does not allow home delivery auto-selects Self Pickup and
+///    shows a "Pickup From" card instead of an address;
+///  * prices/stock are re-validated against the catalogue before the order
+///    is written (price changes update the cart, short stock reduces the
+///    quantity, deleted variants are excluded as "Unavailable");
+///  * every order stores a variant snapshot per item.
 class CheckoutScreen extends StatefulWidget {
   final List<CartItem>? directItems;
   const CheckoutScreen({super.key, this.directItems});
@@ -40,12 +45,6 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _phoneCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
-  final _pincodeCtrl = TextEditingController();
-
   /// Voucher code typed per store.
   final Map<String, TextEditingController> _voucherCtrls =
       <String, TextEditingController>{};
@@ -59,68 +58,113 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   /// Pincode fee per store.
   final Map<String, double> _deliveryCharges = <String, double>{};
 
-  String _deliveryType = DeliveryType.homeDelivery;
+  /// Delivery type per store.
+  final Map<String, String> _deliveryTypes = <String, String>{};
+
+  /// Shop documents, keyed by company id.
+  final Map<String, Company> _companies = <String, Company>{};
+
+  List<AddressEntry> _addresses = const [];
+  String? _selectedAddressId;
+
+  /// Cart lines that failed re-validation (deleted product/variant).
+  final Set<String> _unavailable = <String>{};
+
+  /// Local, mutable copy for direct ("Buy Now") orders.
+  List<CartItem>? _directItems;
+
   bool _placing = false;
+  bool _loading = true;
   int _previousOrderCount = 0;
 
   bool get _isDirectBuy =>
       widget.directItems != null && widget.directItems!.isNotEmpty;
 
-  CartState _effectiveCartState(CartState cubitState) {
-    if (_isDirectBuy) {
-      return CartState(items: widget.directItems!);
-    }
-    return cubitState;
+  AuthCubit get _auth => context.read<AuthCubit>();
+
+  AppUserSnapshot get _profile {
+    final user = _auth.currentUser ?? AuthSession.currentUser;
+    return AppUserSnapshot(
+      id: user?.id ?? 'guest',
+      name: user?.name ?? '',
+      email: user?.email ?? '',
+      mobile: (user?.phone.isNotEmpty ?? false)
+          ? user!.phone
+          : (user?.mobileNumber ?? ''),
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    final user =
-        context.read<AuthCubit>().currentUser ?? AuthSession.currentUser;
-    if (user != null) {
-      if (user.name.isNotEmpty) _nameCtrl.text = user.name;
-      if (user.email.isNotEmpty) _emailCtrl.text = user.email;
-      if (user.phone.isNotEmpty) {
-        _phoneCtrl.text = user.phone;
-      } else if (user.mobileNumber.isNotEmpty) {
-        _phoneCtrl.text = user.mobileNumber;
-      }
-      final defaultAddr = user.defaultAddress;
-      if (defaultAddr != null) {
-        if (_phoneCtrl.text.isEmpty && defaultAddr.phone.isNotEmpty) {
-          _phoneCtrl.text = defaultAddr.phone;
-        }
-        _addressCtrl.text = defaultAddr.formattedAddress;
-        if (defaultAddr.pincode.isNotEmpty) {
-          _pincodeCtrl.text = defaultAddr.pincode;
-        }
-      }
+    if (_isDirectBuy) {
+      _directItems = List<CartItem>.from(widget.directItems!);
     }
-    final initialItems = _isDirectBuy
-        ? widget.directItems!
-        : context.read<CartCubit>().state.items;
-    if (_pincodeCtrl.text.isNotEmpty) {
-      _lookupDelivery(_companiesOf(CartState(items: initialItems)));
-    }
-    _loadOrderHistory(user?.id ?? '');
+    _loadAddresses();
+    _bootstrap();
   }
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
-    _emailCtrl.dispose();
-    _phoneCtrl.dispose();
-    _addressCtrl.dispose();
-    _pincodeCtrl.dispose();
     for (final c in _voucherCtrls.values) {
       c.dispose();
     }
     super.dispose();
   }
 
-  List<String> _companiesOf(CartState? state) =>
-      state?.byCompany.keys.toList() ?? const <String>[];
+  Future<void> _bootstrap() async {
+    final initialItems = _effectiveItems(
+      _isDirectBuy
+          ? CartState(items: widget.directItems!)
+          : (mounted ? context.read<CartCubit>().state : const CartState()),
+    );
+    await _loadCompanies(initialItems);
+    await _revalidate(initialItems);
+    final user = _auth.currentUser ?? AuthSession.currentUser;
+    _loadOrderHistory(user?.id ?? '');
+    if (mounted) setState(() => _loading = false);
+  }
+
+  void _loadAddresses() {
+    final user = _auth.currentUser ?? AuthSession.currentUser;
+    final addresses = List<AddressEntry>.from(user?.addresses ?? const []);
+    final defaultAddr = addresses.firstWhereOrNull((a) => a.isDefault);
+    setState(() {
+      _addresses = addresses;
+      _selectedAddressId = (defaultAddr ?? addresses.firstOrNull)?.id;
+    });
+  }
+
+  List<CartItem> _effectiveItems(CartState state) {
+    final source = _isDirectBuy ? (_directItems ?? const []) : state.items;
+    return source.where((e) => !_unavailable.contains(e.cartKey)).toList();
+  }
+
+  CartState _effectiveCartState(CartState cubitState) =>
+      CartState(items: _effectiveItems(cubitState));
+
+  Future<void> _loadCompanies(List<CartItem> items) async {
+    final companies = await repo.companies().first;
+    if (!mounted) return;
+    setState(() {
+      for (final c in companies) {
+        _companies[c.id] = c;
+      }
+      for (final item in items) {
+        _deliveryTypes.putIfAbsent(item.companyId, () {
+          final company = _companies[item.companyId];
+          if (company != null && !company.allowsHomeDelivery) {
+            return DeliveryType.selfPickup;
+          }
+          return DeliveryType.homeDelivery;
+        });
+      }
+    });
+    final addr = _selectedAddress();
+    if (addr != null && addr.pincode.isNotEmpty) {
+      await _lookupDelivery(_companiesOf(CartState(items: items)));
+    }
+  }
 
   Future<void> _loadOrderHistory(String userId) async {
     if (userId.isEmpty) return;
@@ -129,16 +173,124 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     setState(() => _previousOrderCount = previous.length);
   }
 
+  AddressEntry? _selectedAddress() => _addresses
+      .firstWhereOrNull((a) => a.id == _selectedAddressId);
+
+  List<String> _companiesOf(CartState? state) =>
+      state?.byCompany.keys.toList() ?? const <String>[];
+
   Future<void> _lookupDelivery(List<String> companyIds) async {
-    final pincode = _pincodeCtrl.text.trim();
+    final pincode = _selectedAddress()?.pincode ?? '';
     final charges = <String, double>{};
     for (final companyId in companyIds) {
+      if (_deliveryTypes[companyId] != DeliveryType.homeDelivery) {
+        charges[companyId] = 0;
+        continue;
+      }
       final charge = await repo.deliveryCharge(pincode, companyId);
       charges[companyId] = charge?.charge ?? 0;
     }
     if (!mounted) return;
     setState(() => _deliveryCharges.addAll(charges));
   }
+
+  // ------------------------------------------------------- Re-validation --
+
+  /// Pulls the latest price/stock for every line before checkout and before
+  /// the order is placed (Fix 5).
+  Future<void> _revalidate(List<CartItem> items) async {
+    final messages = <String>[];
+    final updates = <CartItem>[];
+
+    for (final item in items) {
+      final latest = await repo.product(item.product.id);
+      if (latest == null) {
+        _unavailable.add(item.cartKey);
+        messages.add('${item.product.name} is unavailable');
+        continue;
+      }
+
+      final vid = item.variant?.variantId ?? '';
+      if (vid.isNotEmpty) {
+        final v = latest.variants.firstWhereOrNull(
+          (v) => v.variantId == vid || v.sku == vid,
+        );
+        if (v == null) {
+          _unavailable.add(item.cartKey);
+          messages.add(
+            '${item.product.name} (${item.variantLabel}) is unavailable',
+          );
+          continue;
+        }
+        final snap = VariantSnapshot.fromVariant(latest, v);
+        var qty = item.qty;
+        if (!snap.isUnlimitedStock && snap.stock < qty) {
+          qty = snap.stock < 0 ? 0 : snap.stock;
+          if (qty == 0) {
+            _unavailable.add(item.cartKey);
+            messages.add('${item.product.name} is out of stock');
+            continue;
+          }
+          messages.add(
+            '${item.product.name}: quantity reduced to $qty (stock)',
+          );
+        }
+        if ((snap.price - item.effectivePrice).abs() > 0.001) {
+          messages.add('Price updated for ${item.product.name}');
+        }
+        if (qty != item.qty ||
+            (snap.price - item.effectivePrice).abs() > 0.001) {
+          updates.add(
+            item.copyWith(qty: qty, variant: snap),
+          );
+        }
+      } else {
+        final snap = VariantSnapshot.fromProduct(latest);
+        var qty = item.qty;
+        if (!snap.isUnlimitedStock && snap.stock < qty) {
+          qty = snap.stock < 0 ? 0 : snap.stock;
+          if (qty == 0) {
+            _unavailable.add(item.cartKey);
+            messages.add('${item.product.name} is out of stock');
+            continue;
+          }
+          messages.add(
+            '${item.product.name}: quantity reduced to $qty (stock)',
+          );
+        }
+        if ((snap.price - item.effectivePrice).abs() > 0.001) {
+          messages.add('Price updated for ${item.product.name}');
+        }
+        if (qty != item.qty ||
+            (snap.price - item.effectivePrice).abs() > 0.001) {
+          updates.add(item.copyWith(qty: qty, variant: snap));
+        }
+      }
+    }
+
+    if (!mounted) return;
+    if (updates.isNotEmpty) {
+      if (_isDirectBuy) {
+        setState(() {
+          _directItems = [
+            for (final e in _directItems ?? const <CartItem>[])
+              updates.firstWhereOrNull((u) => u.cartKey == e.cartKey) ?? e,
+          ];
+        });
+      } else {
+        final cart = context.read<CartCubit>();
+        for (final u in updates) {
+          cart.replaceItem(u);
+        }
+      }
+    }
+    if (messages.isNotEmpty) {
+      setState(() {});
+      _snack(messages.join(' · '));
+    }
+  }
+
+  // ------------------------------------------------------------- Vouchers --
 
   Future<void> _applyVoucher(String companyId, List<CartItem> items) async {
     final controller = _voucherCtrls[companyId];
@@ -153,7 +305,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    final userId = context.read<AuthCubit>().currentUser?.id ?? '';
+    final userId = _profile.id;
     final voucher = await repo.voucherByCode(companyId, code);
     if (!mounted) return;
 
@@ -196,7 +348,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
-  /// Builds one bill per store from the current cart + state.
+  // ---------------------------------------------------------------- Bills --
+
+  /// Builds one bill per store from the current items + state.
   Map<String, OrderBill> _bills(CartState state) {
     final bills = <String, OrderBill>{};
     for (final entry in state.byCompany.entries) {
@@ -207,10 +361,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         items: items,
         voucher: _applied[entry.key],
         deliveryCharge: _deliveryCharges[entry.key] ?? 0,
-        deliveryRequired: _deliveryType == DeliveryType.homeDelivery,
+        deliveryRequired:
+            _deliveryTypes[entry.key] == DeliveryType.homeDelivery,
         context: VoucherContext(
           now: DateTime.now(),
-          userId: context.read<AuthCubit>().currentUser?.id ?? '',
+          userId: _profile.id,
           previousOrderCount: _previousOrderCount,
         ),
       );
@@ -218,35 +373,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return bills;
   }
 
+  // ------------------------------------------------------------ Placing ---
+
   Future<void> _placeOrder(CartState state) async {
     final l10n = AppLocalizations.of(context);
+    if (state.items.isEmpty || _placing) return;
 
-    if (state.items.isEmpty) return;
+    final profile = _profile;
 
-    final name = _nameCtrl.text.trim();
-    final email = _emailCtrl.text.trim();
-    final phone = _phoneCtrl.text.trim();
-    final address = _addressCtrl.text.trim();
-    final pincode = _pincodeCtrl.text.trim();
+    // 1. Customer name & mobile are mandatory for every order.
+    if (profile.name.trim().isEmpty || profile.mobile.trim().isEmpty) {
+      _snack(
+        'Please complete your profile (name & mobile) before placing an order.',
+      );
+      return;
+    }
 
-    if (name.isEmpty) {
-      _snack('Please enter your name.');
-      return;
-    }
-    if (phone.isEmpty) {
-      _snack('Please enter your mobile number.');
-      return;
-    }
-    if (email.isNotEmpty && !email.contains('@')) {
-      _snack('Please enter a valid email address.');
-      return;
-    }
-    if (address.isEmpty) {
-      _snack('Please enter a delivery address.');
-      return;
-    }
-    if (!RegExp(r'^\d{4,8}$').hasMatch(pincode)) {
-      _snack('Please enter a valid pincode.');
+    // 2. Address is required only for shops with Home Delivery.
+    final needsAddress = state.byCompany.keys.any(
+      (companyId) =>
+          _deliveryTypes[companyId] == DeliveryType.homeDelivery,
+    );
+    final address = _selectedAddress();
+    if (needsAddress && address == null) {
+      _snack('Please select a delivery address.');
       return;
     }
 
@@ -258,24 +408,56 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    final user = context.read<AuthCubit>().currentUser;
     setState(() => _placing = true);
 
     try {
-      final bills = _bills(state);
+      // 3. Re-check prices/stock and the shop delivery settings at submit.
+      await _revalidate(state.items);
+      if (!mounted) return;
+      final latestItems = _effectiveItems(state);
+      if (latestItems.isEmpty) {
+        setState(() => _placing = false);
+        _snack('No order items are available.');
+        return;
+      }
+
+      final bills = _bills(CartState(items: latestItems));
       final placed = <Order>[];
 
-      for (final entry in state.byCompany.entries) {
-        final bill = bills[entry.key];
-        if (bill == null) continue;
+      for (final entry in CartState(items: latestItems).byCompany.entries) {
+        final companyId = entry.key;
+        final bill = bills[companyId];
+        if (bill == null || bill.lines.isEmpty) continue;
+
+        // The shop may have changed its delivery settings since load.
+        final company = await repo.company(companyId) ?? _companies[companyId];
+        var deliveryType =
+            _deliveryTypes[companyId] ?? DeliveryType.homeDelivery;
+        if (deliveryType == DeliveryType.homeDelivery &&
+            company != null &&
+            !company.allowsHomeDelivery) {
+          deliveryType = DeliveryType.selfPickup;
+        }
+
+        final isHome = deliveryType == DeliveryType.homeDelivery;
+        final pickupCard = isHome
+            ? null
+            : (company != null
+                  ? PickupShopCard.fromCompany(company)
+                  : PickupShopCard(
+                      shopName: bill.companyName,
+                      address: '',
+                      phone: '',
+                      timings: '',
+                    ));
 
         final order = Order(
           id: '',
-          userId: user?.id ?? 'guest',
-          customerName: name,
-          customerEmail: email,
-          customerPhone: phone,
-          companyId: entry.key,
+          userId: profile.id,
+          customerName: profile.name,
+          customerEmail: profile.email,
+          customerPhone: profile.mobile,
+          companyId: companyId,
           companyName: bill.companyName,
           items: bill.lines
               .map(
@@ -287,7 +469,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   image: line.image,
                   variantTitle: line.variantTitle,
                   variantSku: line.variantSku,
-                  variantAttributes: line.variantAttributes,
+                  variantLabel: line.displayLabel,
+                  unitValue: line.unitValue,
+                  unitType: line.unitType,
+                  mrp: line.mrp,
                 ),
               )
               .toList(),
@@ -295,17 +480,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           discountAmount: bill.discount,
           deliveryCharge: bill.deliveryCharge,
           totalAmount: bill.total,
-          address: address,
-          pincode: pincode,
+          // Address snapshot for home delivery; nothing for self pickup.
+          address: isHome ? (address?.formattedAddress ?? '') : '',
+          pincode: isHome ? (address?.pincode ?? '') : '',
+          pickupShop: pickupCard?.toSnapshot(),
           voucherId: bill.voucher?.id,
           voucherCode: bill.voucher?.code ?? '',
           paymentStatus: PaymentStatus.pending,
           orderStatus: OrderStatus.pending,
-          deliveryType: _deliveryType,
+          deliveryType: deliveryType,
         );
-        final savedOrder = await repo.placeOrder(order);
-        placed.add(savedOrder);
-        // Send / trigger order placed email notification to ayush123@gmail.com
+        placed.add(order);
+      }
+
+      if (placed.isEmpty) {
+        setState(() => _placing = false);
+        _snack('No order items are available.');
+        return;
+      }
+
+      // One write for every shop's order — never a half-saved checkout.
+      final saved = await repo.placeOrders(placed);
+      for (final savedOrder in saved) {
+        // Send / trigger order placed email notification.
         EmailService.sendOrderPlacedEmail(order: savedOrder);
       }
 
@@ -316,8 +513,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.orderPlaced)));
-      if (placed.length == 1) {
-        context.go(AppRoutes.orderPath(placed.first.id));
+      if (saved.length == 1) {
+        context.go(AppRoutes.orderPath(saved.first.id));
       } else {
         context.go(AppRoutes.orders);
       }
@@ -334,16 +531,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  // ---------------------------------------------------------------- UI ----
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isDirectBuy ? 'Direct Order Details' : l10n.checkout),
-      ),
+      appBar: AppBar(title: const Text('Place Order')),
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, cubitState) {
+          if (_loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
           final cartState = _effectiveCartState(cubitState);
           if (cartState.items.isEmpty) {
             return Center(
@@ -368,6 +568,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             _voucherCtrls.putIfAbsent(companyId, TextEditingController.new);
           }
           final bills = _bills(cartState);
+          final profile = _profile;
 
           final subtotal = bills.values.fold<double>(
             0,
@@ -383,138 +584,63 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           );
           final total = bills.values.fold<double>(0, (sum, b) => sum + b.total);
 
+          final anyHomeDelivery = companies.any(
+            (id) => _deliveryTypes[id] == DeliveryType.homeDelivery,
+          );
+          final anyUnavailable = cartState.items.any(
+            (e) => _unavailable.contains(e.cartKey),
+          ) || _unavailable.isNotEmpty;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.person_pin_outlined,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Customer & Delivery Details',
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      TextField(
-                        key: const Key('checkout-name-field'),
-                        controller: _nameCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Full Name *',
-                          prefixIcon: Icon(Icons.person_outline),
-                          isDense: true,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        key: const Key('checkout-phone-field'),
-                        controller: _phoneCtrl,
-                        keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: 'Mobile Number *',
-                          prefixIcon: Icon(Icons.phone_outlined),
-                          isDense: true,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        key: const Key('checkout-email-field'),
-                        controller: _emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Email Address (Optional)',
-                          prefixIcon: Icon(Icons.email_outlined),
-                          isDense: true,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        key: const Key('checkout-address-field'),
-                        controller: _addressCtrl,
-                        decoration: InputDecoration(
-                          labelText: '${l10n.address} *',
-                          prefixIcon: const Icon(Icons.home_outlined),
-                          isDense: true,
-                          border: const OutlineInputBorder(),
-                        ),
-                        maxLines: 2,
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        key: const Key('checkout-pincode-field'),
-                        controller: _pincodeCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Pincode *',
-                          prefixIcon: const Icon(Icons.pin_drop_outlined),
-                          isDense: true,
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.search),
-                            tooltip: 'Check delivery',
-                            onPressed: () => _lookupDelivery(companies),
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (value.trim().length >= 4) {
-                            _lookupDelivery(companies);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+              // ------------------------------------------- Customer details
+              CustomerDetailsCard(
+                name: profile.name,
+                email: profile.email,
+                mobile: profile.mobile,
               ),
               const SizedBox(height: 16),
-              Text(
-                l10n.deliveryCharge,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(
-                    value: DeliveryType.homeDelivery,
-                    label: Text('Home delivery'),
-                  ),
-                  ButtonSegment(
-                    value: DeliveryType.selfPickup,
-                    label: Text('Self pickup'),
-                  ),
-                ],
-                selected: {_deliveryType},
-                onSelectionChanged: (s) =>
-                    setState(() => _deliveryType = s.first),
-              ),
-              const SizedBox(height: 16),
+
+              // --------------------------------------------- Saved addresses
+              if (anyHomeDelivery) ...[
+                AddressSelector(
+                  addresses: _addresses,
+                  selectedAddressId: _selectedAddressId,
+                  onSelected: (address) {
+                    setState(() => _selectedAddressId = address.id);
+                    _lookupDelivery(companies);
+                  },
+                  onEdit: (address) async {
+                    await showAddressForm(context, initial: address);
+                    if (!mounted) return;
+                    _loadAddresses();
+                  },
+                  onAddNew: () async {
+                    await showAddressForm(context);
+                    if (!mounted) return;
+                    _loadAddresses();
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // ------------------------------------------- Shop-wise blocks
               for (final companyId in companies) ...[
                 _StoreCheckoutCard(
                   key: Key('checkout-store-card-$companyId'),
                   companyId: companyId,
-                  items: cartState.byCompany[companyId] ?? const <CartItem>[],
+                  company: _companies[companyId],
+                  items:
+                      cartState.byCompany[companyId] ?? const <CartItem>[],
                   bill: bills[companyId],
+                  deliveryType:
+                      _deliveryTypes[companyId] ?? DeliveryType.homeDelivery,
+                  onDeliveryTypeChanged: (type) {
+                    setState(() => _deliveryTypes[companyId] = type);
+                    _lookupDelivery([companyId]);
+                  },
+                  unavailableKeys: _unavailable,
                   voucherCtrl: _voucherCtrls[companyId]!,
                   voucherError: _voucherError[companyId],
                   onApply: () => _applyVoucher(
@@ -526,6 +652,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 const SizedBox(height: 12),
               ],
+
+              if (anyUnavailable)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'Unavailable items are excluded from the total.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+
+              // --------------------------------------------------- Summary
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -652,11 +792,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 }
 
-/// One store's items, voucher box and bill.
+/// Lightweight profile snapshot used while ordering.
+class AppUserSnapshot {
+  final String id;
+  final String name;
+  final String email;
+  final String mobile;
+
+  const AppUserSnapshot({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.mobile,
+  });
+}
+
+/// One store's items, delivery type, voucher box and bill.
 class _StoreCheckoutCard extends StatelessWidget {
   final String companyId;
+  final Company? company;
   final List<CartItem> items;
   final OrderBill? bill;
+  final String deliveryType;
+  final ValueChanged<String> onDeliveryTypeChanged;
+  final Set<String> unavailableKeys;
   final TextEditingController voucherCtrl;
   final String? voucherError;
   final VoidCallback onApply;
@@ -666,8 +825,12 @@ class _StoreCheckoutCard extends StatelessWidget {
   const _StoreCheckoutCard({
     super.key,
     required this.companyId,
+    required this.company,
     required this.items,
     required this.bill,
+    required this.deliveryType,
+    required this.onDeliveryTypeChanged,
+    required this.unavailableKeys,
     required this.voucherCtrl,
     required this.onApply,
     required this.onRemove,
@@ -681,7 +844,8 @@ class _StoreCheckoutCard extends StatelessWidget {
     final resolvedBill = bill;
     final storeName = items.isNotEmpty && items.first.companyName.isNotEmpty
         ? items.first.companyName
-        : 'Store';
+        : (company?.name.isNotEmpty == true ? company!.name : 'Store');
+    final isHome = deliveryType == DeliveryType.homeDelivery;
 
     return Card(
       child: Padding(
@@ -696,6 +860,7 @@ class _StoreCheckoutCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     storeName,
+                    key: Key('checkout-store-name-$companyId'),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -703,25 +868,29 @@ class _StoreCheckoutCard extends StatelessWidget {
               ],
             ),
             const Divider(height: 16),
-            for (final item in items)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${item.product.name} × ${item.qty}',
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ),
-                    Text(
-                      formatCurrency(item.lineTotal),
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ],
-                ),
+            for (final item in items) _itemRow(context, item),
+            const SizedBox(height: 12),
+
+            // Per-shop delivery type, honouring the shop's settings.
+            DeliveryTypeSelector(
+              company: company,
+              value: deliveryType,
+              onChanged: onDeliveryTypeChanged,
+            ),
+            const SizedBox(height: 12),
+
+            // Self pickup: no address needed — where to collect instead.
+            if (!isHome && company != null)
+              PickupShopCard.fromCompany(company!)
+            else if (!isHome)
+              const PickupShopCard(
+                shopName: 'Store',
+                address: '',
+                phone: '',
+                timings: '',
               ),
-            const SizedBox(height: 10),
+            if (!isHome) const SizedBox(height: 12),
+
             Row(
               children: [
                 Expanded(
@@ -778,6 +947,83 @@ class _StoreCheckoutCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  /// One order line: image, name, variant label ("500g × 2") and price.
+  Widget _itemRow(BuildContext context, CartItem item) {
+    final unavailable = unavailableKeys.contains(item.cartKey);
+    final label = item.variantLabel.isNotEmpty
+        ? '${item.variantLabel} × ${item.qty}'
+        : '× ${item.qty}';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          if (item.product.images.isNotEmpty &&
+              item.product.images.first.trim().isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.network(
+                item.product.images.first.trim(),
+                width: 32,
+                height: 32,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 18,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+          else
+            const Icon(
+              Icons.shopping_bag_outlined,
+              size: 18,
+              color: Colors.grey,
+            ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.product.name,
+                  style: TextStyle(
+                    fontSize: 13,
+                    decoration: unavailable
+                        ? TextDecoration.lineThrough
+                        : null,
+                  ),
+                ),
+                Text(
+                  label,
+                  key: Key('checkout-item-variant-${item.cartKey}'),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                if (unavailable)
+                  Text(
+                    'Unavailable',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Text(
+            formatCurrency(item.lineTotal),
+            style: const TextStyle(fontSize: 13),
+          ),
+        ],
       ),
     );
   }

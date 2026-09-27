@@ -5,6 +5,7 @@ import 'package:myshop/app/theme/app_theme.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
+import '../../../core/domain/cart_calculator.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/models/company.dart';
 import '../../../core/services/service_locator.dart';
@@ -17,11 +18,12 @@ import 'wishlist_cubit.dart';
 /// Cart grouped by company (Section 3 / multi-company cart support).
 ///
 /// The line-item card shows everything a shopper needs to decide without
-/// opening the product page: thumbnail, variant subtext, the real purchasing
-/// unit on the stepper ("– 500 g +"), a stock warning when the shelf is
-/// almost bare, and a live subtotal. Swiping a card left removes it — with
-/// "Move to Wishlist" and "Undo" offered in the snackbar so a mis-swipe
-/// never loses the item for good.
+/// opening the product page: thumbnail, variant label, the price of ONE pack
+/// ("₹300 / 500g" — always from the cart item's variant snapshot, never the
+/// product default), the MRP with strikethrough, a quantity stepper with the
+/// pack unit ("× 500g") and the converted total ("Total: 1 kg"). Swiping a
+/// card left removes it — with "Move to Wishlist" and "Undo" offered in the
+/// snackbar so a mis-swipe never loses the item for good.
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
@@ -200,6 +202,8 @@ class CartScreen extends StatelessWidget {
   Widget _checkoutBar(BuildContext context, CartState state) {
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    const calc = CartCalculator();
+    final summary = calc.summary(state.items);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -213,17 +217,53 @@ class CartScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.totalAmount,
-                    style: const TextStyle(color: Colors.grey),
+                  Row(
+                    children: [
+                      Text(
+                        l10n.totalAmount,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      if (summary.totalDiscount > 0) ...[
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'You save ${formatCurrency(summary.totalDiscount)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  Text(
-                    formatCurrency(state.totalAmount),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : const Color(0xFF0F172A),
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        formatCurrency(summary.grandTotal),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      if (summary.totalDiscount > 0) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          formatCurrency(summary.totalMrp),
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            color: Colors.grey,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -250,20 +290,14 @@ class _CartLineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<CartCubit>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final variantSku = item.variant?.sku ?? '';
-    final variantTitle = item.variant?.title ?? '';
     final canAdd = item.qty < item.maxQty;
+    final canRemove = item.qty > 1;
     final stockWarning = item.stockWarningLabel();
     final hasImage =
         item.product.images.isNotEmpty &&
         item.product.images.first.trim().isNotEmpty;
 
-    void removeLine() => cubit.remove(
-      companyId,
-      item.product.id,
-      variantSku: variantSku,
-      variantTitle: variantTitle,
-    );
+    void removeLine() => cubit.removeByCartKey(item.cartKey);
 
     return Dismissible(
       key: Key('cart-line-${item.cartKey}'),
@@ -383,51 +417,67 @@ class _CartLineCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
 
-                  // Variant subtext (e.g. "Size M, Red") / pack size.
-                  Text(
-                    item.subLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
+                  // Variant label (e.g. "500g") / pack size.
+                  if (item.subLabel.isNotEmpty) ...[
+                    Text(
+                      item.subLabel,
+                      key: Key('cart-variant-${item.cartKey}'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
+                    const SizedBox(height: 6),
+                  ],
 
-                  // Unit price, small and muted, above the stepper row.
-                  Text(
-                    _unitPriceLabel,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
-                    ),
+                  // Unit price of ONE pack + strikethrough MRP — always
+                  // driven by the variant snapshot ("₹300 / 500g").
+                  Row(
+                    children: [
+                      Text(
+                        _unitPriceLabel,
+                        key: Key('unit-price-${item.cartKey}'),
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                      if (item.effectiveMrp > item.effectivePrice) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          formatCurrency(item.effectiveMrp),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? const Color(0xFF64748B)
+                                : const Color(0xFF94A3B8),
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 8),
 
-                  // Stepper (unit-aware) + stock chip + live line subtotal.
+                  // Stepper (quantity of packs) + unit chip + live subtotal.
                   Row(
                     children: [
                       _Stepper(
-                        label: item.stepperLabel,
+                        qtyLabel: item.stepperLabel,
+                        unitLabel: item.stepperUnitLabel,
+                        cartKey: item.cartKey,
                         canAdd: canAdd && item.isInStock,
+                        canRemove: canRemove,
                         isDark: isDark,
-                        onRemove: () => cubit.decrement(
-                          companyId,
-                          item.product.id,
-                          variantSku: variantSku,
-                          variantTitle: variantTitle,
-                        ),
-                        onAdd: () => cubit.increment(
-                          companyId,
-                          item.product.id,
-                          variantSku: variantSku,
-                          variantTitle: variantTitle,
-                        ),
+                        onRemove: () =>
+                            cubit.decrementByCartKey(item.cartKey),
+                        onAdd: () => cubit.incrementByCartKey(item.cartKey),
                       ),
                       if (stockWarning != null) ...[
                         const SizedBox(width: 8),
@@ -467,6 +517,23 @@ class _CartLineCard extends StatelessWidget {
                     ],
                   ),
 
+                  // "Total: 1 kg" — packs converted for readability.
+                  if (item.totalUnitLabel.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        'Total: ${item.totalUnitLabel}',
+                        key: Key('cart-total-unit-${item.cartKey}'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+
                   if (!item.isInStock)
                     const Padding(
                       padding: EdgeInsets.only(top: 4),
@@ -493,13 +560,11 @@ class _CartLineCard extends StatelessWidget {
     child: const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
   );
 
-  /// "₹48 per 500 g" / "₹68 each" — the price of ONE stepper step.
+  /// "₹300 / 500g" — the price of ONE stepper step, taken from the variant
+  /// snapshot on the cart item (never the product's default variant).
   String get _unitPriceLabel {
     final price = formatCurrency(item.effectivePrice, symbol: '₹');
-    if (item.product.type == 'weight_based' && item.product.unit > 0) {
-      return '$price per ${CartItem.formatAmount(item.product.unit, item.product.unitType)}';
-    }
-    return '$price each';
+    return '$price ${item.unitPriceLine}';
   }
 
   /// Removes the line and immediately offers the way to keep the product.
@@ -538,17 +603,23 @@ class _CartLineCard extends StatelessWidget {
   }
 }
 
-/// "– 500 g +" stepper whose middle label is the product's real unit.
+/// "– 2 +" quantity stepper with the pack unit ("× 500g") beside the count.
 class _Stepper extends StatelessWidget {
-  final String label;
+  final String qtyLabel;
+  final String unitLabel;
+  final String cartKey;
   final bool canAdd;
+  final bool canRemove;
   final bool isDark;
   final VoidCallback onRemove;
   final VoidCallback onAdd;
 
   const _Stepper({
-    required this.label,
+    required this.qtyLabel,
+    required this.unitLabel,
+    required this.cartKey,
     required this.canAdd,
+    required this.canRemove,
     required this.isDark,
     required this.onRemove,
     required this.onAdd,
@@ -557,6 +628,7 @@ class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = isDark ? Colors.white70 : const Color(0xFF475569);
+    final dim = isDark ? Colors.white24 : const Color(0xFFCBD5E1);
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppTheme.surfaceDark : const Color(0xFFF8FAFC),
@@ -569,23 +641,24 @@ class _Stepper extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           InkWell(
-            onTap: onRemove,
+            onTap: canRemove ? onRemove : null,
+            key: Key('stepper-minus-$cartKey'),
             borderRadius: const BorderRadius.horizontal(
               left: Radius.circular(8),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-              child: Icon(Icons.remove, size: 16, color: fg),
+              child: Icon(Icons.remove, size: 16, color: canRemove ? fg : dim),
             ),
           ),
           ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 46),
+            constraints: const BoxConstraints(minWidth: 24),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Text(
-                label,
+                qtyLabel,
                 textAlign: TextAlign.center,
-                key: Key('stepper-label-$label'),
+                key: Key('stepper-qty-$cartKey'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
@@ -596,20 +669,29 @@ class _Stepper extends StatelessWidget {
           ),
           InkWell(
             onTap: canAdd ? onAdd : null,
+            key: Key('stepper-plus-$cartKey'),
             borderRadius: const BorderRadius.horizontal(
               right: Radius.circular(8),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-              child: Icon(
-                Icons.add,
-                size: 16,
-                color: canAdd
-                    ? fg
-                    : (isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
-              ),
+              child: Icon(Icons.add, size: 16, color: canAdd ? fg : dim),
             ),
           ),
+          if (unitLabel.isNotEmpty) ...[
+            const SizedBox(width: 6),
+            Text(
+              unitLabel,
+              key: Key('stepper-unit-$cartKey'),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
+              ),
+            ),
+          ],
         ],
       ),
     );

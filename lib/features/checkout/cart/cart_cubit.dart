@@ -12,6 +12,10 @@ class CartState {
   int get totalItems => items.fold(0, (sum, e) => sum + e.qty);
   double get totalAmount => items.fold(0.0, (sum, e) => sum + e.lineTotal);
 
+  /// Sum of the (strikethrough) MRP totals of every line.
+  double get totalMrpAmount =>
+      items.fold(0.0, (sum, e) => sum + e.lineMrpTotal);
+
   /// Items grouped by company (Section 3 / multi-company cart).
   Map<String, List<CartItem>> get byCompany {
     final map = <String, List<CartItem>>{};
@@ -29,6 +33,11 @@ class CartState {
       CartState(items: items ?? this.items);
 }
 
+/// In-memory cart keyed by `productId_variantId`.
+///
+/// The same product + variant merges into one row (quantity increases), while
+/// two variants of one product are two rows. Quantities are always capped by
+/// the variant's stock snapshot.
 class CartCubit extends Cubit<CartState> {
   CartCubit() : super(const CartState());
 
@@ -43,32 +52,80 @@ class CartCubit extends Cubit<CartState> {
     final items = [...state.items];
     final resolvedCompanyId = companyId ?? company?.id ?? product.companyId;
     final resolvedCompanyName = companyName ?? company?.name ?? '';
-    final targetSku = variant?.sku ?? '';
-    final targetTitle = variant?.title ?? '';
+
+    final line = CartItem.fromSelection(
+      companyId: resolvedCompanyId,
+      companyName: resolvedCompanyName,
+      product: product,
+      selectedVariant: variant,
+      qty: qty,
+    );
 
     final i = items.indexWhere(
-      (e) =>
-          e.product.id == product.id &&
-          e.companyId == resolvedCompanyId &&
-          (e.variant?.sku ?? '') == targetSku &&
-          (e.variant?.title ?? '') == targetTitle,
+      (e) => e.cartKey == line.cartKey && e.companyId == resolvedCompanyId,
     );
     if (i != -1) {
-      items[i] = items[i].copyWith(
-        qty: items[i].qty + qty,
-        variant: variant ?? items[i].variant,
-      );
+      // Same product + same variant: grow the quantity instead of duplicating.
+      final existing = items[i];
+      final maxQty = existing.maxQty;
+      final next = existing.qty + qty;
+      items[i] = existing.copyWith(qty: next > maxQty ? maxQty : next);
     } else {
-      items.add(
-        CartItem(
-          companyId: resolvedCompanyId,
-          companyName: resolvedCompanyName,
-          product: product,
-          variant: variant,
-          qty: qty,
-        ),
-      );
+      final maxQty = line.maxQty;
+      items.add(line.copyWith(qty: qty > maxQty ? maxQty : qty));
     }
+    emit(state.copyWith(items: items));
+  }
+
+  /// True when [cartKey] is not already a row of the cart.
+  bool contains(String cartKey) =>
+      state.items.any((e) => e.cartKey == cartKey);
+
+  CartItem? byKey(String cartKey) {
+    for (final e in state.items) {
+      if (e.cartKey == cartKey) return e;
+    }
+    return null;
+  }
+
+  /// +1 (clamped to the variant's stock).
+  void incrementByCartKey(String cartKey) {
+    final items = state.items
+        .map(
+          (e) => e.cartKey == cartKey && e.qty < e.maxQty
+              ? e.copyWith(qty: e.qty + 1)
+              : e,
+        )
+        .toList();
+    emit(state.copyWith(items: items));
+  }
+
+  /// −1 (no-op at quantity 1 — removing is an explicit action).
+  void decrementByCartKey(String cartKey) {
+    final items = state.items
+        .map(
+          (e) => e.cartKey == cartKey && e.qty > 1
+              ? e.copyWith(qty: e.qty - 1)
+              : e,
+        )
+        .toList();
+    emit(state.copyWith(items: items));
+  }
+
+  void removeByCartKey(String cartKey) {
+    emit(
+      state.copyWith(
+        items: state.items.where((e) => e.cartKey != cartKey).toList(),
+      ),
+    );
+  }
+
+  /// Replaces one line with [updated] (same cart key) — used by the checkout
+  /// price/stock re-validation to sync the cart with the latest catalogue.
+  void replaceItem(CartItem updated) {
+    final items = state.items
+        .map((e) => e.cartKey == updated.cartKey ? updated : e)
+        .toList();
     emit(state.copyWith(items: items));
   }
 
@@ -78,19 +135,8 @@ class CartCubit extends Cubit<CartState> {
     String variantSku = '',
     String variantTitle = '',
   }) {
-    final items = state.items
-        .map(
-          (e) =>
-              e.companyId == companyId &&
-                  e.product.id == productId &&
-                  (e.variant?.sku ?? '') == variantSku &&
-                  (variantTitle.isEmpty ||
-                      (e.variant?.title ?? '') == variantTitle)
-              ? e.copyWith(qty: e.qty + 1)
-              : e,
-        )
-        .toList();
-    emit(state.copyWith(items: items));
+    final key = _resolveKey(companyId, productId, variantSku, variantTitle);
+    if (key != null) incrementByCartKey(key);
   }
 
   void decrement(
@@ -99,18 +145,8 @@ class CartCubit extends Cubit<CartState> {
     String variantSku = '',
     String variantTitle = '',
   }) {
-    final items = <CartItem>[];
-    for (final e in state.items) {
-      if (e.companyId == companyId &&
-          e.product.id == productId &&
-          (e.variant?.sku ?? '') == variantSku &&
-          (variantTitle.isEmpty || (e.variant?.title ?? '') == variantTitle)) {
-        if (e.qty > 1) items.add(e.copyWith(qty: e.qty - 1));
-      } else {
-        items.add(e);
-      }
-    }
-    emit(state.copyWith(items: items));
+    final key = _resolveKey(companyId, productId, variantSku, variantTitle);
+    if (key != null) decrementByCartKey(key);
   }
 
   void remove(
@@ -119,17 +155,41 @@ class CartCubit extends Cubit<CartState> {
     String variantSku = '',
     String variantTitle = '',
   }) {
-    final items = state.items
-        .where(
-          (e) =>
-              !(e.companyId == companyId &&
-                  e.product.id == productId &&
-                  (e.variant?.sku ?? '') == variantSku &&
-                  (variantTitle.isEmpty ||
-                      (e.variant?.title ?? '') == variantTitle)),
-        )
-        .toList();
-    emit(state.copyWith(items: items));
+    final key = _resolveKey(companyId, productId, variantSku, variantTitle);
+    if (key != null) {
+      removeByCartKey(key);
+    } else {
+      // Fallback: remove every row of that product in the company.
+      emit(
+        state.copyWith(
+          items: state.items
+              .where(
+                (e) =>
+                    !(e.companyId == companyId && e.product.id == productId),
+              )
+              .toList(),
+        ),
+      );
+    }
+  }
+
+  String? _resolveKey(
+    String companyId,
+    String productId,
+    String variantSku,
+    String variantTitle,
+  ) {
+    for (final e in state.items) {
+      if (e.companyId != companyId || e.product.id != productId) continue;
+      if (variantSku.isEmpty && variantTitle.isEmpty) return e.cartKey;
+      final id = e.variant?.variantId ?? '';
+      final label = e.variant?.label ?? '';
+      if ((variantSku.isEmpty || id == variantSku) &&
+          (variantTitle.isEmpty || label == variantTitle)) {
+        return e.cartKey;
+      }
+    }
+    return null;
   }
 
   void clear() => emit(const CartState());

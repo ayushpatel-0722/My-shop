@@ -50,18 +50,63 @@ class DeliveryType {
   static const all = <String>[homeDelivery, selfPickup];
 }
 
+/// Snapshot of the shop the customer picks a self-pickup order up from.
+class PickupShop {
+  final String name;
+  final String address;
+  final String phone;
+  final String timings;
+
+  const PickupShop({
+    this.name = '',
+    this.address = '',
+    this.phone = '',
+    this.timings = '',
+  });
+
+  factory PickupShop.fromMap(Map<String, dynamic> map) => PickupShop(
+    name: map['name']?.toString() ?? '',
+    address: map['address']?.toString() ?? '',
+    phone: map['phone']?.toString() ?? '',
+    timings: map['timings']?.toString() ?? '',
+  );
+
+  Map<String, dynamic> toMap() => {
+    'name': name,
+    'address': address,
+    'phone': phone,
+    'timings': timings,
+  };
+
+  @override
+  String toString() => 'PickupShop($name)';
+}
+
 /// One line of an order.
 ///
 /// `name`, `image` and `unitPrice` are snapshots taken at checkout: editing or
-/// deleting the product later must not rewrite a customer's past orders.
+/// deleting the product later must not rewrite a customer's past orders. The
+/// variant snapshot (`variantLabel`, `unitValue`, `unitType`, `mrp`) is frozen
+/// the same way so receipts always say "500g × 2" with the price of that
+/// variant.
 class OrderItem {
   final String productId;
   final int qty;
   final double unitPrice;
   final String name;
   final String image;
+
+  /// Variant identity + display label (e.g. "500g").
   final String variantTitle;
   final String variantSku;
+  final String variantLabel;
+
+  /// Size of ONE unit of the variant (500 of "500 g").
+  final double unitValue;
+  final String unitType;
+
+  /// List price (MRP) of the variant at order time.
+  final double mrp;
   final Map<String, String> variantAttributes;
 
   const OrderItem({
@@ -72,10 +117,32 @@ class OrderItem {
     this.image = '',
     this.variantTitle = '',
     this.variantSku = '',
+    this.variantLabel = '',
+    this.unitValue = 0,
+    this.unitType = '',
+    this.mrp = 0,
     this.variantAttributes = const {},
   });
 
   double get itemTotal => unitPrice * (qty < 0 ? 0 : qty);
+
+  double get itemMrpTotal =>
+      (mrp > 0 ? mrp : unitPrice) * (qty < 0 ? 0 : qty);
+
+  /// "500g" — falls back to the variant title / sku.
+  String get displayVariantLabel {
+    if (variantLabel.isNotEmpty) return variantLabel;
+    if (variantTitle.isNotEmpty) return variantTitle;
+    return variantSku;
+  }
+
+  /// "500g × 2" style summary used by history / admin views.
+  String get variantQtyLabel {
+    final label = displayVariantLabel;
+    final q = qty < 0 ? 0 : qty;
+    if (label.isEmpty) return '× $q';
+    return '$label × $q';
+  }
 
   factory OrderItem.fromMap(Map<String, dynamic> map) {
     final rawAttrs = map['variantAttributes'];
@@ -93,7 +160,11 @@ class OrderItem {
       name: asString(map['name']),
       image: asString(map['image']),
       variantTitle: asString(map['variantTitle']),
-      variantSku: asString(map['variantSku']),
+      variantSku: asString(map['variantSku'] ?? map['variantId']),
+      variantLabel: asString(map['variantLabel'] ?? map['variantTitle']),
+      unitValue: asDouble(map['unitValue']),
+      unitType: asString(map['unitType']),
+      mrp: asDouble(map['mrp'] ?? map['unitMrp']),
       variantAttributes: attrs,
     );
   }
@@ -105,8 +176,15 @@ class OrderItem {
     'name': name,
     'image': image,
     'itemTotal': itemTotal,
+    'variantId': variantSku,
     'variantTitle': variantTitle,
     'variantSku': variantSku,
+    'variantLabel': displayVariantLabel,
+    'unitValue': unitValue,
+    'unitType': unitType,
+    'price': unitPrice,
+    'mrp': mrp,
+    'quantity': qty,
     'variantAttributes': variantAttributes,
   };
 
@@ -117,6 +195,10 @@ class OrderItem {
     String? image,
     String? variantTitle,
     String? variantSku,
+    String? variantLabel,
+    double? unitValue,
+    String? unitType,
+    double? mrp,
     Map<String, String>? variantAttributes,
   }) => OrderItem(
     productId: productId,
@@ -126,12 +208,16 @@ class OrderItem {
     image: image ?? this.image,
     variantTitle: variantTitle ?? this.variantTitle,
     variantSku: variantSku ?? this.variantSku,
+    variantLabel: variantLabel ?? this.variantLabel,
+    unitValue: unitValue ?? this.unitValue,
+    unitType: unitType ?? this.unitType,
+    mrp: mrp ?? this.mrp,
     variantAttributes: variantAttributes ?? this.variantAttributes,
   );
 
   @override
   String toString() =>
-      'OrderItem($productId x$qty @ $unitPrice${variantTitle.isNotEmpty ? " [$variantTitle]" : ""})';
+      'OrderItem($productId x$qty @ $unitPrice${displayVariantLabel.isNotEmpty ? " [$displayVariantLabel]" : ""})';
 }
 
 /// Order model (Firestore: `/companies/{companyId}/orders/{orderId}` plus
@@ -165,6 +251,9 @@ class Order {
 
   final String address;
   final String pincode;
+
+  /// Snapshot of the pickup shop for `self_pickup` orders (null otherwise).
+  final PickupShop? pickupShop;
   final String? voucherId;
 
   /// Denormalised so the receipt still shows the code if the voucher is deleted.
@@ -195,6 +284,7 @@ class Order {
     double? totalAmount,
     this.address = '',
     this.pincode = '',
+    this.pickupShop,
     this.voucherId,
     this.voucherCode = '',
     this.paymentStatus = PaymentStatus.pending,
@@ -267,6 +357,11 @@ class Order {
       totalAmount: asDouble(map['totalAmount'], subtotal),
       address: asString(map['address']),
       pincode: asString(map['pincode']),
+      pickupShop: map['pickupShop'] is Map
+          ? PickupShop.fromMap(
+              Map<String, dynamic>.from(map['pickupShop'] as Map),
+            )
+          : null,
       voucherId: map['voucherId'] == null
           ? null
           : asString(map['voucherId']).isNotEmpty
@@ -314,6 +409,7 @@ class Order {
     'totalAmount': totalAmount,
     'address': address,
     'pincode': pincode,
+    'pickupShop': pickupShop?.toMap(),
     'voucherId': voucherId,
     'voucherCode': voucherCode,
     'paymentStatus': paymentStatus,
@@ -367,6 +463,7 @@ class Order {
     totalAmount: totalAmount ?? this.totalAmount,
     address: address ?? this.address,
     pincode: pincode ?? this.pincode,
+    pickupShop: pickupShop,
     voucherId: voucherId ?? this.voucherId,
     voucherCode: voucherCode ?? this.voucherCode,
     paymentStatus: paymentStatus ?? this.paymentStatus,
@@ -397,6 +494,7 @@ class Order {
     totalAmount: totalAmount,
     address: address,
     pincode: pincode,
+    pickupShop: pickupShop,
     voucherId: voucherId,
     voucherCode: voucherCode,
     paymentStatus: paymentStatus,

@@ -345,6 +345,14 @@ class AuthCubit extends Cubit<AuthState> {
           : address.id;
       final entry = address.copyWith(id: id);
 
+      // Hard cap: a user keeps at most 3 saved addresses.
+      final alreadyExists = current.addresses.any((a) => a.id == id);
+      if (!alreadyExists &&
+          current.addresses.length >= AddressEntry.maxAddresses) {
+        debugPrint('[AuthCubit] saveUserAddress: address limit reached');
+        return false;
+      }
+
       await _repo.saveUserAddress(current.id, entry);
       final updatedList = List<AddressEntry>.from(current.addresses);
       if (entry.isDefault || updatedList.isEmpty) {

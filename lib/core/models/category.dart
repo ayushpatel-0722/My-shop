@@ -20,8 +20,20 @@ class Category {
   /// Either an emoji / short glyph or an http(s) image URL.
   final String iconUrl;
 
-  /// Products explicitly assigned to this category.
+  /// Products explicitly assigned to this category, **in display order**.
+  ///
+  /// The array position is the position customers see inside the category, so
+  /// the admin's arrangement is stored as-is and read back in the same order.
   final List<String> productList;
+
+  /// Manual ordering among siblings (same [parentId]); lower comes first.
+  ///
+  /// Legacy categories (no value stored) read as 0 and fall back to
+  /// [createdAt] then name when sorting, so nothing disappears before the
+  /// one-time backfill runs.
+  final int sortOrder;
+
+  final DateTime? createdAt;
 
   const Category({
     required this.id,
@@ -32,6 +44,8 @@ class Category {
     this.parentId,
     this.iconUrl = '',
     this.productList = const <String>[],
+    this.sortOrder = 0,
+    this.createdAt,
   });
 
   // -------------------------------------------------------------- Parsing --
@@ -47,6 +61,8 @@ class Category {
       parentId: rawParent.isEmpty ? null : rawParent,
       iconUrl: asString(map['iconUrl']),
       productList: asStringList(map['productList']),
+      sortOrder: asInt(map['sortOrder']),
+      createdAt: asDateTime(map['createdAt']),
     );
   }
 
@@ -59,6 +75,8 @@ class Category {
         'parentId': parentId,
         'iconUrl': iconUrl,
         'productList': productList,
+        'sortOrder': sortOrder,
+        if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       };
 
   // --------------------------------------------------------------- Derived --
@@ -83,6 +101,8 @@ class Category {
     bool clearParentId = false,
     String? iconUrl,
     List<String>? productList,
+    int? sortOrder,
+    DateTime? createdAt,
   }) {
     return Category(
       id: id ?? this.id,
@@ -95,6 +115,8 @@ class Category {
           : ((parentId == null || parentId.isEmpty) ? this.parentId : parentId),
       iconUrl: iconUrl ?? this.iconUrl,
       productList: productList ?? this.productList,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 

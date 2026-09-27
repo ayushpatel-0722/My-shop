@@ -46,26 +46,243 @@ class ProductSpec {
   Map<String, dynamic> toMap() => {'key': key, 'value': value};
 }
 
+// ---------------------------------------------------------------------------
+// Structured product content (Flipkart style: Highlights + All Details)
+// ---------------------------------------------------------------------------
+
+/// One "Product Highlights" row (Title + Value), e.g. RAM / 8 GB.
+class HighlightItem {
+  final String id;
+  final String title;
+  final String value;
+  final int order;
+
+  const HighlightItem({
+    this.id = '',
+    this.title = '',
+    this.value = '',
+    this.order = 0,
+  });
+
+  bool get isEmpty => title.trim().isEmpty && value.trim().isEmpty;
+
+  /// Usable for saving: the value carries the content. The title is optional
+  /// because migrated legacy highlights land as value-only rows.
+  bool get isUsable => value.trim().isNotEmpty;
+
+  /// A row someone started (title typed) but did not finish (no value).
+  bool get isHalfWritten => title.trim().isNotEmpty && value.trim().isEmpty;
+
+  bool get isComplete =>
+      title.trim().isNotEmpty && value.trim().isNotEmpty;
+
+  factory HighlightItem.fromMap(Map<String, dynamic> map) => HighlightItem(
+    id: asString(map['id']),
+    title: asString(map['title']),
+    value: asString(map['value']),
+    order: asInt(map['order']),
+  );
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'title': title,
+    'value': value,
+    'order': order,
+  };
+
+  HighlightItem copyWith({
+    String? id,
+    String? title,
+    String? value,
+    int? order,
+  }) => HighlightItem(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    value: value ?? this.value,
+    order: order ?? this.order,
+  );
+
+  @override
+  String toString() => 'HighlightItem($title: $value)';
+}
+
+/// Section types allowed inside "All Details".
+class DetailSectionType {
+  /// A plain paragraph of text.
+  static const text = 'text';
+
+  /// A repeatable list of Title/Value rows.
+  static const keyValue = 'keyValue';
+
+  static const values = <String>[text, keyValue];
+
+  static bool isValid(String type) => values.contains(type);
+}
+
+/// One Title/Value row inside a [DetailSectionType.keyValue] section.
+class DetailItem {
+  final String id;
+  final String title;
+  final String value;
+  final int order;
+
+  const DetailItem({
+    this.id = '',
+    this.title = '',
+    this.value = '',
+    this.order = 0,
+  });
+
+  bool get isEmpty => title.trim().isEmpty && value.trim().isEmpty;
+  bool get isComplete =>
+      title.trim().isNotEmpty && value.trim().isNotEmpty;
+
+  factory DetailItem.fromMap(Map<String, dynamic> map) => DetailItem(
+    id: asString(map['id']),
+    title: asString(map['title']),
+    value: asString(map['value']),
+    order: asInt(map['order']),
+  );
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'title': title,
+    'value': value,
+    'order': order,
+  };
+
+  DetailItem copyWith({
+    String? id,
+    String? title,
+    String? value,
+    int? order,
+  }) => DetailItem(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    value: value ?? this.value,
+    order: order ?? this.order,
+  );
+
+  @override
+  String toString() => 'DetailItem($title: $value)';
+}
+
+/// One section of "All Details" (a heading + its content).
+///
+/// A `text` section stores only [text]; a `keyValue` section stores only
+/// [items]. Everything lives inside the product document (no subcollection) so
+/// the product loads in one read.
+class DetailSection {
+  final String id;
+  final String title;
+
+  /// Exactly [DetailSectionType.text] or [DetailSectionType.keyValue].
+  final String type;
+  final String text;
+  final List<DetailItem> items;
+  final int order;
+
+  const DetailSection({
+    this.id = '',
+    this.title = '',
+    this.type = DetailSectionType.text,
+    this.text = '',
+    this.items = const <DetailItem>[],
+    this.order = 0,
+  });
+
+  bool get isText => type == DetailSectionType.text;
+  bool get isKeyValue => type == DetailSectionType.keyValue;
+
+  /// True when the section carries nothing worth showing.
+  bool get isEmptyContent => isText
+      ? text.trim().isEmpty
+      : items.every((e) => e.isEmpty);
+
+  /// Sorted copy of [items] by their `order` field.
+  List<DetailItem> get sortedItems {
+    final copy = [...items];
+    copy.sort((a, b) => a.order.compareTo(b.order));
+    return copy;
+  }
+
+  factory DetailSection.fromMap(Map<String, dynamic> map) {
+    final rawType = asString(map['type']);
+    return DetailSection(
+      id: asString(map['id']),
+      title: asString(map['title']),
+      type: DetailSectionType.isValid(rawType)
+          ? rawType
+          : DetailSectionType.text,
+      text: asString(map['text']),
+      items: asMapList(map['items']).map(DetailItem.fromMap).toList(),
+      order: asInt(map['order']),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    // A "text" section stores only "text"; a "keyValue" section only "items".
+    return {
+      'id': id,
+      'title': title,
+      'type': type,
+      if (isText) 'text': text,
+      if (isKeyValue)
+        'items': items.map((e) => e.toMap()).toList(),
+      'order': order,
+    };
+  }
+
+  DetailSection copyWith({
+    String? id,
+    String? title,
+    String? type,
+    String? text,
+    List<DetailItem>? items,
+    int? order,
+  }) => DetailSection(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    type: type ?? this.type,
+    text: text ?? this.text,
+    items: items ?? this.items,
+    order: order ?? this.order,
+  );
+
+  @override
+  String toString() => 'DetailSection($title, $type)';
+}
+
+// ---------------------------------------------------------------------------
+
 /// Product variant model representing a distinct combination of attributes.
 class ProductVariant {
+  /// Stable identity used for cart keys (`productId_variantId`) and orders.
+  /// Falls back to sku / title when the data predates the id field.
+  final String id;
   final String sku;
   final String title;
   final Map<String, String> attributes;
   final int stockQty;
   final bool isUnlimitedStock;
   final double priceOverride;
+
+  /// List price (MRP) of THIS variant; 0 means "derive from the product".
+  final double mrpOverride;
   final double unitValue;
   final String unitType;
   final String size;
   final String color;
 
   const ProductVariant({
+    this.id = '',
     this.sku = '',
     this.title = '',
     this.attributes = const {},
     this.stockQty = 0,
     this.isUnlimitedStock = false,
     this.priceOverride = 0,
+    this.mrpOverride = 0,
     this.unitValue = 0,
     this.unitType = '',
     this.size = '',
@@ -74,25 +291,54 @@ class ProductVariant {
 
   bool get isInStock => isUnlimitedStock || stockQty > 0;
 
+  /// Identity used inside cart keys and order snapshots.
+  String get variantId {
+    if (id.isNotEmpty) return id;
+    if (sku.isNotEmpty) return sku;
+    if (title.isNotEmpty) return title;
+    if (size.isNotEmpty || color.isNotEmpty) return '${size}_$color';
+    return attributes.values.join('_');
+  }
+
+  /// Human label ("500g", "Black", ...).
+  String get label {
+    if (title.isNotEmpty) return title;
+    if (attributes.isNotEmpty) return attributes.values.join(' / ');
+    final parts = [size, color].where((s) => s.isNotEmpty).join(' / ');
+    return parts.isNotEmpty ? parts : sku;
+  }
+
+  /// "500 g" style label of the pack size, or '' when unknown.
+  String get unitLabel {
+    if (unitValue > 0 && unitType.isNotEmpty) {
+      return CartUnit.format(unitValue, unitType);
+    }
+    return '';
+  }
+
   ProductVariant copyWith({
+    String? id,
     String? sku,
     String? title,
     Map<String, String>? attributes,
     int? stockQty,
     bool? isUnlimitedStock,
     double? priceOverride,
+    double? mrpOverride,
     double? unitValue,
     String? unitType,
     String? size,
     String? color,
   }) {
     return ProductVariant(
+      id: id ?? this.id,
       sku: sku ?? this.sku,
       title: title ?? this.title,
       attributes: attributes ?? this.attributes,
       stockQty: stockQty ?? this.stockQty,
       isUnlimitedStock: isUnlimitedStock ?? this.isUnlimitedStock,
       priceOverride: priceOverride ?? this.priceOverride,
+      mrpOverride: mrpOverride ?? this.mrpOverride,
       unitValue: unitValue ?? this.unitValue,
       unitType: unitType ?? this.unitType,
       size: size ?? this.size,
@@ -111,6 +357,7 @@ class ProductVariant {
     final rawTitle = map['title']?.toString() ?? '';
 
     return ProductVariant(
+      id: asString(map['id'] ?? map['variantId']),
       sku: map['sku']?.toString() ?? '',
       title: rawTitle.isNotEmpty
           ? rawTitle
@@ -126,6 +373,7 @@ class ProductVariant {
       stockQty: asInt(map['stockQty']),
       isUnlimitedStock: asBool(map['isUnlimitedStock']),
       priceOverride: asDouble(map['priceOverride']),
+      mrpOverride: asDouble(map['mrpOverride'] ?? map['mrp']),
       unitValue: asDouble(map['unitValue'] ?? map['unit']),
       unitType: map['unitType']?.toString() ?? '',
       size: rawSize,
@@ -134,17 +382,108 @@ class ProductVariant {
   }
 
   Map<String, dynamic> toMap() => {
+    'id': id,
     'sku': sku,
     'title': title,
     'attributes': attributes,
     'stockQty': stockQty,
     'isUnlimitedStock': isUnlimitedStock,
     'priceOverride': priceOverride,
+    'mrpOverride': mrpOverride,
     'unitValue': unitValue,
     'unitType': unitType,
     'size': size,
     'color': color,
   };
+}
+
+/// Unit formatting shared by cart lines, order snapshots and pack labels.
+///
+/// "500 grams" -> "500 g"; "1500 grams" -> "1.5 kg"; "2 pieces" -> "2 pieces".
+class CartUnit {
+  const CartUnit._();
+
+  /// Parses a trailing measurement out of a label ("500g", "1 kg", "250 ml").
+  ///
+  /// Returns `null` when the text carries no recognised unit.
+  static ({double value, String unitType})? tryParse(String text) {
+    final m = RegExp(
+      r'(\d+(?:\.\d+)?)\s*(kg|kgs|kilograms?|g|gm|grams?|ml|l|litres?|liters?)\b',
+      caseSensitive: false,
+    ).firstMatch(text.trim());
+    if (m == null) return null;
+    final value = double.tryParse(m.group(1) ?? '') ?? 0;
+    if (value <= 0) return null;
+    var unit = (m.group(2) ?? '').toLowerCase();
+    if (unit == 'gm' || unit == 'gram' || unit == 'grams') unit = 'g';
+    if (unit == 'kgs' || unit == 'kilogram' || unit == 'kilograms') {
+      unit = 'kg';
+    }
+    if (unit == 'litre' || unit == 'litres' || unit == 'liter' || unit == 'liters') {
+      unit = 'l';
+    }
+    // Normalise to the smallest sensible unit so maths never mixes kg and g.
+    if (unit == 'kg') return (value: value * 1000, unitType: 'g');
+    if (unit == 'l') return (value: value * 1000, unitType: 'ml');
+    return (value: value, unitType: unit);
+  }
+
+  static String format(double amount, String unitType) {
+    final unit = unitType.trim().toLowerCase();
+    var value = amount;
+    var suffix = unitType.isEmpty ? 'unit' : unitType;
+
+    if (unit == 'grams' || unit == 'gram' || unit == 'g' || unit == 'gm') {
+      if (amount >= 1000) {
+        value = amount / 1000;
+        suffix = 'kg';
+      } else {
+        suffix = 'g';
+      }
+    } else if (unit == 'ml' ||
+        unit == 'millilitre' ||
+        unit == 'millilitres' ||
+        unit == 'milliliters' ||
+        unit == 'millilitres') {
+      if (amount >= 1000) {
+        value = amount / 1000;
+        suffix = 'L';
+      } else {
+        suffix = 'ml';
+      }
+    } else if (unit == 'kg' || unit == 'kgs' || unit == 'kilogram') {
+      suffix = 'kg';
+    } else if (unit == 'l' || unit == 'litre' || unit == 'liters') {
+      suffix = 'L';
+    }
+
+    final rounded = value == value.roundToDouble()
+        ? value.toInt().toString()
+        : (value * 10).roundToDouble() == value * 10
+        ? value.toStringAsFixed(1)
+        : value.toStringAsFixed(2);
+    return '$rounded $suffix';
+  }
+
+  /// True for weight/volume measures ("g", "kg", "ml", "l", ...).
+  static bool isMeasured(String unitType) {
+    final t = unitType.trim().toLowerCase();
+    return t == 'g' ||
+        t == 'gm' ||
+        t == 'gram' ||
+        t == 'grams' ||
+        t == 'kg' ||
+        t == 'kgs' ||
+        t == 'kilogram' ||
+        t == 'ml' ||
+        t == 'millilitre' ||
+        t == 'millilitres' ||
+        t == 'milliliters' ||
+        t == 'l' ||
+        t == 'litre' ||
+        t == 'litres' ||
+        t == 'liters';
+  }
 }
 
 /// Product model (Firestore: /products).
@@ -164,6 +503,12 @@ class Product {
   final List<ProductVariant> variants;
   final List<ProductOption> options;
   final List<ProductSpec> specifications;
+
+  /// Structured "Product Highlights" rows (Flipkart style).
+  final List<HighlightItem> highlights;
+
+  /// Structured "All Details" sections (text | keyValue).
+  final List<DetailSection> allDetails;
   final String policy;
   final String sku;
   final String color;
@@ -187,6 +532,8 @@ class Product {
     this.variants = const [],
     this.options = const [],
     this.specifications = const [],
+    this.highlights = const [],
+    this.allDetails = const [],
     this.policy = '',
     this.sku = '',
     this.color = '',
@@ -197,6 +544,9 @@ class Product {
 
   /// Effective selling price.
   double get price => discountAmt > 0 ? discountAmt : amount;
+
+  /// List price (MRP) of the base product.
+  double get mrp => amount > 0 ? amount : price;
 
   double get discountPercent => amount > 0 && discountAmt > 0
       ? ((amount - discountAmt) / amount) * 100
@@ -218,6 +568,8 @@ class Product {
     subDetails,
     unitType,
     policy,
+    ...highlights.map((h) => '${h.title} ${h.value}'),
+    ...allDetails.map((s) => '${s.title} ${s.text}'),
   ].join(' ').toLowerCase();
 
   /// Case-insensitive, multi-term search over [searchIndex].
@@ -233,6 +585,73 @@ class Product {
 
   /// Primary image (empty string when the product has none).
   String get imageUrl => images.isNotEmpty ? images.first : '';
+
+  /// Highlights sorted by their `order` field.
+  List<HighlightItem> get sortedHighlights {
+    final copy = [...highlights];
+    copy.sort((a, b) => a.order.compareTo(b.order));
+    return copy;
+  }
+
+  /// All-details sections sorted by their `order` field.
+  List<DetailSection> get sortedAllDetails {
+    final copy = [...allDetails];
+    copy.sort((a, b) => a.order.compareTo(b.order));
+    return copy;
+  }
+
+  /// Selling price of [variant] (falls back to the product price).
+  double priceOf(ProductVariant? variant) =>
+      (variant != null && variant.priceOverride > 0)
+      ? variant.priceOverride
+      : price;
+
+  /// List price (MRP) of [variant] (falls back to the product MRP).
+  double mrpOf(ProductVariant? variant) {
+    final base = (variant != null && variant.mrpOverride > 0)
+        ? variant.mrpOverride
+        : mrp;
+    final price = priceOf(variant);
+    // A list price below the selling price makes no sense — never show a
+    // strikethrough that is lower than the actual price.
+    return base < price ? price : base;
+  }
+
+  /// Index of the variant pre-selected on the product page.
+  ///
+  /// Prefers the variant matching the product's own pack size ("1 kg" of a
+  /// 1 kg product), then the biggest pack, then the first one.
+  int get defaultVariantIndex {
+    if (variants.isEmpty) return -1;
+    for (var i = 0; i < variants.length; i++) {
+      final v = variants[i];
+      if (v.unitValue > 0 &&
+          unit > 0 &&
+          (v.unitValue - unit).abs() < 0.0001 &&
+          _sameUnitType(v.unitType, unitType)) {
+        return i;
+      }
+    }
+    // Biggest pack first (1kg over 500g over 250g).
+    var best = 0;
+    for (var i = 1; i < variants.length; i++) {
+      if (variants[i].unitValue > variants[best].unitValue) best = i;
+    }
+    if (variants[best].unitValue > 0) return best;
+    return 0;
+  }
+
+  static bool _sameUnitType(String a, String b) {
+    String norm(String s) {
+      final t = s.trim().toLowerCase();
+      if (t == 'gram' || t == 'grams' || t == 'gm') return 'g';
+      if (t == 'kgs') return 'kg';
+      if (t == 'litre' || t == 'liters') return 'l';
+      return t;
+    }
+
+    return norm(a) == norm(b);
+  }
 
   /// Blank product pre-filled with the tenant/company it belongs to.
   factory Product.empty({String companyId = '', String categoryId = ''}) =>
@@ -265,6 +684,12 @@ class Product {
     specifications: asMapList(
       map['specifications'],
     ).map(ProductSpec.fromMap).toList(),
+    highlights: asMapList(
+      map['highlights'],
+    ).map(HighlightItem.fromMap).toList(),
+    allDetails: asMapList(
+      map['allDetails'],
+    ).map(DetailSection.fromMap).toList(),
     policy: asString(map['policy']),
     sku: asString(map['sku']),
     color: asString(map['color']),
@@ -288,6 +713,8 @@ class Product {
     'variants': variants.map((e) => e.toMap()).toList(),
     'options': options.map((e) => e.toMap()).toList(),
     'specifications': specifications.map((e) => e.toMap()).toList(),
+    'highlights': highlights.map((e) => e.toMap()).toList(),
+    'allDetails': allDetails.map((e) => e.toMap()).toList(),
     'policy': policy,
     'sku': sku,
     'color': color,
@@ -312,6 +739,8 @@ class Product {
     List<ProductVariant>? variants,
     List<ProductOption>? options,
     List<ProductSpec>? specifications,
+    List<HighlightItem>? highlights,
+    List<DetailSection>? allDetails,
     String? policy,
     String? sku,
     String? color,
@@ -335,6 +764,8 @@ class Product {
       variants: variants ?? this.variants,
       options: options ?? this.options,
       specifications: specifications ?? this.specifications,
+      highlights: highlights ?? this.highlights,
+      allDetails: allDetails ?? this.allDetails,
       policy: policy ?? this.policy,
       sku: sku ?? this.sku,
       color: color ?? this.color,

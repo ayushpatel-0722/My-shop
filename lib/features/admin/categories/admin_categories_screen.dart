@@ -21,6 +21,9 @@ import '../admin_shell.dart';
 ///    missing parents are repaired instead of hanging),
 ///  * counts include descendants,
 ///  * delete explains exactly what will be re-parented.
+/// "1 product" / "2 products" — never "1 products".
+String _plural(int n, String one, String many) => '$n ${n == 1 ? one : many}';
+
 class AdminCategoriesScreen extends StatefulWidget {
   const AdminCategoriesScreen({super.key});
 
@@ -34,11 +37,21 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   /// Nodes the admin collapsed; everything else starts expanded.
   final Set<String> _collapsed = <String>{};
 
+  /// Manual ordering mode (drag to set the sibling order).
+  bool _reorderMode = false;
+
+  /// Parent whose children are being reordered ('' = top level).
+  String _reorderParentId = '';
+
+  /// Optimistic sortOrder overrides applied until Firestore confirms.
+  final Map<String, int> _pendingSortOrders = <String, int>{};
+
   @override
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
   }
+
 
   String get _companyId => AuthSession.currentUser?.companyId ?? '';
 
@@ -49,6 +62,31 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       backRoute: AppRoutes.admin,
       title: 'Categories',
       actions: [
+        IconButton(
+          key: const Key('category-reorder-toggle'),
+          icon: Icon(
+            _reorderMode ? Icons.playlist_add_check : Icons.swap_vert,
+          ),
+          tooltip: _reorderMode ? 'Done reordering' : 'Reorder',
+          onPressed: () {
+            if (_searchCtrl.text.trim().isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Clear search to reorder')),
+              );
+              return;
+            }
+            setState(() {
+              _reorderMode = !_reorderMode;
+              _reorderParentId = '';
+            });
+          },
+        ),
+        IconButton(
+          key: const Key('category-backfill-order'),
+          icon: const Icon(Icons.sort),
+          tooltip: 'Backfill ordering for old categories',
+          onPressed: () => _backfillOrder(),
+        ),
         IconButton(
           icon: const Icon(Icons.add),
           tooltip: 'Add Category',
@@ -80,6 +118,21 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
               onChanged: (_) => setState(() {}),
             ),
           ),
+          if (_searchCtrl.text.trim().isNotEmpty)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Clear search to reorder',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
           Expanded(
             child: StreamBuilder<List<Category>>(
               stream: repo.categories(companyId: _companyId),
@@ -101,7 +154,26 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                 }
 
                 final query = _searchCtrl.text.trim().toLowerCase();
-                final tree = CategoryTree.build(categories);
+                final effective = _applyPending(categories);
+                final tree = CategoryTree.build(effective);
+
+                if (_reorderMode && query.isEmpty) {
+                  return _CategoryReorderView(
+                    tree: tree,
+                    parentId: _reorderParentId,
+                    categories: effective,
+                    onEnterLevel: (id) =>
+                        setState(() => _reorderParentId = id),
+                    onExitLevel: (id) => setState(() {
+                      final node = tree
+                          .flatten()
+                          .where((n) => n.id == id)
+                          .firstOrNull;
+                      _reorderParentId = node?.category.parentId ?? '';
+                    }),
+                    onReorder: _reorderLevel,
+                  );
+                }
 
                 if (query.isNotEmpty) {
                   // Flat, filtered view: a tree would hide matches.
@@ -200,6 +272,62 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     );
   }
 
+
+  /// Applies optimistic sortOrder overrides until Firestore confirms them.
+  List<Category> _applyPending(List<Category> categories) {
+    if (_pendingSortOrders.isEmpty) return categories;
+    return [
+      for (final c in categories)
+        _pendingSortOrders[c.id] != null
+            ? c.copyWith(sortOrder: _pendingSortOrders[c.id])
+            : c,
+    ];
+  }
+
+  /// Saves a new sibling order (0, 1, 2, …) after an optimistic update.
+  Future<void> _reorderLevel(List<Category> orderedSiblings) async {
+    final previous = Map<String, int>.from(_pendingSortOrders);
+    setState(() {
+      for (var i = 0; i < orderedSiblings.length; i++) {
+        _pendingSortOrders[orderedSiblings[i].id] = i;
+      }
+    });
+    try {
+      await repo.reorderCategories([
+        for (var i = 0; i < orderedSiblings.length; i++)
+          orderedSiblings[i].copyWith(sortOrder: i),
+      ]);
+    } catch (e) {
+      // Roll back to the previous order and explain.
+      if (!mounted) return;
+      setState(() {
+        _pendingSortOrders
+          ..clear()
+          ..addAll(previous);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save the new order: $e')),
+      );
+    }
+  }
+
+  /// One-time backfill of `sortOrder` for categories created before ordering
+  /// existed. Safe to run again: already ordered groups are left untouched.
+  Future<void> _backfillOrder() async {
+    try {
+      await repo.backfillCategorySortOrder(companyId: _companyId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Category ordering backfilled.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Backfill failed: $e')),
+      );
+    }
+  }
+
   Future<void> _confirmDelete(Category category, List<Category> all) async {
     final children = all
         .where((c) => c.parentId == category.id)
@@ -223,12 +351,12 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
             const SizedBox(height: 10),
             if (category.productList.isNotEmpty)
               Text(
-                '• ${category.productList.length} assigned product(s) will move '
+                '• ${_plural(category.productList.length, 'assigned product', 'assigned products')} will move '
                 '${parentName == null ? 'to "Uncategorised"' : 'to "$parentName"'}',
               ),
             if (children.isNotEmpty)
               Text(
-                '• ${children.length} sub-category(ies) will move up one level',
+                '• ${_plural(children.length, 'sub-category', 'sub-categories')} will move up one level',
               ),
             if (category.productList.isEmpty && children.isEmpty)
               const Text('This category is empty.'),
@@ -429,9 +557,13 @@ class _CategoryTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            node.children.isEmpty
-                                ? '${node.directProductCount} products'
-                                : '${node.totalProductCount} products',
+                            _plural(
+                              node.children.isEmpty
+                                  ? node.directProductCount
+                                  : node.totalProductCount,
+                              'product',
+                              'products',
+                            ),
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -573,9 +705,13 @@ class _CategoryTile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        node.children.isEmpty
-                            ? '${node.directProductCount} products'
-                            : '${node.totalProductCount} products',
+                        _plural(
+                          node.children.isEmpty
+                              ? node.directProductCount
+                              : node.totalProductCount,
+                          'product',
+                          'products',
+                        ),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -731,6 +867,207 @@ class _EmptyCategories extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Level-scoped drag-to-reorder view of one sibling list.
+///
+/// The admin picks the level (top-level, or inside a parent via "Open"), drags
+/// the ≡ handles and the new order is saved as `sortOrder` 0, 1, 2, … — the
+/// same order customers see. While reordering, edit/delete stay out of the
+/// way; a breadcrumb walks back up the tree.
+class _CategoryReorderView extends StatelessWidget {
+  final CategoryTree tree;
+  final String parentId;
+  final List<Category> categories;
+  final ValueChanged<String> onEnterLevel;
+  final ValueChanged<String> onExitLevel;
+  final ValueChanged<List<Category>> onReorder;
+
+  const _CategoryReorderView({
+    required this.tree,
+    required this.parentId,
+    required this.categories,
+    required this.onEnterLevel,
+    required this.onExitLevel,
+    required this.onReorder,
+  });
+
+  List<CategoryNode> get _siblings {
+    if (parentId.isEmpty) return tree.roots;
+    final node = tree.flatten().where((n) => n.id == parentId).firstOrNull;
+    return node?.children ?? const <CategoryNode>[];
+  }
+
+  void _handleReorder(int oldIndex, int newIndex) {
+    final siblings = [
+      for (final n in _siblings) n.category.copyWith(sortOrder: n.category.sortOrder),
+    ];
+    if (oldIndex < 0 || oldIndex >= siblings.length) return;
+    if (newIndex > oldIndex) newIndex -= 1;
+    if (newIndex < 0 || newIndex >= siblings.length) return;
+    final moved = siblings.removeAt(oldIndex);
+    siblings.insert(newIndex, moved);
+    onReorder(siblings);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final siblings = _siblings;
+    final parentName = parentId.isEmpty
+        ? ''
+        : (tree.flatten().where((n) => n.id == parentId).firstOrNull?.name ??
+              '');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Breadcrumb + hint
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+          child: Row(
+            children: [
+              if (parentId.isNotEmpty)
+                TextButton.icon(
+                  key: const Key('reorder-go-up'),
+                  onPressed: () => onExitLevel(parentId),
+                  icon: const Icon(Icons.arrow_upward, size: 16),
+                  label: const Text('Up'),
+                ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  parentId.isEmpty
+                      ? 'Reordering: top level'
+                      : 'Reordering inside "$parentName"',
+                  key: const Key('reorder-level-label'),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Text(
+            'Drag the ≡ handle to set the order customers see.',
+            style: TextStyle(
+              fontSize: 11.5,
+              fontStyle: FontStyle.italic,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Expanded(
+          child: siblings.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(28),
+                    child: Text('No categories at this level'),
+                  ),
+                )
+              : ReorderableListView.builder(
+                  key: Key('reorder-list-$parentId'),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                  itemCount: siblings.length,
+                  buildDefaultDragHandles: false,
+                  proxyDecorator: (child, index, animation) {
+                    return Material(
+                      elevation: 8,
+                      shadowColor: Colors.black26,
+                      borderRadius: BorderRadius.circular(14),
+                      color: theme.colorScheme.surface,
+                      child: child,
+                    );
+                  },
+                  onReorder: _handleReorder,
+                  itemBuilder: (context, i) {
+                    final node = siblings[i];
+                    final cat = node.category;
+                    return Padding(
+                      key: ValueKey('reorder-${cat.id}'),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: ModernCard(
+                        key: Key('category-tile-${cat.id}'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            ReorderableDragStartListener(
+                              index: i,
+                              child: Tooltip(
+                                message: 'Drag to reorder',
+                                child: Container(
+                                  key: Key('category-drag-handle-${cat.id}'),
+                                  padding: const EdgeInsets.all(6),
+                                  child: Icon(
+                                    Icons.drag_handle,
+                                    size: 20,
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.45),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _CategoryGlyph(category: cat),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cat.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _plural(
+                                      node.children.isEmpty
+                                          ? node.directProductCount
+                                          : node.totalProductCount,
+                                      'product',
+                                      'products',
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (node.children.isNotEmpty)
+                              TextButton.icon(
+                                key: Key('reorder-open-${cat.id}'),
+                                onPressed: () => onEnterLevel(cat.id),
+                                icon: const Icon(
+                                  Icons.subdirectory_arrow_right,
+                                  size: 16,
+                                ),
+                                label: const Text('Open'),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }

@@ -9,6 +9,7 @@ class Company {
   final String status; // active | suspended | inactive
   final String details;
   final String address;
+  final String phone; // contact number shown on pickup cards
   final String location; // maps link
   final String logoUrl;
   final String bannerUrl;
@@ -44,6 +45,7 @@ class Company {
     this.status = 'active',
     this.details = '',
     this.address = '',
+    this.phone = '',
     this.location = '',
     this.logoUrl = '',
     this.bannerUrl = '',
@@ -70,6 +72,7 @@ class Company {
     status: map['status'] ?? 'active',
     details: map['details'] ?? '',
     address: map['address'] ?? '',
+    phone: map['phone']?.toString() ?? '',
     location: map['location'] ?? '',
     logoUrl: map['logoUrl'] ?? map['logo'] ?? '',
     bannerUrl: map['bannerUrl'] ?? map['banner'] ?? '',
@@ -111,6 +114,7 @@ class Company {
     'status': status,
     'details': details,
     'address': address,
+    'phone': phone,
     'location': location,
     'logoUrl': logoUrl,
     'bannerUrl': bannerUrl,
@@ -137,6 +141,7 @@ class Company {
     String? status,
     String? details,
     String? address,
+    String? phone,
     String? location,
     String? logoUrl,
     String? bannerUrl,
@@ -161,6 +166,7 @@ class Company {
     status: status ?? this.status,
     details: details ?? this.details,
     address: address ?? this.address,
+    phone: phone ?? this.phone,
     location: location ?? this.location,
     logoUrl: logoUrl ?? this.logoUrl,
     bannerUrl: bannerUrl ?? this.bannerUrl,

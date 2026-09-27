@@ -163,14 +163,29 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
             ],
           };
 
-          // 3. Child subcategories for chip filter bar
-          final subCategories = activeCat != null
-              ? categories.where((c) => c.parentId == activeCat!.id).toList()
-              : <Category>[];
+          // 3. Child subcategories for chip filter bar (admin-defined order)
+          final subCategories = (activeCat != null
+                  ? categories.where((c) => c.parentId == activeCat!.id).toList()
+                  : <Category>[])
+              .toList()
+            ..sort(CategoryHierarchy.compareByOrder);
 
           final effectiveFilterIds = _selectedSubCatId != null
               ? {_selectedSubCatId!}
               : targetIds;
+
+          // Curated product order: the deepest selected category's productList.
+          Category? selectedSubCat;
+          if (_selectedSubCatId != null) {
+            for (final c in categories) {
+              if (c.id == _selectedSubCatId) {
+                selectedSubCat = c;
+                break;
+              }
+            }
+          }
+          final productOrder =
+              (selectedSubCat ?? activeCat)?.productList ?? const <String>[];
 
           return StreamBuilder<List<Product>>(
             stream: widget.companyId.isNotEmpty
@@ -193,6 +208,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                   categories: categories,
                   sort: _sort,
                   inStockOnly: _inStockOnly,
+                  productOrder: productOrder,
                 ),
               );
 

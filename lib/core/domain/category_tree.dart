@@ -146,7 +146,19 @@ class CategoryTree {
       flatten().where((n) => n.children.isNotEmpty).map((n) => n.id).toSet();
 
   static List<CategoryNode> _sorted(List<CategoryNode> nodes) {
-    nodes.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    nodes.sort((a, b) {
+      final sa = a.category.sortOrder;
+      final sb = b.category.sortOrder;
+      if (sa != sb) return sa.compareTo(sb);
+      final ca = a.category.createdAt;
+      final cb = b.category.createdAt;
+      if (ca != null && cb != null && !ca.isAtSameMomentAs(cb)) {
+        return ca.compareTo(cb);
+      }
+      if (ca != null && cb == null) return -1;
+      if (ca == null && cb != null) return 1;
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return nodes;
   }
 
@@ -219,4 +231,25 @@ class CategoryHierarchy {
   /// Full display path such as `Apparel / Men / Shirts`.
   static String pathLabel(String categoryId, List<Category> all) =>
       pathTo(categoryId, all).map((c) => c.name).join(' / ');
+
+  /// Canonical customer-facing order: admin-defined [Category.sortOrder]
+  /// first (siblings share a level), with the name as a stable fallback for
+  /// categories that predate ordering.
+  static int compareByOrder(Category a, Category b) {
+    final byOrder = a.sortOrder.compareTo(b.sortOrder);
+    if (byOrder != 0) return byOrder;
+    final ca = a.createdAt;
+    final cb = b.createdAt;
+    if (ca != null && cb != null && !ca.isAtSameMomentAs(cb)) {
+      return ca.compareTo(cb);
+    }
+    if (ca != null && cb == null) return -1;
+    if (ca == null && cb != null) return 1;
+    return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  }
+
+  /// Copy of [all] sorted with [compareByOrder]. Slicing per level (children
+  /// of one parent) preserves the admin-defined order within that level.
+  static List<Category> sortedByOrder(List<Category> all) =>
+      List<Category>.from(all)..sort(compareByOrder);
 }

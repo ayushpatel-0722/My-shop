@@ -7,6 +7,7 @@ import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/models/banner.dart';
+import '../../../core/domain/category_tree.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
@@ -634,7 +635,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return StreamBuilder<List<Category>>(
       stream: categories,
       builder: (context, snap) {
-        final list = snap.data ?? const <Category>[];
+        // Admin-defined category order (Category.sortOrder per level).
+        final list = CategoryHierarchy.sortedByOrder(
+          snap.data ?? const <Category>[],
+        );
         if (list.isEmpty) return const SizedBox.shrink();
 
         return Column(

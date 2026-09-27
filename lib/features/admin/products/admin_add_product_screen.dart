@@ -8,6 +8,7 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
+import 'widgets/structured_content_editors.dart';
 
 /// Full-screen form for creating and editing a Product with Dynamic Variant Generation.
 ///
@@ -32,8 +33,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
   // Step 1: Basic Info Controllers
   final _nameCtrl = TextEditingController();
-  final _detailsCtrl = TextEditingController();
-  final _subDetailsCtrl = TextEditingController();
+
+  // Structured content (Flipkart style): N highlight rows + N detail sections.
+  List<HighlightItem> _highlights = <HighlightItem>[];
+  List<DetailSection> _allDetails = <DetailSection>[];
+  bool _contentShowErrors = false;
 
   // Step 2: Media Controllers
   final _imageUrlCtrl = TextEditingController();
@@ -132,11 +136,86 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     }
   }
 
+
+  // --- Structured content: migration + legacy compatibility ---
+
+  /// Old products carry `highlights` / `subDetails` as plain strings; split
+  /// them into editable rows so the admin can fill in the titles.
+  List<HighlightItem> _migrateHighlights(Product p) {
+    if (p.highlights.isNotEmpty) {
+      return [
+        for (var i = 0; i < p.highlights.length; i++)
+          p.highlights[i].copyWith(order: i),
+      ];
+    }
+    final raw = p.subDetails.trim();
+    if (raw.isEmpty) return <HighlightItem>[];
+    final lines = raw
+        .split(RegExp(r'\n|•|\u2022'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    return [
+      for (var i = 0; i < lines.length; i++)
+        HighlightItem(
+          id: 'h_mig_' + DateTime.now().microsecondsSinceEpoch.toString() + '_$i',
+          title: '',
+          value: lines[i],
+          order: i,
+        ),
+    ];
+  }
+
+  /// Old products carry `description` / `details` as one string; fold it into
+  /// a single "Description" text section when no structured data exists.
+  List<DetailSection> _migrateAllDetails(Product p) {
+    if (p.allDetails.isNotEmpty) {
+      return [
+        for (var i = 0; i < p.allDetails.length; i++)
+          p.allDetails[i].copyWith(order: i),
+      ];
+    }
+    final raw = p.details.trim();
+    if (raw.isEmpty) return <DetailSection>[];
+    return [
+      DetailSection(
+        id: 'd_mig_' + DateTime.now().microsecondsSinceEpoch.toString(),
+        title: 'Description',
+        type: DetailSectionType.text,
+        text: raw,
+        order: 0,
+      ),
+    ];
+  }
+
+  /// Legacy `description` string kept in sync until migration is confirmed.
+  String _legacyDescription(List<DetailSection> sections) {
+    for (final s in sections) {
+      if (s.isText && s.title.trim().toLowerCase() == 'description') {
+        return s.text.trim();
+      }
+    }
+    for (final s in sections) {
+      if (s.isText && s.text.trim().isNotEmpty) return s.text.trim();
+    }
+    return '';
+  }
+
+  /// Legacy `subDetails` string kept in sync until migration is confirmed.
+  String _legacySubDetails(List<HighlightItem> rows) => rows
+      .where((h) => h.value.trim().isNotEmpty)
+      .map(
+        (h) => h.title.trim().isEmpty
+            ? h.value.trim()
+            : '${h.title.trim()}: ${h.value.trim()}',
+      )
+      .join('\n');
+
   void _initFromProduct(Product p) {
     _loadedProductId = p.id;
     _nameCtrl.text = p.name;
-    _detailsCtrl.text = p.details;
-    _subDetailsCtrl.text = p.subDetails;
+    _highlights = _migrateHighlights(p);
+    _allDetails = _migrateAllDetails(p);
     _baseSkuCtrl.text = p.sku.isNotEmpty
         ? p.sku
         : 'PROD-${p.id.isNotEmpty ? p.id : DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
@@ -228,8 +307,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _detailsCtrl.dispose();
-    _subDetailsCtrl.dispose();
     _imageUrlCtrl.dispose();
     _priceCtrl.dispose();
     _discountPriceCtrl.dispose();
@@ -244,29 +321,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       entry.value.dispose();
     }
     super.dispose();
-  }
-
-  // --- Step 1 Helper: Insert Bullet ---
-  void _insertBulletPoint() {
-    final currentText = _detailsCtrl.text;
-    final selection = _detailsCtrl.selection;
-    const bullet = '\n• ';
-
-    if (selection.start >= 0 && selection.end >= 0) {
-      final newText = currentText.replaceRange(
-        selection.start,
-        selection.end,
-        bullet,
-      );
-      _detailsCtrl.value = TextEditingValue(
-        text: newText,
-        selection: TextSelection.collapsed(
-          offset: selection.start + bullet.length,
-        ),
-      );
-    } else {
-      _detailsCtrl.text = currentText.isEmpty ? '• ' : '$currentText$bullet';
-    }
   }
 
   // --- Step 2 Helpers: Media Gallery ---
@@ -1735,13 +1789,39 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       final resolvedId =
           _loadedProductId ?? widget.product?.id ?? widget.productId ?? '';
 
+      // Structured content: drop untouched rows/sections, then validate.
+      final highlights = _highlights.where((h) => !h.isEmpty).toList();
+      final allDetails = _allDetails
+          .where(
+            (s) => s.title.trim().isNotEmpty || !s.isEmptyContent,
+          )
+          .toList();
+      if (highlights.any((h) => h.isHalfWritten) ||
+          !HighlightsEditor.isValid(highlights) ||
+          !AllDetailsEditor.isValid(allDetails)) {
+        if (mounted) {
+          setState(() => _contentShowErrors = true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Please complete the Product Highlights and All Details sections.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        setState(() => _isSaving = false);
+        return;
+      }
+
       final product = Product(
         id: resolvedId,
         companyId: _companyId,
         categoryId: _selectedCategoryId ?? '',
         name: _nameCtrl.text.trim(),
-        details: _detailsCtrl.text.trim(),
-        subDetails: _subDetailsCtrl.text.trim(),
+        // Legacy fields kept in sync until the data migration is confirmed.
+        details: _legacyDescription(allDetails),
+        subDetails: _legacySubDetails(highlights),
         color: _colorCtrl.text.trim(),
         type: _measurementType,
         unit: unitValue,
@@ -1756,6 +1836,14 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         options: _options,
         variants: _variants,
         specifications: specs,
+        highlights: [
+          for (var i = 0; i < highlights.length; i++)
+            highlights[i].copyWith(order: i),
+        ],
+        allDetails: [
+          for (var i = 0; i < allDetails.length; i++)
+            allDetails[i].copyWith(order: i),
+        ],
         policy: _policyCtrl.text.trim(),
       );
 
@@ -1951,56 +2039,17 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               : null,
                         ),
                         const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Product Description',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _insertBulletPoint,
-                              icon: const Icon(
-                                Icons.format_list_bulleted,
-                                size: 16,
-                              ),
-                              label: const Text(
-                                'Insert Bullet',
-                                style: TextStyle(fontSize: 12),
-                              ),
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                            ),
-                          ],
+                        HighlightsEditor(
+                          value: _highlights,
+                          showErrors: _contentShowErrors,
+                          onChanged: (rows) => setState(() => _highlights = rows),
                         ),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _detailsCtrl,
-                          maxLines: 4,
-                          decoration: const InputDecoration(
-                            hintText:
-                                'Detailed product summary, features, ingredients, origin...',
-                            alignLabelWithHint: true,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _subDetailsCtrl,
-                          maxLines: 2,
-                          decoration: const InputDecoration(
-                            labelText: 'Highlights / Sub-details',
-                            hintText:
-                                'Key selling points (e.g. 100% Handcrafted • Dispatch in 24h • Organic)',
-                            alignLabelWithHint: true,
-                          ),
+                        const SizedBox(height: 20),
+                        AllDetailsEditor(
+                          value: _allDetails,
+                          showErrors: _contentShowErrors,
+                          onChanged: (sections) =>
+                              setState(() => _allDetails = sections),
                         ),
                       ],
                     ),

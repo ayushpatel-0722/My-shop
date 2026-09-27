@@ -44,6 +44,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
   late final TextEditingController _pincodeCtrl;
   late final TextEditingController _houseNoCtrl;
   late final TextEditingController _streetCtrl;
+  late final TextEditingController _landmarkCtrl;
   late final TextEditingController _cityCtrl;
   late final TextEditingController _stateCtrl;
 
@@ -64,6 +65,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
     _pincodeCtrl = TextEditingController(text: init?.pincode ?? '');
     _houseNoCtrl = TextEditingController(text: init?.houseNo ?? '');
     _streetCtrl = TextEditingController(text: init?.address ?? '');
+    _landmarkCtrl = TextEditingController(text: init?.landmark ?? '');
     _cityCtrl = TextEditingController(text: init?.city ?? 'Ahmedabad');
     _stateCtrl = TextEditingController(text: init?.state ?? 'Gujarat');
 
@@ -78,6 +80,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
     _pincodeCtrl.dispose();
     _houseNoCtrl.dispose();
     _streetCtrl.dispose();
+    _landmarkCtrl.dispose();
     _cityCtrl.dispose();
     _stateCtrl.dispose();
     super.dispose();
@@ -93,6 +96,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
       phone: _phoneCtrl.text.trim(),
       houseNo: _houseNoCtrl.text.trim(),
       address: _streetCtrl.text.trim(),
+      landmark: _landmarkCtrl.text.trim(),
       city: _cityCtrl.text.trim(),
       state: _stateCtrl.text.trim(),
       pincode: _pincodeCtrl.text.trim(),
@@ -333,7 +337,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                     TextFormField(
                       controller: _houseNoCtrl,
                       decoration: InputDecoration(
-                        labelText: 'House / Flat / Block No. *',
+                        labelText: 'Address Line 1 (House / Flat / Block) *',
                         hintText: 'e.g. Flat 402, Block A',
                         prefixIcon: const Icon(
                           Icons.home_work_outlined,
@@ -356,8 +360,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                       controller: _streetCtrl,
                       maxLines: 2,
                       decoration: InputDecoration(
-                        labelText: 'Street / Area / Landmark *',
-                        hintText: 'e.g. Near Shiv Temple, Vastrapur',
+                        labelText: 'Address Line 2 (Street / Area)',
+                        hintText: 'e.g. Vastrapur, near Shiv Temple',
                         prefixIcon: const Icon(
                           Icons.edit_road_outlined,
                           size: 20,
@@ -370,9 +374,25 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                           vertical: 12,
                         ),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Enter street or landmark'
-                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _landmarkCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Landmark (optional)',
+                        hintText: 'e.g. Opposite City Mall',
+                        prefixIcon: const Icon(
+                          Icons.location_searching,
+                          size: 20,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
 

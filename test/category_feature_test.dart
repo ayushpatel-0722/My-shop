@@ -189,7 +189,7 @@ void main() {
         );
 
         // Verify counter
-        expect(find.text('1 products selected'), findsOneWidget);
+        expect(find.text('1 product selected'), findsOneWidget);
 
         // Verify product names are rendered
         expect(find.text('Organic Honey'), findsOneWidget);

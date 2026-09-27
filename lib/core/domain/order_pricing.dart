@@ -8,15 +8,22 @@ double roundMoney(double value) => (value * 100).round() / 100;
 /// One priced cart line, frozen at the moment of checkout.
 ///
 /// Storing the resolved name/price on the order protects the order history
-/// from later catalogue edits (a rename must not rewrite a receipt).
+/// from later catalogue edits (a rename must not rewrite a receipt). The
+/// variant snapshot (label, unit, MRP) is frozen the same way.
 class PricedLine {
   final String productId;
   final String name;
   final String image;
   final int qty;
   final double unitPrice;
+
+  /// Variant snapshot — never the product's default variant.
   final String variantTitle;
   final String variantSku;
+  final String variantLabel;
+  final double unitValue;
+  final String unitType;
+  final double mrp;
   final Map<String, String> variantAttributes;
 
   const PricedLine({
@@ -27,10 +34,23 @@ class PricedLine {
     required this.unitPrice,
     this.variantTitle = '',
     this.variantSku = '',
+    this.variantLabel = '',
+    this.unitValue = 0,
+    this.unitType = '',
+    this.mrp = 0,
     this.variantAttributes = const {},
   });
 
   double get lineTotal => roundMoney(unitPrice * qty);
+
+  double get lineMrpTotal => roundMoney((mrp > 0 ? mrp : unitPrice) * qty);
+
+  /// "500g" — falls back to the variant title/sku when no explicit label.
+  String get displayLabel {
+    if (variantLabel.isNotEmpty) return variantLabel;
+    if (variantTitle.isNotEmpty) return variantTitle;
+    return variantSku;
+  }
 
   Map<String, dynamic> toMap() => {
     'productId': productId,
@@ -41,12 +61,16 @@ class PricedLine {
     'lineTotal': lineTotal,
     'variantTitle': variantTitle,
     'variantSku': variantSku,
+    'variantLabel': displayLabel,
+    'unitValue': unitValue,
+    'unitType': unitType,
+    'mrp': mrp,
     'variantAttributes': variantAttributes,
   };
 
   @override
   String toString() =>
-      'PricedLine($productId, $qty x $unitPrice${variantTitle.isNotEmpty ? " [$variantTitle]" : ""})';
+      'PricedLine($productId, $qty x $unitPrice${displayLabel.isNotEmpty ? " [$displayLabel]" : ""})';
 }
 
 /// The complete, itemised amount payable for one store's cart.
@@ -137,9 +161,13 @@ class OrderPricer {
             image: e.product.images.isNotEmpty ? e.product.images.first : '',
             qty: e.qty,
             unitPrice: e.effectivePrice,
-            variantTitle: e.variant?.title ?? '',
-            variantSku: e.variant?.sku ?? '',
-            variantAttributes: e.variant?.attributes ?? const {},
+            variantTitle: e.variantLabel,
+            variantSku: e.variantId,
+            variantLabel: e.variantLabel,
+            unitValue: e.unitValue,
+            unitType: e.unitType,
+            mrp: e.effectiveMrp,
+            variantAttributes: const {},
           ),
         )
         .toList();

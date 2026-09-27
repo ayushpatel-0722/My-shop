@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
+import 'package:myshop/core/models/app_user.dart';
 import 'package:myshop/core/models/cart_item.dart';
 import 'package:myshop/core/models/order.dart';
 import 'package:myshop/core/models/product.dart';
@@ -17,7 +18,7 @@ void main() {
   setUp(() {
     TestHarness.setupPlatformChannels();
     repo = TestHarness.bootServiceLocator();
-    TestHarness.signIn(TestHarness.shopper);
+    TestHarness.signIn(TestHarness.shopperWithAddresses);
     cart = CartCubit();
   });
 
@@ -51,26 +52,22 @@ void main() {
     stockQty: 25,
   );
 
-  Future<void> openCheckout(WidgetTester tester) => pumpTestApp(
-    tester,
-    const CheckoutScreen(),
-    user: TestHarness.shopper,
-    cartCubit: cart,
-  );
+  Future<void> openCheckout(WidgetTester tester, {AppUser? user}) =>
+      pumpTestApp(
+        tester,
+        const CheckoutScreen(),
+        user: user ?? TestHarness.shopperWithAddresses,
+        cartCubit: cart,
+      );
 
-  Future<void> enterAddressAndPincode(
-    WidgetTester tester, {
-    String address = '12 Market Street',
-    String pincode = '380001',
-  }) async {
-    await tester.enterText(
-      find.byKey(const Key('checkout-address-field')),
-      address,
+  /// Selects the saved home address (12 Market Street, pincode 380001).
+  /// The checkout reads saved addresses from the profile — the default one
+  /// is pre-selected, the tap makes the test explicit about which is used.
+  Future<void> useSavedAddress(WidgetTester tester) async {
+    await tester.ensureVisible(
+      find.byKey(const Key('address-card-addr_home')),
     );
-    await tester.enterText(
-      find.byKey(const Key('checkout-pincode-field')),
-      pincode,
-    );
+    await tester.tap(find.byKey(const Key('address-card-addr_home')));
     await tester.pumpAndSettle();
   }
 
@@ -96,7 +93,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     expect(
       find.byKey(const Key('checkout-store-card-c_organic')),
@@ -131,7 +128,7 @@ void main() {
     ); // 96
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
     await tester.ensureVisible(
       find.byKey(const Key('checkout-place-order-button')),
     );
@@ -159,7 +156,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.tap(find.text('Self pickup'));
     await tester.pumpAndSettle();
@@ -190,7 +187,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.enterText(
       find.byKey(const Key('checkout-voucher-field-c_organic')),
@@ -230,7 +227,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.enterText(
       find.byKey(const Key('checkout-voucher-field-c_organic')),
@@ -263,7 +260,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.enterText(
       find.byKey(const Key('checkout-voucher-field-c_organic')),
@@ -287,7 +284,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.enterText(
       find.byKey(const Key('checkout-voucher-field-c_techtronics')),
@@ -310,7 +307,7 @@ void main() {
     ); // 68
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.enterText(
       find.byKey(const Key('checkout-voucher-field-c_organic')),
@@ -351,7 +348,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.enterText(
       find.byKey(const Key('checkout-voucher-field-c_organic')),
@@ -363,9 +360,11 @@ void main() {
     expect(find.text('This voucher has expired.'), findsOneWidget);
   });
 
-  testWidgets('the address and pincode are validated before ordering', (
+  testWidgets('a saved delivery address is required before ordering', (
     tester,
   ) async {
+    // A profile without saved addresses cannot order with home delivery.
+    TestHarness.signIn(TestHarness.shopper);
     cart.add(
       tomatoes,
       companyId: 'c_organic',
@@ -373,33 +372,21 @@ void main() {
       qty: 1,
     );
 
-    await openCheckout(tester);
+    await openCheckout(tester, user: TestHarness.shopper);
+
+    // The empty state offers adding the first address.
+    expect(find.byKey(const Key('empty-address-state')), findsOneWidget);
+    expect(find.byKey(const Key('add-address-empty')), findsOneWidget);
+
     await tester.ensureVisible(
       find.byKey(const Key('checkout-place-order-button')),
     );
     await tester.tap(find.byKey(const Key('checkout-place-order-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Please enter a delivery address.'), findsOneWidget);
+    expect(find.text('Please select a delivery address.'), findsOneWidget);
     expect(await repo.orders(userId: TestHarness.shopper.id).first, isEmpty);
-
-    await tester.enterText(
-      find.byKey(const Key('checkout-address-field')),
-      '12 Market Street',
-    );
-    await tester.enterText(
-      find.byKey(const Key('checkout-pincode-field')),
-      '38',
-    );
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(
-      find.byKey(const Key('checkout-place-order-button')),
-    );
-    await tester.tap(find.byKey(const Key('checkout-place-order-button')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Please enter a valid pincode.'), findsOneWidget);
-    expect(await repo.orders(userId: TestHarness.shopper.id).first, isEmpty);
+    TestHarness.signIn(TestHarness.shopperWithAddresses);
   });
 
   testWidgets('placing an order reduces the stock', (tester) async {
@@ -411,7 +398,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
     await tester.ensureVisible(
       find.byKey(const Key('checkout-place-order-button')),
     );
@@ -431,7 +418,7 @@ void main() {
     );
 
     await openCheckout(tester);
-    await enterAddressAndPincode(tester);
+    await useSavedAddress(tester);
 
     await tester.enterText(
       find.byKey(const Key('checkout-voucher-field-c_organic')),
@@ -465,10 +452,10 @@ void main() {
       await pumpTestApp(
         tester,
         CheckoutScreen(directItems: [directItem]),
-        user: TestHarness.shopper,
+        user: TestHarness.shopperWithAddresses,
         cartCubit: cart,
       );
-      await enterAddressAndPincode(tester);
+      await useSavedAddress(tester);
 
       // Only the direct buy store should be shown
       expect(
@@ -496,4 +483,103 @@ void main() {
       expect(cart.state.items.first.product.id, 'p_tomato');
     },
   );
+  testWidgets('an incomplete profile blocks the order with guidance', (
+    tester,
+  ) async {
+    final noName = TestHarness.shopperWithAddresses.copyWith(name: '');
+    TestHarness.signIn(noName);
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    );
+
+    await openCheckout(tester, user: noName);
+    expect(find.byKey(const Key('customer-profile-warning')), findsOneWidget);
+
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
+    await tester.tap(find.byKey(const Key('checkout-place-order-button')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Please complete your profile (name & mobile) before placing an order.',
+      ),
+      findsOneWidget,
+    );
+    expect(await repo.orders(userId: noName.id).first, isEmpty);
+    TestHarness.signIn(TestHarness.shopperWithAddresses);
+  });
+
+  testWidgets('self-pickup orders carry a pickup shop and no delivery '
+      'address', (tester) async {
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    );
+
+    await openCheckout(tester);
+    await useSavedAddress(tester);
+
+    await tester.tap(find.text('Self pickup'));
+    await tester.pumpAndSettle();
+
+    // The pickup card replaces the shared address block for this shop.
+    expect(find.byKey(const Key('pickup-shop-card')), findsOneWidget);
+
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
+    await tester.tap(find.byKey(const Key('checkout-place-order-button')));
+    await tester.pumpAndSettle();
+
+    final order =
+        (await repo.orders(userId: TestHarness.shopper.id).first).single;
+    expect(order.deliveryType, DeliveryType.selfPickup);
+    expect(order.address, isEmpty, reason: 'no delivery address on pickup');
+    expect(order.pickupShop, isNotNull);
+    expect(order.pickupShop!.name, 'GreenLeaf Organics');
+    expect(order.customerName, 'Asha Shopper');
+    expect(order.customerPhone, '9876543210');
+    expect(order.orderStatus, OrderStatus.pending);
+    expect(order.paymentStatus, PaymentStatus.pending);
+  });
+
+  testWidgets('home-delivery orders snapshot the customer and the address', (
+    tester,
+  ) async {
+    cart.add(
+      tomatoes,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      qty: 1,
+    );
+
+    await openCheckout(tester);
+    await useSavedAddress(tester);
+
+    await tester.ensureVisible(
+      find.byKey(const Key('checkout-place-order-button')),
+    );
+    await tester.tap(find.byKey(const Key('checkout-place-order-button')));
+    await tester.pumpAndSettle();
+
+    final order =
+        (await repo.orders(userId: TestHarness.shopper.id).first).single;
+    expect(order.deliveryType, DeliveryType.homeDelivery);
+    expect(
+      order.address,
+      TestHarness.homeAddress.formattedAddress,
+      reason: 'address snapshot',
+    );
+    expect(order.pincode, '380001');
+    expect(order.pickupShop, isNull);
+    expect(order.customerName, 'Asha Shopper');
+  });
+
 }

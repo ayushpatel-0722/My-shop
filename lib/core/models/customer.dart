@@ -56,6 +56,8 @@ class AddressEntry {
   final String phone;
   final String houseNo;
   final String address;
+  final String line2;
+  final String landmark;
   final String city;
   final String state;
   final String pincode;
@@ -70,6 +72,8 @@ class AddressEntry {
     this.phone = '',
     this.houseNo = '',
     this.address = '',
+    this.line2 = '',
+    this.landmark = '',
     this.city = '',
     this.state = '',
     this.pincode = '',
@@ -79,6 +83,9 @@ class AddressEntry {
     this.lng = 0,
   });
 
+  /// Maximum saved addresses per user (enforced in the app layer).
+  static const int maxAddresses = 3;
+
   /// Backwards compatibility for line1
   String get line1 => formattedAddress;
 
@@ -87,6 +94,8 @@ class AddressEntry {
     final parts = [
       if (houseNo.trim().isNotEmpty) houseNo.trim(),
       if (address.trim().isNotEmpty) address.trim(),
+      if (line2.trim().isNotEmpty) line2.trim(),
+      if (landmark.trim().isNotEmpty) 'Near ${landmark.trim()}',
       if (city.trim().isNotEmpty) city.trim(),
       if (state.trim().isNotEmpty) state.trim(),
       if (pincode.trim().isNotEmpty) pincode.trim(),
@@ -112,6 +121,8 @@ class AddressEntry {
     String? phone,
     String? houseNo,
     String? address,
+    String? line2,
+    String? landmark,
     String? city,
     String? state,
     String? pincode,
@@ -125,6 +136,8 @@ class AddressEntry {
     phone: phone ?? this.phone,
     houseNo: houseNo ?? this.houseNo,
     address: address ?? this.address,
+    line2: line2 ?? this.line2,
+    landmark: landmark ?? this.landmark,
     city: city ?? this.city,
     state: state ?? this.state,
     pincode: pincode ?? this.pincode,
@@ -141,8 +154,10 @@ class AddressEntry {
       id: map['id']?.toString() ?? '',
       name: map['name']?.toString() ?? '',
       phone: map['phone']?.toString() ?? '',
-      houseNo: map['houseNo']?.toString() ?? '',
+      houseNo: map['houseNo']?.toString() ?? map['line1']?.toString() ?? '',
       address: rawAddress,
+      line2: map['line2']?.toString() ?? '',
+      landmark: map['landmark']?.toString() ?? '',
       city: map['city']?.toString() ?? '',
       state: map['state']?.toString() ?? '',
       pincode: map['pincode']?.toString() ?? '',

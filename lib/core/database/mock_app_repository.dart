@@ -608,58 +608,74 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<Order> placeOrder(Order order) async {
-    if (order.companyId.isEmpty) {
-      throw ArgumentError('An order must belong to a company.');
+    final saved = await placeOrders([order]);
+    return saved.first;
+  }
+
+  @override
+  Future<List<Order>> placeOrders(List<Order> orders) async {
+    if (orders.isEmpty) return const <Order>[];
+    final saved = <Order>[];
+
+    for (final order in orders) {
+      if (order.companyId.isEmpty) {
+        throw ArgumentError('An order must belong to a company.');
+      }
+      if (order.items.isEmpty) {
+        throw ArgumentError('Cannot place an order with no items.');
+      }
+
+      final now = DateTime.now();
+      final id = order.id.isEmpty ? _uuid.v4() : order.id;
+
+      // Freeze the bill so later catalogue edits cannot rewrite the receipt.
+      final subtotal = Order.itemsTotalOf(order.items);
+      final doc = Order(
+        id: id,
+        userId: order.userId,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        companyId: order.companyId,
+        companyName: order.companyName,
+        items: order.items,
+        subtotal: order.subtotal != subtotal && order.subtotal > 0
+            ? order.subtotal
+            : subtotal,
+        discountAmount: order.discountAmount,
+        deliveryCharge: order.deliveryCharge,
+        totalAmount: order.totalAmount > 0
+            ? order.totalAmount
+            : (order.subtotal > 0 ? order.subtotal : subtotal) -
+                  order.discountAmount +
+                  order.deliveryCharge,
+        address: order.address,
+        pincode: order.pincode,
+        pickupShop: order.pickupShop,
+        voucherId: order.voucherId,
+        voucherCode: order.voucherCode,
+        paymentStatus: order.paymentStatus,
+        orderStatus: order.orderStatus,
+        deliveryType: order.deliveryType,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      saved.add(doc);
     }
-    if (order.items.isEmpty) {
-      throw ArgumentError('Cannot place an order with no items.');
-    }
 
-    final now = DateTime.now();
-    final id = order.id.isEmpty ? _uuid.v4() : order.id;
+    // All docs are written together (batch semantics) before bookkeeping.
+    _orders.addAll(saved);
 
-    // Freeze the bill so later catalogue edits cannot rewrite the receipt.
-    final subtotal = Order.itemsTotalOf(order.items);
-    final doc = Order(
-      id: id,
-      userId: order.userId,
-      customerName: order.customerName,
-      customerEmail: order.customerEmail,
-      customerPhone: order.customerPhone,
-      companyId: order.companyId,
-      companyName: order.companyName,
-      items: order.items,
-      subtotal: order.subtotal != subtotal && order.subtotal > 0
-          ? order.subtotal
-          : subtotal,
-      discountAmount: order.discountAmount,
-      deliveryCharge: order.deliveryCharge,
-      totalAmount: order.totalAmount > 0
-          ? order.totalAmount
-          : (order.subtotal > 0 ? order.subtotal : subtotal) -
-                order.discountAmount +
-                order.deliveryCharge,
-      address: order.address,
-      pincode: order.pincode,
-      voucherId: order.voucherId,
-      voucherCode: order.voucherCode,
-      paymentStatus: order.paymentStatus,
-      orderStatus: order.orderStatus,
-      deliveryType: order.deliveryType,
-      createdAt: now,
-      updatedAt: now,
-    );
-
-    _orders.add(doc);
-
-    // Stock + voucher bookkeeping belong to the same logical write.
-    _decrementStock(doc);
-    if (doc.voucherId != null && doc.voucherId!.isNotEmpty) {
-      _recordVoucherUsage(doc);
+    for (final doc in saved) {
+      _decrementStock(doc);
+      if (doc.voucherId != null && doc.voucherId!.isNotEmpty) {
+        _recordVoucherUsage(doc);
+      }
     }
 
     _pushOrders();
-    return doc;
+    return saved;
   }
 
   void _decrementStock(Order order) {
@@ -855,8 +871,9 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<void> saveCategory(Category category) async {
-    final id = category.id.isEmpty ? _uuid.v4() : category.id;
-    final saved = category.copyWith(id: id);
+    final isNew = category.id.isEmpty;
+    final id = isNew ? _uuid.v4() : category.id;
+    var saved = category.copyWith(id: id);
 
     // Never let an admin build a loop: a cycle would hang the tree builder.
     if (saved.parentId != null &&
@@ -871,10 +888,82 @@ class MockAppRepository implements AppRepository {
     }
 
     final i = _categories.indexWhere((c) => c.id == id);
+    final existing = i == -1 ? null : _categories[i];
+    final parentChanged =
+        existing != null &&
+        (existing.parentId ?? '') != (saved.parentId ?? '');
+
+    // New categories (and moves to another parent) go to the END of their
+    // sibling list; plain edits keep their manual position.
+    if (isNew || existing == null || parentChanged) {
+      final parentKey = saved.parentId ?? '';
+      var maxOrder = -1;
+      for (final c in _categories) {
+        if (c.id == id) continue;
+        if ((c.parentId ?? '') == parentKey && c.sortOrder > maxOrder) {
+          maxOrder = c.sortOrder;
+        }
+      }
+      saved = saved.copyWith(sortOrder: maxOrder + 1);
+    }
+    if (saved.createdAt == null) {
+      saved = saved.copyWith(createdAt: DateTime.now());
+    }
+
     if (i == -1) {
       _categories.add(saved);
     } else {
       _categories[i] = saved;
+    }
+    _pushCategories();
+  }
+
+  @override
+  Future<void> reorderCategories(List<Category> orderedSiblings) async {
+    for (var i = 0; i < orderedSiblings.length; i++) {
+      final cat = orderedSiblings[i];
+      if (cat.sortOrder == i) continue;
+      final idx = _categories.indexWhere((c) => c.id == cat.id);
+      if (idx != -1 && _categories[idx].sortOrder != i) {
+        _categories[idx] = _categories[idx].copyWith(sortOrder: i);
+      }
+    }
+    _pushCategories();
+  }
+
+  @override
+  Future<void> backfillCategorySortOrder({String companyId = ''}) async {
+    final byParent = <String, List<Category>>{};
+    for (final c in _categories) {
+      if (companyId.isNotEmpty &&
+          c.companyId.isNotEmpty &&
+          c.companyId != companyId) {
+        continue;
+      }
+      byParent.putIfAbsent(c.parentId ?? '', () => []).add(c);
+    }
+
+    for (final entry in byParent.entries) {
+      final siblings = entry.value;
+      // Only groups with colliding values (legacy data has no sortOrder) are
+      // migrated; an already ordered group is left untouched so a second run
+      // can never clobber the admin's manual arrangement.
+      final distinct = siblings.map((c) => c.sortOrder).toSet().length;
+      if (siblings.length < 2 || distinct == siblings.length) continue;
+      siblings.sort((a, b) {
+        final ca = a.createdAt;
+        final cb = b.createdAt;
+        if (ca != null && cb != null && !ca.isAtSameMomentAs(cb)) {
+          return ca.compareTo(cb);
+        }
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
+      for (var i = 0; i < siblings.length; i++) {
+        final idx = _categories.indexWhere((c) => c.id == siblings[i].id);
+        if (idx != -1 && _categories[idx].sortOrder != i) {
+          _categories[idx] = _categories[idx].copyWith(sortOrder: i);
+        }
+      }
     }
     _pushCategories();
   }

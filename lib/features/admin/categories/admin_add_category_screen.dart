@@ -50,6 +50,21 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
   bool _isLoadingCategory = false;
   String? _loadedCategoryId;
 
+  /// Snapshot of the loaded state, used to detect unsaved changes (including
+  /// product assignment / ordering) before leaving the screen.
+  String _baseline = '';
+
+  bool get _isDirty => _snapshot() != _baseline;
+
+  String _snapshot() => [
+    _nameCtrl.text.trim(),
+    _detailsCtrl.text.trim(),
+    _typeCtrl.text.trim(),
+    _iconCtrl.text.trim(),
+    _selectedParentId ?? '',
+    _selectedProductIds.join(','),
+  ].join('|');
+
   final List<String> _suggestedEmojis = [
     '🛍️',
     '🍎',
@@ -100,6 +115,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       _initFromCategory(widget.category!);
     } else if (widget.categoryId != null && widget.categoryId!.isNotEmpty) {
       _loadCategoryById(widget.categoryId!);
+    } else {
+      _baseline = _snapshot();
     }
   }
 
@@ -123,6 +140,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     if (cat.companyId.isNotEmpty) {
       _companyId = cat.companyId;
     }
+    _baseline = _snapshot();
   }
 
   Future<void> _loadCategoryById(String id) async {
@@ -250,6 +268,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       await repo.saveCategory(category);
 
       if (!mounted) return;
+      _baseline = _snapshot();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -348,7 +367,41 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
             .where((c) => !invalidParentIds.contains(c.id))
             .toList();
 
-        return Scaffold(
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            final navigator = Navigator.of(context);
+            if (!_isDirty) {
+              navigator.pop();
+              return;
+            }
+            // Unsaved assignment/order/field changes: ask before leaving.
+            final discard = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Discard changes?'),
+                content: const Text(
+                  'You have unsaved changes. Leave without saving?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: const Text('Keep Editing'),
+                  ),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: const Text('Discard'),
+                  ),
+                ],
+              ),
+            );
+            if (discard == true && mounted) navigator.pop();
+          },
+          child: Scaffold(
           appBar: AppBar(
             title: Text(isEditMode ? 'Edit Category' : 'Add New Category'),
             leading: IconButton(
@@ -718,6 +771,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
               ),
             ),
           ),
+        ),
         );
       },
     );

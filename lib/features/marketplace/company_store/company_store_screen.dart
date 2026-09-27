@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/domain/catalog.dart';
+import '../../../core/domain/category_tree.dart';
 import '../../../core/domain/store_profile.dart';
 import '../../../core/models/banner.dart';
 import '../../../core/models/category.dart';
@@ -218,7 +219,10 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
           return StreamBuilder<List<Category>>(
             stream: repo.categories(companyId: company.id),
             builder: (context, catSnap) {
-              final categories = catSnap.data ?? const <Category>[];
+              // Admin-defined category order (Category.sortOrder per level).
+              final categories = CategoryHierarchy.sortedByOrder(
+                catSnap.data ?? const <Category>[],
+              );
               return StreamBuilder<List<OfferBanner>>(
                 stream: repo.offerBanners(company.id),
                 builder: (context, bannerSnap) {
