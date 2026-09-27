@@ -206,7 +206,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final latest = await repo.product(item.product.id);
       if (latest == null) {
         _unavailable.add(item.cartKey);
-        messages.add('${item.product.name} is unavailable');
+        messages.add(AppLocalizations.of(context).isUnavailable('${item.product.name}'));
         continue;
       }
 
@@ -218,7 +218,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         if (v == null) {
           _unavailable.add(item.cartKey);
           messages.add(
-            '${item.product.name} (${item.variantLabel}) is unavailable',
+            AppLocalizations.of(context).isUnavailable2('${item.product.name}', '${item.variantLabel}'),
           );
           continue;
         }
@@ -228,15 +228,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           qty = snap.stock < 0 ? 0 : snap.stock;
           if (qty == 0) {
             _unavailable.add(item.cartKey);
-            messages.add('${item.product.name} is out of stock');
+            messages.add(AppLocalizations.of(context).isOutOfStock('${item.product.name}'));
             continue;
           }
           messages.add(
-            '${item.product.name}: quantity reduced to $qty (stock)',
+            AppLocalizations.of(context).quantityReducedToStock('${item.product.name}', '${qty}'),
           );
         }
         if ((snap.price - item.effectivePrice).abs() > 0.001) {
-          messages.add('Price updated for ${item.product.name}');
+          messages.add(AppLocalizations.of(context).priceUpdatedFor('${item.product.name}'));
         }
         if (qty != item.qty ||
             (snap.price - item.effectivePrice).abs() > 0.001) {
@@ -251,15 +251,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           qty = snap.stock < 0 ? 0 : snap.stock;
           if (qty == 0) {
             _unavailable.add(item.cartKey);
-            messages.add('${item.product.name} is out of stock');
+            messages.add(AppLocalizations.of(context).isOutOfStock('${item.product.name}'));
             continue;
           }
           messages.add(
-            '${item.product.name}: quantity reduced to $qty (stock)',
+            AppLocalizations.of(context).quantityReducedToStock('${item.product.name}', '${qty}'),
           );
         }
         if ((snap.price - item.effectivePrice).abs() > 0.001) {
-          messages.add('Price updated for ${item.product.name}');
+          messages.add(AppLocalizations.of(context).priceUpdatedFor('${item.product.name}'));
         }
         if (qty != item.qty ||
             (snap.price - item.effectivePrice).abs() > 0.001) {
@@ -300,7 +300,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (code.isEmpty) {
       setState(() {
         _applied[companyId] = null;
-        _voucherError[companyId] = 'Enter a voucher code.';
+        _voucherError[companyId] = AppLocalizations.of(context).enterAVoucherCode;
       });
       return;
     }
@@ -384,7 +384,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // 1. Customer name & mobile are mandatory for every order.
     if (profile.name.trim().isEmpty || profile.mobile.trim().isEmpty) {
       _snack(
-        'Please complete your profile (name & mobile) before placing an order.',
+        AppLocalizations.of(context).pleaseCompleteYourProfileNameMobileBeforePlacingAnOrder,
       );
       return;
     }
@@ -396,7 +396,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
     final address = _selectedAddress();
     if (needsAddress && address == null) {
-      _snack('Please select a delivery address.');
+      _snack(AppLocalizations.of(context).pleaseSelectADeliveryAddress);
       return;
     }
 
@@ -417,7 +417,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final latestItems = _effectiveItems(state);
       if (latestItems.isEmpty) {
         setState(() => _placing = false);
-        _snack('No order items are available.');
+        _snack(AppLocalizations.of(context).noOrderItemsAreAvailable);
         return;
       }
 
@@ -495,7 +495,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (placed.isEmpty) {
         setState(() => _placing = false);
-        _snack('No order items are available.');
+        _snack(AppLocalizations.of(context).noOrderItemsAreAvailable);
         return;
       }
 
@@ -521,7 +521,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _placing = false);
-      _snack('Could not place the order: $e');
+      _snack(AppLocalizations.of(context).couldNotPlaceTheOrder('${e}'));
     }
   }
 
@@ -538,7 +538,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Place Order')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).placeOrder)),
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, cubitState) {
           if (_loading) {
@@ -552,7 +552,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 children: [
                   const Icon(Icons.shopping_cart_outlined, size: 56),
                   const SizedBox(height: 12),
-                  const Text('Your cart is empty'),
+                  Text(AppLocalizations.of(context).yourCartIsEmpty),
                   const SizedBox(height: 12),
                   FilledButton(
                     onPressed: () => context.go(AppRoutes.home),
@@ -657,7 +657,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'Unavailable items are excluded from the total.',
+                    AppLocalizations.of(context).unavailableItemsAreExcludedFromTheTotal,
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.error,
@@ -716,7 +716,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Manual / Offline Payment',
+                            AppLocalizations.of(context).manualOfflinePayment,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -725,7 +725,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Pay directly (Cash/UPI on delivery or pickup). Payment status will default to Pending and can be marked as Done by the admin.',
+                            AppLocalizations.of(context).payDirectlyCashUpiOnDeliveryOrPickupPaymentStatusWillDefaultToPendingAndCanBeMarkedAsDoneByTheAdmin,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey.shade800,
@@ -750,8 +750,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       )
                     : Text(
                         _isDirectBuy
-                            ? 'Place Direct Order · ${formatCurrency(total)}'
-                            : 'Confirm & Place Order · ${formatCurrency(total)}',
+                            ? AppLocalizations.of(context).placeDirectOrder('${formatCurrency(total)}')
+                            : AppLocalizations.of(context).confirmPlaceOrder('${formatCurrency(total)}'),
                       ),
               ),
               const SizedBox(height: 24),
@@ -844,7 +844,7 @@ class _StoreCheckoutCard extends StatelessWidget {
     final resolvedBill = bill;
     final storeName = items.isNotEmpty && items.first.companyName.isNotEmpty
         ? items.first.companyName
-        : (company?.name.isNotEmpty == true ? company!.name : 'Store');
+        : (company?.name.isNotEmpty == true ? company!.name : AppLocalizations.of(context).store2);
     final isHome = deliveryType == DeliveryType.homeDelivery;
 
     return Card(
@@ -883,8 +883,8 @@ class _StoreCheckoutCard extends StatelessWidget {
             if (!isHome && company != null)
               PickupShopCard.fromCompany(company!)
             else if (!isHome)
-              const PickupShopCard(
-                shopName: 'Store',
+              PickupShopCard(
+                shopName: AppLocalizations.of(context).store2,
                 address: '',
                 phone: '',
                 timings: '',
@@ -910,7 +910,7 @@ class _StoreCheckoutCard extends StatelessWidget {
                 FilledButton.tonal(
                   key: Key('checkout-apply-$companyId'),
                   onPressed: onApply,
-                  child: const Text('Apply'),
+                  child: Text(AppLocalizations.of(context).apply),
                 ),
               ],
             ),
@@ -929,17 +929,17 @@ class _StoreCheckoutCard extends StatelessWidget {
             ],
             if (resolvedBill != null) ...[
               const SizedBox(height: 10),
-              _row('Items', formatCurrency(resolvedBill.subtotal)),
+              _row(AppLocalizations.of(context).items4, formatCurrency(resolvedBill.subtotal)),
               if (resolvedBill.discount > 0)
                 _row(
-                  'Discount',
+                  AppLocalizations.of(context).discount,
                   '− ${formatCurrency(resolvedBill.discount)}',
                   color: Colors.green.shade700,
                 ),
-              _row('Delivery', formatCurrency(resolvedBill.deliveryCharge)),
+              _row(AppLocalizations.of(context).delivery, formatCurrency(resolvedBill.deliveryCharge)),
               const Divider(height: 14),
               _row(
-                'Store total',
+                AppLocalizations.of(context).storeTotal,
                 formatCurrency(resolvedBill.total),
                 bold: true,
                 color: theme.colorScheme.primary,
@@ -1009,7 +1009,7 @@ class _StoreCheckoutCard extends StatelessWidget {
                 ),
                 if (unavailable)
                   Text(
-                    'Unavailable',
+                    AppLocalizations.of(context).unavailable,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,

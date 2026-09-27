@@ -67,7 +67,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   TextField(
                     controller: _companyCtrl,
                     decoration: InputDecoration(
-                        hintText: 'GreenLeaf Organics',
+                        hintText: AppLocalizations.of(context).greenleafOrganics,
                         prefixIcon: const Icon(Icons.business)),
                   ),
                   const SizedBox(height: 16),
@@ -85,7 +85,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                        hintText: 'admin@company.in',
+                        hintText: AppLocalizations.of(context).adminCompanyIn,
                         prefixIcon: const Icon(Icons.mail_outline)),
                   ),
                   const SizedBox(height: 16),
@@ -132,8 +132,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       final companyPass = _companyPassCtrl.text;
       if (companyName.isEmpty || companyPass.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter company name and company password.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).pleaseEnterCompanyNameAndCompanyPassword),
           ),
         );
         return;
@@ -166,7 +166,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         if (docs.isEmpty) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Company "$companyName" not found.')),
+              SnackBar(content: Text(AppLocalizations.of(context).companyNotFound('${companyName}'))),
             );
           }
           return;
@@ -177,7 +177,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         if (!passMatch) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Incorrect company password.')),
+              SnackBar(content: Text(AppLocalizations.of(context).incorrectCompanyPassword)),
             );
           }
           return;
@@ -187,8 +187,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       } catch (e) {
         debugPrint('Step 1 company check error: $e');
         final errMsg = e.toString().contains('permission-denied')
-            ? 'Access denied by server. Please check your internet connection and try again.'
-            : 'Could not verify company. Please try again.\n$e';
+            ? AppLocalizations.of(context).accessDeniedByServerPleaseCheckYourInternetConnectionAndTryAgain
+            : AppLocalizations.of(context).couldNotVerifyCompanyPleaseTryAgain('${e}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(errMsg)),
@@ -200,8 +200,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     } else {
       if (_emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter admin email and password.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).pleaseEnterAdminEmailAndPassword),
           ),
         );
         return;

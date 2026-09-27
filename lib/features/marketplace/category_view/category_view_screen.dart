@@ -14,6 +14,7 @@ import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/product_card.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Category explorer screen.
 ///
@@ -70,7 +71,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
           },
         ),
         title: Text(
-          widget.categoryName.isNotEmpty ? widget.categoryName : 'Category',
+          widget.categoryName.isNotEmpty ? widget.categoryName : AppLocalizations.of(context).category,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
@@ -80,7 +81,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search_rounded, color: Color(0xFF1E2229)),
-            tooltip: 'Search products',
+            tooltip: AppLocalizations.of(context).searchProducts,
             onPressed: () {
               if (widget.companyId.isNotEmpty) {
                 context.push(
@@ -111,7 +112,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                     color: Color(0xFF1E2229),
                   ),
                 ),
-                tooltip: 'Cart',
+                tooltip: AppLocalizations.of(context).cart,
                 onPressed: () async {
                   if (AuthSession.currentUser == null) {
                     final ok = await AuthBottomSheet.show(context);
@@ -230,7 +231,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                             final isSel = _selectedSubCatId == null;
                             return _SubCategoryPill(
                               label:
-                                  'All ${widget.categoryName.isNotEmpty ? widget.categoryName : 'Items'}',
+                                  AppLocalizations.of(context).all2('${widget.categoryName.isNotEmpty ? widget.categoryName : AppLocalizations.of(context).items4}'),
                               isSelected: isSel,
                               onTap: () =>
                                   setState(() => _selectedSubCatId = null),
@@ -400,7 +401,7 @@ class _Toolbar extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '$count product${count == 1 ? '' : 's'}',
+            AppLocalizations.of(context).productCount(count),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -411,8 +412,8 @@ class _Toolbar extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'In stock',
+              Text(
+                AppLocalizations.of(context).inStock2,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -493,8 +494,8 @@ class _EmptyCategory extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               categoryName.isNotEmpty
-                  ? 'No $categoryName products found'
-                  : 'No products in this category',
+                  ? AppLocalizations.of(context).noProductsFound2('${categoryName}')
+                  : AppLocalizations.of(context).noProductsInThisCategory,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 17,
@@ -503,8 +504,8 @@ class _EmptyCategory extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Products assigned to this category (or its sub-categories) will show up here.',
+            Text(
+              AppLocalizations.of(context).productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
             ),
@@ -519,7 +520,7 @@ class _EmptyCategory extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Show out-of-stock items'),
+                label: Text(AppLocalizations.of(context).showOutOfStockItems),
                 onPressed: onClearStockFilter,
               ),
             ],

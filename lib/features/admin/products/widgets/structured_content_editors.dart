@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/models/product.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Editors for the two structured product content blocks (Flipkart style):
 ///
@@ -83,7 +84,7 @@ class _HighlightsEditorState extends State<HighlightsEditor> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Product Highlights',
+                AppLocalizations.of(context).productHighlights,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -93,13 +94,13 @@ class _HighlightsEditorState extends State<HighlightsEditor> {
               key: const Key('add-highlight'),
               onPressed: _add,
               icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add Highlight'),
+              label: Text(AppLocalizations.of(context).addHighlight),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
-          'Title and value rows shown as the compact highlights list on the product page.',
+          AppLocalizations.of(context).titleAndValueRowsShownAsTheCompactHighlightsListOnTheProductPage,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -116,7 +117,7 @@ class _HighlightsEditorState extends State<HighlightsEditor> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              'No highlights yet — tap "Add Highlight".',
+              AppLocalizations.of(context).noHighlightsYetTapAddHighlight,
               style: theme.textTheme.bodySmall,
             ),
           ),
@@ -183,8 +184,8 @@ class HighlightRowEditor extends StatelessWidget {
                   key: Key('highlight-title-$index'),
                   initialValue: item.title,
                   style: const TextStyle(fontSize: 13),
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).title,
                     isDense: true,
                     border: OutlineInputBorder(),
                   ),
@@ -198,11 +199,11 @@ class HighlightRowEditor extends StatelessWidget {
                   initialValue: item.value,
                   style: const TextStyle(fontSize: 13),
                   decoration: InputDecoration(
-                    labelText: 'Value *',
+                    labelText: AppLocalizations.of(context).value,
                     isDense: true,
                     border: const OutlineInputBorder(),
                     errorText: showErrors && item.isHalfWritten
-                        ? 'Required'
+                        ? AppLocalizations.of(context).msgRequired
                         : null,
                   ),
                   onChanged: (v) => onChanged(item.copyWith(value: v)),
@@ -214,14 +215,14 @@ class HighlightRowEditor extends StatelessWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     iconSize: 18,
-                    tooltip: 'Move up',
+                    tooltip: AppLocalizations.of(context).moveUp,
                     onPressed: isFirst ? null : onMoveUp,
                     icon: const Icon(Icons.keyboard_arrow_up),
                   ),
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     iconSize: 18,
-                    tooltip: 'Move down',
+                    tooltip: AppLocalizations.of(context).moveDown,
                     onPressed: isLast ? null : onMoveDown,
                     icon: const Icon(Icons.keyboard_arrow_down),
                   ),
@@ -230,7 +231,7 @@ class HighlightRowEditor extends StatelessWidget {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 iconSize: 18,
-                tooltip: 'Delete row',
+                tooltip: AppLocalizations.of(context).deleteRow,
                 onPressed: onRemove,
                 icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
               ),
@@ -300,20 +301,19 @@ class _AllDetailsEditorState extends State<AllDetailsEditor> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Section'),
+        title: Text(AppLocalizations.of(context).deleteSection),
         content: Text(
-          'Delete "${section.title.isEmpty ? 'Untitled section' : section.title}"? '
-          'Its content will be lost.',
+          AppLocalizations.of(context).deleteItsContentWillBeLost('${section.title.isEmpty ? AppLocalizations.of(context).untitledSection : section.title}'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -347,7 +347,7 @@ class _AllDetailsEditorState extends State<AllDetailsEditor> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'All Details',
+                AppLocalizations.of(context).allDetails,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -357,14 +357,13 @@ class _AllDetailsEditorState extends State<AllDetailsEditor> {
               key: const Key('add-detail-section'),
               onPressed: _add,
               icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add Section'),
+              label: Text(AppLocalizations.of(context).addSection),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
-          'Sections shown under "All Details" on the product page — '
-          'Simple Text paragraphs or Title & Value tables.',
+          AppLocalizations.of(context).sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -381,7 +380,7 @@ class _AllDetailsEditorState extends State<AllDetailsEditor> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              'No detail sections yet — tap "Add Section".',
+              AppLocalizations.of(context).noDetailSectionsYetTapAddSection,
               style: theme.textTheme.bodySmall,
             ),
           ),
@@ -448,18 +447,18 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Change Section Type'),
-          content: const Text(
-            'Switching the type will clear the content of this section. Continue?',
+          title: Text(AppLocalizations.of(context).changeSectionType),
+          content: Text(
+            AppLocalizations.of(context).switchingTheTypeWillClearTheContentOfThisSectionContinue,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Change & Clear'),
+              child: Text(AppLocalizations.of(context).changeClear),
             ),
           ],
         ),
@@ -557,7 +556,7 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                   Expanded(
                     child: Text(
                       s.title.trim().isEmpty
-                          ? 'Untitled section'
+                          ? AppLocalizations.of(context).untitledSection
                           : s.title.trim(),
                       style: const TextStyle(
                         fontSize: 13.5,
@@ -576,7 +575,7 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      isText ? 'Simple Text' : 'Title & Value',
+                      isText ? AppLocalizations.of(context).simpleText : AppLocalizations.of(context).titleValue,
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
@@ -587,21 +586,21 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     iconSize: 18,
-                    tooltip: 'Move up',
+                    tooltip: AppLocalizations.of(context).moveUp,
                     onPressed: widget.isFirst ? null : widget.onMoveUp,
                     icon: const Icon(Icons.keyboard_arrow_up),
                   ),
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     iconSize: 18,
-                    tooltip: 'Move down',
+                    tooltip: AppLocalizations.of(context).moveDown,
                     onPressed: widget.isLast ? null : widget.onMoveDown,
                     icon: const Icon(Icons.keyboard_arrow_down),
                   ),
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     iconSize: 18,
-                    tooltip: 'Delete section',
+                    tooltip: AppLocalizations.of(context).deleteSection2,
                     onPressed: widget.onRemove,
                     icon: Icon(
                       Icons.delete_outline,
@@ -624,13 +623,13 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                     initialValue: s.title,
                     style: const TextStyle(fontSize: 13.5),
                     decoration: InputDecoration(
-                      labelText: 'Section Title *',
-                      hintText: 'e.g. Description, General, Display Features',
+                      labelText: AppLocalizations.of(context).sectionTitle,
+                      hintText: AppLocalizations.of(context).eGDescriptionGeneralDisplayFeatures,
                       isDense: true,
                       border: const OutlineInputBorder(),
                       errorText:
                           widget.showErrors && s.title.trim().isEmpty
-                          ? 'Section title is required'
+                          ? AppLocalizations.of(context).sectionTitleIsRequired
                           : null,
                     ),
                     onChanged: (v) => widget.onChanged(s.copyWith(title: v)),
@@ -641,18 +640,18 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                         ? s.type
                         : DetailSectionType.text,
                     isDense: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Section Type *',
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context).sectionType,
                       border: OutlineInputBorder(),
                     ),
                     items: const [
                       DropdownMenuItem(
                         value: DetailSectionType.text,
-                        child: Text('Simple Text'),
+                        child: Text(AppLocalizations.of(context).simpleText),
                       ),
                       DropdownMenuItem(
                         value: DetailSectionType.keyValue,
-                        child: Text('Title & Value'),
+                        child: Text(AppLocalizations.of(context).titleValue),
                       ),
                     ],
                     onChanged: _onTypeChanged,
@@ -665,13 +664,13 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                       maxLines: 5,
                       style: const TextStyle(fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: 'Text *',
-                        hintText: 'Long description shown as a paragraph...',
+                        labelText: AppLocalizations.of(context).text,
+                        hintText: AppLocalizations.of(context).longDescriptionShownAsAParagraph,
                         alignLabelWithHint: true,
                         border: const OutlineInputBorder(),
                         errorText:
                             widget.showErrors && s.text.trim().isEmpty
-                            ? 'Text is required'
+                            ? AppLocalizations.of(context).textIsRequired
                             : null,
                       ),
                       onChanged: (v) =>
@@ -682,7 +681,7 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
-                          'Add at least one complete title & value row',
+                          AppLocalizations.of(context).addAtLeastOneCompleteTitleValueRow,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.error,
@@ -710,7 +709,7 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                         key: Key('add-detail-item-${widget.index}'),
                         onPressed: _addItem,
                         icon: const Icon(Icons.add, size: 16),
-                        label: const Text('Add Row'),
+                        label: Text(AppLocalizations.of(context).addRow),
                       ),
                     ),
                   ],
@@ -760,11 +759,11 @@ class KeyValueRowEditor extends StatelessWidget {
             initialValue: item.title,
             style: const TextStyle(fontSize: 13),
             decoration: InputDecoration(
-              labelText: 'Title *',
+              labelText: AppLocalizations.of(context).title2,
               isDense: true,
               border: const OutlineInputBorder(),
               errorText: showErrors && item.title.trim().isEmpty
-                  ? 'Required'
+                  ? AppLocalizations.of(context).msgRequired
                   : null,
             ),
             onChanged: (v) => onChanged(item.copyWith(title: v)),
@@ -776,11 +775,11 @@ class KeyValueRowEditor extends StatelessWidget {
             initialValue: item.value,
             style: const TextStyle(fontSize: 13),
             decoration: InputDecoration(
-              labelText: 'Value *',
+              labelText: AppLocalizations.of(context).value,
               isDense: true,
               border: const OutlineInputBorder(),
               errorText: showErrors && item.value.trim().isEmpty
-                  ? 'Required'
+                  ? AppLocalizations.of(context).msgRequired
                   : null,
             ),
             onChanged: (v) => onChanged(item.copyWith(value: v)),
@@ -792,14 +791,14 @@ class KeyValueRowEditor extends StatelessWidget {
             IconButton(
               visualDensity: VisualDensity.compact,
               iconSize: 18,
-              tooltip: 'Move up',
+              tooltip: AppLocalizations.of(context).moveUp,
               onPressed: isFirst ? null : onMoveUp,
               icon: const Icon(Icons.keyboard_arrow_up),
             ),
             IconButton(
               visualDensity: VisualDensity.compact,
               iconSize: 18,
-              tooltip: 'Move down',
+              tooltip: AppLocalizations.of(context).moveDown,
               onPressed: isLast ? null : onMoveDown,
               icon: const Icon(Icons.keyboard_arrow_down),
             ),
@@ -808,7 +807,7 @@ class KeyValueRowEditor extends StatelessWidget {
         IconButton(
           visualDensity: VisualDensity.compact,
           iconSize: 18,
-          tooltip: 'Delete row',
+          tooltip: AppLocalizations.of(context).deleteRow,
           onPressed: onRemove,
           icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
         ),

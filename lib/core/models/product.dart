@@ -1,4 +1,5 @@
 import '../utils/type_utils.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// How a product is measured and sold.
 class ProductType {
@@ -11,7 +12,7 @@ class ProductType {
   static const values = <String>[weightBased, quantityBased];
 
   static String label(String type) =>
-      type == weightBased ? 'Weight based' : 'Quantity based';
+      type == weightBased ? L10n.current.weightBased : L10n.current.quantityBased;
 }
 
 /// Product option definition (e.g. Option name: "Weight", values: ["250g", "500g", "1kg"]).
@@ -352,8 +353,8 @@ class ProductVariant {
         ? rawAttrs.map((k, v) => MapEntry(k.toString(), v.toString()))
         : <String, String>{};
 
-    final rawSize = map['size']?.toString() ?? attrs['Size'] ?? '';
-    final rawColor = map['color']?.toString() ?? attrs['Color'] ?? '';
+    final rawSize = map['size']?.toString() ?? attrs[L10n.current.size] ?? '';
+    final rawColor = map['color']?.toString() ?? attrs[L10n.current.color] ?? '';
     final rawTitle = map['title']?.toString() ?? '';
 
     return ProductVariant(
@@ -367,8 +368,8 @@ class ProductVariant {
       attributes: attrs.isNotEmpty
           ? attrs
           : {
-              if (rawSize.isNotEmpty) 'Size': rawSize,
-              if (rawColor.isNotEmpty) 'Color': rawColor,
+              if (rawSize.isNotEmpty) L10n.current.size: rawSize,
+              if (rawColor.isNotEmpty) L10n.current.color: rawColor,
             },
       stockQty: asInt(map['stockQty']),
       isUnlimitedStock: asBool(map['isUnlimitedStock']),

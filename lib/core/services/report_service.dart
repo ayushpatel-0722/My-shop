@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../app/l10n/l10n_service.dart';
 import '../models/order.dart';
 import '../models/product.dart';
 
@@ -71,12 +72,12 @@ class ReportService {
       pw.MultiPage(
         build: (context) => [
           pw.Text(
-            'INVOICE',
+            L10n.current.invoice,
             style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
-          pw.Text('Order #${order.id.toUpperCase()}'),
-          pw.Text('Company: ${order.companyName}'),
+          pw.Text(L10n.current.order('${order.id.toUpperCase()}')),
+          pw.Text(L10n.current.company2('${order.companyName}')),
           pw.SizedBox(height: 16),
           pw.TableHelper.fromTextArray(
             headers: const ['Item', 'Qty', 'Unit Price', 'Total'],
@@ -93,7 +94,7 @@ class ReportService {
           ),
           pw.SizedBox(height: 16),
           pw.Text(
-            'Total: ₹${order.totalAmount}',
+            L10n.current.total('${order.totalAmount}'),
             style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
           ),
         ],

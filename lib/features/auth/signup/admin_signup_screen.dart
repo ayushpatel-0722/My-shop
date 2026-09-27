@@ -51,7 +51,7 @@ class _AdminSignupScreenState extends State<AdminSignupScreen> {
             if (widget.companyName.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: Text('Company: ${widget.companyName}',
+                child: Text(AppLocalizations.of(context).company3('${widget.companyName}'),
                     style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
             TextField(
@@ -121,9 +121,9 @@ class _AdminSignupScreenState extends State<AdminSignupScreen> {
     }
     if (effectiveCompanyId.isEmpty) {
       messenger.showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-              'No company identified. Please ensure you are logged in to your company.'),
+              AppLocalizations.of(context).noCompanyIdentifiedPleaseEnsureYouAreLoggedInToYourCompany),
         ),
       );
       return;
@@ -146,7 +146,7 @@ class _AdminSignupScreenState extends State<AdminSignupScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating admin: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).errorCreatingAdmin('${e}'))),
         );
       }
     } finally {

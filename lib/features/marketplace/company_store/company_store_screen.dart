@@ -28,6 +28,7 @@ import '../widgets/common_carousel.dart';
 import '../widgets/location_picker_sheet.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/product_card.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Company micro-storefront, restructured into clear "aisles":
 ///
@@ -113,10 +114,10 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${product.name} added to cart'),
+          content: Text(AppLocalizations.of(context).addedToCart('${product.name}')),
           duration: const Duration(seconds: 2),
           action: SnackBarAction(
-            label: 'View Cart',
+            label: AppLocalizations.of(context).viewCart2,
             textColor: Colors.white,
             onPressed: () => context.go(AppRoutes.cart),
           ),
@@ -138,7 +139,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Voucher "$code" copied to clipboard!'),
+          content: Text(AppLocalizations.of(context).voucherCopiedToClipboard('${code}')),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -284,7 +285,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       titleSpacing: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1E2229)),
-        tooltip: 'Back',
+        tooltip: AppLocalizations.of(context).back,
         onPressed: () {
           if (context.canPop()) {
             context.pop();
@@ -304,7 +305,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.search_rounded, color: Color(0xFF1E2229)),
-          tooltip: 'Search in this store',
+          tooltip: AppLocalizations.of(context).searchInThisStore,
           onPressed: () => context.push(
             '${AppRoutes.search}?companyId=${company.id}&name=${Uri.encodeComponent(company.name)}',
           ),
@@ -314,7 +315,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             Icons.rate_review_outlined,
             color: Color(0xFF1E2229),
           ),
-          tooltip: 'Store reviews',
+          tooltip: AppLocalizations.of(context).storeReviews,
           onPressed: () => context.push(
             AppRoutes.reviews.replaceFirst(':companyId', company.id),
           ),
@@ -339,7 +340,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                   color: Color(0xFF1E2229),
                 ),
               ),
-              tooltip: 'Cart',
+              tooltip: AppLocalizations.of(context).cart,
               onPressed: () async {
                 if (AuthSession.currentUser == null) {
                   final ok = await AuthBottomSheet.show(context);
@@ -495,7 +496,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                 final isSelected = _selectedCategoryId == null;
                 return _CategoryChip(
                   key: const Key('category-chip-all'),
-                  label: 'All',
+                  label: AppLocalizations.of(context).all3,
                   isSelected: isSelected,
                   onTap: () => setState(() => _selectedCategoryId = null),
                 );
@@ -613,8 +614,8 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                 size: 20,
               ),
               const SizedBox(width: 6),
-              const Text(
-                'Trending Now',
+              Text(
+                AppLocalizations.of(context).trendingNow,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -623,7 +624,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               ),
               const SizedBox(width: 6),
               Text(
-                'in ${company.name}',
+                AppLocalizations.of(context).msgIn('${company.name}'),
                 style: const TextStyle(
                   fontSize: 11.5,
                   color: Color(0xFF6C757D),
@@ -684,7 +685,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'All Products (${filtered.length})',
+            AppLocalizations.of(context).allProducts('${filtered.length}'),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -715,7 +716,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               const SizedBox(width: 8),
               _FilterPill(
                 key: const Key('filter-pill-rating'),
-                label: 'Rating',
+                label: AppLocalizations.of(context).rating,
                 active: _sort == ProductSort.rating,
                 onTap: () => setState(
                   () => _sort = _sort == ProductSort.rating
@@ -726,7 +727,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               const SizedBox(width: 8),
               _FilterPill(
                 key: const Key('filter-pill-instock'),
-                label: 'In-Stock',
+                label: AppLocalizations.of(context).inStock3,
                 active: _onlyInStock,
                 onTap: () => setState(() => _onlyInStock = !_onlyInStock),
               ),
@@ -736,21 +737,21 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         const SizedBox(height: 14),
 
         if (allProducts.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(32),
             child: Center(
               child: Text(
-                'This store has no products yet',
+                AppLocalizations.of(context).thisStoreHasNoProductsYet,
                 style: TextStyle(color: Color(0xFF94A3B8)),
               ),
             ),
           )
         else if (visible.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(32),
             child: Center(
               child: Text(
-                'No products match these filters',
+                AppLocalizations.of(context).noProductsMatchTheseFilters,
                 style: TextStyle(color: Color(0xFF94A3B8)),
               ),
             ),
@@ -799,7 +800,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             padding: const EdgeInsets.only(top: 12),
             child: Center(
               child: Text(
-                'Scroll for more (${filtered.length - visible.length} left)',
+                AppLocalizations.of(context).scrollForMoreLeft('${filtered.length - visible.length}'),
                 style: const TextStyle(
                   fontSize: 11.5,
                   color: Color(0xFF94A3B8),
@@ -812,10 +813,10 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   }
 
   String _priceSortLabel() => _sort == ProductSort.priceDesc
-      ? 'Price ↓'
+      ? AppLocalizations.of(context).price3
       : _sort == ProductSort.priceAsc
-      ? 'Price ↑'
-      : 'Price';
+      ? AppLocalizations.of(context).price4
+      : AppLocalizations.of(context).price5;
 }
 
 // =============================================================================
@@ -970,7 +971,7 @@ class _ShopDetailsBlock extends StatelessWidget {
                     color: const Color(0xFF00796B),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
@@ -980,7 +981,7 @@ class _ShopDetailsBlock extends StatelessWidget {
                       ),
                       SizedBox(width: 3),
                       Text(
-                        'Verified',
+                        AppLocalizations.of(context).verified,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 10.5,
@@ -1039,7 +1040,7 @@ class _ShopDetailsBlock extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        ' (${stats.reviewCount} ${stats.reviewCount == 1 ? 'review' : 'reviews'})',
+                        AppLocalizations.of(context).reviewsCount(stats.reviewCount),
                         style: const TextStyle(
                           color: Color(0xFF6C757D),
                           fontSize: 12,
@@ -1124,20 +1125,20 @@ class _ShopDetailsBlock extends StatelessWidget {
       icon = Icons.storefront_outlined;
       iconColor = const Color(0xFF0F766E);
       label = hasMinOrder
-          ? 'Self-Pickup only • Min order $minOrderFormatted'
-          : 'Self-Pickup only';
+          ? AppLocalizations.of(context).selfPickupOnlyMinOrder('${minOrderFormatted}')
+          : AppLocalizations.of(context).selfPickupOnly;
     } else if (company.allowsHomeDelivery) {
       // Home delivery allowed
       icon = Icons.local_shipping_outlined;
       iconColor = const Color(0xFFE03131);
       label = hasMinOrder
-          ? 'Home Delivery available • Min order $minOrderFormatted'
-          : 'Home Delivery available • No min order';
+          ? AppLocalizations.of(context).homeDeliveryAvailableMinOrder('${minOrderFormatted}')
+          : AppLocalizations.of(context).homeDeliveryAvailableNoMinOrder;
     } else {
       // Neither or fallback
       icon = Icons.storefront_outlined;
       iconColor = const Color(0xFF64748B);
-      label = 'Storefront service';
+      label = AppLocalizations.of(context).storefrontService;
     }
 
     return InkWell(
@@ -1304,13 +1305,13 @@ class _OfferCarousel extends StatelessWidget {
   Widget _voucherPage(List<Voucher> vouchers) {
     final top = vouchers.first;
     final title = top.discountType == 'percentage'
-        ? 'Flat ${top.discountValue.toStringAsFixed(0)}% OFF'
+        ? AppLocalizations.of(context).flatOff('${top.discountValue.toStringAsFixed(0)}')
         : top.discountType == 'free_shipping'
-        ? 'Free Delivery on your order'
-        : 'Flat ₹${top.discountValue.toStringAsFixed(0)} OFF';
+        ? AppLocalizations.of(context).freeDeliveryOnYourOrder
+        : AppLocalizations.of(context).flatOff2('${top.discountValue.toStringAsFixed(0)}');
     final sub = top.minOrderAmt > 0
-        ? 'Valid on orders over ₹${top.minOrderAmt.toStringAsFixed(0)}'
-        : 'Store exclusive deal';
+        ? AppLocalizations.of(context).validOnOrdersOver('${top.minOrderAmt.toStringAsFixed(0)}')
+        : AppLocalizations.of(context).storeExclusiveDeal;
 
     return Container(
       decoration: BoxDecoration(
@@ -1345,8 +1346,8 @@ class _OfferCarousel extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.22),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    'SPECIAL OFFER',
+                  child: Text(
+                    AppLocalizations.of(context).specialOffer,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -1368,8 +1369,7 @@ class _OfferCarousel extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '$sub · ${vouchers.length} live '
-                  '${vouchers.length == 1 ? 'offer' : 'offers'}',
+                  AppLocalizations.of(context).vouchersPlural11LiveOfferOtherLiveOffers('${sub}', vouchers.length),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.white70, fontSize: 11.5),
@@ -1387,7 +1387,7 @@ class _OfferCarousel extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Use Code: ${top.code}',
+                      AppLocalizations.of(context).useCode('${top.code}'),
                       style: const TextStyle(
                         color: Color(0xFFB3261E),
                         fontWeight: FontWeight.w800,
@@ -1470,7 +1470,7 @@ class _CategoryShelf extends StatelessWidget {
                     horizontal: 4,
                   ),
                   child: Text(
-                    'See All',
+                    AppLocalizations.of(context).seeAll,
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
@@ -1644,7 +1644,7 @@ class _StoreCouponsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
@@ -1655,7 +1655,7 @@ class _StoreCouponsSection extends StatelessWidget {
               ),
               SizedBox(width: 6),
               Text(
-                'Offers from this store',
+                AppLocalizations.of(context).offersFromThisStore,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -1698,14 +1698,14 @@ class _StoreCouponCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final discountTitle = voucher.discountType == 'percentage'
-        ? '${voucher.discountValue.toStringAsFixed(0)}% OFF'
+        ? AppLocalizations.of(context).off('${voucher.discountValue.toStringAsFixed(0)}')
         : voucher.discountType == 'free_shipping'
-        ? 'FREE DEL'
-        : '₹${voucher.discountValue.toStringAsFixed(0)} OFF';
+        ? AppLocalizations.of(context).freeDel
+        : AppLocalizations.of(context).off4('${voucher.discountValue.toStringAsFixed(0)}');
 
     final sub = voucher.minOrderAmt > 0
-        ? 'Orders over ₹${voucher.minOrderAmt.toStringAsFixed(0)}'
-        : 'No min. order';
+        ? AppLocalizations.of(context).ordersOver('${voucher.minOrderAmt.toStringAsFixed(0)}')
+        : AppLocalizations.of(context).noMinOrder;
 
     final isFreeDel = voucher.discountType == 'free_shipping';
 
@@ -1780,8 +1780,8 @@ class _StoreCouponCard extends StatelessWidget {
                 color: const Color(0xFFFFEBEA),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
-                'Apply',
+              child: Text(
+                AppLocalizations.of(context).apply,
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,

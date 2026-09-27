@@ -43,7 +43,7 @@ class ReviewsScreen extends StatelessWidget {
               .where((r) => r.isVisible)
               .toList();
           if (list.isEmpty) {
-            return const Center(child: Text('No reviews yet'));
+            return Center(child: Text(AppLocalizations.of(context).noReviewsYet));
           }
           final avg = list.fold(0, (s, r) => s + r.rating) / list.length;
           return ListView(
@@ -83,7 +83,7 @@ class ReviewsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text('$count reviews'),
+                Text(AppLocalizations.of(context).reviews2('${count}')),
               ],
             ),
           ],

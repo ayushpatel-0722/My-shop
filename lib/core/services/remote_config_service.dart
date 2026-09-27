@@ -1,6 +1,7 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../config/app_config.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Force-update / feature-flag controller (Section 18.2).
 class RemoteConfigService {
@@ -14,7 +15,7 @@ class RemoteConfigService {
     await _rc.setDefaults({
       _keyMinVersion: AppConfig.minSupportedVersion,
       _keyForceUpdate: false,
-      _keyUpdateMessage: 'A new version is available. Please update.',
+      _keyUpdateMessage: L10n.current.aNewVersionIsAvailablePleaseUpdate,
     });
     await _rc.setConfigSettings(RemoteConfigSettings(
       fetchTimeout: const Duration(seconds: 10),

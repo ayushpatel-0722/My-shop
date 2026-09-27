@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/app/theme/app_theme.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
@@ -170,6 +171,9 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
             home: Scaffold(
               body: StatefulBuilder(
                 builder: (context, setState) {
@@ -241,6 +245,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
           theme: AppTheme.light(),
           home: const AdminCategoriesScreen(),
         ),

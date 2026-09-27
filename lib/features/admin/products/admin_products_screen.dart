@@ -13,6 +13,7 @@ import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Product management for the signed-in store.
 ///
@@ -68,11 +69,11 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Products',
+      title: AppLocalizations.of(context).products,
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
-          tooltip: 'Add Product',
+          tooltip: AppLocalizations.of(context).addProduct,
           onPressed: () => context.push(AppRoutes.adminAddProduct),
         ),
       ],
@@ -87,8 +88,8 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                     key: const Key('product-search-field'),
                     controller: _searchCtrl,
                     decoration: InputDecoration(
-                      labelText: 'Search products',
-                      hintText: 'Name or SKU',
+                      labelText: AppLocalizations.of(context).searchProducts,
+                      hintText: AppLocalizations.of(context).nameOrSku,
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: _searchCtrl.text.isEmpty
                           ? null
@@ -133,19 +134,19 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    _chip('All', products.length, ProductStockFilter.all),
+                    _chip(AppLocalizations.of(context).all3, products.length, ProductStockFilter.all),
                     _chip(
-                      'In stock',
+                      AppLocalizations.of(context).inStock2,
                       summary.inStock,
                       ProductStockFilter.inStock,
                     ),
                     _chip(
-                      'Low stock',
+                      AppLocalizations.of(context).lowStock,
                       summary.lowStock,
                       ProductStockFilter.lowStock,
                     ),
                     _chip(
-                      'Sold out',
+                      AppLocalizations.of(context).soldOut,
                       summary.outOfStock,
                       ProductStockFilter.outOfStock,
                     ),
@@ -175,10 +176,10 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                   );
                 }
                 if (list.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
                       padding: EdgeInsets.all(28),
-                      child: Text('No products match these filters'),
+                      child: Text(AppLocalizations.of(context).noProductsMatchTheseFilters),
                     ),
                   );
                 }
@@ -229,19 +230,19 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Product'),
-        content: Text('Are you sure you want to delete "${product.name}"?'),
+        title: Text(AppLocalizations.of(context).deleteProduct),
+        content: Text(AppLocalizations.of(context).areYouSureYouWantToDelete('${product.name}')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -252,13 +253,13 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       await repo.deleteProduct(product.id, companyId: _companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product "${product.name}" deleted.')),
+        SnackBar(content: Text(AppLocalizations.of(context).productDeleted('${product.name}'))),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to delete product: $e')));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).failedToDeleteProduct('${e}'))));
     }
   }
 }
@@ -376,7 +377,7 @@ class _ProductTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      categoryName.isEmpty ? 'Uncategorised' : categoryName,
+                      categoryName.isEmpty ? AppLocalizations.of(context).uncategorised : categoryName,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(
@@ -389,8 +390,8 @@ class _ProductTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       product.isUnlimitedStock
-                          ? 'Stock: Unlimited'
-                          : 'Stock: ${product.stockQty} ${product.unitType}',
+                          ? AppLocalizations.of(context).stockUnlimited
+                          : AppLocalizations.of(context).stock('${product.stockQty}', '${product.unitType}'),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -453,7 +454,7 @@ class _ProductTile extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              '${product.variants.length} var',
+                              AppLocalizations.of(context).msgVar('${product.variants.length}'),
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
@@ -466,7 +467,7 @@ class _ProductTile extends StatelessWidget {
                     CopyableIdBadge(
                       key: Key('product-id-${product.id}'),
                       id: product.id,
-                      label: 'Product',
+                      label: AppLocalizations.of(context).product,
                     ),
                   ],
                 ),
@@ -478,7 +479,7 @@ class _ProductTile extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                     iconSize: 20,
                     icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Edit Product',
+                    tooltip: AppLocalizations.of(context).editProduct,
                     onPressed: onEdit,
                   ),
                   IconButton(
@@ -488,7 +489,7 @@ class _ProductTile extends StatelessWidget {
                       Icons.delete_outline,
                       color: Colors.redAccent,
                     ),
-                    tooltip: 'Delete Product',
+                    tooltip: AppLocalizations.of(context).deleteProduct,
                     onPressed: onDelete,
                   ),
                 ],
@@ -565,7 +566,7 @@ class _ProductTile extends StatelessWidget {
                       ),
                     if (product.variants.isNotEmpty)
                       Text(
-                        '• ${product.variants.length} variants',
+                        AppLocalizations.of(context).variants('${product.variants.length}'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -575,14 +576,14 @@ class _ProductTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  categoryName.isEmpty ? 'Uncategorised' : categoryName,
+                  categoryName.isEmpty ? AppLocalizations.of(context).uncategorised : categoryName,
                   style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
                 const SizedBox(height: 6),
                 CopyableIdBadge(
                   key: Key('product-id-${product.id}'),
                   id: product.id,
-                  label: 'Product',
+                  label: AppLocalizations.of(context).product,
                 ),
               ],
             ),
@@ -594,7 +595,7 @@ class _ProductTile extends StatelessWidget {
             children: [
               Text(
                 product.isUnlimitedStock
-                    ? 'Unlimited'
+                    ? AppLocalizations.of(context).unlimited
                     : '${product.stockQty} ${product.unitType}',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -619,7 +620,7 @@ class _ProductTile extends StatelessWidget {
           const SizedBox(width: 12),
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20),
-            tooltip: 'Edit Product',
+            tooltip: AppLocalizations.of(context).editProduct,
             onPressed: onEdit,
           ),
           IconButton(
@@ -628,7 +629,7 @@ class _ProductTile extends StatelessWidget {
               size: 20,
               color: Colors.redAccent,
             ),
-            tooltip: 'Delete Product',
+            tooltip: AppLocalizations.of(context).deleteProduct,
             onPressed: onDelete,
           ),
         ],
@@ -650,19 +651,19 @@ class _EmptyProducts extends StatelessWidget {
         children: [
           const Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
-          const Text(
-            'No products found',
+          Text(
+            AppLocalizations.of(context).noProductsFound,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Add your first product to start selling.',
+          Text(
+            AppLocalizations.of(context).addYourFirstProductToStartSelling,
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.add),
-            label: const Text('Add Product'),
+            label: Text(AppLocalizations.of(context).addProduct),
             onPressed: onAdd,
           ),
         ],

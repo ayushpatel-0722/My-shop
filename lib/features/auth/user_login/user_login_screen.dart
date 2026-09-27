@@ -52,7 +52,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                   readOnly: _otpSent || _busy || isAuthenticating,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    labelText: 'Mobile Number',
+                    labelText: AppLocalizations.of(context).mobileNumber,
                     hintText: '9876543210',
                     prefixIcon: const Icon(Icons.phone_iphone),
                     prefixText: '+91  ',
@@ -61,13 +61,13 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                             onPressed: _busy || isAuthenticating
                                 ? null
                                 : _changeNumber,
-                            child: const Text('Change'),
+                            child: Text(AppLocalizations.of(context).change),
                           )
                         : null,
                     errorText: _notFound && !_otpSent
                         ? AppLocalizations.of(context).noAccountFound
                         : null,
-                    helperText: _otpSent ? null : 'Enter 10-digit number',
+                    helperText: _otpSent ? null : AppLocalizations.of(context).enter10DigitNumber,
                   ),
                 ),
                 if (_otpSent) ...[
@@ -77,11 +77,11 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                     keyboardType: TextInputType.number,
                     maxLength: 6,
                     enabled: !_busy && !isAuthenticating,
-                    decoration: const InputDecoration(
-                      labelText: 'OTP',
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context).otp,
                       hintText: '------',
                       prefixIcon: Icon(Icons.pin_outlined),
-                      helperText: 'Enter the 6-digit code sent via SMS',
+                      helperText: AppLocalizations.of(context).enterThe6DigitCodeSentViaSms,
                     ),
                   ),
                 ],
@@ -110,7 +110,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'OR',
+                        AppLocalizations.of(context).or,
                         style: TextStyle(
                           color: Colors.grey,
                           fontWeight: FontWeight.bold,
@@ -141,7 +141,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                           color: Colors.red,
                         ),
                   label: Text(
-                    isAuthenticating ? 'Signing in...' : 'Sign in with Google',
+                    isAuthenticating ? AppLocalizations.of(context).signingIn : AppLocalizations.of(context).signInWithGoogle,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -193,15 +193,15 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
     final mobile = _mobileCtrl.text.trim();
     if (mobile.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your mobile number')),
+        SnackBar(content: Text(AppLocalizations.of(context).pleaseEnterYourMobileNumber)),
       );
       return;
     }
     if (!_isValidMobile(mobile)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Enter a valid 10-digit Indian mobile number (e.g. 9876543210)',
+            AppLocalizations.of(context).enterAValid10DigitIndianMobileNumberEG9876543210,
           ),
         ),
       );
@@ -233,15 +233,15 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         setState(() => _otpSent = true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('OTP sent to $mobile'),
+            content: Text(AppLocalizations.of(context).otpSentTo('${mobile}')),
             duration: const Duration(seconds: 4),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Could not send OTP. Please verify your number or try again.',
+              AppLocalizations.of(context).couldNotSendOtpPleaseVerifyYourNumberOrTryAgain,
             ),
           ),
         );
@@ -251,7 +251,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error: ${e.toString().replaceFirst('Exception: ', '')}',
+              AppLocalizations.of(context).error('${e.toString().replaceFirst('Exception: ', '')}'),
             ),
           ),
         );
@@ -271,7 +271,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              ok ? 'OTP resent to $mobile' : 'Could not resend OTP. Try again.',
+              ok ? AppLocalizations.of(context).otpResentTo('${mobile}') : AppLocalizations.of(context).couldNotResendOtpTryAgain,
             ),
           ),
         );
@@ -280,7 +280,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).error('${e}'))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -291,7 +291,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
     final otp = _otpCtrl.text.trim();
     if (otp.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the 6-digit OTP')),
+        SnackBar(content: Text(AppLocalizations.of(context).pleaseEnterThe6DigitOtp)),
       );
       return;
     }
@@ -303,8 +303,8 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       );
       if (!ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid OTP. Please check the code and try again.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).invalidOtpPleaseCheckTheCodeAndTryAgain),
           ),
         );
       }
@@ -313,7 +313,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Verification error: ${e.toString().replaceFirst('Exception: ', '')}',
+              AppLocalizations.of(context).verificationError('${e.toString().replaceFirst('Exception: ', '')}'),
             ),
           ),
         );

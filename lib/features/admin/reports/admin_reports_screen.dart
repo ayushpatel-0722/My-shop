@@ -5,6 +5,7 @@ import '../../../core/models/order.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Reports centre — generate & download Excel (.xlsx), Word (.docx) and PDF
 /// reports (Section 17.1 / Section 2.2).
@@ -18,7 +19,7 @@ class AdminReportsScreen extends StatelessWidget {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Reports',
+      title: AppLocalizations.of(context).reports,
       child: StreamBuilder<List<Order>>(
         stream: repo.orders(companyId: companyId),
         builder: (context, snap) {
@@ -33,11 +34,11 @@ class AdminReportsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Summary',
+                      Text(AppLocalizations.of(context).summary,
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
-                      Text('Orders: ${orders.length}'),
-                      Text('Revenue: ₹${revenue.toStringAsFixed(2)}'),
+                      Text(AppLocalizations.of(context).orders2('${orders.length}')),
+                      Text(AppLocalizations.of(context).revenue('${revenue.toStringAsFixed(2)}')),
                     ],
                   ),
                 ),
@@ -48,29 +49,29 @@ class AdminReportsScreen extends StatelessWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.grid_on),
-                      title: const Text('Monthly order report'),
-                      subtitle: const Text('Excel (.xlsx)'),
+                      title: Text(AppLocalizations.of(context).monthlyOrderReport),
+                      subtitle: Text(AppLocalizations.of(context).excelXlsx),
                       trailing: const Icon(Icons.download),
-                      onTap: () => _exportExcel(context, orders, 'Monthly'),
+                      onTap: () => _exportExcel(context, orders, AppLocalizations.of(context).monthly),
                     ),
                     ListTile(
                       leading: const Icon(Icons.grid_on),
-                      title: const Text('Yearly order report'),
-                      subtitle: const Text('Excel (.xlsx)'),
+                      title: Text(AppLocalizations.of(context).yearlyOrderReport),
+                      subtitle: Text(AppLocalizations.of(context).excelXlsx),
                       trailing: const Icon(Icons.download),
-                      onTap: () => _exportExcel(context, orders, 'Yearly'),
+                      onTap: () => _exportExcel(context, orders, AppLocalizations.of(context).yearly),
                     ),
                     ListTile(
                       leading: const Icon(Icons.article),
-                      title: const Text('Export catalog sheet'),
-                      subtitle: const Text('Word (.docx)'),
+                      title: Text(AppLocalizations.of(context).exportCatalogSheet),
+                      subtitle: Text(AppLocalizations.of(context).wordDocx),
                       trailing: const Icon(Icons.download),
                       onTap: () => _exportWord(context),
                     ),
                     ListTile(
                       leading: const Icon(Icons.picture_as_pdf),
-                      title: const Text('Latest invoice PDF'),
-                      subtitle: const Text('PDF'),
+                      title: Text(AppLocalizations.of(context).latestInvoicePdf),
+                      subtitle: Text(AppLocalizations.of(context).pdf),
                       trailing: const Icon(Icons.download),
                       onTap: () => _exportPdf(context, orders),
                     ),
@@ -86,7 +87,7 @@ class AdminReportsScreen extends StatelessWidget {
 
   Future<void> _exportExcel(
       BuildContext context, List<Order> orders, String period) async {
-    final bytes = reports.buildOrderReportExcel(orders, '$period Order Report');
+    final bytes = reports.buildOrderReportExcel(orders, AppLocalizations.of(context).orderReport('${period}'));
     final stamp = DateTime.now().toIso8601String().split('T').first;
     await reports.saveExcel(bytes, 'orders_${period.toLowerCase()}_$stamp');
   }
@@ -101,7 +102,7 @@ class AdminReportsScreen extends StatelessWidget {
   Future<void> _exportPdf(BuildContext context, List<Order> orders) async {
     if (orders.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No orders to invoice yet')));
+          SnackBar(content: Text(AppLocalizations.of(context).noOrdersToInvoiceYet)));
       return;
     }
     final bytes = await reports.buildInvoicePdf(orders.first);

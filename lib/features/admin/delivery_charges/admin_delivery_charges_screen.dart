@@ -10,6 +10,7 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Pincode → delivery charge mapping, with full-screen CRUD and bulk CSV import.
 class AdminDeliveryChargesScreen extends StatefulWidget {
@@ -37,16 +38,16 @@ class _AdminDeliveryChargesScreenState
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Delivery Charges',
+      title: AppLocalizations.of(context).deliveryCharges,
       actions: [
         TextButton.icon(
           onPressed: () => _importCsv(context),
           icon: const Icon(Icons.upload_file),
-          label: const Text('Import CSV'),
+          label: Text(AppLocalizations.of(context).importCsv),
         ),
         IconButton(
           icon: const Icon(Icons.add),
-          tooltip: 'Add Delivery Charge',
+          tooltip: AppLocalizations.of(context).addDeliveryCharge,
           onPressed: () => context.push(AppRoutes.adminAddDelivery),
         ),
       ],
@@ -57,7 +58,7 @@ class _AdminDeliveryChargesScreenState
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                labelText: 'Search pincode',
+                labelText: AppLocalizations.of(context).searchPincode,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchCtrl.text.isEmpty
                     ? null
@@ -101,10 +102,10 @@ class _AdminDeliveryChargesScreenState
                     : list.where((c) => c.pincode.contains(query)).toList();
 
                 if (filtered.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
                       padding: EdgeInsets.all(28),
-                      child: Text('No delivery charges match this pincode'),
+                      child: Text(AppLocalizations.of(context).noDeliveryChargesMatchThisPincode),
                     ),
                   );
                 }
@@ -152,7 +153,7 @@ class _AdminDeliveryChargesScreenState
     repo.importDeliveryCharges(charges);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Imported ${charges.length} pincodes successfully'),
+        content: Text(AppLocalizations.of(context).importedPincodesSuccessfully('${charges.length}')),
       ),
     );
   }
@@ -161,19 +162,19 @@ class _AdminDeliveryChargesScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Delivery Charge'),
+        title: Text(AppLocalizations.of(context).deleteDeliveryCharge),
         content: Text(
-          'Are you sure you want to remove delivery mapping for pincode "${charge.pincode}"?',
+          AppLocalizations.of(context).areYouSureYouWantToRemoveDeliveryMappingForPincode('${charge.pincode}'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -186,13 +187,13 @@ class _AdminDeliveryChargesScreenState
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Delivery charge for "${charge.pincode}" deleted.'),
+          content: Text(AppLocalizations.of(context).deliveryChargeForDeleted('${charge.pincode}')),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete delivery charge: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).failedToDeleteDeliveryCharge('${e}'))),
       );
     }
   }
@@ -251,7 +252,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Pincode: ${charge.pincode}',
+                          AppLocalizations.of(context).pincode2('${charge.pincode}'),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -270,7 +271,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            charge.isServiceable ? 'Serviceable' : 'Suspended',
+                            charge.isServiceable ? AppLocalizations.of(context).serviceable : AppLocalizations.of(context).suspended,
                             style: TextStyle(
                               color: charge.isServiceable
                                   ? Colors.green
@@ -295,8 +296,8 @@ class _DeliveryChargeTile extends StatelessWidget {
                               color: Colors.green.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'FREE DELIVERY',
+                            child: Text(
+                              AppLocalizations.of(context).freeDelivery,
                               style: TextStyle(
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold,
@@ -332,14 +333,14 @@ class _DeliveryChargeTile extends StatelessWidget {
                   _detailPill(
                     context,
                     Icons.card_giftcard,
-                    'Free on > ${formatCurrency(charge.freeAboveAmount)}',
+                    AppLocalizations.of(context).freeOn2('${formatCurrency(charge.freeAboveAmount)}'),
                     isDark,
                   ),
                 if (charge.minOrderAmount > 0)
                   _detailPill(
                     context,
                     Icons.shopping_bag_outlined,
-                    'Min: ${formatCurrency(charge.minOrderAmount)}',
+                    AppLocalizations.of(context).min('${formatCurrency(charge.minOrderAmount)}'),
                     isDark,
                   ),
                 if (charge.estimatedDays.isNotEmpty)
@@ -366,14 +367,14 @@ class _DeliveryChargeTile extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 iconSize: 20,
                 icon: const Icon(Icons.edit_outlined),
-                tooltip: 'Edit Delivery Charge',
+                tooltip: AppLocalizations.of(context).editDeliveryCharge,
                 onPressed: onEdit,
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
                 iconSize: 20,
                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                tooltip: 'Delete Delivery Charge',
+                tooltip: AppLocalizations.of(context).deleteDeliveryCharge,
                 onPressed: onDelete,
               ),
             ],
@@ -414,7 +415,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Pincode: ${charge.pincode}',
+                      AppLocalizations.of(context).pincode2('${charge.pincode}'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -433,7 +434,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        charge.isServiceable ? 'Serviceable' : 'Suspended',
+                        charge.isServiceable ? AppLocalizations.of(context).serviceable : AppLocalizations.of(context).suspended,
                         style: TextStyle(
                           color: charge.isServiceable
                               ? Colors.green
@@ -460,8 +461,8 @@ class _DeliveryChargeTile extends StatelessWidget {
                           color: Colors.green.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          'FREE DELIVERY',
+                        child: Text(
+                          AppLocalizations.of(context).freeDelivery,
                           style: TextStyle(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
@@ -471,7 +472,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                       )
                     else
                       Text(
-                        'Charge: ${formatCurrency(charge.charge)}',
+                        AppLocalizations.of(context).charge('${formatCurrency(charge.charge)}'),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -479,7 +480,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                       ),
                     if (charge.freeAboveAmount > 0 && !charge.isFree)
                       Text(
-                        '• Free on > ${formatCurrency(charge.freeAboveAmount)}',
+                        AppLocalizations.of(context).freeOn('${formatCurrency(charge.freeAboveAmount)}'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -487,7 +488,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                       ),
                     if (charge.minOrderAmount > 0)
                       Text(
-                        '• Min order: ${formatCurrency(charge.minOrderAmount)}',
+                        AppLocalizations.of(context).minOrder('${formatCurrency(charge.minOrderAmount)}'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -495,7 +496,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                       ),
                     if (charge.estimatedDays.isNotEmpty)
                       Text(
-                        '• ETA: ${charge.estimatedDays}',
+                        AppLocalizations.of(context).eta('${charge.estimatedDays}'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -509,7 +510,7 @@ class _DeliveryChargeTile extends StatelessWidget {
           const SizedBox(width: 12),
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20),
-            tooltip: 'Edit Delivery Charge',
+            tooltip: AppLocalizations.of(context).editDeliveryCharge,
             onPressed: onEdit,
           ),
           IconButton(
@@ -518,7 +519,7 @@ class _DeliveryChargeTile extends StatelessWidget {
               size: 20,
               color: Colors.redAccent,
             ),
-            tooltip: 'Delete Delivery Charge',
+            tooltip: AppLocalizations.of(context).deleteDeliveryCharge,
             onPressed: onDelete,
           ),
         ],
@@ -567,20 +568,20 @@ class _EmptyDeliveryCharges extends StatelessWidget {
             color: Colors.grey,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No delivery pincodes configured',
+          Text(
+            AppLocalizations.of(context).noDeliveryPincodesConfigured,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Add pincodes to define delivery fees, free delivery rules, or minimum order limits.',
+          Text(
+            AppLocalizations.of(context).addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits,
             style: TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.add),
-            label: const Text('Add Delivery Charge'),
+            label: Text(AppLocalizations.of(context).addDeliveryCharge),
             onPressed: onAdd,
           ),
         ],

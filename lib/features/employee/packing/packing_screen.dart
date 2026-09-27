@@ -23,7 +23,7 @@ class _PackingScreenState extends State<PackingScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text('${l10n.packing} Manifest')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).manifest('${l10n.packing}'))),
       body: StreamBuilder<Order?>(
         // Single-order stream: no need to pull the whole company (or the
         // whole platform) just to render one manifest.
@@ -34,7 +34,7 @@ class _PackingScreenState extends State<PackingScreen> {
             if (snap.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-            return const Center(child: Text('Order not found'));
+            return Center(child: Text(AppLocalizations.of(context).orderNotFound));
           }
           return Padding(
               padding: const EdgeInsets.all(16),
@@ -65,7 +65,7 @@ class _PackingScreenState extends State<PackingScreen> {
                               title: Text(
                                 item.name.isNotEmpty ? item.name : item.productId,
                               ),
-                              subtitle: Text('Qty: ${item.qty} · SKU scan'),
+                              subtitle: Text(AppLocalizations.of(context).qtySkuScan('${item.qty}')),
                               trailing: TextButton(
                                 onPressed: () async {
                                   final result = await context.push<String>(
@@ -75,7 +75,7 @@ class _PackingScreenState extends State<PackingScreen> {
                                     setState(() => _scanned.add(result));
                                   }
                                 },
-                                child: const Text('Scan'),
+                                child: Text(AppLocalizations.of(context).scan),
                               ),
                             ),
                           ),
@@ -93,8 +93,8 @@ class _PackingScreenState extends State<PackingScreen> {
                             await repo.setEmployeePackingDone(order.id, true);
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Packing done — notified Admin'),
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context).packingDoneNotifiedAdmin),
                               ),
                             );
                             context.go(AppRoutes.employeeHome);
@@ -104,8 +104,8 @@ class _PackingScreenState extends State<PackingScreen> {
                     ),
                     label: Text(
                       order.employeePackingDone
-                          ? 'Sent to Admin'
-                          : 'Packing Done',
+                          ? AppLocalizations.of(context).sentToAdmin
+                          : AppLocalizations.of(context).packingDone,
                     ),
                   ),
                 ],

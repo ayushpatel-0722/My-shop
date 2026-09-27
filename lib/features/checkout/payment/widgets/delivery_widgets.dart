@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/models/company.dart';
 import '../../../core/models/order.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// "Delivery Type" selector for one shop's order block.
 ///
@@ -33,7 +34,7 @@ class DeliveryTypeSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Delivery Type',
+          AppLocalizations.of(context).deliveryType,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -43,15 +44,15 @@ class DeliveryTypeSelector extends StatelessWidget {
           key: const Key('delivery-type-selector'),
           segments: [
             if (allowsHome)
-              const ButtonSegment(
+              ButtonSegment(
                 value: DeliveryType.homeDelivery,
-                label: Text('Home delivery'),
+                label: Text(AppLocalizations.of(context).homeDelivery2),
                 icon: Icon(Icons.local_shipping_outlined, size: 18),
               ),
             if (allowsPickup)
-              const ButtonSegment(
+              ButtonSegment(
                 value: DeliveryType.selfPickup,
-                label: Text('Self pickup'),
+                label: Text(AppLocalizations.of(context).selfPickup),
                 icon: Icon(Icons.storefront_outlined, size: 18),
               ),
           ],
@@ -72,7 +73,7 @@ class DeliveryTypeSelector extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'This shop does not offer home delivery',
+                  AppLocalizations.of(context).thisShopDoesNotOfferHomeDelivery,
                   style: TextStyle(
                     fontSize: 12,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
@@ -148,7 +149,7 @@ class PickupShopCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Pickup From',
+                  AppLocalizations.of(context).pickupFrom,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

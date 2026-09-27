@@ -24,6 +24,7 @@ import '../domain/category_tree.dart';
 import '../domain/order_status.dart';
 import '../repositories/app_repository.dart';
 import '../services/secure_session_cache.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Firestore / Auth / RTDB implementation of [AppRepository].
 ///
@@ -280,7 +281,7 @@ class FirebaseAppRepository implements AppRepository {
     if (result.user == null) {
       throw FirebaseAuthException(
         code: 'user-not-found',
-        message: 'Could not sign in with provided credentials.',
+        message: L10n.current.couldNotSignInWithProvidedCredentials,
       );
     }
 
@@ -378,7 +379,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (adminData == null) {
-      throw Exception('No admin profile found for account "$email".');
+      throw Exception(L10n.current.noAdminProfileFoundForAccount('${email}'));
     }
 
     // Ensure companyDoc is loaded
@@ -390,7 +391,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (companyDoc == null || !companyDoc.exists) {
-      throw Exception('Company "$companyName" not found.');
+      throw Exception(L10n.current.companyNotFound('${companyName}'));
     }
 
     final companyData = companyDoc.data() ?? {};
@@ -403,7 +404,7 @@ class FirebaseAppRepository implements AppRepository {
 
     // 4. Verify company password
     if (registeredPass != companyPassword.trim()) {
-      throw Exception('Incorrect company password.');
+      throw Exception(L10n.current.incorrectCompanyPassword);
     }
 
     // 5. Verify company association
@@ -414,7 +415,7 @@ class FirebaseAppRepository implements AppRepository {
         matchedCompanyId.isNotEmpty &&
         matchedCompanyId != companyDoc.id) {
       throw Exception(
-        'Admin account is assigned to "$registeredName", not "$companyName".',
+        L10n.current.adminAccountIsAssignedToNot('${registeredName}', '${companyName}'),
       );
     }
 
@@ -459,7 +460,7 @@ class FirebaseAppRepository implements AppRepository {
     if (result.user == null) {
       throw FirebaseAuthException(
         code: 'user-not-found',
-        message: 'Could not sign in with provided credentials.',
+        message: L10n.current.couldNotSignInWithProvidedCredentials,
       );
     }
 
@@ -527,7 +528,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (empData == null) {
-      throw Exception('No employee profile found for account "$email".');
+      throw Exception(L10n.current.noEmployeeProfileFoundForAccount('${email}'));
     }
 
     if (companyDoc == null && matchedCompanyId.isNotEmpty) {
@@ -538,7 +539,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (companyDoc == null || !companyDoc.exists) {
-      throw Exception('Company "$companyName" not found.');
+      throw Exception(L10n.current.companyNotFound('${companyName}'));
     }
 
     // Auto-migrate to subcollection if not present

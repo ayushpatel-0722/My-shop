@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../models/order.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Plain English fallback used when the widget tree has no localizations
 /// delegate (isolated screens, widget tests, storybook-style previews).

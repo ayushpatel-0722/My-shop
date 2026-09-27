@@ -1,6 +1,7 @@
 import '../models/category.dart';
 import '../models/product.dart';
 import '../models/voucher.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Field name -> first error message. Empty means "valid".
 ///
@@ -34,37 +35,37 @@ class ProductValidator {
     final errors = <String, String>{};
 
     if (product.name.trim().isEmpty) {
-      errors['name'] = 'Product title is required.';
+      errors['name'] = L10n.current.productTitleIsRequired;
     } else if (product.name.trim().length < 2) {
-      errors['name'] = 'Use at least 2 characters.';
+      errors['name'] = L10n.current.useAtLeast2Characters;
     }
 
     if (product.amount <= 0) {
-      errors['amount'] = 'MRP must be greater than 0.';
+      errors['amount'] = L10n.current.mrpMustBeGreaterThan0;
     }
 
     if (product.discountAmt < 0) {
-      errors['discountAmt'] = 'Selling price cannot be negative.';
+      errors['discountAmt'] = L10n.current.sellingPriceCannotBeNegative;
     } else if (product.discountAmt > 0 &&
         product.discountAmt >= product.amount) {
       errors['discountAmt'] =
-          'Selling price must be lower than the MRP (or left at 0).';
+          L10n.current.sellingPriceMustBeLowerThanTheMrpOrLeftAt0;
     }
 
     if (!product.isUnlimitedStock && product.stockQty < 0) {
-      errors['stockQty'] = 'Stock cannot be negative.';
+      errors['stockQty'] = L10n.current.stockCannotBeNegative;
     }
 
     if (product.unit <= 0) {
-      errors['unit'] = 'Unit must be greater than 0.';
+      errors['unit'] = L10n.current.unitMustBeGreaterThan0;
     }
 
     if (product.categoryId.isEmpty) {
-      errors['categoryId'] = 'Pick a category for this product.';
+      errors['categoryId'] = L10n.current.pickACategoryForThisProduct;
     }
 
     if (product.type == ProductType.weightBased && product.unitType.isEmpty) {
-      errors['unitType'] = 'Weight based products need a unit (kg, g, ...).';
+      errors['unitType'] = L10n.current.weightBasedProductsNeedAUnitKgG;
     }
 
     return ValidationResult(errors);
@@ -101,11 +102,11 @@ class CategoryValidator {
     final trimmed = name.trim();
 
     if (trimmed.isEmpty) {
-      errors['name'] = 'Category name is required.';
+      errors['name'] = L10n.current.categoryNameIsRequired;
       return errors;
     }
     if (trimmed.length < 2) {
-      errors['name'] = 'Use at least 2 characters.';
+      errors['name'] = L10n.current.useAtLeast2Characters;
     }
 
     final duplicate = existing.any(
@@ -115,11 +116,11 @@ class CategoryValidator {
           c.name.trim().toLowerCase() == trimmed.toLowerCase(),
     );
     if (duplicate) {
-      errors['name'] = 'A category with this name already exists.';
+      errors['name'] = L10n.current.aCategoryWithThisNameAlreadyExists;
     }
 
     if (parentId != null && parentId.isNotEmpty && parentId == selfId) {
-      errors['parentId'] = 'A category cannot be its own parent.';
+      errors['parentId'] = L10n.current.aCategoryCannotBeItsOwnParent;
     }
     return errors;
   }
@@ -151,33 +152,33 @@ class VoucherValidator {
     final normalized = Voucher.normalizeCode(code);
 
     if (normalized.isEmpty) {
-      errors['code'] = 'Voucher code is required.';
+      errors['code'] = L10n.current.voucherCodeIsRequired;
     } else if (normalized.length < codeMinLength) {
-      errors['code'] = 'Use at least $codeMinLength characters.';
+      errors['code'] = L10n.current.useAtLeastCharacters('${codeMinLength}');
     } else if (normalized.length > codeMaxLength) {
-      errors['code'] = 'Use at most $codeMaxLength characters.';
+      errors['code'] = L10n.current.useAtMostCharacters('${codeMaxLength}');
     } else if (!RegExp(r'^[A-Z0-9]+$').hasMatch(normalized)) {
-      errors['code'] = 'Only letters and numbers are allowed.';
+      errors['code'] = L10n.current.onlyLettersAndNumbersAreAllowed;
     } else if (existingCodes.any(
       (c) => c.toUpperCase() == normalized && c.isNotEmpty,
     )) {
-      errors['code'] = 'This code already exists for this store.';
+      errors['code'] = L10n.current.thisCodeAlreadyExistsForThisStore;
     }
 
     if (discountType == VoucherType.percentage) {
       if (discountValue <= 0) {
-        errors['discountValue'] = 'Enter a percentage greater than 0.';
+        errors['discountValue'] = L10n.current.enterAPercentageGreaterThan0;
       } else if (discountValue > 100) {
-        errors['discountValue'] = 'Percentage cannot exceed 100.';
+        errors['discountValue'] = L10n.current.percentageCannotExceed100;
       }
     } else if (discountType == VoucherType.fixedAmount) {
       if (discountValue <= 0) {
-        errors['discountValue'] = 'Enter an amount greater than 0.';
+        errors['discountValue'] = L10n.current.enterAnAmountGreaterThan0;
       }
     }
 
     if (minOrderAmt < 0) {
-      errors['minOrderAmt'] = 'Minimum order cannot be negative.';
+      errors['minOrderAmt'] = L10n.current.minimumOrderCannotBeNegative;
     } else if (discountType == VoucherType.fixedAmount &&
         minOrderAmt > 0 &&
         minOrderAmt <= discountValue) {
@@ -187,28 +188,28 @@ class VoucherValidator {
     }
 
     if (perUserLimit <= 0) {
-      errors['perUserLimit'] = 'Per-user limit must be at least 1.';
+      errors['perUserLimit'] = L10n.current.perUserLimitMustBeAtLeast1;
     }
 
     if (maxUses <= 0) {
-      errors['maxUses'] = 'Total usage limit must be at least 1.';
+      errors['maxUses'] = L10n.current.totalUsageLimitMustBeAtLeast1;
     } else if (maxUses < perUserLimit) {
       errors['maxUses'] =
-          'Total limit cannot be lower than the per-user limit.';
+          L10n.current.totalLimitCannotBeLowerThanThePerUserLimit;
     }
 
     if (expiryDate != null &&
         (now ?? DateTime.now()).isAfter(
           expiryDate.add(const Duration(days: 1)),
         )) {
-      errors['expiryDate'] = 'Expiry date must be in the future.';
+      errors['expiryDate'] = L10n.current.expiryDateMustBeInTheFuture;
     }
 
     if (appliesTo == VoucherScope.specificProduct && productIds.isEmpty) {
-      errors['productIds'] = 'Select at least one product.';
+      errors['productIds'] = L10n.current.selectAtLeastOneProduct;
     }
     if (appliesTo == VoucherScope.specificCategory && categoryIds.isEmpty) {
-      errors['categoryIds'] = 'Select at least one category.';
+      errors['categoryIds'] = L10n.current.selectAtLeastOneCategory;
     }
 
     return ValidationResult(errors);

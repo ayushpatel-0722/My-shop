@@ -119,9 +119,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               children: [
                 const Icon(Icons.error_outline, size: 56, color: Colors.grey),
                 const SizedBox(height: 12),
-                const Text('Product not found', style: TextStyle(fontSize: 18)),
+                Text(AppLocalizations.of(context).productNotFound, style: TextStyle(fontSize: 18)),
                 const SizedBox(height: 8),
-                TextButton(onPressed: handleBack, child: const Text('Go Back')),
+                TextButton(onPressed: handleBack, child: Text(AppLocalizations.of(context).goBack)),
               ],
             ),
           ),
@@ -182,7 +182,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       // ------------------------------------------------ 5. SKU
                       if (_skuOf(selectedVariant, p).isNotEmpty)
                         Text(
-                          'SKU: ${_skuOf(selectedVariant, p)}',
+                          AppLocalizations.of(context).sku3('${_skuOf(selectedVariant, p)}'),
                           key: const Key('product-sku'),
                           style: TextStyle(
                             color: Colors.grey.shade600,
@@ -306,7 +306,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     return [
       const SizedBox(height: 8),
-      CollapsibleSection(title: 'Highlights', child: content),
+      CollapsibleSection(title: AppLocalizations.of(context).highlights, child: content),
     ];
   }
 
@@ -319,7 +319,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     if (sections.isEmpty && p.details.trim().isNotEmpty) {
       sections = [
         DetailSection(
-          title: 'Description',
+          title: AppLocalizations.of(context).description,
           type: DetailSectionType.text,
           text: p.details.trim(),
         ),
@@ -337,7 +337,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       const SizedBox(height: 4),
       for (final section in visible) ...[
         CollapsibleSection(
-          title: section.title.isEmpty ? 'Details' : section.title,
+          title: section.title.isEmpty ? AppLocalizations.of(context).details : section.title,
           child: section.isKeyValue
                 ? KeyValueTable(
                     rows: [
@@ -355,7 +355,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             key: const Key('view-more-details'),
             onPressed: () => setState(() => _showAllDetailSections = true),
             icon: const Icon(Icons.unfold_more, size: 18),
-            label: Text('View all details ($hidden more)'),
+            label: Text(AppLocalizations.of(context).viewAllDetailsMore('${hidden}')),
           ),
         ),
       if (_showAllDetailSections && sections.length > visibleCount)
@@ -365,7 +365,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             key: const Key('view-less-details'),
             onPressed: () => setState(() => _showAllDetailSections = false),
             icon: const Icon(Icons.unfold_less, size: 18),
-            label: const Text('Show less'),
+            label: Text(AppLocalizations.of(context).showLess),
           ),
         ),
     ];
@@ -379,7 +379,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ..add(const SizedBox(height: 4))
         ..add(
           CollapsibleSection(
-            title: 'Specifications',
+            title: AppLocalizations.of(context).specifications,
             child: KeyValueTable(
               rows: [
                 for (final s in p.specifications)
@@ -395,7 +395,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ..add(const SizedBox(height: 4))
         ..add(
           CollapsibleSection(
-            title: 'Delivery & Policies',
+            title: AppLocalizations.of(context).deliveryPolicies,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -661,11 +661,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${p.name}$variantLabel added to cart',
+                                AppLocalizations.of(context).addedToCart2('${p.name}', '${variantLabel}'),
                               ),
                               duration: const Duration(seconds: 2),
                               action: SnackBarAction(
-                                label: 'View Cart',
+                                label: AppLocalizations.of(context).viewCart2,
                                 onPressed: () => context.go(AppRoutes.cart),
                               ),
                               behavior: SnackBarBehavior.floating,
@@ -683,7 +683,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         }
                       }
                     : null,
-                child: Text(inStock ? l10n.addToCart : 'Out of Stock'),
+                child: Text(inStock ? l10n.addToCart : AppLocalizations.of(context).outOfStock2),
               ),
             ),
             const SizedBox(width: 8),
@@ -795,7 +795,7 @@ class _PriceRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              '${percent.round()}% OFF',
+              AppLocalizations.of(context).off3('${percent.round()}'),
               style: TextStyle(
                 color: Colors.green.shade800,
                 fontWeight: FontWeight.w700,
@@ -831,13 +831,13 @@ class _StockLabel extends StatelessWidget {
     final String text;
     final Color color;
     if (!inStock) {
-      text = 'Out of Stock';
+      text = AppLocalizations.of(context).outOfStock2;
       color = Colors.red.shade700;
     } else if (!isUnlimited && stock <= _lowThreshold) {
-      text = 'Only $stock left';
+      text = AppLocalizations.of(context).onlyLeft('${stock}');
       color = Colors.orange.shade800;
     } else {
-      text = 'In Stock';
+      text = AppLocalizations.of(context).inStock;
       color = Colors.green.shade700;
     }
 
@@ -891,7 +891,7 @@ class _VariantPicker extends StatelessWidget {
         Row(
           children: [
             Text(
-              'Select Variant',
+              AppLocalizations.of(context).selectVariant,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -957,7 +957,7 @@ class _QtyHint extends StatelessWidget {
     return Row(
       children: [
         Text(
-          'Quantity',
+          AppLocalizations.of(context).quantity,
           style: Theme.of(
             context,
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),

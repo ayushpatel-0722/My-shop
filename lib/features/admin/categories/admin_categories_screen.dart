@@ -11,6 +11,7 @@ import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Admin category manager with a real hierarchy view.
 ///
@@ -60,18 +61,18 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Categories',
+      title: AppLocalizations.of(context).categories,
       actions: [
         IconButton(
           key: const Key('category-reorder-toggle'),
           icon: Icon(
             _reorderMode ? Icons.playlist_add_check : Icons.swap_vert,
           ),
-          tooltip: _reorderMode ? 'Done reordering' : 'Reorder',
+          tooltip: _reorderMode ? AppLocalizations.of(context).doneReordering : AppLocalizations.of(context).reorder,
           onPressed: () {
             if (_searchCtrl.text.trim().isNotEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Clear search to reorder')),
+                SnackBar(content: Text(AppLocalizations.of(context).clearSearchToReorder)),
               );
               return;
             }
@@ -84,12 +85,12 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
         IconButton(
           key: const Key('category-backfill-order'),
           icon: const Icon(Icons.sort),
-          tooltip: 'Backfill ordering for old categories',
+          tooltip: AppLocalizations.of(context).backfillOrderingForOldCategories,
           onPressed: () => _backfillOrder(),
         ),
         IconButton(
           icon: const Icon(Icons.add),
-          tooltip: 'Add Category',
+          tooltip: AppLocalizations.of(context).addCategory,
           onPressed: () => context.push(AppRoutes.adminAddCategory),
         ),
       ],
@@ -101,7 +102,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
               key: const Key('category-search-field'),
               controller: _searchCtrl,
               decoration: InputDecoration(
-                labelText: 'Search categories',
+                labelText: AppLocalizations.of(context).searchCategories,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchCtrl.text.isEmpty
                     ? null
@@ -119,12 +120,12 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
             ),
           ),
           if (_searchCtrl.text.trim().isNotEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Clear search to reorder',
+                  AppLocalizations.of(context).clearSearchToReorder,
                   style: TextStyle(
                     fontSize: 11.5,
                     fontStyle: FontStyle.italic,
@@ -182,10 +183,10 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                       .where((node) => node.name.toLowerCase().contains(query))
                       .toList();
                   if (matches.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Padding(
                         padding: EdgeInsets.all(28),
-                        child: Text('No categories match this search'),
+                        child: Text(AppLocalizations.of(context).noCategoriesMatchThisSearch),
                       ),
                     );
                   }
@@ -306,7 +307,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           ..addAll(previous);
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save the new order: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).couldNotSaveTheNewOrder('${e}'))),
       );
     }
   }
@@ -318,12 +319,12 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       await repo.backfillCategorySortOrder(companyId: _companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Category ordering backfilled.')),
+        SnackBar(content: Text(AppLocalizations.of(context).categoryOrderingBackfilled)),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Backfill failed: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).backfillFailed('${e}'))),
       );
     }
   }
@@ -342,35 +343,34 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Category'),
+        title: Text(AppLocalizations.of(context).deleteCategory),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Delete "${category.name}"?'),
+            Text(AppLocalizations.of(context).delete2('${category.name}')),
             const SizedBox(height: 10),
             if (category.productList.isNotEmpty)
               Text(
-                '• ${_plural(category.productList.length, 'assigned product', 'assigned products')} will move '
-                '${parentName == null ? 'to "Uncategorised"' : 'to "$parentName"'}',
+                AppLocalizations.of(context).willMove2('${_plural(category.productList.length, AppLocalizations.of(context).assignedProduct, AppLocalizations.of(context).assignedProducts)}', '${parentName == null ? AppLocalizations.of(context).toUncategorised : AppLocalizations.of(context).to('${parentName}')}'),
               ),
             if (children.isNotEmpty)
               Text(
-                '• ${_plural(children.length, 'sub-category', 'sub-categories')} will move up one level',
+                AppLocalizations.of(context).willMoveUpOneLevel('${_plural(children.length, AppLocalizations.of(context).subCategory, AppLocalizations.of(context).subCategories)}'),
               ),
             if (category.productList.isEmpty && children.isEmpty)
-              const Text('This category is empty.'),
+              Text(AppLocalizations.of(context).thisCategoryIsEmpty),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -382,13 +382,13 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       await repo.deleteCategory(category.id, companyId: category.companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Category "${category.name}" deleted.')),
+        SnackBar(content: Text(AppLocalizations.of(context).categoryDeleted('${category.name}'))),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to delete category: $e')));
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).failedToDeleteCategory('${e}'))));
     }
   }
 }
@@ -408,11 +408,11 @@ class _SummaryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _Stat(label: 'Categories', value: '$total'),
+        _Stat(label: AppLocalizations.of(context).categories, value: '$total'),
         const SizedBox(width: 8),
-        _Stat(label: 'Top level', value: '$roots'),
+        _Stat(label: AppLocalizations.of(context).topLevel, value: '$roots'),
         const SizedBox(width: 8),
-        _Stat(label: 'Assigned products', value: '$products'),
+        _Stat(label: AppLocalizations.of(context).assignedProducts2, value: '$products'),
       ],
     );
   }
@@ -519,7 +519,7 @@ class _CategoryTile extends StatelessWidget {
                         : Icons.keyboard_arrow_down,
                     size: 20,
                   ),
-                  tooltip: collapsed ? 'Expand' : 'Collapse',
+                  tooltip: collapsed ? AppLocalizations.of(context).expand : AppLocalizations.of(context).collapse,
                   onPressed: onToggle,
                 ),
                 const SizedBox(width: 4),
@@ -575,9 +575,7 @@ class _CategoryTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${node.category.type.isEmpty ? 'Uncategorised type' : node.category.type}'
-                      '${node.category.companyId.isNotEmpty ? ' • Store' : ' • Global'}'
-                      '${node.children.isNotEmpty ? ' • ${node.descendantCount} sub' : ''}',
+                      AppLocalizations.of(context).str('${node.category.type.isEmpty ? AppLocalizations.of(context).uncategorisedType : node.category.type}', '${node.category.companyId.isNotEmpty ? AppLocalizations.of(context).store : AppLocalizations.of(context).global}', '${node.children.isNotEmpty ? AppLocalizations.of(context).sub('${node.descendantCount}') : ''}'),
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(
@@ -590,7 +588,7 @@ class _CategoryTile extends StatelessWidget {
                     if (pathLabel.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
-                        'Under: $pathLabel',
+                        AppLocalizations.of(context).under('${pathLabel}'),
                         style: const TextStyle(
                           fontSize: 11,
                           color: Colors.grey,
@@ -618,7 +616,7 @@ class _CategoryTile extends StatelessWidget {
                 child: CopyableIdBadge(
                   key: Key('category-id-${node.id}'),
                   id: node.id,
-                  label: 'Category',
+                  label: AppLocalizations.of(context).category,
                 ),
               ),
               Row(
@@ -628,7 +626,7 @@ class _CategoryTile extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                     iconSize: 20,
                     icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Edit Category',
+                    tooltip: AppLocalizations.of(context).editCategory,
                     onPressed: onEdit,
                   ),
                   IconButton(
@@ -638,7 +636,7 @@ class _CategoryTile extends StatelessWidget {
                       Icons.delete_outline,
                       color: Colors.redAccent,
                     ),
-                    tooltip: 'Delete Category',
+                    tooltip: AppLocalizations.of(context).deleteCategory,
                     onPressed: onDelete,
                   ),
                 ],
@@ -667,7 +665,7 @@ class _CategoryTile extends StatelessWidget {
                     : Icons.keyboard_arrow_down,
                 size: 20,
               ),
-              tooltip: collapsed ? 'Expand' : 'Collapse',
+              tooltip: collapsed ? AppLocalizations.of(context).expand : AppLocalizations.of(context).collapse,
               onPressed: onToggle,
             )
           else
@@ -723,15 +721,13 @@ class _CategoryTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${node.category.type.isEmpty ? 'Uncategorised type' : node.category.type}'
-                  '${node.category.companyId.isNotEmpty ? ' • Store' : ' • Global'}'
-                  '${node.children.isNotEmpty ? ' • ${node.descendantCount} sub' : ''}',
+                  AppLocalizations.of(context).str('${node.category.type.isEmpty ? AppLocalizations.of(context).uncategorisedType : node.category.type}', '${node.category.companyId.isNotEmpty ? AppLocalizations.of(context).store : AppLocalizations.of(context).global}', '${node.children.isNotEmpty ? AppLocalizations.of(context).sub('${node.descendantCount}') : ''}'),
                   style: const TextStyle(fontSize: 12),
                 ),
                 if (pathLabel.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Under: $pathLabel',
+                    AppLocalizations.of(context).under('${pathLabel}'),
                     style: const TextStyle(
                       fontSize: 11,
                       color: Colors.grey,
@@ -743,7 +739,7 @@ class _CategoryTile extends StatelessWidget {
                 CopyableIdBadge(
                   key: Key('category-id-${node.id}'),
                   id: node.id,
-                  label: 'Category',
+                  label: AppLocalizations.of(context).category,
                 ),
               ],
             ),
@@ -751,7 +747,7 @@ class _CategoryTile extends StatelessWidget {
           const SizedBox(width: 12),
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20),
-            tooltip: 'Edit Category',
+            tooltip: AppLocalizations.of(context).editCategory,
             onPressed: onEdit,
           ),
           IconButton(
@@ -760,7 +756,7 @@ class _CategoryTile extends StatelessWidget {
               size: 20,
               color: Colors.redAccent,
             ),
-            tooltip: 'Delete Category',
+            tooltip: AppLocalizations.of(context).deleteCategory,
             onPressed: onDelete,
           ),
         ],
@@ -849,20 +845,20 @@ class _EmptyCategories extends StatelessWidget {
         children: [
           const Icon(Icons.category_outlined, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
-          const Text(
-            'No categories found',
+          Text(
+            AppLocalizations.of(context).noCategoriesFound,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Create your first category and assign products to organize your store.',
+          Text(
+            AppLocalizations.of(context).createYourFirstCategoryAndAssignProductsToOrganizeYourStore,
             style: TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.add),
-            label: const Text('Add Category'),
+            label: Text(AppLocalizations.of(context).addCategory),
             onPressed: onAdd,
           ),
         ],
@@ -934,14 +930,14 @@ class _CategoryReorderView extends StatelessWidget {
                   key: const Key('reorder-go-up'),
                   onPressed: () => onExitLevel(parentId),
                   icon: const Icon(Icons.arrow_upward, size: 16),
-                  label: const Text('Up'),
+                  label: Text(AppLocalizations.of(context).up),
                 ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   parentId.isEmpty
-                      ? 'Reordering: top level'
-                      : 'Reordering inside "$parentName"',
+                      ? AppLocalizations.of(context).reorderingTopLevel
+                      : AppLocalizations.of(context).reorderingInside('${parentName}'),
                   key: const Key('reorder-level-label'),
                   style: TextStyle(
                     fontSize: 12.5,
@@ -953,10 +949,10 @@ class _CategoryReorderView extends StatelessWidget {
             ],
           ),
         ),
-        const Padding(
+        Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text(
-            'Drag the ≡ handle to set the order customers see.',
+            AppLocalizations.of(context).dragTheHandleToSetTheOrderCustomersSee,
             style: TextStyle(
               fontSize: 11.5,
               fontStyle: FontStyle.italic,
@@ -966,10 +962,10 @@ class _CategoryReorderView extends StatelessWidget {
         ),
         Expanded(
           child: siblings.isEmpty
-              ? const Center(
+              ? Center(
                   child: Padding(
                     padding: EdgeInsets.all(28),
-                    child: Text('No categories at this level'),
+                    child: Text(AppLocalizations.of(context).noCategoriesAtThisLevel),
                   ),
                 )
               : ReorderableListView.builder(
@@ -1004,7 +1000,7 @@ class _CategoryReorderView extends StatelessWidget {
                             ReorderableDragStartListener(
                               index: i,
                               child: Tooltip(
-                                message: 'Drag to reorder',
+                                message: AppLocalizations.of(context).dragToReorder,
                                 child: Container(
                                   key: Key('category-drag-handle-${cat.id}'),
                                   padding: const EdgeInsets.all(6),
@@ -1058,7 +1054,7 @@ class _CategoryReorderView extends StatelessWidget {
                                   Icons.subdirectory_arrow_right,
                                   size: 16,
                                 ),
-                                label: const Text('Open'),
+                                label: Text(AppLocalizations.of(context).open),
                               ),
                           ],
                         ),

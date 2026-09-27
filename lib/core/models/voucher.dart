@@ -1,4 +1,5 @@
 import '../utils/type_utils.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// The three ways a voucher can reduce the payable amount.
 class VoucherType {
@@ -16,11 +17,11 @@ class VoucherType {
   static String label(String type) {
     switch (type) {
       case percentage:
-        return 'Percentage';
+        return L10n.current.percentage;
       case fixedAmount:
-        return 'Fixed amount';
+        return L10n.current.fixedAmount;
       case freeShipping:
-        return 'Free shipping';
+        return L10n.current.freeShipping;
       default:
         return type;
     }
@@ -42,11 +43,11 @@ class VoucherScope {
   static String label(String scope) {
     switch (scope) {
       case specificCategory:
-        return 'Specific categories';
+        return L10n.current.specificCategories;
       case specificProduct:
-        return 'Specific products';
+        return L10n.current.specificProducts;
       default:
-        return 'All categories';
+        return L10n.current.allCategories;
     }
   }
 }
@@ -212,11 +213,11 @@ class Voucher {
   String get discountLabel {
     switch (discountType) {
       case VoucherType.percentage:
-        return '${_trim(discountValue)}% OFF';
+        return L10n.current.off('${_trim(discountValue)}');
       case VoucherType.freeShipping:
-        return 'FREE DELIVERY';
+        return L10n.current.freeDelivery;
       default:
-        return '₹${_trim(discountValue)} OFF';
+        return L10n.current.off4('${_trim(discountValue)}');
     }
   }
 

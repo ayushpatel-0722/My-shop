@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'l10n_service.dart';
+
 /// Manages the app locale (English / Gujarati / Hindi).
 /// Persisted per-device via SharedPreferences (Section 3 / Section 20).
 class LocaleCubit extends Cubit<Locale> {
@@ -19,13 +21,14 @@ class LocaleCubit extends Cubit<Locale> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final code = prefs.getString(_prefKey) ?? 'en';
-      setByCode(code);
+      await setByCode(code);
     } catch (_) {
       // keep default
     }
   }
 
   Future<void> set(Locale locale) async {
+    L10n.setLocale(locale.languageCode);
     emit(locale);
     await _persist(locale.languageCode);
   }
@@ -35,6 +38,7 @@ class LocaleCubit extends Cubit<Locale> {
       (l) => l.languageCode == code,
       orElse: () => const Locale('en'),
     );
+    L10n.setLocale(match.languageCode);
     emit(match);
     await _persist(match.languageCode);
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/category.dart';
@@ -138,6 +139,9 @@ void main() {
 
     Widget picker(List<String> selected, ValueChanged<List<String>> onChanged) =>
         MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
           home: Scaffold(
             body: SingleChildScrollView(
               child: ProductAssignmentPicker(

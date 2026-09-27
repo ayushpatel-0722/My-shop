@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes/app_router.dart';
 import '../auth/auth_cubit.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Branded splash screen (Section 3). Shows the logo while the auth session is
 /// being restored, then routes to the appropriate dashboard (if already signed
@@ -85,14 +86,14 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Bazaar',
+                AppLocalizations.of(context).appTitle,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Multi-tenant commerce',
+                AppLocalizations.of(context).multiTenantCommerce,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 32),

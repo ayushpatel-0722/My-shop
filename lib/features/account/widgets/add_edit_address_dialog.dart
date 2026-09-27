@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/models/customer.dart';
 import '../../auth/auth_cubit.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Modal bottom sheet for adding or editing a delivery address (up to 3 addresses).
 class AddEditAddressSheet extends StatefulWidget {
@@ -69,7 +70,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
     _cityCtrl = TextEditingController(text: init?.city ?? 'Ahmedabad');
     _stateCtrl = TextEditingController(text: init?.state ?? 'Gujarat');
 
-    _label = init?.label.isNotEmpty == true ? init!.label : 'Home';
+    _label = init?.label.isNotEmpty == true ? init!.label : AppLocalizations.of(context).home;
     _isDefault = init?.isDefault ?? widget.isFirstAddress;
   }
 
@@ -112,8 +113,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
       Navigator.of(context).pop(entry);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save address. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).failedToSaveAddressPleaseTryAgain),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -171,7 +172,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    isEditing ? 'Edit Address' : 'Add New Address',
+                    isEditing ? AppLocalizations.of(context).editAddress : AppLocalizations.of(context).addNewAddress,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -182,7 +183,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.grey),
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Close',
+                  tooltip: AppLocalizations.of(context).close,
                 ),
               ],
             ),
@@ -196,8 +197,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Contact Info
-                    const Text(
-                      'Contact Details',
+                    Text(
+                      AppLocalizations.of(context).contactDetails,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -211,7 +212,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                           child: TextFormField(
                             controller: _nameCtrl,
                             decoration: InputDecoration(
-                              labelText: 'Full Name *',
+                              labelText: AppLocalizations.of(context).fullName,
                               prefixIcon: const Icon(
                                 Icons.person_outline,
                                 size: 20,
@@ -225,7 +226,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                               ),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Enter name'
+                                ? AppLocalizations.of(context).enterName
                                 : null,
                           ),
                         ),
@@ -239,7 +240,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                               LengthLimitingTextInputFormatter(10),
                             ],
                             decoration: InputDecoration(
-                              labelText: 'Mobile Number *',
+                              labelText: AppLocalizations.of(context).mobileNumber2,
                               prefixIcon: const Icon(
                                 Icons.phone_outlined,
                                 size: 20,
@@ -254,10 +255,10 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                             ),
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
-                                return 'Enter phone';
+                                return AppLocalizations.of(context).enterPhone;
                               }
                               if (v.trim().length < 10) {
-                                return '10 digits required';
+                                return AppLocalizations.of(context).msg10DigitsRequired;
                               }
                               return null;
                             },
@@ -268,8 +269,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                     const SizedBox(height: 16),
 
                     // Address Info
-                    const Text(
-                      'Address Details',
+                    Text(
+                      AppLocalizations.of(context).addressDetails,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -289,7 +290,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                               LengthLimitingTextInputFormatter(6),
                             ],
                             decoration: InputDecoration(
-                              labelText: 'Pincode *',
+                              labelText: AppLocalizations.of(context).pincode,
                               prefixIcon: const Icon(
                                 Icons.pin_drop_outlined,
                                 size: 20,
@@ -304,9 +305,9 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                             ),
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
-                                return 'Enter pincode';
+                                return AppLocalizations.of(context).enterPincode;
                               }
-                              if (v.trim().length < 6) return '6 digits';
+                              if (v.trim().length < 6) return AppLocalizations.of(context).msg6Digits;
                               return null;
                             },
                           ),
@@ -317,7 +318,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                           child: TextFormField(
                             controller: _cityCtrl,
                             decoration: InputDecoration(
-                              labelText: 'City *',
+                              labelText: AppLocalizations.of(context).city,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -327,7 +328,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                               ),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Enter city'
+                                ? AppLocalizations.of(context).enterCity
                                 : null,
                           ),
                         ),
@@ -337,8 +338,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                     TextFormField(
                       controller: _houseNoCtrl,
                       decoration: InputDecoration(
-                        labelText: 'Address Line 1 (House / Flat / Block) *',
-                        hintText: 'e.g. Flat 402, Block A',
+                        labelText: AppLocalizations.of(context).addressLine1HouseFlatBlock,
+                        hintText: AppLocalizations.of(context).eGFlat402BlockA,
                         prefixIcon: const Icon(
                           Icons.home_work_outlined,
                           size: 20,
@@ -352,7 +353,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                         ),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Enter house/flat number'
+                          ? AppLocalizations.of(context).enterHouseFlatNumber
                           : null,
                     ),
                     const SizedBox(height: 12),
@@ -360,8 +361,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                       controller: _streetCtrl,
                       maxLines: 2,
                       decoration: InputDecoration(
-                        labelText: 'Address Line 2 (Street / Area)',
-                        hintText: 'e.g. Vastrapur, near Shiv Temple',
+                        labelText: AppLocalizations.of(context).addressLine2StreetArea,
+                        hintText: AppLocalizations.of(context).eGVastrapurNearShivTemple,
                         prefixIcon: const Icon(
                           Icons.edit_road_outlined,
                           size: 20,
@@ -379,8 +380,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                     TextFormField(
                       controller: _landmarkCtrl,
                       decoration: InputDecoration(
-                        labelText: 'Landmark (optional)',
-                        hintText: 'e.g. Opposite City Mall',
+                        labelText: AppLocalizations.of(context).landmarkOptional,
+                        hintText: AppLocalizations.of(context).eGOppositeCityMall,
                         prefixIcon: const Icon(
                           Icons.location_searching,
                           size: 20,
@@ -397,8 +398,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                     const SizedBox(height: 16),
 
                     // Address Type (Home / Work / Other)
-                    const Text(
-                      'Save Address As',
+                    Text(
+                      AppLocalizations.of(context).saveAddressAs,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -407,7 +408,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                     ),
                     const SizedBox(height: 8),
                     Row(
-                      children: ['Home', 'Work', 'Other'].map((type) {
+                      children: [AppLocalizations.of(context).home, AppLocalizations.of(context).work, AppLocalizations.of(context).other].map((type) {
                         final isSelected =
                             _label.toLowerCase() == type.toLowerCase();
                         return Padding(
@@ -419,9 +420,9 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                               if (val) setState(() => _label = type);
                             },
                             avatar: Icon(
-                              type == 'Home'
+                              type == AppLocalizations.of(context).home
                                   ? Icons.home
-                                  : type == 'Work'
+                                  : type == AppLocalizations.of(context).work
                                   ? Icons.work
                                   : Icons.location_on,
                               size: 16,
@@ -451,8 +452,8 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                     // Default Address Toggle
                     CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Set as default delivery address',
+                      title: Text(
+                        AppLocalizations.of(context).setAsDefaultDeliveryAddress,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -495,7 +496,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                         ),
                       )
                     : Text(
-                        isEditing ? 'Update Address' : 'Save & Deliver Here',
+                        isEditing ? AppLocalizations.of(context).updateAddress : AppLocalizations.of(context).saveDeliverHere,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

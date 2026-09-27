@@ -18,11 +18,11 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('${l10n.packing} Queue'),
+        title: Text(AppLocalizations.of(context).queue('${l10n.packing}')),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
+            tooltip: AppLocalizations.of(context).logout,
             onPressed: () async {
               await context.read<AuthCubit>().signOut();
               if (context.mounted) context.go(AppRoutes.role);
@@ -54,10 +54,10 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator(strokeWidth: 2));
           }
           if (orders.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(28),
-                child: Text('No packing tasks assigned'),
+                child: Text(AppLocalizations.of(context).noPackingTasksAssigned),
               ),
             );
           }
@@ -76,15 +76,13 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '${o.itemCount} items · '
-                    '${o.isSelfPickup ? 'Pickup' : 'Delivery'}'
-                    '${o.employeePackingDone ? ' · packed' : ''}',
+                    AppLocalizations.of(context).items5('${o.itemCount}', '${o.isSelfPickup ? AppLocalizations.of(context).pickup : AppLocalizations.of(context).delivery}', '${o.employeePackingDone ? AppLocalizations.of(context).packed : ''}'),
                   ),
                   trailing: FilledButton(
                     onPressed: () => context.go(
                       AppRoutes.packing.replaceFirst(':orderId', o.id),
                     ),
-                    child: const Text('Pack'),
+                    child: Text(AppLocalizations.of(context).pack),
                   ),
                 ),
               );

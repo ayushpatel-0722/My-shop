@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes/app_router.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Reusable 4-item bottom navigation bar for the shopper / marketplace experience:
 /// 1. Home
@@ -66,7 +67,7 @@ class MarketplaceBottomNav extends StatelessWidget {
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home, color: Color(0xFFFF5247)),
-            label: 'Home',
+            label: AppLocalizations.of(context).home,
           ),
           NavigationDestination(
             icon: Icon(Icons.grid_view_outlined),
@@ -74,7 +75,7 @@ class MarketplaceBottomNav extends StatelessWidget {
               Icons.grid_view_rounded,
               color: Color(0xFFFF5247),
             ),
-            label: 'Categories',
+            label: AppLocalizations.of(context).categories,
           ),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
@@ -82,12 +83,12 @@ class MarketplaceBottomNav extends StatelessWidget {
               Icons.receipt_long_rounded,
               color: Color(0xFFFF5247),
             ),
-            label: 'Orders',
+            label: AppLocalizations.of(context).orders,
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person, color: Color(0xFFFF5247)),
-            label: 'Account',
+            label: AppLocalizations.of(context).account,
           ),
         ],
       ),

@@ -9,6 +9,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Employee management screen — list staff, view status & permissions, navigate to add/edit.
 class AdminEmployeesScreen extends StatelessWidget {
@@ -18,19 +19,19 @@ class AdminEmployeesScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Employee Account'),
+        title: Text(AppLocalizations.of(context).deleteEmployeeAccount),
         content: Text(
-          'Are you sure you want to remove "${emp.name}" (${emp.email}) from the company?',
+          AppLocalizations.of(context).areYouSureYouWantToRemoveFromTheCompany('${emp.name}', '${emp.email}'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -42,7 +43,7 @@ class AdminEmployeesScreen extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Employee "${emp.name}" deleted.'),
+              content: Text(AppLocalizations.of(context).employeeDeleted('${emp.name}')),
               backgroundColor: Colors.green.shade700,
             ),
           );
@@ -51,7 +52,7 @@ class AdminEmployeesScreen extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to delete employee: $e'),
+              content: Text(AppLocalizations.of(context).failedToDeleteEmployee('${e}')),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -69,11 +70,11 @@ class AdminEmployeesScreen extends StatelessWidget {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Employees',
+      title: AppLocalizations.of(context).employees,
       actions: [
         IconButton(
           icon: const Icon(Icons.person_add_outlined),
-          tooltip: 'Provision Employee',
+          tooltip: AppLocalizations.of(context).provisionEmployee,
           onPressed: () => context.push(AppRoutes.adminAddEmployee),
         ),
       ],
@@ -92,19 +93,19 @@ class AdminEmployeesScreen extends StatelessWidget {
                     color: Colors.grey,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'No employees provisioned',
+                  Text(
+                    AppLocalizations.of(context).noEmployeesProvisioned,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Provision staff accounts with custom designations, salary, and operational access.',
+                  Text(
+                    AppLocalizations.of(context).provisionStaffAccountsWithCustomDesignationsSalaryAndOperationalAccess,
                     style: TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     icon: const Icon(Icons.add),
-                    label: const Text('Provision Employee'),
+                    label: Text(AppLocalizations.of(context).provisionEmployee),
                     onPressed: () => context.push(AppRoutes.adminAddEmployee),
                   ),
                 ],
@@ -186,8 +187,8 @@ class AdminEmployeesScreen extends StatelessWidget {
                                           ),
                                           child: Text(
                                             e.shiftActive
-                                                ? 'Active Shift'
-                                                : 'Off Shift',
+                                                ? AppLocalizations.of(context).activeShift
+                                                : AppLocalizations.of(context).offShift,
                                             style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.bold,
@@ -214,7 +215,7 @@ class AdminEmployeesScreen extends StatelessWidget {
                               ),
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined, size: 20),
-                                tooltip: 'Edit Employee',
+                                tooltip: AppLocalizations.of(context).editEmployee,
                                 onPressed: () => context.push(
                                   AppRoutes.adminEditEmployeePath(e.id),
                                   extra: e,
@@ -226,7 +227,7 @@ class AdminEmployeesScreen extends StatelessWidget {
                                   size: 20,
                                   color: Colors.redAccent,
                                 ),
-                                tooltip: 'Delete Employee',
+                                tooltip: AppLocalizations.of(context).deleteEmployee,
                                 onPressed: () => _confirmDelete(context, e),
                               ),
                             ],
@@ -261,7 +262,7 @@ class AdminEmployeesScreen extends StatelessWidget {
                                 )
                               else
                                 Text(
-                                  'Salary: Not specified',
+                                  AppLocalizations.of(context).salaryNotSpecified,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: isDark
@@ -275,14 +276,14 @@ class AdminEmployeesScreen extends StatelessWidget {
                                 spacing: 4,
                                 children: [
                                   if (e.permissions['canPack'] == true)
-                                    _permissionChip('Pack', Colors.blue),
+                                    _permissionChip(AppLocalizations.of(context).pack, Colors.blue),
                                   if (e.permissions['canDispatch'] == true)
-                                    _permissionChip('Dispatch', Colors.orange),
+                                    _permissionChip(AppLocalizations.of(context).dispatch, Colors.orange),
                                   if (e.permissions['canManageInventory'] ==
                                       true)
-                                    _permissionChip('Inventory', Colors.purple),
+                                    _permissionChip(AppLocalizations.of(context).inventory, Colors.purple),
                                   if (e.permissions['canViewReports'] == true)
-                                    _permissionChip('Reports', Colors.teal),
+                                    _permissionChip(AppLocalizations.of(context).reports, Colors.teal),
                                 ],
                               ),
                             ],

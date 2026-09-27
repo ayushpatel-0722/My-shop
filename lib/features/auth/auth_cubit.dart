@@ -10,6 +10,7 @@ import '../../core/services/auth_session.dart';
 import '../../core/services/secure_session_cache.dart';
 import '../../core/services/service_locator.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import '../../app/l10n/l10n_service.dart';
 
 enum AuthStatus { unauthenticated, authenticating, authenticated, error }
 
@@ -184,9 +185,9 @@ class AuthCubit extends Cubit<AuthState> {
       );
       if (user == null) {
         emit(
-          const AuthState(
+          AuthState(
             status: AuthStatus.error,
-            error: 'Invalid email, password, or company credentials.',
+            error: L10n.current.invalidEmailPasswordOrCompanyCredentials,
           ),
         );
         return false;
@@ -197,15 +198,15 @@ class AuthCubit extends Cubit<AuthState> {
       _registerPush(user);
       return true;
     } on fb_auth.FirebaseAuthException catch (e) {
-      String msg = 'Authentication failed.';
+      String msg = L10n.current.authenticationFailed;
       if (e.code == 'invalid-credential' ||
           e.code == 'wrong-password' ||
           e.code == 'user-not-found') {
-        msg = 'Invalid admin email or password.';
+        msg = L10n.current.invalidAdminEmailOrPassword;
       } else if (e.code == 'user-disabled') {
-        msg = 'This admin account has been disabled.';
+        msg = L10n.current.thisAdminAccountHasBeenDisabled;
       } else if (e.code == 'too-many-requests') {
-        msg = 'Too many attempts. Please wait a moment and try again.';
+        msg = L10n.current.tooManyAttemptsPleaseWaitAMomentAndTryAgain;
       } else if (e.message != null && e.message!.isNotEmpty) {
         msg = e.message!;
       }
@@ -233,9 +234,9 @@ class AuthCubit extends Cubit<AuthState> {
       );
       if (user == null) {
         emit(
-          const AuthState(
+          AuthState(
             status: AuthStatus.error,
-            error: 'Invalid employee email, password, or company name.',
+            error: L10n.current.invalidEmployeeEmailPasswordOrCompanyName,
           ),
         );
         return false;
@@ -246,15 +247,15 @@ class AuthCubit extends Cubit<AuthState> {
       _registerPush(user);
       return true;
     } on fb_auth.FirebaseAuthException catch (e) {
-      String msg = 'Authentication failed.';
+      String msg = L10n.current.authenticationFailed;
       if (e.code == 'invalid-credential' ||
           e.code == 'wrong-password' ||
           e.code == 'user-not-found') {
-        msg = 'Invalid employee email or password.';
+        msg = L10n.current.invalidEmployeeEmailOrPassword;
       } else if (e.code == 'user-disabled') {
-        msg = 'This employee account has been disabled.';
+        msg = L10n.current.thisEmployeeAccountHasBeenDisabled;
       } else if (e.code == 'too-many-requests') {
-        msg = 'Too many attempts. Please wait a moment and try again.';
+        msg = L10n.current.tooManyAttemptsPleaseWaitAMomentAndTryAgain;
       } else if (e.message != null && e.message!.isNotEmpty) {
         msg = e.message!;
       }
@@ -481,7 +482,7 @@ class AuthCubit extends Cubit<AuthState> {
       if (appUser == null) {
         final name = fbUser.displayName?.isNotEmpty == true
             ? fbUser.displayName!
-            : 'Shopper';
+            : L10n.current.shopper;
         final mobile = fbUser.phoneNumber ?? '';
         final email = fbUser.email ?? '';
         await _repo.createUserAccount(

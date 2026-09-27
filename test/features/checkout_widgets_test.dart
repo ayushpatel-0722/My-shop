@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/models/company.dart';
 import 'package:myshop/core/models/customer.dart';
@@ -19,6 +20,9 @@ void main() {
   setUp(TestHarness.setupPlatformChannels);
 
   Widget shell(Widget child) => MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
     theme: ThemeData.light(),
     home: Scaffold(body: SingleChildScrollView(child: child)),
   );

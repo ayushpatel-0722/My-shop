@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_locator.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Recommended products manager — pin a product, else auto best-seller
 /// fallback (Section 13.3).
@@ -15,7 +16,7 @@ class AdminRecommendationsScreen extends StatelessWidget {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Recommendations',
+      title: AppLocalizations.of(context).recommendations,
       actions: [
         IconButton(
           icon: const Icon(Icons.push_pin),
@@ -29,22 +30,22 @@ class AdminRecommendationsScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              const Card(
+              Card(
                 child: ListTile(
                   leading: Icon(Icons.auto_awesome),
-                  title: Text('Fallback strategy'),
+                  title: Text(AppLocalizations.of(context).fallbackStrategy),
                   subtitle: Text(
-                    'Top Sellers · Trending · Curated · Cross-sell',
+                    AppLocalizations.of(context).topSellersTrendingCuratedCrossSell,
                   ),
                 ),
               ),
               const SizedBox(height: 8),
               if (list.isEmpty)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.all(24),
                   child: Center(
                     child: Text(
-                      'No pinned recommendations — using best-sellers',
+                      AppLocalizations.of(context).noPinnedRecommendationsUsingBestSellers,
                     ),
                   ),
                 ),
@@ -52,7 +53,7 @@ class AdminRecommendationsScreen extends StatelessWidget {
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.push_pin),
-                    title: Text(r.pinnedProductId ?? '(no pinned product)'),
+                    title: Text(r.pinnedProductId ?? AppLocalizations.of(context).noPinnedProduct),
                     subtitle: Text(r.strategy),
                   ),
                 ),
@@ -102,27 +103,27 @@ class _PinProductSheetState extends State<_PinProductSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Pin a product',
+          Text(
+            AppLocalizations.of(context).pinAProduct,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _productIdCtrl,
-            decoration: const InputDecoration(labelText: 'Product ID'),
+            decoration: InputDecoration(labelText: AppLocalizations.of(context).productId),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _strategy,
-            decoration: const InputDecoration(labelText: 'Strategy'),
+            decoration: InputDecoration(labelText: AppLocalizations.of(context).strategy),
             items: const [
-              DropdownMenuItem(value: 'curated', child: Text('Curated')),
+              DropdownMenuItem(value: 'curated', child: Text(AppLocalizations.of(context).curated)),
               DropdownMenuItem(
                 value: 'top_sellers',
-                child: Text('Top sellers'),
+                child: Text(AppLocalizations.of(context).topSellers),
               ),
-              DropdownMenuItem(value: 'trending', child: Text('Trending')),
-              DropdownMenuItem(value: 'cross_sell', child: Text('Cross-sell')),
+              DropdownMenuItem(value: 'trending', child: Text(AppLocalizations.of(context).trending)),
+              DropdownMenuItem(value: 'cross_sell', child: Text(AppLocalizations.of(context).crossSell)),
             ],
             onChanged: (v) => setState(() => _strategy = v ?? 'curated'),
           ),
@@ -138,7 +139,7 @@ class _PinProductSheetState extends State<_PinProductSheet> {
               );
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context).save),
           ),
         ],
       ),

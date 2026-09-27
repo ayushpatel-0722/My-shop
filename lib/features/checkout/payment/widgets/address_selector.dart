@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/models/customer.dart';
 import '../../account/widgets/add_edit_address_dialog.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// "Delivery Address" section: the user's saved addresses (max 3) as
 /// selectable radio cards with inline edit, plus an "Add New Address" button
@@ -37,7 +38,7 @@ class AddressSelector extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Delivery Address',
+              AppLocalizations.of(context).deliveryAddress,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -71,7 +72,7 @@ class AddressSelector extends StatelessWidget {
               key: const Key('add-new-address'),
               onPressed: onAddNew,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add New Address'),
+              label: Text(AppLocalizations.of(context).addNewAddress),
             ),
         ],
       ],
@@ -146,7 +147,7 @@ class _AddressCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            address.label.isEmpty ? 'Home' : address.label,
+                            address.label.isEmpty ? AppLocalizations.of(context).home : address.label,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -166,7 +167,7 @@ class _AddressCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'Default',
+                              AppLocalizations.of(context).default2,
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
@@ -202,7 +203,7 @@ class _AddressCard extends StatelessWidget {
               TextButton(
                 key: Key('edit-address-${address.id}'),
                 onPressed: onEdit,
-                child: const Text('Edit'),
+                child: Text(AppLocalizations.of(context).edit),
               ),
             ],
           ),
@@ -237,8 +238,8 @@ class _EmptyAddress extends StatelessWidget {
             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'No saved addresses yet',
+          Text(
+            AppLocalizations.of(context).noSavedAddressesYet,
             style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
@@ -246,7 +247,7 @@ class _EmptyAddress extends StatelessWidget {
             key: const Key('add-address-empty'),
             onPressed: onAddNew,
             icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Address'),
+            label: Text(AppLocalizations.of(context).addAddress),
           ),
         ],
       ),

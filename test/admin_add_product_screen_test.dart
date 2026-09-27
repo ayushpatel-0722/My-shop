@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/models/app_user.dart';
 import 'package:myshop/core/services/auth_session.dart';
@@ -36,6 +37,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
           theme: AppTheme.light(),
           darkTheme: AppTheme.dark(),
           home: const AdminAddProductScreen(),
@@ -72,6 +76,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
           theme: AppTheme.light(),
           darkTheme: AppTheme.dark(),
           home: const AdminAddProductScreen(),
@@ -126,6 +133,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         home: const AdminAddCategoryScreen(),
@@ -175,7 +185,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light(), home: const AdminProductsScreen()),
+      MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+theme: AppTheme.light(), home: const AdminProductsScreen()),
     );
     await tester.pumpAndSettle();
 
@@ -241,6 +254,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
           theme: AppTheme.light(),
           home: const AdminAddProductScreen(product: existingProduct),
         ),
@@ -294,6 +310,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
           theme: AppTheme.light(),
           home: const AdminAddProductScreen(),
         ),
@@ -426,7 +445,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light(), home: const AdminAddProductScreen()),
+      MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+theme: AppTheme.light(), home: const AdminAddProductScreen()),
     );
     await tester.pumpAndSettle();
 

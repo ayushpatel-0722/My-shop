@@ -4,6 +4,7 @@ import '../../../../app/theme/app_theme.dart';
 import '../../../../core/models/product.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/modern_card.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Interactive dual-panel product-assignment picker.
 ///
@@ -123,7 +124,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
   /// "1 product selected" / "2 products selected".
   String get _selectedLabel {
     final n = widget.selectedProductIds.length;
-    return '$n ${n == 1 ? 'product' : 'products'} selected';
+    return AppLocalizations.of(context).productsSelected(n);
   }
 
   @override
@@ -168,7 +169,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Product Assignment',
+                  AppLocalizations.of(context).productAssignment,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -224,9 +225,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
 
         // Hint instructions
         Text(
-          'Swipe right or tap + on available products to assign. Swipe left or '
-          'tap – to remove. Drag the ≡ handle in "In This Category" to set the '
-          'display order.',
+          AppLocalizations.of(context).swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder,
           style: theme.textTheme.bodySmall?.copyWith(
             color: isDark
                 ? AppTheme.textSecondaryDark
@@ -239,7 +238,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
         TextField(
           controller: _searchCtrl,
           decoration: InputDecoration(
-            hintText: 'Search products by name or ID...',
+            hintText: AppLocalizations.of(context).searchProductsByNameOrId,
             prefixIcon: const Icon(Icons.search, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
@@ -260,7 +259,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
         if (_searchQuery.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
-            'Clear search to reorder',
+            AppLocalizations.of(context).clearSearchToReorder,
             style: TextStyle(
               fontSize: 11.5,
               fontStyle: FontStyle.italic,
@@ -284,7 +283,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   Expanded(
                     child: _buildPanel(
                       context,
-                      title: 'All Products',
+                      title: AppLocalizations.of(context).allProducts2,
                       count: filteredAvailable.length,
                       totalCount: availableProducts.length,
                       isAssignedPanel: false,
@@ -299,7 +298,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   Expanded(
                     child: _buildPanel(
                       context,
-                      title: 'In This Category',
+                      title: AppLocalizations.of(context).inThisCategory,
                       count: filteredAssigned.length,
                       totalCount: assignedProducts.length,
                       isAssignedPanel: true,
@@ -320,12 +319,12 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                       ButtonSegment<int>(
                         value: 0,
                         icon: const Icon(Icons.storefront_outlined, size: 18),
-                        label: Text('All (${filteredAvailable.length})'),
+                        label: Text(AppLocalizations.of(context).all('${filteredAvailable.length}')),
                       ),
                       ButtonSegment<int>(
                         value: 1,
                         icon: const Icon(Icons.category_outlined, size: 18),
-                        label: Text('In Category (${filteredAssigned.length})'),
+                        label: Text(AppLocalizations.of(context).inCategory('${filteredAssigned.length}')),
                       ),
                     ],
                     selected: {_mobileTab},
@@ -336,7 +335,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   if (_mobileTab == 0)
                     _buildPanel(
                       context,
-                      title: 'All Products',
+                      title: AppLocalizations.of(context).allProducts2,
                       count: filteredAvailable.length,
                       totalCount: availableProducts.length,
                       isAssignedPanel: false,
@@ -348,7 +347,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   else
                     _buildPanel(
                       context,
-                      title: 'In This Category',
+                      title: AppLocalizations.of(context).inThisCategory,
                       count: filteredAssigned.length,
                       totalCount: assignedProducts.length,
                       isAssignedPanel: true,
@@ -431,7 +430,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                       ),
                       child: Text(
                         _searchQuery.isNotEmpty
-                            ? '$count of $totalCount'
+                            ? AppLocalizations.of(context).of('${count}', '${totalCount}')
                             : '$count',
                         style: const TextStyle(
                           fontSize: 11,
@@ -449,7 +448,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                   ),
-                  child: const Text('Add All', style: TextStyle(fontSize: 12)),
+                  child: Text(AppLocalizations.of(context).addAll, style: TextStyle(fontSize: 12)),
                 ),
               if (isAssignedPanel && onRemoveAll != null)
                 TextButton(
@@ -459,8 +458,8 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                   ),
-                  child: const Text(
-                    'Clear All',
+                  child: Text(
+                    AppLocalizations.of(context).clearAll,
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
@@ -487,11 +486,11 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   Text(
                     isAssignedPanel
                         ? (_searchQuery.isNotEmpty
-                              ? 'No assigned products match search'
-                              : 'No products assigned yet')
+                              ? AppLocalizations.of(context).noAssignedProductsMatchSearch
+                              : AppLocalizations.of(context).noProductsAssignedYet)
                         : (_searchQuery.isNotEmpty
-                              ? 'No available products match search'
-                              : 'All products are assigned!'),
+                              ? AppLocalizations.of(context).noAvailableProductsMatchSearch
+                              : AppLocalizations.of(context).allProductsAreAssigned),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
@@ -567,7 +566,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
               dragHandle: ReorderableDragStartListener(
                 index: i,
                 child: Tooltip(
-                  message: 'Drag to reorder',
+                  message: AppLocalizations.of(context).dragToReorder,
                   child: Container(
                     key: Key('drag-handle-${products[i].id}'),
                     padding: const EdgeInsets.all(6),
@@ -712,14 +711,14 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
           if (!isAssigned)
             IconButton(
               icon: const Icon(Icons.add_circle, color: Colors.green),
-              tooltip: 'Add to Category',
+              tooltip: AppLocalizations.of(context).addToCategory,
               visualDensity: VisualDensity.compact,
               onPressed: () => _addProduct(product.id),
             )
           else
             IconButton(
               icon: const Icon(Icons.remove_circle, color: Colors.redAccent),
-              tooltip: 'Remove from Category',
+              tooltip: AppLocalizations.of(context).removeFromCategory,
               visualDensity: VisualDensity.compact,
               onPressed: () => _removeProduct(product.id),
             ),
@@ -741,12 +740,12 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
             color: Colors.green.shade600,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Row(
+          child: Row(
             children: [
               Icon(Icons.add_circle, color: Colors.white, size: 20),
               SizedBox(width: 8),
               Text(
-                'Assign',
+                AppLocalizations.of(context).assign,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -770,11 +769,11 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
             color: Colors.red.shade600,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                'Remove',
+                AppLocalizations.of(context).remove,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

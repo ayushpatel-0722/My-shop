@@ -20,6 +20,7 @@ import '../models/review.dart';
 import '../models/voucher.dart';
 import '../repositories/app_repository.dart';
 import 'mock_data.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// In-memory implementation of [AppRepository].
 ///
@@ -72,7 +73,7 @@ class MockAppRepository implements AppRepository {
   AppUser? _currentUser;
 
   MockAppRepository() {
-    _usersByMobile['9876543210'] = const AppUser(
+    _usersByMobile['9876543210'] = AppUser(
       id: 'u_seed',
       name: 'Demo User',
       mobileNumber: '9876543210',
@@ -87,7 +88,7 @@ class MockAppRepository implements AppRepository {
           city: 'Ahmedabad',
           state: 'Gujarat',
           pincode: '380015',
-          label: 'Home',
+          label: L10n.current.home,
           isDefault: true,
         ),
         AddressEntry(

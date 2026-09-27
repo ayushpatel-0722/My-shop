@@ -7,6 +7,7 @@ import '../../../core/models/admin.dart';
 import '../../../core/services/service_locator.dart';
 import '../../auth/auth_cubit.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Manage additional Admins for the same company (Section 4).
 class AdminAdminsScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class AdminAdminsScreen extends StatelessWidget {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Admins',
+      title: AppLocalizations.of(context).admins,
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
@@ -37,7 +38,7 @@ class AdminAdminsScreen extends StatelessWidget {
         builder: (context, snap) {
           final list = snap.data ?? const <Admin>[];
           if (list.isEmpty) {
-            return const Center(child: Text('No admins yet'));
+            return Center(child: Text(AppLocalizations.of(context).noAdminsYet));
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -51,7 +52,7 @@ class AdminAdminsScreen extends StatelessWidget {
                       const CircleAvatar(child: Icon(Icons.admin_panel_settings)),
                   title: Text(a.name),
                   subtitle: Text(a.email),
-                  trailing: const Chip(label: Text('Admin')),
+                  trailing: Chip(label: Text(AppLocalizations.of(context).admin)),
                 ),
               );
             },

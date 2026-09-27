@@ -1,4 +1,5 @@
 import 'product.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Frozen copy of the variant the shopper actually picked.
 ///
@@ -318,7 +319,7 @@ class CartItem {
   String? stockWarningLabel({int threshold = 5}) {
     final left = trackedStock;
     if (left == null || left <= 0 || left > threshold) return null;
-    return 'Only $left left';
+    return L10n.current.onlyLeft('${left}');
   }
 
   // ----------------------------------------------------------- Stepper UI ---

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes/app_router.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Read-only "Customer Details" card (name, email, mobile).
 ///
@@ -47,7 +48,7 @@ class CustomerDetailsCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Customer Details',
+                  AppLocalizations.of(context).customerDetails,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -58,7 +59,7 @@ class CustomerDetailsCard extends StatelessWidget {
             _readOnlyRow(
               context,
               icon: Icons.person_outline,
-              label: 'Name',
+              label: AppLocalizations.of(context).name,
               value: name,
               missing: name.trim().isEmpty,
             ),
@@ -66,7 +67,7 @@ class CustomerDetailsCard extends StatelessWidget {
             _readOnlyRow(
               context,
               icon: Icons.phone_outlined,
-              label: 'Mobile',
+              label: AppLocalizations.of(context).mobile,
               value: mobile,
               missing: mobile.trim().isEmpty,
             ),
@@ -74,7 +75,7 @@ class CustomerDetailsCard extends StatelessWidget {
             _readOnlyRow(
               context,
               icon: Icons.email_outlined,
-              label: 'Email',
+              label: AppLocalizations.of(context).email,
               value: email,
               missing: false,
             ),
@@ -96,16 +97,16 @@ class CustomerDetailsCard extends StatelessWidget {
                       color: Colors.amber.shade900,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Please complete your profile (name & mobile) before placing an order.',
+                        AppLocalizations.of(context).pleaseCompleteYourProfileNameMobileBeforePlacingAnOrder,
                         style: TextStyle(fontSize: 12.5),
                       ),
                     ),
                     TextButton(
                       key: const Key('update-profile-link'),
                       onPressed: () => context.go(AppRoutes.account),
-                      child: const Text('Update Profile'),
+                      child: Text(AppLocalizations.of(context).updateProfile),
                     ),
                   ],
                 ),

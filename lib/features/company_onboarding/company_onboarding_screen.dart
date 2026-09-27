@@ -115,16 +115,16 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _nameCtrl,
               decoration: InputDecoration(
                 labelText: l10n.companyName,
-                hintText: 'e.g. Om Mart Express',
+                hintText: AppLocalizations.of(context).eGOmMartExpress,
                 prefixIcon: const Icon(Icons.business),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _categoryCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Store Category',
-                hintText: 'e.g. Grocery & Staples, Supermarket, Electronics',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).storeCategory,
+                hintText: AppLocalizations.of(context).eGGroceryStaplesSupermarketElectronics,
                 prefixIcon: Icon(Icons.category_outlined),
               ),
             ),
@@ -134,7 +134,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: l10n.appSubtitle,
-                hintText: 'e.g. Fresh organic groceries delivered daily',
+                hintText: AppLocalizations.of(context).eGFreshOrganicGroceriesDeliveredDaily,
                 prefixIcon: const Icon(Icons.description_outlined),
               ),
             ),
@@ -143,7 +143,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _addressCtrl,
               decoration: InputDecoration(
                 labelText: l10n.address,
-                hintText: 'e.g. 12 Market Street, Ahmedabad',
+                hintText: AppLocalizations.of(context).eG12MarketStreetAhmedabad,
                 prefixIcon: const Icon(Icons.location_on_outlined),
               ),
             ),
@@ -180,8 +180,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                                 controller: TextEditingController(
                                   text: _hours[i].openTime,
                                 ),
-                                decoration: const InputDecoration(
-                                  labelText: 'Open',
+                                decoration: InputDecoration(
+                                  labelText: AppLocalizations.of(context).open,
                                 ),
                                 onChanged: (v) => setState(() {
                                   _hours[i] = WeeklyHours(
@@ -199,8 +199,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                                 controller: TextEditingController(
                                   text: _hours[i].closeTime,
                                 ),
-                                decoration: const InputDecoration(
-                                  labelText: 'Close',
+                                decoration: InputDecoration(
+                                  labelText: AppLocalizations.of(context).close,
                                 ),
                                 onChanged: (v) => setState(() {
                                   _hours[i] = WeeklyHours(
@@ -223,28 +223,28 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       default:
         return ListView(
           children: [
-            const Text('Currency'),
+            Text(AppLocalizations.of(context).currency),
             const SizedBox(height: 8),
             SegmentedButton<String>(
               segments: const [
-                ButtonSegment(value: 'INR', label: Text('₹ INR')),
-                ButtonSegment(value: 'USD', label: Text('\$ USD')),
+                ButtonSegment(value: 'INR', label: Text(AppLocalizations.of(context).inr)),
+                ButtonSegment(value: 'USD', label: Text(AppLocalizations.of(context).usd)),
               ],
               selected: {_currency},
               onSelectionChanged: (s) => setState(() => _currency = s.first),
             ),
             const SizedBox(height: 24),
-            const Text('Delivery types'),
+            Text(AppLocalizations.of(context).deliveryTypes),
             const SizedBox(height: 8),
             CheckboxListTile(
               value: _deliveryTypes.contains('self_pickup'),
               onChanged: (v) => _toggleDelivery('self_pickup', v),
-              title: const Text('Self-Pickup'),
+              title: Text(AppLocalizations.of(context).selfPickup2),
             ),
             CheckboxListTile(
               value: _deliveryTypes.contains('home_delivery'),
               onChanged: (v) => _toggleDelivery('home_delivery', v),
-              title: const Text('Home Delivery'),
+              title: Text(AppLocalizations.of(context).homeDelivery),
             ),
             if (_deliveryTypes.contains('home_delivery')) ...[
               const SizedBox(height: 12),
@@ -253,8 +253,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText:
-                      'Minimum Order for Delivery (${_currency == 'USD' ? '\$' : '₹'})',
-                  hintText: 'e.g. 199 (0 for no minimum)',
+                      AppLocalizations.of(context).minimumOrderForDelivery('${_currency == 'USD' ? '\$' : '₹'}'),
+                  hintText: AppLocalizations.of(context).eG1990ForNoMinimum,
                   prefixIcon: const Icon(Icons.shopping_bag_outlined),
                 ),
               ),
@@ -271,16 +271,16 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             const SizedBox(height: 24),
             const SizedBox(height: 24),
             Text(
-              'Company Branding & Images',
+              AppLocalizations.of(context).companyBrandingImages,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _logoUrlCtrl,
               keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: 'Company Logo URL',
-                hintText: 'https://example.com/logo.png',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).companyLogoUrl,
+                hintText: AppLocalizations.of(context).httpsExampleComLogoPng,
                 prefixIcon: Icon(Icons.photo_size_select_actual_outlined),
               ),
             ),
@@ -288,9 +288,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             TextField(
               controller: _bannerUrlCtrl,
               keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: 'Company Banner URL',
-                hintText: 'https://example.com/store_banner.jpg',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).companyBannerUrl,
+                hintText: AppLocalizations.of(context).httpsExampleComStoreBannerJpg,
                 prefixIcon: Icon(Icons.panorama_outlined),
               ),
             ),
@@ -298,9 +298,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             TextField(
               controller: _profileImageUrlCtrl,
               keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: 'Company Storefront / Profile Image URL',
-                hintText: 'https://example.com/storefront_photo.jpg',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).companyStorefrontProfileImageUrl,
+                hintText: AppLocalizations.of(context).httpsExampleComStorefrontPhotoJpg,
                 prefixIcon: Icon(Icons.storefront_outlined),
               ),
             ),
@@ -308,14 +308,14 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             const Divider(),
             const SizedBox(height: 12),
             Text(
-              'First Admin Account',
+              AppLocalizations.of(context).firstAdminAccount,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _adminNameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Admin name',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).adminName,
                 prefixIcon: Icon(Icons.person),
               ),
             ),
@@ -323,8 +323,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             TextField(
               controller: _adminEmailCtrl,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Admin email',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).adminEmail,
                 prefixIcon: Icon(Icons.mail_outline),
               ),
             ),
@@ -332,8 +332,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             TextField(
               controller: _adminPassCtrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).password,
                 prefixIcon: Icon(Icons.lock_outline),
               ),
             ),
@@ -341,8 +341,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             TextField(
               controller: _adminPassConfirmCtrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm password',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).confirmPassword,
                 prefixIcon: Icon(Icons.lock_outline),
               ),
             ),
@@ -376,30 +376,30 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     // Basic validation
     if (companyName.isEmpty || companyPass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Company name and password are required.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).companyNameAndPasswordAreRequired),
         ),
       );
       return;
     }
     if (adminName.isEmpty || adminEmail.isEmpty || adminPass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Admin name, email, and password are required.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).adminNameEmailAndPasswordAreRequired),
         ),
       );
       return;
     }
     if (adminPass != adminPassConfirm) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Admin passwords do not match.')),
+        SnackBar(content: Text(AppLocalizations.of(context).adminPasswordsDoNotMatch)),
       );
       return;
     }
     if (adminPass.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Admin password must be at least 6 characters.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).adminPasswordMustBeAtLeast6Characters),
         ),
       );
       return;
@@ -429,7 +429,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               throw FirebaseAuthException(
                 code: 'email-already-in-use',
                 message:
-                    'This email is already registered, but the password provided does not match. Please enter your existing password, sign in via Admin Login, or use a different email.',
+                    AppLocalizations.of(context).thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail,
               );
             }
             rethrow;
@@ -441,7 +441,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
 
       final uid = userCred.user?.uid;
       if (uid == null) {
-        throw Exception('Failed to obtain authenticated user ID.');
+        throw Exception(AppLocalizations.of(context).failedToObtainAuthenticatedUserId);
       }
 
       // 2. Create Company in Firestore & Realtime Database
@@ -550,7 +550,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Company "$companyName" registered successfully!'),
+          content: Text(AppLocalizations.of(context).companyRegisteredSuccessfully('${companyName}')),
         ),
       );
 
@@ -559,20 +559,20 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       debugPrint(
         'FirebaseAuthException during onboarding: ${e.code} ${e.message}',
       );
-      String userMsg = e.message ?? 'Authentication error occurred.';
+      String userMsg = e.message ?? AppLocalizations.of(context).authenticationErrorOccurred;
       if (e.code == 'weak-password') {
-        userMsg = 'Password is too weak. Please use at least 6 characters.';
+        userMsg = AppLocalizations.of(context).passwordIsTooWeakPleaseUseAtLeast6Characters;
       } else if (e.code == 'email-already-in-use') {
         userMsg =
             e.message ??
-            'That email is already registered. Please sign in via Admin Login or use a different email.';
+            AppLocalizations.of(context).thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail;
       } else if (e.code == 'invalid-email') {
-        userMsg = 'Please enter a valid email address.';
+        userMsg = AppLocalizations.of(context).pleaseEnterAValidEmailAddress;
       } else if (e.code == 'invalid-credential' || e.code == 'wrong-password') {
         userMsg =
-            'Invalid credentials. If you already have an account, enter its existing password or sign in via Admin Login.';
+            AppLocalizations.of(context).invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin;
       } else if (e.code == 'too-many-requests') {
-        userMsg = 'Too many attempts. Please wait a moment and try again.';
+        userMsg = AppLocalizations.of(context).tooManyAttemptsPleaseWaitAMomentAndTryAgain;
       }
       if (mounted) {
         ScaffoldMessenger.of(
@@ -585,7 +585,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).error('${e.toString()}'))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);

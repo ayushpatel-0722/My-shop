@@ -6,6 +6,7 @@ import '../../app/theme/app_theme.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/services/email_service.dart';
 import '../auth/auth_cubit.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 class ContactSupportScreen extends StatefulWidget {
   final String? initialCategory;
@@ -32,18 +33,18 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
   final _subjectCtrl = TextEditingController();
   final _messageCtrl = TextEditingController();
 
-  String _selectedCategory = 'Order Issue & Tracking';
+  String _selectedCategory = AppLocalizations.of(context).orderIssueTracking;
   bool _isSubmitting = false;
 
   final List<String> _categories = [
-    'Order Issue & Tracking',
-    'Delivery Delay & Scheduling',
-    'Payment & Refund Inquiries',
-    'Damaged / Wrong Item Received',
-    'Product Details & Availability',
-    'Account & Login Assistance',
-    'General Feedback & Suggestions',
-    'Other Inquiries',
+    AppLocalizations.of(context).orderIssueTracking,
+    AppLocalizations.of(context).deliveryDelayScheduling,
+    AppLocalizations.of(context).paymentRefundInquiries,
+    AppLocalizations.of(context).damagedWrongItemReceived,
+    AppLocalizations.of(context).productDetailsAvailability,
+    AppLocalizations.of(context).accountLoginAssistance,
+    AppLocalizations.of(context).generalFeedbackSuggestions,
+    AppLocalizations.of(context).otherInquiries,
   ];
 
   @override
@@ -138,8 +139,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Query Submitted & Email Sent!',
+            Text(
+              AppLocalizations.of(context).querySubmittedEmailSent,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -149,7 +150,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Your ticket ID is #$ticketId.\nAn email has been triggered to ayush123@gmail.com with your attached account details.',
+              AppLocalizations.of(context).yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails('${ticketId}'),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 13,
@@ -175,7 +176,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Ticket #$ticketId',
+                    AppLocalizations.of(context).ticket('${ticketId}'),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -204,8 +205,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                 Navigator.of(ctx).pop();
                 context.pop();
               },
-              child: const Text(
-                'Done',
+              child: Text(
+                AppLocalizations.of(context).paymentDone,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
@@ -280,8 +281,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Contact Support',
+        title: Text(
+          AppLocalizations.of(context).contactSupport,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: Colors.white,
@@ -323,12 +324,12 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Support Helpline: ayush123@gmail.com',
+                            AppLocalizations.of(context).supportHelplineAyush123GmailCom,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -337,7 +338,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Submitting this form triggers an email to ayush123@gmail.com with your message and account details attached.',
+                            AppLocalizations.of(context).submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached,
                             style: TextStyle(
                               fontSize: 12,
                               color: Color(0xFF6B7280),
@@ -353,8 +354,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               const SizedBox(height: 20),
 
               // Category dropdown
-              const Text(
-                'Issue Category *',
+              Text(
+                AppLocalizations.of(context).issueCategory,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -402,8 +403,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               // Order ID (optional)
               _buildTextField(
                 controller: _orderIdCtrl,
-                label: 'Order ID (Optional)',
-                hint: 'e.g. ORD-10294 or paste order ID',
+                label: AppLocalizations.of(context).orderIdOptional,
+                hint: AppLocalizations.of(context).eGOrd10294OrPasteOrderId,
                 prefixIcon: Icons.receipt_outlined,
               ),
               const SizedBox(height: 16),
@@ -414,12 +415,12 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                   Expanded(
                     child: _buildTextField(
                       controller: _nameCtrl,
-                      label: 'Your Name *',
-                      hint: 'Enter your name',
+                      label: AppLocalizations.of(context).yourName,
+                      hint: AppLocalizations.of(context).enterYourName,
                       prefixIcon: Icons.person_outline,
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
-                          return 'Name is required';
+                          return AppLocalizations.of(context).nameIsRequired;
                         }
                         return null;
                       },
@@ -429,13 +430,13 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                   Expanded(
                     child: _buildTextField(
                       controller: _phoneCtrl,
-                      label: 'Mobile Number *',
-                      hint: '10-digit phone',
+                      label: AppLocalizations.of(context).mobileNumber2,
+                      hint: AppLocalizations.of(context).msg10DigitPhone,
                       prefixIcon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
-                          return 'Phone is required';
+                          return AppLocalizations.of(context).phoneIsRequired;
                         }
                         return null;
                       },
@@ -447,16 +448,16 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
 
               _buildTextField(
                 controller: _emailCtrl,
-                label: 'Your Email Address (From) *',
-                hint: 'e.g. user@example.com',
+                label: AppLocalizations.of(context).yourEmailAddressFrom,
+                hint: AppLocalizations.of(context).eGUserExampleCom,
                 prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
-                    return 'Email is required';
+                    return AppLocalizations.of(context).emailIsRequired;
                   }
                   if (!val.contains('@') || !val.contains('.')) {
-                    return 'Enter a valid email';
+                    return AppLocalizations.of(context).enterAValidEmail;
                   }
                   return null;
                 },
@@ -466,8 +467,8 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               // Address (optional / prefilled)
               _buildTextField(
                 controller: _addressCtrl,
-                label: 'Delivery / Contact Address',
-                hint: 'Enter your address to attach with query',
+                label: AppLocalizations.of(context).deliveryContactAddress,
+                hint: AppLocalizations.of(context).enterYourAddressToAttachWithQuery,
                 prefixIcon: Icons.location_on_outlined,
               ),
               const SizedBox(height: 16),
@@ -475,12 +476,12 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               // Subject
               _buildTextField(
                 controller: _subjectCtrl,
-                label: 'Subject / Query Summary *',
-                hint: 'Brief summary of the issue',
+                label: AppLocalizations.of(context).subjectQuerySummary,
+                hint: AppLocalizations.of(context).briefSummaryOfTheIssue,
                 prefixIcon: Icons.subject_rounded,
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
-                    return 'Please enter a summary';
+                    return AppLocalizations.of(context).pleaseEnterASummary;
                   }
                   return null;
                 },
@@ -490,13 +491,13 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               // Message
               _buildTextField(
                 controller: _messageCtrl,
-                label: 'Detailed Query / Message *',
+                label: AppLocalizations.of(context).detailedQueryMessage,
                 hint:
-                    'Explain your issue, questions or feedback in detail so we can assist you quickly...',
+                    AppLocalizations.of(context).explainYourIssueQuestionsOrFeedbackInDetailSoWeCanAssistYouQuickly,
                 maxLines: 5,
                 validator: (val) {
                   if (val == null || val.trim().length < 10) {
-                    return 'Please describe your query in at least 10 characters';
+                    return AppLocalizations.of(context).pleaseDescribeYourQueryInAtLeast10Characters;
                   }
                   return null;
                 },
@@ -528,13 +529,13 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                             ),
                           ),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.send_rounded, size: 18),
                             SizedBox(width: 8),
                             Text(
-                              'Submit Query & Send Email',
+                              AppLocalizations.of(context).submitQuerySendEmail,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

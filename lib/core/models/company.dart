@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../app/l10n/l10n_service.dart';
 
 /// Tenant / Company model (Firestore: /companies).
 class Company {
@@ -266,14 +267,14 @@ class WeeklyHours {
   };
 
   static List<WeeklyHours> defaultWeek() => [
-    const WeeklyHours(day: 'Mon', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Tue', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Wed', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Thu', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Fri', openTime: '09:00', closeTime: '22:00'),
-    const WeeklyHours(day: 'Sat', openTime: '10:00', closeTime: '22:00'),
-    const WeeklyHours(
-      day: 'Sun',
+    WeeklyHours(day: L10n.current.mon, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.tue, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.wed, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.thu, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.fri, openTime: '09:00', closeTime: '22:00'),
+    WeeklyHours(day: L10n.current.sat, openTime: '10:00', closeTime: '22:00'),
+    WeeklyHours(
+      day: L10n.current.sun,
       openTime: '00:00',
       closeTime: '00:00',
       isClosed: true,

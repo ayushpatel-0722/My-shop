@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Collapsible tile with a title row, a rotating arrow and animated content.
 ///
@@ -209,7 +210,7 @@ class _ExpandableTextState extends State<ExpandableText> {
             child: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'Read more',
+                AppLocalizations.of(context).readMore,
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
@@ -225,7 +226,7 @@ class _ExpandableTextState extends State<ExpandableText> {
             child: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'Read less',
+                AppLocalizations.of(context).readLess,
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,

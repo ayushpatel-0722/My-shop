@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Camera QR/barcode scanner (Section 15.2 + Section 17.2).
 ///
@@ -43,7 +44,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan QR / Barcode')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).scanQrBarcode)),
       body: Stack(
         children: [
           MobileScanner(

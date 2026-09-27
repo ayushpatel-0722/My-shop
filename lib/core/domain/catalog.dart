@@ -1,5 +1,6 @@
 import '../models/category.dart';
 import '../models/product.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Stock health of a product, shared by the admin list and the store front.
 enum StockStatus {
@@ -13,13 +14,13 @@ enum StockStatus {
   String get label {
     switch (this) {
       case StockStatus.outOfStock:
-        return 'Out of stock';
+        return L10n.current.outOfStock;
       case StockStatus.lowStock:
-        return 'Low stock';
+        return L10n.current.lowStock;
       case StockStatus.inStock:
-        return 'In stock';
+        return L10n.current.inStock2;
       case StockStatus.unlimited:
-        return 'Unlimited';
+        return L10n.current.unlimited;
     }
   }
 }
@@ -40,17 +41,17 @@ enum ProductSort {
   String get label {
     switch (this) {
       case ProductSort.relevance:
-        return 'Relevance';
+        return L10n.current.relevance;
       case ProductSort.nameAsc:
-        return 'Name (A–Z)';
+        return L10n.current.nameAZ;
       case ProductSort.nameDesc:
-        return 'Name (Z–A)';
+        return L10n.current.nameZA;
       case ProductSort.priceAsc:
-        return 'Price (low to high)';
+        return L10n.current.priceLowToHigh;
       case ProductSort.priceDesc:
-        return 'Price (high to low)';
+        return L10n.current.priceHighToLow;
       case ProductSort.rating:
-        return 'Rating (top picks first)';
+        return L10n.current.ratingTopPicksFirst;
     }
   }
 }

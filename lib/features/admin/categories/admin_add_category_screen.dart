@@ -11,6 +11,7 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
 import 'widgets/product_assignment_picker.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Screen for creating and editing a Category with dual-panel product assignment.
 ///
@@ -39,7 +40,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
   final _nameCtrl = TextEditingController();
   final _detailsCtrl = TextEditingController();
-  final _typeCtrl = TextEditingController(text: 'Grocery');
+  final _typeCtrl = TextEditingController(text: AppLocalizations.of(context).grocery);
   final _iconCtrl = TextEditingController(text: '🛍️');
 
   String _companyId = '';
@@ -83,16 +84,16 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
   ];
 
   final List<String> _suggestedTypes = [
-    'Grocery',
-    'Electronics',
-    'Fashion & Apparel',
-    'Health & Beauty',
-    'Home & Kitchen',
-    'Bakery & Dairy',
+    AppLocalizations.of(context).grocery,
+    AppLocalizations.of(context).electronics,
+    AppLocalizations.of(context).fashionApparel,
+    AppLocalizations.of(context).healthBeauty,
+    AppLocalizations.of(context).homeKitchen,
+    AppLocalizations.of(context).bakeryDairy,
     'Beverages',
-    'Personal Care',
-    'Sports & Outdoors',
-    'Toys & Games',
+    AppLocalizations.of(context).personalCare,
+    AppLocalizations.of(context).sportsOutdoors,
+    AppLocalizations.of(context).toysGames,
   ];
 
   bool get isEditMode => widget.category != null || widget.categoryId != null;
@@ -133,7 +134,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     _loadedCategoryId = cat.id;
     _nameCtrl.text = cat.name;
     _detailsCtrl.text = cat.details;
-    _typeCtrl.text = cat.type.isNotEmpty ? cat.type : 'Grocery';
+    _typeCtrl.text = cat.type.isNotEmpty ? cat.type : AppLocalizations.of(context).grocery;
     _iconCtrl.text = cat.iconUrl.isNotEmpty ? cat.iconUrl : '🛍️';
     _selectedParentId = cat.parentId?.isNotEmpty == true ? cat.parentId : null;
     _selectedProductIds = List<String>.from(cat.productList);
@@ -188,8 +189,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
     if (_selectedProductIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one product for the category'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseSelectAtLeastOneProductForTheCategory),
           backgroundColor: Colors.orange,
         ),
       );
@@ -215,7 +216,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'A category named "$trimmedName" already exists in this company.',
+            AppLocalizations.of(context).aCategoryNamedAlreadyExistsInThisCompany('${trimmedName}'),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
@@ -228,7 +229,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       if (_selectedParentId == currentCatId) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('A category cannot have itself as its parent.'),
+            content: Text(AppLocalizations.of(context).aCategoryCannotHaveItselfAsItsParent),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -239,8 +240,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       if (descendants.contains(_selectedParentId)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Invalid parent: Selecting a descendant category creates a cycle.',
+            content: Text(
+              AppLocalizations.of(context).invalidParentSelectingADescendantCategoryCreatesACycle,
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
@@ -273,8 +274,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
         SnackBar(
           content: Text(
             isEditMode
-                ? 'Category "${category.name}" updated successfully!'
-                : 'Category "${category.name}" created successfully!',
+                ? AppLocalizations.of(context).categoryUpdatedSuccessfully('${category.name}')
+                : AppLocalizations.of(context).categoryCreatedSuccessfully('${category.name}'),
           ),
           backgroundColor: Colors.green.shade700,
         ),
@@ -289,7 +290,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to save category: $e'),
+          content: Text(AppLocalizations.of(context).failedToSaveCategory('${e}')),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -343,7 +344,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
     if (_isLoadingCategory) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Loading Category...')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).loadingCategory)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -380,21 +381,21 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
             final discard = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: const Text('Discard changes?'),
-                content: const Text(
-                  'You have unsaved changes. Leave without saving?',
+                title: Text(AppLocalizations.of(context).discardChanges),
+                content: Text(
+                  AppLocalizations.of(context).youHaveUnsavedChangesLeaveWithoutSaving,
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
-                    child: const Text('Keep Editing'),
+                    child: Text(AppLocalizations.of(context).keepEditing),
                   ),
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
                     onPressed: () => Navigator.of(ctx).pop(true),
-                    child: const Text('Discard'),
+                    child: Text(AppLocalizations.of(context).discard),
                   ),
                 ],
               ),
@@ -403,7 +404,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
           },
           child: Scaffold(
           appBar: AppBar(
-            title: Text(isEditMode ? 'Edit Category' : 'Add New Category'),
+            title: Text(isEditMode ? AppLocalizations.of(context).editCategory : AppLocalizations.of(context).addNewCategory),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
@@ -436,8 +437,8 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                             children: [
                               Text(
                                 isEditMode
-                                    ? 'Edit Category'
-                                    : 'Category Details',
+                                    ? AppLocalizations.of(context).editCategory
+                                    : AppLocalizations.of(context).categoryDetails,
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -447,7 +448,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Configure hierarchy, catalog classification, and assigned products.',
+                            AppLocalizations.of(context).configureHierarchyCatalogClassificationAndAssignedProducts,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: isDark
                                   ? AppTheme.textSecondaryDark
@@ -466,14 +467,14 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                               children: [
                                 Text(
                                   isEditMode
-                                      ? 'Edit Category'
-                                      : 'Category Details',
+                                      ? AppLocalizations.of(context).editCategory
+                                      : AppLocalizations.of(context).categoryDetails,
                                   style: theme.textTheme.headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Configure hierarchy, catalog classification, and assigned products.',
+                                  AppLocalizations.of(context).configureHierarchyCatalogClassificationAndAssignedProducts,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: isDark
                                         ? AppTheme.textSecondaryDark
@@ -504,7 +505,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Basic Information',
+                                AppLocalizations.of(context).basicInformation,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -514,14 +515,14 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _nameCtrl,
-                            decoration: const InputDecoration(
-                              labelText: 'Category Name *',
-                              hintText: 'e.g. Fresh Organic Vegetables',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).categoryName,
+                              hintText: AppLocalizations.of(context).eGFreshOrganicVegetables,
                               prefixIcon: Icon(Icons.drive_file_rename_outline),
                             ),
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
-                                return 'Category name is required';
+                                return AppLocalizations.of(context).categoryNameIsRequired2;
                               }
                               return null;
                             },
@@ -529,14 +530,14 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _typeCtrl,
-                            decoration: const InputDecoration(
-                              labelText: 'Classification / Type *',
-                              hintText: 'e.g. Grocery, Electronics',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).classificationType,
+                              hintText: AppLocalizations.of(context).eGGroceryElectronics,
                               prefixIcon: Icon(Icons.category_outlined),
                             ),
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
-                                return 'Classification type is required';
+                                return AppLocalizations.of(context).classificationTypeIsRequired;
                               }
                               return null;
                             },
@@ -565,10 +566,10 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                           TextFormField(
                             controller: _detailsCtrl,
                             maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: 'Description / Details',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).descriptionDetails,
                               hintText:
-                                  'Description shown on the category header...',
+                                  AppLocalizations.of(context).descriptionShownOnTheCategoryHeader,
                               alignLabelWithHint: true,
                             ),
                           ),
@@ -593,7 +594,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Icon & Visuals',
+                                AppLocalizations.of(context).iconVisuals,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -610,19 +611,19 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                                 child: TextFormField(
                                   controller: _iconCtrl,
                                   onChanged: (_) => setState(() {}),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     labelText:
-                                        'Category Icon (Image URL or Emoji)',
+                                        AppLocalizations.of(context).categoryIconImageUrlOrEmoji,
                                     hintText:
-                                        'Enter image URL or emoji (e.g. 🛍️)',
+                                        AppLocalizations.of(context).enterImageUrlOrEmojiEG,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'Quick select emoji:',
+                          Text(
+                            AppLocalizations.of(context).quickSelectEmoji,
                             style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                           const SizedBox(height: 6),
@@ -661,7 +662,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Hierarchy & Nesting',
+                                AppLocalizations.of(context).hierarchyNesting,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -670,8 +671,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Assign an existing parent category in the same company for nesting. '
-                            'Self and descendant categories are automatically blocked to prevent hierarchy cycles.',
+                            AppLocalizations.of(context).assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: isDark
                                   ? AppTheme.textSecondaryDark
@@ -687,15 +687,15 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                                 )
                                 ? _selectedParentId
                                 : null,
-                            decoration: const InputDecoration(
-                              labelText: 'Parent Category',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).parentCategory,
                               prefixIcon: Icon(Icons.subdirectory_arrow_right),
                             ),
                             items: [
-                              const DropdownMenuItem<String?>(
+                              DropdownMenuItem<String?>(
                                 value: null,
                                 child: Text(
-                                  'None (Top-Level Category)',
+                                  AppLocalizations.of(context).noneTopLevelCategory,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -718,7 +718,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                           if (invalidParentIds.isNotEmpty && isEditMode) ...[
                             const SizedBox(height: 8),
                             Text(
-                              'Note: ${invalidParentIds.length} categories (this category and its descendants) are blocked from being chosen as parent.',
+                              AppLocalizations.of(context).noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent('${invalidParentIds.length}'),
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey,
@@ -756,7 +756,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
                     // Save Action Button
                     ModernButton(
-                      text: isEditMode ? 'Save Changes' : 'Create Category',
+                      text: isEditMode ? AppLocalizations.of(context).saveChanges : AppLocalizations.of(context).createCategory,
                       icon: const Icon(Icons.check, size: 20),
                       isLoading: _isSaving,
                       height: 52,
@@ -797,7 +797,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
             child: Text(
               _companyName.isNotEmpty
                   ? _companyName
-                  : (_companyId.isNotEmpty ? 'Company Scope' : 'Global Scope'),
+                  : (_companyId.isNotEmpty ? AppLocalizations.of(context).companyScope : AppLocalizations.of(context).globalScope),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

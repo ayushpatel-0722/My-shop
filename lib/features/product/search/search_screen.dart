@@ -98,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 8),
                     hintText: scoped
-                        ? 'Search in ${widget.companyName.isEmpty ? 'this store' : widget.companyName}'
+                        ? AppLocalizations.of(context).searchIn('${widget.companyName.isEmpty ? AppLocalizations.of(context).thisStore : widget.companyName}')
                         : l10n.searchHint,
                     border: InputBorder.none,
                     hintStyle: const TextStyle(
@@ -204,7 +204,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Row(
         children: [
           Text(
-            '$resultCount ${resultCount == 1 ? 'item' : 'items'}',
+            AppLocalizations.of(context).itemCount(resultCount),
             style: const TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
@@ -228,7 +228,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ),
               child: Text(
-                'In Stock',
+                AppLocalizations.of(context).inStock,
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
@@ -269,10 +269,10 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   Text(
                     _sort == ProductSort.priceAsc
-                        ? 'Price ↑'
+                        ? AppLocalizations.of(context).price4
                         : _sort == ProductSort.priceDesc
-                        ? 'Price ↓'
-                        : 'Price',
+                        ? AppLocalizations.of(context).price3
+                        : AppLocalizations.of(context).price5,
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
@@ -295,8 +295,8 @@ class _SearchScreenState extends State<SearchScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         // Popular Searches
-        const Text(
-          'Popular Searches',
+        Text(
+          AppLocalizations.of(context).popularSearches,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w800,
@@ -352,7 +352,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Row(
             children: [
               Text(
-                scoped ? 'All Store Products' : 'Browse All Products',
+                scoped ? AppLocalizations.of(context).allStoreProducts : AppLocalizations.of(context).browseAllProducts,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -405,7 +405,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 14),
             Text(
-              'No products found for "$_query"',
+              AppLocalizations.of(context).noProductsFoundFor('${_query}'),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,
@@ -414,8 +414,8 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Try checking for typos or searching for a different keyword',
+            Text(
+              AppLocalizations.of(context).tryCheckingForTyposOrSearchingForADifferentKeyword,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
             ),
@@ -425,7 +425,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 _textCtrl.clear();
                 _onQueryChanged('');
               },
-              child: const Text('Clear Search'),
+              child: Text(AppLocalizations.of(context).clearSearch),
             ),
           ],
         ),

@@ -71,7 +71,7 @@ class CartScreen extends StatelessWidget {
                 children: [
                   const Icon(Icons.shopping_cart_outlined, size: 64),
                   const SizedBox(height: 12),
-                  const Text('Your cart is empty'),
+                  Text(AppLocalizations.of(context).yourCartIsEmpty),
                   const SizedBox(height: 12),
                   FilledButton(
                     onPressed: () => context.go(AppRoutes.home),
@@ -124,8 +124,8 @@ class CartScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Sign In to View Cart',
+            Text(
+              AppLocalizations.of(context).signInToViewCart,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -133,8 +133,8 @@ class CartScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Add products to your cart after signing in to continue checkout.',
+            Text(
+              AppLocalizations.of(context).addProductsToYourCartAfterSigningInToContinueCheckout,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
@@ -159,8 +159,8 @@ class CartScreen extends StatelessWidget {
                 }
               },
               icon: const Icon(Icons.login),
-              label: const Text(
-                'Continue with Google',
+              label: Text(
+                AppLocalizations.of(context).continueWithGoogle,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
@@ -180,7 +180,7 @@ class CartScreen extends StatelessWidget {
           final comp = companies.where((c) => c.id == companyId).firstOrNull;
           final name = (comp != null && comp.name.isNotEmpty)
               ? comp.name
-              : 'Store';
+              : AppLocalizations.of(context).store2;
           return Row(
             children: [
               const Icon(Icons.storefront, size: 18),
@@ -227,7 +227,7 @@ class CartScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            'You save ${formatCurrency(summary.totalDiscount)}',
+                            AppLocalizations.of(context).youSave('${formatCurrency(summary.totalDiscount)}'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -313,21 +313,21 @@ class _CartLineCard extends StatelessWidget {
           color: const Color(0xFFDC2626),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Icon(Icons.bookmark_add_outlined, color: Colors.white70, size: 16),
             SizedBox(height: 2),
             Text(
-              'Move to Wishlist?',
+              AppLocalizations.of(context).moveToWishlist,
               style: TextStyle(color: Colors.white70, fontSize: 10),
             ),
             SizedBox(height: 6),
             Icon(Icons.delete_outline, color: Colors.white, size: 26),
             SizedBox(height: 2),
             Text(
-              'Remove',
+              AppLocalizations.of(context).remove,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -522,7 +522,7 @@ class _CartLineCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        'Total: ${item.totalUnitLabel}',
+                        AppLocalizations.of(context).total2('${item.totalUnitLabel}'),
                         key: Key('cart-total-unit-${item.cartKey}'),
                         style: TextStyle(
                           fontSize: 11,
@@ -535,10 +535,10 @@ class _CartLineCard extends StatelessWidget {
                     ),
 
                   if (!item.isInStock)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(top: 4),
                       child: Text(
-                        'Out of stock',
+                        AppLocalizations.of(context).outOfStock,
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.redAccent,
@@ -578,11 +578,11 @@ class _CartLineCard extends StatelessWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('${removed.product.name} removed from cart'),
+          content: Text(AppLocalizations.of(context).removedFromCart('${removed.product.name}')),
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
-            label: 'MOVE TO WISHLIST',
+            label: AppLocalizations.of(context).moveToWishlist2,
             onPressed: () {
               wishlist.addFromCart(removed);
               ScaffoldMessenger.of(context)
@@ -590,7 +590,7 @@ class _CartLineCard extends StatelessWidget {
                 ..showSnackBar(
                   SnackBar(
                     content: Text(
-                      '${removed.product.name} saved to your wishlist',
+                      AppLocalizations.of(context).savedToYourWishlist('${removed.product.name}'),
                     ),
                     duration: const Duration(seconds: 2),
                     behavior: SnackBarBehavior.floating,

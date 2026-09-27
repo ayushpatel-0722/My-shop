@@ -9,6 +9,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../admin_shell.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
 
 enum DeliveryPricingType { paid, free }
 
@@ -113,8 +114,8 @@ class _AdminAddDeliveryChargeScreenState
         SnackBar(
           content: Text(
             _isEdit
-                ? 'Delivery charge updated for $pincode'
-                : 'Delivery charge created for $pincode',
+                ? AppLocalizations.of(context).deliveryChargeUpdatedFor('${pincode}')
+                : AppLocalizations.of(context).deliveryChargeCreatedFor('${pincode}'),
           ),
         ),
       );
@@ -122,7 +123,7 @@ class _AdminAddDeliveryChargeScreenState
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save delivery charge: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).failedToSaveDeliveryCharge('${e}'))),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -136,7 +137,7 @@ class _AdminAddDeliveryChargeScreenState
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.adminDelivery,
-      title: _isEdit ? 'Edit Delivery Charge' : 'Add Delivery Charge',
+      title: _isEdit ? AppLocalizations.of(context).editDeliveryCharge : AppLocalizations.of(context).addDeliveryCharge,
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 700),
@@ -155,8 +156,8 @@ class _AdminAddDeliveryChargeScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Pincode Information',
+                        Text(
+                          AppLocalizations.of(context).pincodeInformation,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -171,19 +172,19 @@ class _AdminAddDeliveryChargeScreenState
                             LengthLimitingTextInputFormatter(6),
                           ],
                           decoration: InputDecoration(
-                            labelText: 'Postal Pincode *',
-                            hintText: 'e.g. 380001',
+                            labelText: AppLocalizations.of(context).postalPincode,
+                            hintText: AppLocalizations.of(context).eG380001,
                             prefixIcon: const Icon(Icons.pin_drop_outlined),
                             border: const OutlineInputBorder(),
                             helperText:
-                                '6-digit area code for delivery service',
+                                AppLocalizations.of(context).msg6DigitAreaCodeForDeliveryService,
                             enabled: !_isEdit,
                           ),
                           validator: (value) {
                             final val = value?.trim() ?? '';
-                            if (val.isEmpty) return 'Enter a 6-digit pincode';
+                            if (val.isEmpty) return AppLocalizations.of(context).enterA6DigitPincode;
                             if (val.length != 6) {
-                              return 'Pincode must be exactly 6 digits';
+                              return AppLocalizations.of(context).pincodeMustBeExactly6Digits;
                             }
                             return null;
                           },
@@ -191,14 +192,14 @@ class _AdminAddDeliveryChargeScreenState
                         const SizedBox(height: 16),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text(
-                            'Serviceable Area',
+                          title: Text(
+                            AppLocalizations.of(context).serviceableArea,
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                           subtitle: Text(
                             _isServiceable
-                                ? 'Orders can be delivered to this pincode'
-                                : 'Delivery temporarily suspended to this pincode',
+                                ? AppLocalizations.of(context).ordersCanBeDeliveredToThisPincode
+                                : AppLocalizations.of(context).deliveryTemporarilySuspendedToThisPincode,
                             style: const TextStyle(fontSize: 12),
                           ),
                           value: _isServiceable,
@@ -213,8 +214,8 @@ class _AdminAddDeliveryChargeScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Pricing & Charge Rules',
+                        Text(
+                          AppLocalizations.of(context).pricingChargeRules,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -225,12 +226,12 @@ class _AdminAddDeliveryChargeScreenState
                           segments: const [
                             ButtonSegment(
                               value: DeliveryPricingType.paid,
-                              label: Text('Fixed / Paid Charge'),
+                              label: Text(AppLocalizations.of(context).fixedPaidCharge),
                               icon: Icon(Icons.payments_outlined),
                             ),
                             ButtonSegment(
                               value: DeliveryPricingType.free,
-                              label: Text('Free Delivery'),
+                              label: Text(AppLocalizations.of(context).freeDelivery2),
                               icon: Icon(Icons.local_shipping_outlined),
                             ),
                           ],
@@ -247,19 +248,19 @@ class _AdminAddDeliveryChargeScreenState
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
-                            decoration: const InputDecoration(
-                              labelText: 'Standard Delivery Charge (₹) *',
-                              hintText: 'e.g. 40',
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context).standardDeliveryCharge,
+                              hintText: AppLocalizations.of(context).eG40,
                               prefixIcon: Icon(Icons.currency_rupee),
                               border: OutlineInputBorder(),
                             ),
                             validator: (val) {
                               if (_pricingType == DeliveryPricingType.paid) {
                                 final v = val?.trim() ?? '';
-                                if (v.isEmpty) return 'Enter delivery charge';
+                                if (v.isEmpty) return AppLocalizations.of(context).enterDeliveryCharge;
                                 final num = double.tryParse(v);
                                 if (num == null || num < 0) {
-                                  return 'Enter a valid amount';
+                                  return AppLocalizations.of(context).enterAValidAmount;
                                 }
                               }
                               return null;
@@ -272,15 +273,15 @@ class _AdminAddDeliveryChargeScreenState
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText:
-                                  'Free Delivery for Orders Above (₹) (Optional)',
+                                  AppLocalizations.of(context).freeDeliveryForOrdersAboveOptional,
                               hintText:
-                                  'e.g. 499 (Leave blank if no free tier)',
+                                  AppLocalizations.of(context).eG499LeaveBlankIfNoFreeTier,
                               prefixIcon: Icon(Icons.card_giftcard),
                               border: OutlineInputBorder(),
                               helperText:
-                                  'Customers get ₹0 delivery fee when order subtotal meets this amount',
+                                  AppLocalizations.of(context).customersGet0DeliveryFeeWhenOrderSubtotalMeetsThisAmount,
                             ),
                           ),
                         ] else ...[
@@ -293,7 +294,7 @@ class _AdminAddDeliveryChargeScreenState
                                 color: Colors.green.withValues(alpha: 0.3),
                               ),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
                                 Icon(
                                   Icons.check_circle_outline,
@@ -302,7 +303,7 @@ class _AdminAddDeliveryChargeScreenState
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    'Delivery will always be FREE (₹0) for all orders to this pincode.',
+                                    AppLocalizations.of(context).deliveryWillAlwaysBeFree0ForAllOrdersToThisPincode,
                                     style: TextStyle(
                                       color: Colors.green,
                                       fontWeight: FontWeight.w600,
@@ -323,8 +324,8 @@ class _AdminAddDeliveryChargeScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Estimated Delivery Time (ETA)',
+                        Text(
+                          AppLocalizations.of(context).estimatedDeliveryTimeEta,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -333,13 +334,13 @@ class _AdminAddDeliveryChargeScreenState
                         const SizedBox(height: 14),
                         TextFormField(
                           controller: _estimatedDaysCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Estimated Delivery Time (Optional)',
-                            hintText: 'e.g. 1-2 days, Same Day, 30-45 mins',
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context).estimatedDeliveryTimeOptional,
+                            hintText: AppLocalizations.of(context).eG12DaysSameDay3045Mins,
                             prefixIcon: Icon(Icons.timer_outlined),
                             border: OutlineInputBorder(),
                             helperText:
-                                'Displayed to customers on checkout & product pages',
+                                AppLocalizations.of(context).displayedToCustomersOnCheckoutProductPages,
                           ),
                         ),
                       ],
@@ -362,10 +363,10 @@ class _AdminAddDeliveryChargeScreenState
                         : const Icon(Icons.save),
                     label: Text(
                       _isSaving
-                          ? 'Saving...'
+                          ? AppLocalizations.of(context).saving
                           : (_isEdit
-                                ? 'Update Delivery Charge'
-                                : 'Save Delivery Charge'),
+                                ? AppLocalizations.of(context).updateDeliveryCharge
+                                : AppLocalizations.of(context).saveDeliveryCharge),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

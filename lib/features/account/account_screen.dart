@@ -8,6 +8,8 @@ import '../auth/auth_cubit.dart';
 import '../auth/widgets/auth_bottom_sheet.dart';
 import '../marketplace/widgets/location_picker_sheet.dart';
 import '../marketplace/widgets/marketplace_bottom_nav.dart';
+import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:my_shop/app/l10n/locale_cubit.dart';
 
 /// Full-screen Account/Profile screen with AppBar and MarketplaceBottomNav.
 class AccountScreen extends StatelessWidget {
@@ -55,6 +57,18 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
+  /// Display name of a supported language code (shown in its own script).
+  static String _languageName(String code) {
+    switch (code) {
+      case 'hi':
+        return 'हिन्दी (Hindi)';
+      case 'gu':
+        return 'ગુજરાતી (Gujarati)';
+      default:
+        return 'English';
+    }
+  }
+
   Widget _sectionHeader(
     BuildContext c,
     String title, {
@@ -76,8 +90,8 @@ class AccountScreen extends StatelessWidget {
           if (onViewAll != null)
             TextButton(
               onPressed: onViewAll,
-              child: const Text(
-                'View',
+              child: Text(
+                AppLocalizations.of(context).view,
                 style: TextStyle(color: Color(0xFFFF5247)),
               ),
             ),
@@ -94,8 +108,8 @@ class AccountScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Account',
+        title: Text(
+          AppLocalizations.of(context).account,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
         ),
         automaticallyImplyLeading: false,
@@ -179,8 +193,8 @@ class AccountScreen extends StatelessWidget {
                           ),
                           onPressed: () => AuthBottomSheet.show(context),
                           icon: const Icon(Icons.login, size: 16),
-                          label: const Text(
-                            'Sign In',
+                          label: Text(
+                            AppLocalizations.of(context).signIn,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
@@ -197,8 +211,8 @@ class AccountScreen extends StatelessWidget {
                             color: const Color(0xFFEFFAF5),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'Verified Member',
+                          child: Text(
+                            AppLocalizations.of(context).verifiedMember,
                             style: TextStyle(
                               color: Color(0xFF1E8F66),
                               fontSize: 11,
@@ -247,8 +261,8 @@ class AccountScreen extends StatelessWidget {
                     Icons.receipt_long_outlined,
                     color: Color(0xFFFF5247),
                   ),
-                  title: const Text('My Orders'),
-                  subtitle: const Text('Orders, tracking & status'),
+                  title: Text(AppLocalizations.of(context).myOrders),
+                  subtitle: Text(AppLocalizations.of(context).ordersTrackingStatus),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     if (user == null) {
@@ -264,8 +278,8 @@ class AccountScreen extends StatelessWidget {
                     Icons.notifications_none,
                     color: Color(0xFF3D38D9),
                   ),
-                  title: const Text('Notifications'),
-                  subtitle: const Text('Order updates & promo alerts'),
+                  title: Text(AppLocalizations.of(context).notificationCentre),
+                  subtitle: Text(AppLocalizations.of(context).orderUpdatesPromoAlerts),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.go(AppRoutes.notifications),
                 ),
@@ -290,9 +304,9 @@ class AccountScreen extends StatelessWidget {
                         Icons.admin_panel_settings_outlined,
                         color: Color(0xFFFF5247),
                       ),
-                      title: const Text('Admin Dashboard'),
-                      subtitle: const Text(
-                        'Manage products, categories & orders',
+                      title: Text(AppLocalizations.of(context).adminDashboard),
+                      subtitle: Text(
+                        AppLocalizations.of(context).manageProductsCategoriesOrders,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.go(AppRoutes.adminLogin),
@@ -305,9 +319,9 @@ class AccountScreen extends StatelessWidget {
                         Icons.badge_outlined,
                         color: Color(0xFF3D38D9),
                       ),
-                      title: const Text('Employee Portal'),
-                      subtitle: const Text(
-                        'Packing, order queue & fulfillment',
+                      title: Text(AppLocalizations.of(context).employeePortal),
+                      subtitle: Text(
+                        AppLocalizations.of(context).packingOrderQueueFulfillment,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.go(AppRoutes.employeeLogin),
@@ -327,16 +341,49 @@ class AccountScreen extends StatelessWidget {
             color: Colors.white,
             child: Column(
               children: [
+                BlocBuilder<LocaleCubit, Locale>(
+                  builder: (context, locale) {
+                    return ListTile(
+                      leading: const Icon(Icons.language_outlined),
+                      title: Text(AppLocalizations.of(context).selectLanguage),
+                      subtitle: Text(_languageName(locale.languageCode)),
+                      trailing: DropdownButton<String>(
+                        value: locale.languageCode,
+                        underline: const SizedBox.shrink(),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'en',
+                            child: Text('English'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'hi',
+                            child: Text('हिन्दी (Hindi)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'gu',
+                            child: Text('ગુજરાતી (Gujarati)'),
+                          ),
+                        ],
+                        onChanged: (code) {
+                          if (code != null) {
+                            context.read<LocaleCubit>().setByCode(code);
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined),
-                  title: const Text('Saved Addresses'),
+                  title: Text(AppLocalizations.of(context).savedAddresses2),
                   subtitle: user != null && user.addresses.isNotEmpty
                       ? Text(
-                          '${user.defaultAddress?.label ?? 'Default'}: ${user.defaultAddress?.shortLocation ?? user.defaultAddress?.formattedAddress ?? ''} (${user.addresses.length}/3)',
+                          AppLocalizations.of(context).msg3('${user.defaultAddress?.label ?? AppLocalizations.of(context).default2}', '${user.defaultAddress?.shortLocation ?? user.defaultAddress?.formattedAddress ?? ''}', '${user.addresses.length}'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         )
-                      : const Text('Manage delivery locations (0/3)'),
+                      : Text(AppLocalizations.of(context).manageDeliveryLocations03),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     LocationPickerSheet.show(context);
@@ -345,8 +392,8 @@ class AccountScreen extends StatelessWidget {
                 const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.help_outline),
-                  title: const Text('Help & Support'),
-                  subtitle: const Text('FAQs, customer helpline & query form'),
+                  title: Text(AppLocalizations.of(context).helpSupport),
+                  subtitle: Text(AppLocalizations.of(context).faqsCustomerHelplineQueryForm),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.helpSupport),
                 ),
@@ -371,8 +418,8 @@ class AccountScreen extends StatelessWidget {
                 if (context.mounted) context.go(AppRoutes.home);
               },
               icon: const Icon(Icons.logout),
-              label: const Text(
-                'Log Out',
+              label: Text(
+                AppLocalizations.of(context).logOut,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
