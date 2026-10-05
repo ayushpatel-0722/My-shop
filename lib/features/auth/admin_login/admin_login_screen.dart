@@ -24,6 +24,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _passCtrl = TextEditingController();
   int _step = 1;
   bool _validatingStep1 = false;
+  String? _companyError;
+  String? _companyPassError;
+  String? _emailError;
+  String? _passError;
 
   @override
   void dispose() {
@@ -44,14 +48,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           if (state.status == AuthStatus.authenticated) {
             context.go(AppRoutes.admin);
           } else if (state.status == AuthStatus.error) {
-            final msg = state.error != null &&
+            final msg =
+                state.error != null &&
                     state.error!.isNotEmpty &&
                     state.error != 'invalid'
                 ? state.error!
                 : l10n.invalidCredentials;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(msg)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(msg)));
           }
         },
         builder: (context, state) {
@@ -66,17 +71,31 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _companyCtrl,
+                    onChanged: (_) {
+                      if (_companyError != null) {
+                        setState(() => _companyError = null);
+                      }
+                    },
                     decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context).greenleafOrganics,
-                        prefixIcon: const Icon(Icons.business)),
+                      hintText: AppLocalizations.of(context).greenleafOrganics,
+                      prefixIcon: const Icon(Icons.business),
+                      errorText: _companyError,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _companyPassCtrl,
                     obscureText: true,
+                    onChanged: (_) {
+                      if (_companyPassError != null) {
+                        setState(() => _companyPassError = null);
+                      }
+                    },
                     decoration: InputDecoration(
-                        hintText: l10n.companyPassword,
-                        prefixIcon: const Icon(Icons.lock_outline)),
+                      hintText: l10n.companyPassword,
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      errorText: _companyPassError,
+                    ),
                   ),
                 ] else ...[
                   _label(context, '2 · ${l10n.email}'),
@@ -84,17 +103,31 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   TextField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) {
+                      if (_emailError != null) {
+                        setState(() => _emailError = null);
+                      }
+                    },
                     decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context).adminCompanyIn,
-                        prefixIcon: const Icon(Icons.mail_outline)),
+                      hintText: AppLocalizations.of(context).adminCompanyIn,
+                      prefixIcon: const Icon(Icons.mail_outline),
+                      errorText: _emailError,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _passCtrl,
                     obscureText: true,
+                    onChanged: (_) {
+                      if (_passError != null) {
+                        setState(() => _passError = null);
+                      }
+                    },
                     decoration: InputDecoration(
-                        hintText: l10n.password,
-                        prefixIcon: const Icon(Icons.lock_outline)),
+                      hintText: l10n.password,
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      errorText: _passError,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 24),
@@ -104,12 +137,17 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       ? const SizedBox(
                           height: 22,
                           width: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5))
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        )
                       : Text(_step == 1 ? l10n.next : l10n.login),
                 ),
                 if (_step == 2)
                   TextButton(
-                    onPressed: () => setState(() => _step = 1),
+                    onPressed: () => setState(() {
+                      _step = 1;
+                      _emailError = null;
+                      _passError = null;
+                    }),
                     child: Text(l10n.back),
                   ),
               ],
@@ -120,20 +158,44 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     );
   }
 
-  Widget _label(BuildContext context, String text) => Text(text,
-      style: Theme.of(context)
-          .textTheme
-          .labelLarge
-          ?.copyWith(fontWeight: FontWeight.w600));
+  Widget _label(BuildContext context, String text) => Text(
+    text,
+    style: Theme.of(
+      context,
+    ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+  );
+
+  bool _isValidEmail(String email) {
+    return RegExp(
+      r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+    ).hasMatch(email);
+  }
 
   Future<void> _next() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     if (_step == 1) {
       final companyName = _companyCtrl.text.trim();
       final companyPass = _companyPassCtrl.text;
-      if (companyName.isEmpty || companyPass.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      String? companyErr;
+      String? passErr;
+
+      if (companyName.isEmpty) {
+        companyErr = l10n.companyNameAndPasswordAreRequired;
+      }
+      if (companyPass.isEmpty) {
+        passErr = l10n.companyPassword;
+      }
+
+      if (companyErr != null || passErr != null) {
+        setState(() {
+          _companyError = companyErr;
+          _companyPassError = passErr;
+        });
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).pleaseEnterCompanyNameAndCompanyPassword),
+            content: Text(l10n.pleaseEnterCompanyNameAndCompanyPassword),
           ),
         );
         return;
@@ -141,77 +203,106 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
       setState(() => _validatingStep1 = true);
       try {
-        final slug =
-            companyName.toLowerCase().replaceAll(RegExp(r'\s+'), '-');
-        var docs = (await FirebaseFirestore.instance
-                .collection('companies')
-                .where('name', isEqualTo: companyName)
-                .get())
-            .docs;
+        final slug = companyName.toLowerCase().replaceAll(RegExp(r'\s+'), '-');
+        var docs =
+            (await FirebaseFirestore.instance
+                    .collection('companies')
+                    .where('name', isEqualTo: companyName)
+                    .get())
+                .docs;
         if (docs.isEmpty) {
-          docs = (await FirebaseFirestore.instance
-                  .collection('companies')
-                  .where('slug', isEqualTo: slug)
-                  .get())
-              .docs;
+          docs =
+              (await FirebaseFirestore.instance
+                      .collection('companies')
+                      .where('slug', isEqualTo: slug)
+                      .get())
+                  .docs;
         }
         if (docs.isEmpty) {
-          docs = (await FirebaseFirestore.instance
-                  .collection('companies')
-                  .where('name', isEqualTo: companyName.toLowerCase())
-                  .get())
-              .docs;
+          docs =
+              (await FirebaseFirestore.instance
+                      .collection('companies')
+                      .where('name', isEqualTo: companyName.toLowerCase())
+                      .get())
+                  .docs;
         }
 
+        if (!mounted) return;
+
         if (docs.isEmpty) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(AppLocalizations.of(context).companyNotFound('${companyName}'))),
-            );
-          }
+          setState(() {
+            _companyError = l10n.companyNotFound(companyName);
+          });
+          messenger.showSnackBar(
+            SnackBar(content: Text(l10n.companyNotFound(companyName))),
+          );
           return;
         }
 
         final passMatch = docs.any(
-            (d) => (d.data()['companyPassword'] ?? '') == companyPass);
+          (d) => (d.data()['companyPassword'] ?? '') == companyPass,
+        );
         if (!passMatch) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(AppLocalizations.of(context).incorrectCompanyPassword)),
-            );
-          }
+          setState(() {
+            _companyPassError = l10n.incorrectCompanyPassword;
+          });
+          messenger.showSnackBar(
+            SnackBar(content: Text(l10n.incorrectCompanyPassword)),
+          );
           return;
         }
 
-        if (mounted) setState(() => _step = 2);
+        setState(() {
+          _companyError = null;
+          _companyPassError = null;
+          _step = 2;
+        });
       } catch (e) {
         debugPrint('Step 1 company check error: $e');
-        final errMsg = e.toString().contains('permission-denied')
-            ? AppLocalizations.of(context).accessDeniedByServerPleaseCheckYourInternetConnectionAndTryAgain
-            : AppLocalizations.of(context).couldNotVerifyCompanyPleaseTryAgain('${e}');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errMsg)),
-          );
+          final errMsg = e.toString().contains('permission-denied')
+              ? l10n.accessDeniedByServerPleaseCheckYourInternetConnectionAndTryAgain
+              : l10n.couldNotVerifyCompanyPleaseTryAgain('$e');
+          messenger.showSnackBar(SnackBar(content: Text(errMsg)));
         }
       } finally {
         if (mounted) setState(() => _validatingStep1 = false);
       }
     } else {
-      if (_emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).pleaseEnterAdminEmailAndPassword),
-          ),
+      final email = _emailCtrl.text.trim();
+      final pass = _passCtrl.text;
+      String? emailErr;
+      String? passErr;
+
+      if (email.isEmpty) {
+        emailErr = l10n.adminNameEmailAndPasswordAreRequired;
+      } else if (!_isValidEmail(email)) {
+        emailErr = l10n.pleaseEnterAdminEmailAndPassword;
+      }
+
+      if (pass.isEmpty) {
+        passErr = l10n.password;
+      } else if (pass.length < 6) {
+        passErr = l10n.adminPasswordMustBeAtLeast6Characters;
+      }
+
+      if (emailErr != null || passErr != null) {
+        setState(() {
+          _emailError = emailErr;
+          _passError = passErr;
+        });
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.pleaseEnterAdminEmailAndPassword)),
         );
         return;
       }
+
       context.read<AuthCubit>().adminLogin(
-            companyName: _companyCtrl.text.trim(),
-            companyPassword: _companyPassCtrl.text,
-            email: _emailCtrl.text.trim(),
-            password: _passCtrl.text,
-          );
+        companyName: _companyCtrl.text.trim(),
+        companyPassword: _companyPassCtrl.text,
+        email: email,
+        password: pass,
+      );
     }
   }
 }

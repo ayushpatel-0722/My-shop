@@ -127,44 +127,46 @@ class Voucher {
   // -------------------------------------------------------------- Parsing --
 
   factory Voucher.fromMap(String id, Map<String, dynamic> map) => Voucher(
-        id: id,
-        companyId: asString(map['companyId']),
-        code: Voucher.normalizeCode(asString(map['code'])),
-        discountType: _sanitizeType(asString(map['discountType'])),
-        discountValue: asDouble(map['discountValue']),
-        appliesTo: _sanitizeScope(asString(map['appliesTo'])),
-        productIds: asStringList(map['productIds']),
-        categoryIds: asStringList(map['categoryIds']),
-        perUserLimit: asInt(map['perUserLimit'], 1),
-        maxUses: asInt(map['maxUses'], 100),
-        expiryDate: asDateTime(map['expiryDate']),
-        minOrderAmt: asDouble(map['minOrderAmt']),
-        firstTimeOnly: asBool(map['firstTimeOnly']),
-        // Old documents predate `isActive`, so default to enabled.
-        isActive: map.containsKey('isActive') ? asBool(map['isActive'], true) : true,
-        usedOrderIds: asStringList(map['usedOrderIds']),
-        usageByUser: asIntMap(map['usageByUser']),
-      );
+    id: id,
+    companyId: asString(map['companyId']),
+    code: Voucher.normalizeCode(asString(map['code'])),
+    discountType: _sanitizeType(asString(map['discountType'])),
+    discountValue: asDouble(map['discountValue']),
+    appliesTo: _sanitizeScope(asString(map['appliesTo'])),
+    productIds: asStringList(map['productIds']),
+    categoryIds: asStringList(map['categoryIds']),
+    perUserLimit: asInt(map['perUserLimit'], 1),
+    maxUses: asInt(map['maxUses'], 100),
+    expiryDate: asDateTime(map['expiryDate']),
+    minOrderAmt: asDouble(map['minOrderAmt']),
+    firstTimeOnly: asBool(map['firstTimeOnly']),
+    // Old documents predate `isActive`, so default to enabled.
+    isActive: map.containsKey('isActive')
+        ? asBool(map['isActive'], true)
+        : true,
+    usedOrderIds: asStringList(map['usedOrderIds']),
+    usageByUser: asIntMap(map['usageByUser']),
+  );
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'companyId': companyId,
-        'code': normalizedCode,
-        'codeUpper': normalizedCode,
-        'discountType': discountType,
-        'discountValue': discountValue,
-        'appliesTo': appliesTo,
-        'productIds': productIds,
-        'categoryIds': categoryIds,
-        'perUserLimit': perUserLimit,
-        'maxUses': maxUses,
-        'expiryDate': expiryDate?.toIso8601String(),
-        'minOrderAmt': minOrderAmt,
-        'firstTimeOnly': firstTimeOnly,
-        'isActive': isActive,
-        'usedOrderIds': usedOrderIds,
-        'usageByUser': usageByUser,
-        'usageCount': usageCount,
-      };
+    'companyId': companyId,
+    'code': normalizedCode,
+    'codeUpper': normalizedCode,
+    'discountType': discountType,
+    'discountValue': discountValue,
+    'appliesTo': appliesTo,
+    'productIds': productIds,
+    'categoryIds': categoryIds,
+    'perUserLimit': perUserLimit,
+    'maxUses': maxUses,
+    'expiryDate': expiryDate?.toIso8601String(),
+    'minOrderAmt': minOrderAmt,
+    'firstTimeOnly': firstTimeOnly,
+    'isActive': isActive,
+    'usedOrderIds': usedOrderIds,
+    'usageByUser': usageByUser,
+    'usageCount': usageCount,
+  };
 
   static String _sanitizeType(String type) =>
       VoucherType.values.contains(type) ? type : VoucherType.fixedAmount;
@@ -213,11 +215,11 @@ class Voucher {
   String get discountLabel {
     switch (discountType) {
       case VoucherType.percentage:
-        return L10n.current.off('${_trim(discountValue)}');
+        return L10n.current.off(_trim(discountValue));
       case VoucherType.freeShipping:
         return L10n.current.freeDelivery;
       default:
-        return L10n.current.off4('${_trim(discountValue)}');
+        return L10n.current.off4(_trim(discountValue));
     }
   }
 
@@ -245,8 +247,8 @@ class Voucher {
     final raw = discountType == VoucherType.percentage
         ? base * (discountValue.clamp(0, 100).toDouble()) / 100
         : discountType == VoucherType.fixedAmount
-            ? discountValue
-            : 0.0;
+        ? discountValue
+        : 0.0;
 
     if (raw.isNaN || raw <= 0) return 0;
     return raw > base ? base : raw;
@@ -288,26 +290,24 @@ class Voucher {
     bool? isActive,
     List<String>? usedOrderIds,
     Map<String, int>? usageByUser,
-  }) =>
-      Voucher(
-        id: id ?? this.id,
-        companyId: companyId ?? this.companyId,
-        code: code ?? this.code,
-        discountType: discountType ?? this.discountType,
-        discountValue: discountValue ?? this.discountValue,
-        appliesTo: appliesTo ?? this.appliesTo,
-        productIds: productIds ?? this.productIds,
-        categoryIds: categoryIds ?? this.categoryIds,
-        perUserLimit: perUserLimit ?? this.perUserLimit,
-        maxUses: maxUses ?? this.maxUses,
-        expiryDate:
-            clearExpiryDate ? null : (expiryDate ?? this.expiryDate),
-        minOrderAmt: minOrderAmt ?? this.minOrderAmt,
-        firstTimeOnly: firstTimeOnly ?? this.firstTimeOnly,
-        isActive: isActive ?? this.isActive,
-        usedOrderIds: usedOrderIds ?? this.usedOrderIds,
-        usageByUser: usageByUser ?? this.usageByUser,
-      );
+  }) => Voucher(
+    id: id ?? this.id,
+    companyId: companyId ?? this.companyId,
+    code: code ?? this.code,
+    discountType: discountType ?? this.discountType,
+    discountValue: discountValue ?? this.discountValue,
+    appliesTo: appliesTo ?? this.appliesTo,
+    productIds: productIds ?? this.productIds,
+    categoryIds: categoryIds ?? this.categoryIds,
+    perUserLimit: perUserLimit ?? this.perUserLimit,
+    maxUses: maxUses ?? this.maxUses,
+    expiryDate: clearExpiryDate ? null : (expiryDate ?? this.expiryDate),
+    minOrderAmt: minOrderAmt ?? this.minOrderAmt,
+    firstTimeOnly: firstTimeOnly ?? this.firstTimeOnly,
+    isActive: isActive ?? this.isActive,
+    usedOrderIds: usedOrderIds ?? this.usedOrderIds,
+    usageByUser: usageByUser ?? this.usageByUser,
+  );
 
   @override
   bool operator ==(Object other) =>

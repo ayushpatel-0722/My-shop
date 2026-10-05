@@ -6,7 +6,7 @@ import '../../app/theme/app_theme.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/services/email_service.dart';
 import '../auth/auth_cubit.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 class ContactSupportScreen extends StatefulWidget {
   final String? initialCategory;
@@ -33,10 +33,12 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
   final _subjectCtrl = TextEditingController();
   final _messageCtrl = TextEditingController();
 
-  String _selectedCategory = AppLocalizations.of(context).orderIssueTracking;
+  late String _selectedCategory = AppLocalizations.of(
+    context,
+  ).orderIssueTracking;
   bool _isSubmitting = false;
 
-  final List<String> _categories = [
+  late final List<String> _categories = [
     AppLocalizations.of(context).orderIssueTracking,
     AppLocalizations.of(context).deliveryDelayScheduling,
     AppLocalizations.of(context).paymentRefundInquiries,
@@ -150,7 +152,11 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails('${ticketId}'),
+              AppLocalizations.of(
+                context,
+              ).yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails(
+                ticketId,
+              ),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 13,
@@ -176,7 +182,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    AppLocalizations.of(context).ticket('${ticketId}'),
+                    AppLocalizations.of(context).ticket(ticketId),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -329,7 +335,9 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(context).supportHelplineAyush123GmailCom,
+                            AppLocalizations.of(
+                              context,
+                            ).supportHelplineAyush123GmailCom,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -338,7 +346,9 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            AppLocalizations.of(context).submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached,
+                            AppLocalizations.of(
+                              context,
+                            ).submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached,
                             style: TextStyle(
                               fontSize: 12,
                               color: Color(0xFF6B7280),
@@ -468,7 +478,9 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               _buildTextField(
                 controller: _addressCtrl,
                 label: AppLocalizations.of(context).deliveryContactAddress,
-                hint: AppLocalizations.of(context).enterYourAddressToAttachWithQuery,
+                hint: AppLocalizations.of(
+                  context,
+                ).enterYourAddressToAttachWithQuery,
                 prefixIcon: Icons.location_on_outlined,
               ),
               const SizedBox(height: 16),
@@ -492,12 +504,15 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               _buildTextField(
                 controller: _messageCtrl,
                 label: AppLocalizations.of(context).detailedQueryMessage,
-                hint:
-                    AppLocalizations.of(context).explainYourIssueQuestionsOrFeedbackInDetailSoWeCanAssistYouQuickly,
+                hint: AppLocalizations.of(
+                  context,
+                ).explainYourIssueQuestionsOrFeedbackInDetailSoWeCanAssistYouQuickly,
                 maxLines: 5,
                 validator: (val) {
                   if (val == null || val.trim().length < 10) {
-                    return AppLocalizations.of(context).pleaseDescribeYourQueryInAtLeast10Characters;
+                    return AppLocalizations.of(
+                      context,
+                    ).pleaseDescribeYourQueryInAtLeast10Characters;
                   }
                   return null;
                 },

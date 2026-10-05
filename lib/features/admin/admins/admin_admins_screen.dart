@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/models/admin.dart';
 import '../../../core/services/service_locator.dart';
 import '../../auth/auth_cubit.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Manage additional Admins for the same company (Section 4).
 class AdminAdminsScreen extends StatelessWidget {

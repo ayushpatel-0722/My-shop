@@ -379,7 +379,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (adminData == null) {
-      throw Exception(L10n.current.noAdminProfileFoundForAccount('${email}'));
+      throw Exception(L10n.current.noAdminProfileFoundForAccount(email));
     }
 
     // Ensure companyDoc is loaded
@@ -391,7 +391,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (companyDoc == null || !companyDoc.exists) {
-      throw Exception(L10n.current.companyNotFound('${companyName}'));
+      throw Exception(L10n.current.companyNotFound(companyName));
     }
 
     final companyData = companyDoc.data() ?? {};
@@ -415,7 +415,7 @@ class FirebaseAppRepository implements AppRepository {
         matchedCompanyId.isNotEmpty &&
         matchedCompanyId != companyDoc.id) {
       throw Exception(
-        L10n.current.adminAccountIsAssignedToNot('${registeredName}', '${companyName}'),
+        L10n.current.adminAccountIsAssignedToNot(registeredName, companyName),
       );
     }
 
@@ -528,7 +528,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (empData == null) {
-      throw Exception(L10n.current.noEmployeeProfileFoundForAccount('${email}'));
+      throw Exception(L10n.current.noEmployeeProfileFoundForAccount(email));
     }
 
     if (companyDoc == null && matchedCompanyId.isNotEmpty) {
@@ -539,7 +539,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (companyDoc == null || !companyDoc.exists) {
-      throw Exception(L10n.current.companyNotFound('${companyName}'));
+      throw Exception(L10n.current.companyNotFound(companyName));
     }
 
     // Auto-migrate to subcollection if not present

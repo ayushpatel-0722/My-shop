@@ -82,14 +82,15 @@ class CategoryValidator {
     String companyId = '',
     String selfId = '',
     String? parentId,
-  }) =>
-      ValidationResult(_errors(
-        name: name,
-        existing: existing,
-        companyId: companyId,
-        selfId: selfId,
-        parentId: parentId,
-      ));
+  }) => ValidationResult(
+    _errors(
+      name: name,
+      existing: existing,
+      companyId: companyId,
+      selfId: selfId,
+      parentId: parentId,
+    ),
+  );
 
   Map<String, String> _errors({
     required String name,
@@ -154,9 +155,9 @@ class VoucherValidator {
     if (normalized.isEmpty) {
       errors['code'] = L10n.current.voucherCodeIsRequired;
     } else if (normalized.length < codeMinLength) {
-      errors['code'] = L10n.current.useAtLeastCharacters('${codeMinLength}');
+      errors['code'] = L10n.current.useAtLeastCharacters('$codeMinLength');
     } else if (normalized.length > codeMaxLength) {
-      errors['code'] = L10n.current.useAtMostCharacters('${codeMaxLength}');
+      errors['code'] = L10n.current.useAtMostCharacters('$codeMaxLength');
     } else if (!RegExp(r'^[A-Z0-9]+$').hasMatch(normalized)) {
       errors['code'] = L10n.current.onlyLettersAndNumbersAreAllowed;
     } else if (existingCodes.any(

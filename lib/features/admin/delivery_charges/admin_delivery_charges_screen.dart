@@ -10,7 +10,7 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Pincode → delivery charge mapping, with full-screen CRUD and bulk CSV import.
 class AdminDeliveryChargesScreen extends StatefulWidget {
@@ -105,7 +105,11 @@ class _AdminDeliveryChargesScreenState
                   return Center(
                     child: Padding(
                       padding: EdgeInsets.all(28),
-                      child: Text(AppLocalizations.of(context).noDeliveryChargesMatchThisPincode),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).noDeliveryChargesMatchThisPincode,
+                      ),
                     ),
                   );
                 }
@@ -153,7 +157,11 @@ class _AdminDeliveryChargesScreenState
     repo.importDeliveryCharges(charges);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context).importedPincodesSuccessfully('${charges.length}')),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          ).importedPincodesSuccessfully('${charges.length}'),
+        ),
       ),
     );
   }
@@ -164,7 +172,9 @@ class _AdminDeliveryChargesScreenState
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context).deleteDeliveryCharge),
         content: Text(
-          AppLocalizations.of(context).areYouSureYouWantToRemoveDeliveryMappingForPincode('${charge.pincode}'),
+          AppLocalizations.of(
+            context,
+          ).areYouSureYouWantToRemoveDeliveryMappingForPincode(charge.pincode),
         ),
         actions: [
           TextButton(
@@ -187,13 +197,21 @@ class _AdminDeliveryChargesScreenState
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).deliveryChargeForDeleted('${charge.pincode}')),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            ).deliveryChargeForDeleted(charge.pincode),
+          ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).failedToDeleteDeliveryCharge('${e}'))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).failedToDeleteDeliveryCharge('$e'),
+          ),
+        ),
       );
     }
   }
@@ -252,7 +270,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          AppLocalizations.of(context).pincode2('${charge.pincode}'),
+                          AppLocalizations.of(context).pincode2(charge.pincode),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -271,7 +289,9 @@ class _DeliveryChargeTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            charge.isServiceable ? AppLocalizations.of(context).serviceable : AppLocalizations.of(context).suspended,
+                            charge.isServiceable
+                                ? AppLocalizations.of(context).serviceable
+                                : AppLocalizations.of(context).suspended,
                             style: TextStyle(
                               color: charge.isServiceable
                                   ? Colors.green
@@ -333,14 +353,18 @@ class _DeliveryChargeTile extends StatelessWidget {
                   _detailPill(
                     context,
                     Icons.card_giftcard,
-                    AppLocalizations.of(context).freeOn2('${formatCurrency(charge.freeAboveAmount)}'),
+                    AppLocalizations.of(
+                      context,
+                    ).freeOn2(formatCurrency(charge.freeAboveAmount)),
                     isDark,
                   ),
                 if (charge.minOrderAmount > 0)
                   _detailPill(
                     context,
                     Icons.shopping_bag_outlined,
-                    AppLocalizations.of(context).min('${formatCurrency(charge.minOrderAmount)}'),
+                    AppLocalizations.of(
+                      context,
+                    ).min(formatCurrency(charge.minOrderAmount)),
                     isDark,
                   ),
                 if (charge.estimatedDays.isNotEmpty)
@@ -415,7 +439,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      AppLocalizations.of(context).pincode2('${charge.pincode}'),
+                      AppLocalizations.of(context).pincode2(charge.pincode),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -434,7 +458,9 @@ class _DeliveryChargeTile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        charge.isServiceable ? AppLocalizations.of(context).serviceable : AppLocalizations.of(context).suspended,
+                        charge.isServiceable
+                            ? AppLocalizations.of(context).serviceable
+                            : AppLocalizations.of(context).suspended,
                         style: TextStyle(
                           color: charge.isServiceable
                               ? Colors.green
@@ -472,7 +498,9 @@ class _DeliveryChargeTile extends StatelessWidget {
                       )
                     else
                       Text(
-                        AppLocalizations.of(context).charge('${formatCurrency(charge.charge)}'),
+                        AppLocalizations.of(
+                          context,
+                        ).charge(formatCurrency(charge.charge)),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -480,7 +508,9 @@ class _DeliveryChargeTile extends StatelessWidget {
                       ),
                     if (charge.freeAboveAmount > 0 && !charge.isFree)
                       Text(
-                        AppLocalizations.of(context).freeOn('${formatCurrency(charge.freeAboveAmount)}'),
+                        AppLocalizations.of(
+                          context,
+                        ).freeOn(formatCurrency(charge.freeAboveAmount)),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -488,7 +518,9 @@ class _DeliveryChargeTile extends StatelessWidget {
                       ),
                     if (charge.minOrderAmount > 0)
                       Text(
-                        AppLocalizations.of(context).minOrder('${formatCurrency(charge.minOrderAmount)}'),
+                        AppLocalizations.of(
+                          context,
+                        ).minOrder(formatCurrency(charge.minOrderAmount)),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -496,7 +528,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                       ),
                     if (charge.estimatedDays.isNotEmpty)
                       Text(
-                        AppLocalizations.of(context).eta('${charge.estimatedDays}'),
+                        AppLocalizations.of(context).eta(charge.estimatedDays),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -574,7 +606,9 @@ class _EmptyDeliveryCharges extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context).addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits,
+            AppLocalizations.of(
+              context,
+            ).addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits,
             style: TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),

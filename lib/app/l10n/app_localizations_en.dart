@@ -1,6 +1,3 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-// Regenerate with: flutter gen-l10n  (kept in sync manually in this repo)
-
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
@@ -240,10 +237,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subtotal => 'Subtotal';
 
   @override
-  String get aCategoryCannotHaveItselfAsItsParent => 'A category cannot have itself as its parent.';
+  String get aCategoryCannotHaveItselfAsItsParent =>
+      'A category cannot have itself as its parent.';
 
   @override
-  String get accessPackingHubToVerifyItemsAndMarkOrdersAsPacked => 'Access packing hub to verify items and mark orders as packed.';
+  String get accessPackingHubToVerifyItemsAndMarkOrdersAsPacked =>
+      'Access packing hub to verify items and mark orders as packed.';
 
   @override
   String get account => 'Account';
@@ -300,31 +299,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addVariant => 'Add Variant';
 
   @override
-  String get addAtLeastOneCompleteTitleValueRow => 'Add at least one complete title & value row';
+  String get addAtLeastOneCompleteTitleValueRow =>
+      'Add at least one complete title & value row';
 
   @override
-  String get addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies => 'Add dynamic key-value specifications (e.g. Fabric, Shelf Life, Processor, Storage, Origin) and return/delivery policies.';
+  String
+  get addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies =>
+      'Add dynamic key-value specifications (e.g. Fabric, Shelf Life, Processor, Storage, Origin) and return/delivery policies.';
 
   @override
-  String get addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage => 'Add multiple image URLs. The first image will automatically act as the Hero / Main product image.';
+  String
+  get addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage =>
+      'Add multiple image URLs. The first image will automatically act as the Hero / Main product image.';
 
   @override
-  String get addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits => 'Add pincodes to define delivery fees, free delivery rules, or minimum order limits.';
+  String
+  get addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits =>
+      'Add pincodes to define delivery fees, free delivery rules, or minimum order limits.';
 
   @override
-  String get addProductsToYourCartAfterSigningInToContinueCheckout => 'Add products to your cart after signing in to continue checkout.';
+  String get addProductsToYourCartAfterSigningInToContinueCheckout =>
+      'Add products to your cart after signing in to continue checkout.';
 
   @override
   String get addToCategory => 'Add to Category';
 
   @override
-  String get addYourFirstProductToStartSelling => 'Add your first product to start selling.';
+  String get addYourFirstProductToStartSelling =>
+      'Add your first product to start selling.';
 
   @override
   String get addressDetails => 'Address Details';
 
   @override
-  String get addressLine1HouseFlatBlock => 'Address Line 1 (House / Flat / Block) *';
+  String get addressLine1HouseFlatBlock =>
+      'Address Line 1 (House / Flat / Block) *';
 
   @override
   String get addressLine2StreetArea => 'Address Line 2 (Street / Area)';
@@ -348,10 +357,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminName => 'Admin name';
 
   @override
-  String get adminNameEmailAndPasswordAreRequired => 'Admin name, email, and password are required.';
+  String get adminNameEmailAndPasswordAreRequired =>
+      'Admin name, email, and password are required.';
 
   @override
-  String get adminPasswordMustBeAtLeast6Characters => 'Admin password must be at least 6 characters.';
+  String get adminPasswordMustBeAtLeast6Characters =>
+      'Admin password must be at least 6 characters.';
 
   @override
   String get adminPasswordsDoNotMatch => 'Admin passwords do not match.';
@@ -378,19 +389,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assign => 'Assign';
 
   @override
-  String get assignAnExistingParentCategoryInTheSameCompanyForNesting => 'Assign an existing parent category in the same company for nesting. ';
+  String get assignAnExistingParentCategoryInTheSameCompanyForNesting =>
+      'Assign an existing parent category in the same company for nesting. ';
 
   @override
-  String get assignDeliveryRidersAndDispatchOrdersForFulfillment => 'Assign delivery riders and dispatch orders for fulfillment.';
+  String get assignDeliveryRidersAndDispatchOrdersForFulfillment =>
+      'Assign delivery riders and dispatch orders for fulfillment.';
 
   @override
-  String get assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges => 'Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.';
+  String
+  get assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges =>
+      'Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.';
 
   @override
   String get availableInventoryUnits => 'Available inventory units';
 
   @override
-  String get backfillOrderingForOldCategories => 'Backfill ordering for old categories';
+  String get backfillOrderingForOldCategories =>
+      'Backfill ordering for old categories';
 
   @override
   String get baseMeasurementType => 'Base Measurement Type';
@@ -402,13 +418,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get basicInformation => 'Basic Information';
 
   @override
-  String get bottle1Bottle2Bottles4Bottles6Bottles => 'Bottle (1 bottle, 2 bottles, 4 bottles, 6 bottles)';
+  String get bottle1Bottle2Bottles4Bottles6Bottles =>
+      'Bottle (1 bottle, 2 bottles, 4 bottles, 6 bottles)';
 
   @override
-  String get box1Box2Boxes5Boxes10Boxes => 'Box (1 box, 2 boxes, 5 boxes, 10 boxes)';
+  String get box1Box2Boxes5Boxes10Boxes =>
+      'Box (1 box, 2 boxes, 5 boxes, 10 boxes)';
 
   @override
-  String get byContinuingYouAgreeToOurTermsPrivacyPolicy => 'By continuing, you agree to our Terms & Privacy Policy';
+  String get byContinuingYouAgreeToOurTermsPrivacyPolicy =>
+      'By continuing, you agree to our Terms & Privacy Policy';
 
   @override
   String get cancelOrder => 'Cancel order';
@@ -423,7 +442,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get category => 'Category';
 
   @override
-  String get categoryIconImageUrlOrEmoji => 'Category Icon (Image URL or Emoji)';
+  String get categoryIconImageUrlOrEmoji =>
+      'Category Icon (Image URL or Emoji)';
 
   @override
   String get categoryName => 'Category Name *';
@@ -474,7 +494,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorOptional => 'Color (Optional)';
 
   @override
-  String get colorRedBlueBlackWhiteGreen => 'Color (Red, Blue, Black, White, Green)';
+  String get colorRedBlueBlackWhiteGreen =>
+      'Color (Red, Blue, Black, White, Green)';
 
   @override
   String get company => 'Company';
@@ -489,19 +510,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get companyLogoUrl => 'Company Logo URL';
 
   @override
-  String get companyStorefrontProfileImageUrl => 'Company Storefront / Profile Image URL';
+  String get companyStorefrontProfileImageUrl =>
+      'Company Storefront / Profile Image URL';
 
   @override
-  String get companyNameAndPasswordAreRequired => 'Company name and password are required.';
+  String get companyNameAndPasswordAreRequired =>
+      'Company name and password are required.';
 
   @override
   String get compensationSalary => 'Compensation & Salary';
 
   @override
-  String get configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides => 'Configure customizable option types (e.g. Size, Color, Weight, Storage) and automatically generate Cartesian combinations with distinct SKU, stock, and price overrides.';
+  String
+  get configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides =>
+      'Configure customizable option types (e.g. Size, Color, Weight, Storage) and automatically generate Cartesian combinations with distinct SKU, stock, and price overrides.';
 
   @override
-  String get configureHierarchyCatalogClassificationAndAssignedProducts => 'Configure hierarchy, catalog classification, and assigned products.';
+  String get configureHierarchyCatalogClassificationAndAssignedProducts =>
+      'Configure hierarchy, catalog classification, and assigned products.';
 
   @override
   String get configuredOptionSets => 'Configured Option Sets:';
@@ -516,7 +542,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contactSupport => 'Contact Support';
 
   @override
-  String get continue => 'Continue';
+  String get continueLabel => 'Continue';
 
   @override
   String get continueWithGoogle => 'Continue with Google';
@@ -525,10 +551,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyLink => 'Copy link';
 
   @override
-  String get couldNotSendOtpPleaseTryAgain => 'Could not send OTP. Please try again.';
+  String get couldNotSendOtpPleaseTryAgain =>
+      'Could not send OTP. Please try again.';
 
   @override
-  String get couldNotSendOtpPleaseVerifyYourNumberOrTryAgain => 'Could not send OTP. Please verify your number or try again.';
+  String get couldNotSendOtpPleaseVerifyYourNumberOrTryAgain =>
+      'Could not send OTP. Please verify your number or try again.';
 
   @override
   String get createOfferBanner => 'Create Offer Banner';
@@ -537,7 +565,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createVoucher => 'Create voucher';
 
   @override
-  String get createYourFirstCategoryAndAssignProductsToOrganizeYourStore => 'Create your first category and assign products to organize your store.';
+  String get createYourFirstCategoryAndAssignProductsToOrganizeYourStore =>
+      'Create your first category and assign products to organize your store.';
 
   @override
   String get crossSell => 'Cross-sell';
@@ -555,7 +584,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerDetails2 => 'Customer details';
 
   @override
-  String get default => 'DEFAULT';
+  String get defaultBadge => 'DEFAULT';
 
   @override
   String get dateOfBirth => 'Date of Birth';
@@ -564,7 +593,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get default2 => 'Default';
 
   @override
-  String get defineStaffCompensationPackageAndPaymentFrequency => 'Define staff compensation package and payment frequency.';
+  String get defineStaffCompensationPackageAndPaymentFrequency =>
+      'Define staff compensation package and payment frequency.';
 
   @override
   String get delete => 'Delete';
@@ -618,13 +648,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryTypes => 'Delivery types';
 
   @override
-  String get deliveryWillAlwaysBeFree0ForAllOrdersToThisPincode => 'Delivery will always be FREE (₹0) for all orders to this pincode.';
+  String get deliveryWillAlwaysBeFree0ForAllOrdersToThisPincode =>
+      'Delivery will always be FREE (₹0) for all orders to this pincode.';
 
   @override
   String get descriptionDetails => 'Description / Details';
 
   @override
-  String get descriptionShownOnTheCategoryHeader => 'Description shown on the category header...';
+  String get descriptionShownOnTheCategoryHeader =>
+      'Description shown on the category header...';
 
   @override
   String get designationRole => 'Designation / Role *';
@@ -639,7 +671,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discountType => 'Discount type';
 
   @override
-  String get dragTheHandleToSetTheOrderCustomersSee => 'Drag the ≡ handle to set the order customers see.';
+  String get dragTheHandleToSetTheOrderCustomersSee =>
+      'Drag the ≡ handle to set the order customers see.';
 
   @override
   String get edit => 'Edit';
@@ -663,7 +696,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editVoucher => 'Edit voucher';
 
   @override
-  String get emergencyContactCertificationsQualifications => 'Emergency contact, certifications, qualifications...';
+  String get emergencyContactCertificationsQualifications =>
+      'Emergency contact, certifications, qualifications...';
 
   @override
   String get employeePortal => 'Employee Portal';
@@ -675,19 +709,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterMobileNumber => 'Enter Mobile Number';
 
   @override
-  String get enterAValid10DigitIndianMobileNumberEG9876543210 => 'Enter a valid 10-digit Indian mobile number (e.g. 9876543210)';
+  String get enterAValid10DigitIndianMobileNumberEG9876543210 =>
+      'Enter a valid 10-digit Indian mobile number (e.g. 9876543210)';
 
   @override
   String get enterImageUrlOrEmojiEG => 'Enter image URL or emoji (e.g. 🛍️)';
 
   @override
-  String get enterYourAddressForAccurateDelivery => 'Enter your address for accurate delivery';
+  String get enterYourAddressForAccurateDelivery =>
+      'Enter your address for accurate delivery';
 
   @override
   String get estimatedDeliveryTimeEta => 'Estimated Delivery Time (ETA)';
 
   @override
-  String get estimatedDeliveryTimeOptional => 'Estimated Delivery Time (Optional)';
+  String get estimatedDeliveryTimeOptional =>
+      'Estimated Delivery Time (Optional)';
 
   @override
   String get excelXlsx => 'Excel (.xlsx)';
@@ -696,7 +733,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expiryDate => 'Expiry date';
 
   @override
-  String get exploreProductsAndPlaceYourFirstOrderToday => 'Explore products and place your first order today!';
+  String get exploreProductsAndPlaceYourFirstOrderToday =>
+      'Explore products and place your first order today!';
 
   @override
   String get exportCatalogSheet => 'Export catalog sheet';
@@ -705,19 +743,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get externalUrl => 'External URL';
 
   @override
-  String get faqsCustomerHelplineQueryForm => 'FAQs, customer helpline & query form';
+  String get faqsCustomerHelplineQueryForm =>
+      'FAQs, customer helpline & query form';
 
   @override
   String get freeDelivery => 'FREE DELIVERY';
 
   @override
-  String get failedToSaveAddressPleaseTryAgain => 'Failed to save address. Please try again.';
+  String get failedToSaveAddressPleaseTryAgain =>
+      'Failed to save address. Please try again.';
 
   @override
-  String get failedToSaveAddressTryAgain => 'Failed to save address. Try again.';
+  String get failedToSaveAddressTryAgain =>
+      'Failed to save address. Try again.';
 
   @override
-  String get failedToSaveMobileNumberTryAgain => 'Failed to save mobile number. Try again.';
+  String get failedToSaveMobileNumberTryAgain =>
+      'Failed to save mobile number. Try again.';
 
   @override
   String get fallbackStrategy => 'Fallback strategy';
@@ -738,22 +780,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fixedPaidCharge => 'Fixed / Paid Charge';
 
   @override
-  String get flagThisProductToAppearInTheRecommendationsEngineCarousel => 'Flag this product to appear in the recommendations engine carousel.';
+  String get flagThisProductToAppearInTheRecommendationsEngineCarousel =>
+      'Flag this product to appear in the recommendations engine carousel.';
 
   @override
   String get flat50OffFreeDelivery => 'Flat 50% Off + Free Delivery';
 
   @override
-  String get forDeliveryTrackingOrderSmsUpdates => 'For delivery tracking & order SMS updates';
+  String get forDeliveryTrackingOrderSmsUpdates =>
+      'For delivery tracking & order SMS updates';
 
   @override
-  String get forInstantOrderUpdatesDeliverySms => 'For instant order updates & delivery SMS';
+  String get forInstantOrderUpdatesDeliverySms =>
+      'For instant order updates & delivery SMS';
 
   @override
   String get freeDelivery2 => 'Free Delivery';
 
   @override
-  String get freeDeliveryForOrdersAboveOptional => 'Free Delivery for Orders Above (₹) (Optional)';
+  String get freeDeliveryForOrdersAboveOptional =>
+      'Free Delivery for Orders Above (₹) (Optional)';
 
   @override
   String get frequentlyAskedQuestions => 'Frequently Asked Questions';
@@ -762,7 +808,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullName => 'Full Name *';
 
   @override
-  String get gatesLoginToScheduledWorkingHoursWhenDisabledTheEmployeeCannotLogIntoTheMobileApp => 'Gates login to scheduled working hours. When disabled, the employee cannot log into the mobile app.';
+  String
+  get gatesLoginToScheduledWorkingHoursWhenDisabledTheEmployeeCannotLogIntoTheMobileApp =>
+      'Gates login to scheduled working hours. When disabled, the employee cannot log into the mobile app.';
 
   @override
   String get gender => 'Gender';
@@ -828,16 +876,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get initialPassword => 'Initial Password *';
 
   @override
-  String get invalidOtpPleaseCheckTheCodeAndTryAgain => 'Invalid OTP. Please check the code and try again.';
+  String get invalidOtpPleaseCheckTheCodeAndTryAgain =>
+      'Invalid OTP. Please check the code and try again.';
 
   @override
   String get invalidOtpPleaseTryAgain => 'Invalid OTP. Please try again.';
 
   @override
-  String get invalidParentSelectingADescendantCategoryCreatesACycle => 'Invalid parent: Selecting a descendant category creates a cycle.';
+  String get invalidParentSelectingADescendantCategoryCreatesACycle =>
+      'Invalid parent: Selecting a descendant category creates a cycle.';
 
   @override
-  String get inventoryManagementCanmanageinventory => 'Inventory Management (canManageInventory)';
+  String get inventoryManagementCanmanageinventory =>
+      'Inventory Management (canManageInventory)';
 
   @override
   String get issueCategory => 'Issue Category *';
@@ -849,7 +900,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keepEditing => 'Keep Editing';
 
   @override
-  String get keepTrackOfYourActiveDeliveriesAndPastPurchases => 'Keep track of your active deliveries and past purchases.';
+  String get keepTrackOfYourActiveDeliveriesAndPastPurchases =>
+      'Keep track of your active deliveries and past purchases.';
 
   @override
   String get limitedTimeOffer => 'LIMITED TIME OFFER';
@@ -876,7 +928,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginEmail => 'Login Email *';
 
   @override
-  String get longDescriptionShownAsAParagraph => 'Long description shown as a paragraph...';
+  String get longDescriptionShownAsAParagraph =>
+      'Long description shown as a paragraph...';
 
   @override
   String get mrpOriginalPrice => 'MRP / Original Price (₹) *';
@@ -891,10 +944,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageDeliveryLocations03 => 'Manage delivery locations (0/3)';
 
   @override
-  String get manageProductsCategoriesOrders => 'Manage products, categories & orders';
+  String get manageProductsCategoriesOrders =>
+      'Manage products, categories & orders';
 
   @override
-  String get manageStaffAccountDesignationSalaryAndOperationalAccess => 'Manage staff account, designation, salary, and operational access.';
+  String get manageStaffAccountDesignationSalaryAndOperationalAccess =>
+      'Manage staff account, designation, salary, and operational access.';
 
   @override
   String get manualOfflinePayment => 'Manual / Offline Payment';
@@ -903,7 +958,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get marketplace => 'Marketplace';
 
   @override
-  String get maximum3AddressesAllowedPleaseEditOrRemoveAnAddress => 'Maximum 3 addresses allowed. Please edit or remove an address.';
+  String get maximum3AddressesAllowedPleaseEditOrRemoveAnAddress =>
+      'Maximum 3 addresses allowed. Please edit or remove an address.';
 
   @override
   String get maybeLater => 'Maybe Later';
@@ -918,7 +974,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mobileNumber2 => 'Mobile Number *';
 
   @override
-  String get mobileNumberSavedSuccessfully => 'Mobile number saved successfully!';
+  String get mobileNumberSavedSuccessfully =>
+      'Mobile number saved successfully!';
 
   @override
   String get monthlyMonth => 'Monthly (₹/month)';
@@ -957,7 +1014,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCategoriesFound => 'No categories found';
 
   @override
-  String get noCategoriesFoundForThisStore => 'No categories found for this store.';
+  String get noCategoriesFoundForThisStore =>
+      'No categories found for this store.';
 
   @override
   String get noCategoriesMatchThisSearch => 'No categories match this search';
@@ -966,19 +1024,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCategoriesYet => 'No categories yet';
 
   @override
-  String get noCompanyIdentifiedPleaseEnsureYouAreLoggedInToYourCompany => 'No company identified. Please ensure you are logged in to your company.';
+  String get noCompanyIdentifiedPleaseEnsureYouAreLoggedInToYourCompany =>
+      'No company identified. Please ensure you are logged in to your company.';
 
   @override
-  String get noCompanyScopeFoundForCurrentAdmin => 'No company scope found for current admin.';
+  String get noCompanyScopeFoundForCurrentAdmin =>
+      'No company scope found for current admin.';
 
   @override
-  String get noDeliveryChargesMatchThisPincode => 'No delivery charges match this pincode';
+  String get noDeliveryChargesMatchThisPincode =>
+      'No delivery charges match this pincode';
 
   @override
   String get noDeliveryPincodesConfigured => 'No delivery pincodes configured';
 
   @override
-  String get noDetailSectionsYetTapAddSection => 'No detail sections yet — tap "Add Section".';
+  String get noDetailSectionsYetTapAddSection =>
+      'No detail sections yet — tap \"Add Section\".';
 
   @override
   String get noEmployeesProvisioned => 'No employees provisioned';
@@ -987,7 +1049,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noExpiry => 'No expiry';
 
   @override
-  String get noHighlightsYetTapAddHighlight => 'No highlights yet — tap "Add Highlight".';
+  String get noHighlightsYetTapAddHighlight =>
+      'No highlights yet — tap \"Add Highlight\".';
 
   @override
   String get noMatchingFaqsFound => 'No matching FAQs found';
@@ -1008,7 +1071,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPackingTasksAssigned => 'No packing tasks assigned';
 
   @override
-  String get noPinnedRecommendationsUsingBestSellers => 'No pinned recommendations — using best-sellers';
+  String get noPinnedRecommendationsUsingBestSellers =>
+      'No pinned recommendations — using best-sellers';
 
   @override
   String get noProductsFound => 'No products found';
@@ -1032,7 +1096,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noShopsRegisteredYet => 'No shops registered yet';
 
   @override
-  String get noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix => 'No variants configured (single standard SKU). Tap "Add Option" to define dimensions, then "Generate Matrix".';
+  String
+  get noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix =>
+      'No variants configured (single standard SKU). Tap \"Add Option\" to define dimensions, then \"Generate Matrix\".';
 
   @override
   String get noVouchersAvailableRightNow => 'No vouchers available right now.';
@@ -1056,7 +1122,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offersFromThisStore => 'Offers from this store';
 
   @override
-  String get onlyShoppersWithoutAPreviousOrder => 'Only shoppers without a previous order';
+  String get onlyShoppersWithoutAPreviousOrder =>
+      'Only shoppers without a previous order';
 
   @override
   String get open => 'Open';
@@ -1089,7 +1156,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get other => 'Other';
 
   @override
-  String get outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked => 'Out of Stock / Finished: Product will show as sold out on the storefront until restocked.';
+  String
+  get outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked =>
+      'Out of Stock / Finished: Product will show as sold out on the storefront until restocked.';
 
   @override
   String get outOfStock => 'Out of stock';
@@ -1104,22 +1173,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pack => 'Pack';
 
   @override
-  String get pack1Pack2Packs5Packs10Packs => 'Pack (1 pack, 2 packs, 5 packs, 10 packs)';
+  String get pack1Pack2Packs5Packs10Packs =>
+      'Pack (1 pack, 2 packs, 5 packs, 10 packs)';
 
   @override
   String get packingDoneNotifiedAdmin => 'Packing done — notified Admin';
 
   @override
-  String get packingOrderQueueFulfillment => 'Packing, order queue & fulfillment';
+  String get packingOrderQueueFulfillment =>
+      'Packing, order queue & fulfillment';
 
   @override
   String get parentCategory => 'Parent Category';
 
   @override
-  String get pauseInsteadOfDeletingACampaign => 'Pause instead of deleting a campaign';
+  String get pauseInsteadOfDeletingACampaign =>
+      'Pause instead of deleting a campaign';
 
   @override
-  String get payDirectlyCashUpiOnDeliveryOrPickupPaymentStatusWillDefaultToPendingAndCanBeMarkedAsDoneByTheAdmin => 'Pay directly (Cash/UPI on delivery or pickup). Payment status will default to Pending and can be marked as Done by the admin.';
+  String
+  get payDirectlyCashUpiOnDeliveryOrPickupPaymentStatusWillDefaultToPendingAndCanBeMarkedAsDoneByTheAdmin =>
+      'Pay directly (Cash/UPI on delivery or pickup). Payment status will default to Pending and can be marked as Done by the admin.';
 
   @override
   String get perShopperLimit => 'Per shopper limit';
@@ -1143,34 +1217,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get placeOrder => 'Place Order';
 
   @override
-  String get pleaseAddAtLeastOneOptionFirstToGenerateCombinations => 'Please add at least one Option first to generate combinations.';
+  String get pleaseAddAtLeastOneOptionFirstToGenerateCombinations =>
+      'Please add at least one Option first to generate combinations.';
 
   @override
-  String get pleaseCheckAllRequiredFields => 'Please check all required fields.';
+  String get pleaseCheckAllRequiredFields =>
+      'Please check all required fields.';
 
   @override
-  String get pleaseCompleteTheProductHighlightsAndAllDetailsSections => 'Please complete the Product Highlights and All Details sections.';
+  String get pleaseCompleteTheProductHighlightsAndAllDetailsSections =>
+      'Please complete the Product Highlights and All Details sections.';
 
   @override
-  String get pleaseCompleteYourProfileNameMobileBeforePlacingAnOrder => 'Please complete your profile (name & mobile) before placing an order.';
+  String get pleaseCompleteYourProfileNameMobileBeforePlacingAnOrder =>
+      'Please complete your profile (name & mobile) before placing an order.';
 
   @override
-  String get pleaseEnterAValid6DigitPincode => 'Please enter a valid 6-digit pincode';
+  String get pleaseEnterAValid6DigitPincode =>
+      'Please enter a valid 6-digit pincode';
 
   @override
-  String get pleaseEnterAValidHttpOrHttpsImageUrl => 'Please enter a valid HTTP or HTTPS image URL';
+  String get pleaseEnterAValidHttpOrHttpsImageUrl =>
+      'Please enter a valid HTTP or HTTPS image URL';
 
   @override
-  String get pleaseEnterAdminEmailAndPassword => 'Please enter admin email and password.';
+  String get pleaseEnterAdminEmailAndPassword =>
+      'Please enter admin email and password.';
 
   @override
-  String get pleaseEnterCompanyNameAndCompanyPassword => 'Please enter company name and company password.';
+  String get pleaseEnterCompanyNameAndCompanyPassword =>
+      'Please enter company name and company password.';
 
   @override
   String get pleaseEnterThe6DigitOtp => 'Please enter the 6-digit OTP';
 
   @override
-  String get pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration => 'Please enter the required primary product details above to unlock variant options and matrix generation:';
+  String
+  get pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration =>
+      'Please enter the required primary product details above to unlock variant options and matrix generation:';
 
   @override
   String get pleaseEnterYourMobileNumber => 'Please enter your mobile number';
@@ -1179,7 +1263,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterYourName => 'Please enter your name';
 
   @override
-  String get pleaseSelectAtLeastOneProductForTheCategory => 'Please select at least one product for the category';
+  String get pleaseSelectAtLeastOneProductForTheCategory =>
+      'Please select at least one product for the category';
 
   @override
   String get popularSearches => 'Popular Searches';
@@ -1227,16 +1312,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get products => 'Products';
 
   @override
-  String get productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere => 'Products assigned to this category (or its sub-categories) will show up here.';
+  String get productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere =>
+      'Products assigned to this category (or its sub-categories) will show up here.';
 
   @override
-  String get promoCodeFestive50CopiedToClipboard => 'Promo Code FESTIVE50 copied to clipboard!';
+  String get promoCodeFestive50CopiedToClipboard =>
+      'Promo Code FESTIVE50 copied to clipboard!';
 
   @override
   String get provisionEmployee => 'Provision Employee';
 
   @override
-  String get provisionStaffAccountsWithCustomDesignationsSalaryAndOperationalAccess => 'Provision staff accounts with custom designations, salary, and operational access.';
+  String
+  get provisionStaffAccountsWithCustomDesignationsSalaryAndOperationalAccess =>
+      'Provision staff accounts with custom designations, salary, and operational access.';
 
   @override
   String get quantity => 'Quantity';
@@ -1263,7 +1352,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removeFromCategory => 'Remove from Category';
 
   @override
-  String get reportsAnalyticsCanviewreports => 'Reports & Analytics (canViewReports)';
+  String get reportsAnalyticsCanviewreports =>
+      'Reports & Analytics (canViewReports)';
 
   @override
   String get residentialAddress => 'Residential Address';
@@ -1314,7 +1404,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanQrBarcode => 'Scan QR / Barcode';
 
   @override
-  String get searchFaqsOrdersReturnsPayments => 'Search FAQs, orders, returns, payments...';
+  String get searchFaqsOrdersReturnsPayments =>
+      'Search FAQs, orders, returns, payments...';
 
   @override
   String get searchByCode => 'Search by code';
@@ -1323,7 +1414,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchCategories => 'Search categories';
 
   @override
-  String get searchCategoriesBrandsOrShops => 'Search categories, brands, or shops...';
+  String get searchCategoriesBrandsOrShops =>
+      'Search categories, brands, or shops...';
 
   @override
   String get searchInThisStore => 'Search in this store';
@@ -1341,7 +1433,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchProductsByNameOrId => 'Search products by name or ID...';
 
   @override
-  String get searchProductsCategoriesOrStores => 'Search products, categories, or stores...';
+  String get searchProductsCategoriesOrStores =>
+      'Search products, categories, or stores...';
 
   @override
   String get sectionTitle => 'Section Title *';
@@ -1350,7 +1443,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionType => 'Section Type *';
 
   @override
-  String get sectionsShownUnderAllDetailsOnTheProductPage => 'Sections shown under "All Details" on the product page — ';
+  String get sectionsShownUnderAllDetailsOnTheProductPage =>
+      'Sections shown under \"All Details\" on the product page — ';
 
   @override
   String get seeAll => 'See All';
@@ -1362,7 +1456,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectVariant => 'Select Variant';
 
   @override
-  String get selectAnAddressToSeeProductAvailabilityAndDeliveryFees => 'Select an address to see product availability and delivery fees';
+  String get selectAnAddressToSeeProductAvailabilityAndDeliveryFees =>
+      'Select an address to see product availability and delivery fees';
 
   @override
   String get selfPickup => 'Self pickup';
@@ -1410,7 +1505,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInToViewOrders => 'Sign In to View Orders';
 
   @override
-  String get signInToPlaceOrdersSaveCartApplyVouchers => 'Sign in to place orders, save cart & apply vouchers';
+  String get signInToPlaceOrdersSaveCartApplyVouchers =>
+      'Sign in to place orders, save cart & apply vouchers';
 
   @override
   String get signInFailedPleaseTryAgain => 'Sign-in failed. Please try again.';
@@ -1434,7 +1530,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startShopping => 'Start Shopping';
 
   @override
-  String get stockAvailabilityInventoryMode => 'Stock Availability & Inventory Mode';
+  String get stockAvailabilityInventoryMode =>
+      'Stock Availability & Inventory Mode';
 
   @override
   String get stockAvailability => 'Stock Availability *';
@@ -1464,22 +1561,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submitQuerySendEmail => 'Submit Query & Send Email';
 
   @override
-  String get submitASupportQueryDirectlyToOurTeam => 'Submit a support query directly to our team.';
+  String get submitASupportQueryDirectlyToOurTeam =>
+      'Submit a support query directly to our team.';
 
   @override
-  String get submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached => 'Submitting this form triggers an email to ayush123@gmail.com with your message and account details attached.';
+  String
+  get submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached =>
+      'Submitting this form triggers an email to ayush123@gmail.com with your message and account details attached.';
 
   @override
   String get summary => 'Summary';
 
   @override
-  String get supportHelplineAyush123GmailCom => 'Support Helpline: ayush123@gmail.com';
+  String get supportHelplineAyush123GmailCom =>
+      'Support Helpline: ayush123@gmail.com';
 
   @override
-  String get swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOr => 'Swipe right or tap + on available products to assign. Swipe left or ';
+  String get swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOr =>
+      'Swipe right or tap + on available products to assign. Swipe left or ';
 
   @override
-  String get switchingTheTypeWillClearTheContentOfThisSectionContinue => 'Switching the type will clear the content of this section. Continue?';
+  String get switchingTheTypeWillClearTheContentOfThisSectionContinue =>
+      'Switching the type will clear the content of this section. Continue?';
 
   @override
   String get tapAction => 'Tap action';
@@ -1488,16 +1591,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get text => 'Text *';
 
   @override
-  String get theseProductsAreNoLongerAvailable => 'These products are no longer available';
+  String get theseProductsAreNoLongerAvailable =>
+      'These products are no longer available';
 
   @override
   String get thisCategoryIsEmpty => 'This category is empty.';
 
   @override
-  String get thisOrderIsNoLongerAvailable => 'This order is no longer available.';
+  String get thisOrderIsNoLongerAvailable =>
+      'This order is no longer available.';
 
   @override
-  String get thisShopDoesNotOfferHomeDelivery => 'This shop does not offer home delivery';
+  String get thisShopDoesNotOfferHomeDelivery =>
+      'This shop does not offer home delivery';
 
   @override
   String get thisStoreHasNoProductsYet => 'This store has no products yet';
@@ -1512,10 +1618,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title2 => 'Title *';
 
   @override
-  String get titleAndValueRowsShownAsTheCompactHighlightsListOnTheProductPage => 'Title and value rows shown as the compact highlights list on the product page.';
+  String get titleAndValueRowsShownAsTheCompactHighlightsListOnTheProductPage =>
+      'Title and value rows shown as the compact highlights list on the product page.';
 
   @override
-  String get topSellersTrendingCuratedCrossSell => 'Top Sellers · Trending · Curated · Cross-sell';
+  String get topSellersTrendingCuratedCrossSell =>
+      'Top Sellers · Trending · Curated · Cross-sell';
 
   @override
   String get topSellers => 'Top sellers';
@@ -1530,16 +1638,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trending => 'Trending';
 
   @override
-  String get tryAdjustingYourSearchTermsOrSubmitAQueryToOurSupportStaff => 'Try adjusting your search terms or submit a query to our support staff.';
+  String get tryAdjustingYourSearchTermsOrSubmitAQueryToOurSupportStaff =>
+      'Try adjusting your search terms or submit a query to our support staff.';
 
   @override
-  String get tryCheckingForTyposOrSearchingForADifferentKeyword => 'Try checking for typos or searching for a different keyword';
+  String get tryCheckingForTyposOrSearchingForADifferentKeyword =>
+      'Try checking for typos or searching for a different keyword';
 
   @override
   String get unavailable => 'Unavailable';
 
   @override
-  String get unavailableItemsAreExcludedFromTheTotal => 'Unavailable items are excluded from the total.';
+  String get unavailableItemsAreExcludedFromTheTotal =>
+      'Unavailable items are excluded from the total.';
 
   @override
   String get unitType => 'Unit Type *';
@@ -1551,7 +1662,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlimitedInventory => 'Unlimited Inventory';
 
   @override
-  String get unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems => 'Unlimited Inventory: Product will always appear in stock for customers (ideal for digital goods or made-to-order items).';
+  String
+  get unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems =>
+      'Unlimited Inventory: Product will always appear in stock for customers (ideal for digital goods or made-to-order items).';
 
   @override
   String get up => 'Up';
@@ -1590,10 +1703,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get view => 'View';
 
   @override
-  String get viewAndUpdateStockCountsAndWarehouseAlerts => 'View and update stock counts and warehouse alerts.';
+  String get viewAndUpdateStockCountsAndWarehouseAlerts =>
+      'View and update stock counts and warehouse alerts.';
 
   @override
-  String get viewDailyEmployeeActivityAndOperationsLogs => 'View daily employee activity and operations logs.';
+  String get viewDailyEmployeeActivityAndOperationsLogs =>
+      'View daily employee activity and operations logs.';
 
   @override
   String get welcome20 => 'WELCOME20';
@@ -1641,7 +1756,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yesCancel => 'Yes, cancel';
 
   @override
-  String get youHaveUnsavedChangesLeaveWithoutSaving => 'You have unsaved changes. Leave without saving?';
+  String get youHaveUnsavedChangesLeaveWithoutSaving =>
+      'You have unsaved changes. Leave without saving?';
 
   @override
   String get yourCartIsEmpty => 'Your cart is empty';
@@ -1674,7 +1790,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eG40 => 'e.g. 40';
 
   @override
-  String get eG499LeaveBlankIfNoFreeTier => 'e.g. 499 (Leave blank if no free tier)';
+  String get eG499LeaveBlankIfNoFreeTier =>
+      'e.g. 499 (Leave blank if no free tier)';
 
   @override
   String get eG500125 => 'e.g. 500, 1, 2, 5';
@@ -1686,7 +1803,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eG99900 => 'e.g. 999.00';
 
   @override
-  String get eGDescriptionGeneralDisplayFeatures => 'e.g. Description, General, Display Features';
+  String get eGDescriptionGeneralDisplayFeatures =>
+      'e.g. Description, General, Display Features';
 
   @override
   String get eGFabricShelfLife => 'e.g. Fabric / Shelf Life';
@@ -1698,19 +1816,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eGFlat402BlockA => 'e.g. Flat 402, Block A';
 
   @override
-  String get eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts => 'e.g. Free shipping on orders above ₹499. Easy 7-day hassle-free replacement for defective products.';
+  String
+  get eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts =>
+      'e.g. Free shipping on orders above ₹499. Easy 7-day hassle-free replacement for defective products.';
 
   @override
   String get eGFreshOrganicVegetables => 'e.g. Fresh Organic Vegetables';
 
   @override
-  String get eGFreshOrganicGroceriesDeliveredDaily => 'e.g. Fresh organic groceries delivered daily';
+  String get eGFreshOrganicGroceriesDeliveredDaily =>
+      'e.g. Fresh organic groceries delivered daily';
 
   @override
-  String get eGGreenValleyRoadNearCityMall => 'e.g. Green Valley Road, Near City Mall';
+  String get eGGreenValleyRoadNearCityMall =>
+      'e.g. Green Valley Road, Near City Mall';
 
   @override
-  String get eGGroceryStaplesSupermarketElectronics => 'e.g. Grocery & Staples, Supermarket, Electronics';
+  String get eGGroceryStaplesSupermarketElectronics =>
+      'e.g. Grocery & Staples, Supermarket, Electronics';
 
   @override
   String get eGGroceryElectronics => 'e.g. Grocery, Electronics';
@@ -1722,7 +1845,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eGOppositeCityMall => 'e.g. Opposite City Mall';
 
   @override
-  String get eGOrganicHassAvocadoChanderiSilkSaree15In1SweetsBox => 'e.g. Organic Hass Avocado / Chanderi Silk Saree / 15-in-1 Sweets Box';
+  String get eGOrganicHassAvocadoChanderiSilkSaree15In1SweetsBox =>
+      'e.g. Organic Hass Avocado / Chanderi Silk Saree / 15-in-1 Sweets Box';
 
   @override
   String get eGProdHoney01 => 'e.g. PROD-HONEY-01';
@@ -1737,7 +1861,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eGRameshKumar => 'e.g. Ramesh Kumar';
 
   @override
-  String get eGRedMidnightBlueMatteBlack => 'e.g. Red / Midnight Blue / Matte Black';
+  String get eGRedMidnightBlueMatteBlack =>
+      'e.g. Red / Midnight Blue / Matte Black';
 
   @override
   String get eGRedMidnightBlueBlack => 'e.g. Red, Midnight Blue, Black';
@@ -1755,10 +1880,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get httpsExampleComLogoPng => 'https://example.com/logo.png';
 
   @override
-  String get httpsExampleComStoreBannerJpg => 'https://example.com/store_banner.jpg';
+  String get httpsExampleComStoreBannerJpg =>
+      'https://example.com/store_banner.jpg';
 
   @override
-  String get httpsExampleComStorefrontPhotoJpg => 'https://example.com/storefront_photo.jpg';
+  String get httpsExampleComStorefrontPhotoJpg =>
+      'https://example.com/storefront_photo.jpg';
 
   @override
   String get httpsImagesUnsplashCom => 'https://images.unsplash.com/...';
@@ -1773,7 +1900,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assignedProducts => 'assigned products';
 
   @override
-  String get toUncategorised => 'to "Uncategorised"';
+  String get toUncategorised => 'to \"Uncategorised\"';
 
   @override
   String get subCategory => 'sub-category';
@@ -1831,754 +1958,841 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String order(String order) {
-    return 'Order #' + order;
+    return 'Order #$order';
   }
 
   @override
   String company2(String order) {
-    return 'Company: ' + order;
+    return 'Company: $order';
   }
 
   @override
   String total(String order) {
-    return 'Total: ₹' + order;
+    return 'Total: ₹$order';
   }
 
   @override
   String copyId(String label) {
-    return 'Copy ' + label + ' ID';
+    return 'Copy $label ID';
   }
 
   @override
   String idCopiedToClipboard(String label, String id) {
-    return label + ' ID copied to clipboard: ' + id;
+    return '$label ID copied to clipboard: $id';
   }
 
   @override
   String id(String id) {
-    return 'ID: ' + id;
+    return 'ID: $id';
   }
 
   @override
   String msg3(String user, String user2, String user3) {
-    return user + ': ' + user2 + ' (' + user3 + '/3)';
+    return '$user: $user2 ($user3/3)';
   }
 
   @override
   String priority(String b, String b2) {
-    return b + ' · priority ' + b2;
+    return '$b · priority $b2';
   }
 
   @override
   String aCategoryNamedAlreadyExistsInThisCompany(String trimmedname) {
-    return 'A category named "' + trimmedname + '" already exists in this company.';
+    return 'A category named \"$trimmedname\" already exists in this company.';
   }
 
   @override
   String categoryUpdatedSuccessfully(String category) {
-    return 'Category "' + category + '" updated successfully!';
+    return 'Category \"$category\" updated successfully!';
   }
 
   @override
   String failedToSaveCategory(String e) {
-    return 'Failed to save category: ' + e;
+    return 'Failed to save category: $e';
   }
 
   @override
-  String get assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles => 'Assign an existing parent category in the same company for nesting. Self and descendant categories are automatically blocked to prevent hierarchy cycles.';
+  String
+  get assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles =>
+      'Assign an existing parent category in the same company for nesting. Self and descendant categories are automatically blocked to prevent hierarchy cycles.';
 
   @override
-  String noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent(String invalidparentids) {
-    return 'Note: ' + invalidparentids + ' categories (this category and its descendants) are blocked from being chosen as parent.';
+  String
+  noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent(
+    String invalidparentids,
+  ) {
+    return 'Note: $invalidparentids categories (this category and its descendants) are blocked from being chosen as parent.';
   }
 
   @override
   String couldNotSaveTheNewOrder(String e) {
-    return 'Could not save the new order: ' + e;
+    return 'Could not save the new order: $e';
   }
 
   @override
   String backfillFailed(String e) {
-    return 'Backfill failed: ' + e;
+    return 'Backfill failed: $e';
   }
 
   @override
   String delete2(String category) {
-    return 'Delete "' + category + '"?';
+    return 'Delete \"$category\"?';
   }
 
   @override
   String to(String parentname) {
-    return 'to "' + parentname + '"';
+    return 'to \"$parentname\"';
   }
 
   @override
   String willMove2(String plural, String parentname) {
-    return '• ' + plural + ' will move ' + parentname;
+    return '• $plural will move $parentname';
   }
 
   @override
   String willMoveUpOneLevel(String plural) {
-    return '• ' + plural + ' will move up one level';
+    return '• $plural will move up one level';
   }
 
   @override
   String categoryDeleted(String category) {
-    return 'Category "' + category + '" deleted.';
+    return 'Category \"$category\" deleted.';
   }
 
   @override
   String failedToDeleteCategory(String e) {
-    return 'Failed to delete category: ' + e;
+    return 'Failed to delete category: $e';
   }
 
   @override
   String sub(String node) {
-    return ' • ' + node + ' sub';
+    return ' • $node sub';
   }
 
   @override
   String str(String node, String node2, String node3) {
-    return node + node2 + node3;
+    return '$node$node2$node3';
   }
 
   @override
   String under(String pathlabel) {
-    return 'Under: ' + pathlabel;
+    return 'Under: $pathlabel';
   }
 
   @override
-  String get swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder => 'Swipe right or tap + on available products to assign. Swipe left or tap – to remove. Drag the ≡ handle in "In This Category" to set the display order.';
+  String
+  get swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder =>
+      'Swipe right or tap + on available products to assign. Swipe left or tap – to remove. Drag the ≡ handle in \"In This Category\" to set the display order.';
 
   @override
   String all(String filteredavailable) {
-    return 'All (' + filteredavailable + ')';
+    return 'All ($filteredavailable)';
   }
 
   @override
   String inCategory(String filteredassigned) {
-    return 'In Category (' + filteredassigned + ')';
+    return 'In Category ($filteredassigned)';
   }
 
   @override
-  String of(String count, String totalcount) {
-    return count + ' of ' + totalcount;
+  String countOutOfTotal(String count, String totalcount) {
+    return '$count of $totalcount';
   }
 
   @override
   String deliveryChargeUpdatedFor(String pincode) {
-    return 'Delivery charge updated for ' + pincode;
+    return 'Delivery charge updated for $pincode';
   }
 
   @override
   String failedToSaveDeliveryCharge(String e) {
-    return 'Failed to save delivery charge: ' + e;
+    return 'Failed to save delivery charge: $e';
   }
 
   @override
   String importedPincodesSuccessfully(String charges) {
-    return 'Imported ' + charges + ' pincodes successfully';
+    return 'Imported $charges pincodes successfully';
   }
 
   @override
   String areYouSureYouWantToRemoveDeliveryMappingForPincode(String charge) {
-    return 'Are you sure you want to remove delivery mapping for pincode "' + charge + '"?';
+    return 'Are you sure you want to remove delivery mapping for pincode \"$charge\"?';
   }
 
   @override
   String deliveryChargeForDeleted(String charge) {
-    return 'Delivery charge for "' + charge + '" deleted.';
+    return 'Delivery charge for \"$charge\" deleted.';
   }
 
   @override
   String failedToDeleteDeliveryCharge(String e) {
-    return 'Failed to delete delivery charge: ' + e;
+    return 'Failed to delete delivery charge: $e';
   }
 
   @override
   String pincode2(String charge) {
-    return 'Pincode: ' + charge;
+    return 'Pincode: $charge';
   }
 
   @override
   String charge(String formatcurrency) {
-    return 'Charge: ' + formatcurrency;
+    return 'Charge: $formatcurrency';
   }
 
   @override
   String freeOn(String formatcurrency) {
-    return '• Free on > ' + formatcurrency;
+    return '• Free on > $formatcurrency';
   }
 
   @override
   String minOrder(String formatcurrency) {
-    return '• Min order: ' + formatcurrency;
+    return '• Min order: $formatcurrency';
   }
 
   @override
   String eta(String charge) {
-    return '• ETA: ' + charge;
+    return '• ETA: $charge';
   }
 
   @override
   String employeeUpdatedSuccessfully(String emp) {
-    return 'Employee "' + emp + '" updated successfully!';
+    return 'Employee \"$emp\" updated successfully!';
   }
 
   @override
   String failedToSaveEmployee(String e) {
-    return 'Failed to save employee: ' + e;
+    return 'Failed to save employee: $e';
   }
 
   @override
   String areYouSureYouWantToRemoveFromTheCompany(String emp, String emp2) {
-    return 'Are you sure you want to remove "' + emp + '" (' + emp2 + ') from the company?';
+    return 'Are you sure you want to remove \"$emp\" ($emp2) from the company?';
   }
 
   @override
   String employeeDeleted(String emp) {
-    return 'Employee "' + emp + '" deleted.';
+    return 'Employee \"$emp\" deleted.';
   }
 
   @override
   String failedToDeleteEmployee(String e) {
-    return 'Failed to delete employee: ' + e;
+    return 'Failed to delete employee: $e';
   }
 
   @override
   String itemS2(String order, String order2, String order3) {
-    return order + ' item(s) · ' + order2 + order3;
+    return '$order item(s) · $order2$order3';
   }
 
   @override
   String str2(String order, String order2, String order3) {
-    return order + order2 + order3;
+    return '$order$order2$order3';
   }
 
   @override
   String mark(String orderstatuslabel) {
-    return 'Mark ' + orderstatuslabel;
+    return 'Mark $orderstatuslabel';
   }
 
   @override
   String order2(String order, String orderstatuslabel) {
-    return 'Order ' + order + ' → ' + orderstatuslabel;
+    return 'Order $order → $orderstatuslabel';
   }
 
   @override
   String couldNotUpdateOrder(String e) {
-    return 'Could not update order: ' + e;
+    return 'Could not update order: $e';
   }
 
   @override
-  String orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(String order) {
-    return 'Order ' + order + ' will be cancelled and the customer will see it under "Cancelled".';
+  String orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(
+    String order,
+  ) {
+    return 'Order $order will be cancelled and the customer will see it under \"Cancelled\".';
   }
 
   @override
   String couldNotCancelOrder(String e) {
-    return 'Could not cancel order: ' + e;
+    return 'Could not cancel order: $e';
   }
 
   @override
-  String quantity12510(String currentunit, String currentunit2, String currentunit3, String currentunit4) {
-    return 'Quantity (1 ' + currentunit + ', 2 ' + currentunit2 + ', 5 ' + currentunit3 + ', 10 ' + currentunit4 + ')';
+  String quantity12510(
+    String currentunit,
+    String currentunit2,
+    String currentunit3,
+    String currentunit4,
+  ) {
+    return 'Quantity (1 $currentunit, 2 $currentunit2, 5 $currentunit3, 10 $currentunit4)';
   }
 
   @override
-  String quantity246(String currentunit, String currentunit2, String currentunit3) {
-    return 'Quantity (2 ' + currentunit + ', 4 ' + currentunit2 + ', 6 ' + currentunit3 + ')';
+  String quantity246(
+    String currentunit,
+    String currentunit2,
+    String currentunit3,
+  ) {
+    return 'Quantity (2 $currentunit, 4 $currentunit2, 6 $currentunit3)';
   }
 
   @override
-  String pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions(String missingbasefields) {
-    return 'Please complete the required product details above (' + missingbasefields + ') before configuring options.';
+  String pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions(
+    String missingbasefields,
+  ) {
+    return 'Please complete the required product details above ($missingbasefields) before configuring options.';
   }
 
   @override
   String unitOptionsStrictlySynchronizedWith(String currentunit) {
-    return 'Unit options strictly synchronized with "' + currentunit + '"';
+    return 'Unit options strictly synchronized with \"$currentunit\"';
   }
 
   @override
   String eG125(String currentunit, String currentunit2, String currentunit3) {
-    return 'e.g. 1 ' + currentunit + ', 2 ' + currentunit2 + ', 5 ' + currentunit3;
+    return 'e.g. 1 $currentunit, 2 $currentunit2, 5 $currentunit3';
   }
 
   @override
   String quickTemplatesStrictlyFor(String currentunit) {
-    return 'Quick Templates (Strictly for ' + currentunit + '):';
+    return 'Quick Templates (Strictly for $currentunit):';
   }
 
   @override
-  String cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor(String optname, String currentunit) {
-    return 'Cannot add "' + optname + '" option. The product unit is locked to "' + currentunit + '". Please use Quantity or Size/Color.';
+  String cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor(
+    String optname,
+    String currentunit,
+  ) {
+    return 'Cannot add \"$optname\" option. The product unit is locked to \"$currentunit\". Please use Quantity or Size/Color.';
   }
 
   @override
-  String pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix(String missingbasefields) {
-    return 'Please complete the required product details above (' + missingbasefields + ') before generating matrix.';
+  String pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix(
+    String missingbasefields,
+  ) {
+    return 'Please complete the required product details above ($missingbasefields) before generating matrix.';
   }
 
   @override
-  String generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices(String variants, String baseunittype) {
-    return 'Generated ' + variants + ' variant combinations with locked "' + baseunittype + '" unit & auto-calculated prices!';
+  String generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices(
+    String variants,
+    String baseunittype,
+  ) {
+    return 'Generated $variants variant combinations with locked \"$baseunittype\" unit & auto-calculated prices!';
   }
 
   @override
-  String pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants(String missingbasefields) {
-    return 'Please complete the required product details above (' + missingbasefields + ') before adding variants.';
+  String pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants(
+    String missingbasefields,
+  ) {
+    return 'Please complete the required product details above ($missingbasefields) before adding variants.';
   }
 
   @override
   String unitTypeLockedFromBaseProduct(String lockedunittype) {
-    return 'Unit Type: ' + lockedunittype + ' (Locked from Base Product)';
+    return 'Unit Type: $lockedunittype (Locked from Base Product)';
   }
 
   @override
   String eGLarge500PackOf2(String lockedunittype) {
-    return 'e.g. Large / 500' + lockedunittype + ' / Pack of 2';
+    return 'e.g. Large / 500$lockedunittype / Pack of 2';
   }
 
   @override
   String auto(String calculatedautoprice) {
-    return 'Auto: ₹' + calculatedautoprice;
+    return 'Auto: ₹$calculatedautoprice';
   }
 
   @override
   String blankAutoCalculatesToBasedOnBasePrice(String calculatedautoprice) {
-    return 'Blank auto-calculates to ₹' + calculatedautoprice + ' based on base price';
+    return 'Blank auto-calculates to ₹$calculatedautoprice based on base price';
   }
 
   @override
   String editVariant(String v) {
-    return 'Edit Variant (' + v + ')';
+    return 'Edit Variant ($v)';
   }
 
   @override
   String productUpdatedSuccessfully(String product) {
-    return 'Product "' + product + '" updated successfully!';
+    return 'Product \"$product\" updated successfully!';
   }
 
   @override
   String failedToSaveProduct(String e) {
-    return 'Failed to save product: ' + e;
+    return 'Failed to save product: $e';
   }
 
   @override
   String added(String images) {
-    return images + ' added';
+    return '$images added';
   }
 
   @override
   String off(String discountpercent) {
-    return discountpercent + '% OFF';
+    return '$discountpercent% OFF';
   }
 
   @override
   String variantCombinations(String variants) {
-    return variants + ' Variant Combinations:';
+    return '$variants Variant Combinations:';
   }
 
   @override
   String price2(String variants) {
-    return 'Price: ₹' + variants;
+    return 'Price: ₹$variants';
   }
 
   @override
-  String unitStock(String variants, String variants2, String variants3, String variants4, String variants5) {
-    return 'Unit: ' + variants + ' ' + variants2 + ' • Stock: ' + variants3 + ' • ' + variants4 + variants5;
+  String unitStock(
+    String variants,
+    String variants2,
+    String variants3,
+    String variants4,
+    String variants5,
+  ) {
+    return 'Unit: $variants $variants2 • Stock: $variants3 • $variants4$variants5';
   }
 
   @override
   String areYouSureYouWantToDelete(String product) {
-    return 'Are you sure you want to delete "' + product + '"?';
+    return 'Are you sure you want to delete \"$product\"?';
   }
 
   @override
   String productDeleted(String product) {
-    return 'Product "' + product + '" deleted.';
+    return 'Product \"$product\" deleted.';
   }
 
   @override
   String failedToDeleteProduct(String e) {
-    return 'Failed to delete product: ' + e;
+    return 'Failed to delete product: $e';
   }
 
   @override
   String msgVar(String product) {
-    return product + ' var';
+    return '$product var';
   }
 
   @override
   String variants(String product) {
-    return '• ' + product + ' variants';
+    return '• $product variants';
   }
 
   @override
   String deleteItsContentWillBeLost(String section) {
-    return 'Delete "' + section + '"? Its content will be lost.';
+    return 'Delete \"$section\"? Its content will be lost.';
   }
 
   @override
-  String get sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables => 'Sections shown under "All Details" on the product page — Simple Text paragraphs or Title & Value tables.';
+  String
+  get sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables =>
+      'Sections shown under \"All Details\" on the product page — Simple Text paragraphs or Title & Value tables.';
 
   @override
   String orders2(String orders) {
-    return 'Orders: ' + orders;
+    return 'Orders: $orders';
   }
 
   @override
   String revenue(String revenue) {
-    return 'Revenue: ₹' + revenue;
+    return 'Revenue: ₹$revenue';
   }
 
   @override
-  String willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount(String voucher) {
-    return '"' + voucher + '" will be removed. Shoppers who saved this code will no longer get the discount.';
+  String willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount(
+    String voucher,
+  ) {
+    return '\"$voucher\" will be removed. Shoppers who saved this code will no longer get the discount.';
   }
 
   @override
   String voucherDeleted(String voucher) {
-    return 'Voucher ' + voucher + ' deleted.';
+    return 'Voucher $voucher deleted.';
   }
 
   @override
   String couldNotDeleteVoucher(String e) {
-    return 'Could not delete voucher: ' + e;
+    return 'Could not delete voucher: $e';
   }
 
   @override
-  String minOrder4(String voucher, String voucher2, String voucher3, String voucher4) {
-    return 'Min order ₹' + voucher + ' · ' + voucher2 + voucher3 + voucher4;
+  String minOrder4(
+    String voucher,
+    String voucher2,
+    String voucher3,
+    String voucher4,
+  ) {
+    return 'Min order ₹$voucher · $voucher2$voucher3$voucher4';
   }
 
   @override
-  String perShopperExpires(String usage, String voucher, String voucher2, String fmt) {
-    return usage + ' · ' + voucher + ' per shopper' + voucher2 + ' · expires ' + fmt;
+  String perShopperExpires(
+    String usage,
+    String voucher,
+    String voucher2,
+    String fmt,
+  ) {
+    return '$usage · $voucher per shopper$voucher2 · expires $fmt';
   }
 
   @override
   String voucherUpdated(String voucher) {
-    return 'Voucher ' + voucher + ' updated.';
+    return 'Voucher $voucher updated.';
   }
 
   @override
   String couldNotSaveVoucher(String e) {
-    return 'Could not save voucher: ' + e;
+    return 'Could not save voucher: $e';
   }
 
   @override
   String companyNotFound(String companyname) {
-    return 'Company "' + companyname + '" not found.';
+    return 'Company \"$companyname\" not found.';
   }
 
   @override
   String company3(String widget) {
-    return 'Company: ' + widget;
+    return 'Company: $widget';
   }
 
   @override
   String errorCreatingAdmin(String e) {
-    return 'Error creating admin: ' + e;
+    return 'Error creating admin: $e';
   }
 
   @override
   String otpSentTo(String mobile) {
-    return 'OTP sent to ' + mobile;
+    return 'OTP sent to $mobile';
   }
 
   @override
   String error(String e) {
-    return 'Error: ' + e;
+    return 'Error: $e';
   }
 
   @override
   String otpResentTo(String mobile) {
-    return 'OTP resent to ' + mobile;
+    return 'OTP resent to $mobile';
   }
 
   @override
   String verificationFailed(String e) {
-    return 'Verification failed: ' + e;
+    return 'Verification failed: $e';
   }
 
   @override
   String verificationError(String e) {
-    return 'Verification error: ' + e;
+    return 'Verification error: $e';
   }
 
   @override
   String youSave(String formatcurrency) {
-    return 'You save ' + formatcurrency;
+    return 'You save $formatcurrency';
   }
 
   @override
   String total2(String item) {
-    return 'Total: ' + item;
+    return 'Total: $item';
   }
 
   @override
   String removedFromCart(String removed) {
-    return removed + ' removed from cart';
+    return '$removed removed from cart';
   }
 
   @override
   String savedToYourWishlist(String removed) {
-    return removed + ' saved to your wishlist';
+    return '$removed saved to your wishlist';
   }
 
   @override
   String placeDirectOrder(String formatcurrency) {
-    return 'Place Direct Order · ' + formatcurrency;
+    return 'Place Direct Order · $formatcurrency';
   }
 
   @override
   String orderWillBeCancelledThisCannotBeUndone(String order) {
-    return 'Order ' + order + ' will be cancelled. This cannot be undone.';
+    return 'Order $order will be cancelled. This cannot be undone.';
   }
 
   @override
   String order3(String order) {
-    return 'Order ' + order;
+    return 'Order $order';
   }
 
   @override
   String items(String order, String formatdate) {
-    return order + ' items · ' + formatdate;
+    return '$order items · $formatdate';
   }
 
   @override
   String msgOn(String formatdate) {
-    return ' on ' + formatdate;
+    return ' on $formatdate';
   }
 
   @override
   String cancelled2(String order) {
-    return 'Cancelled' + order;
+    return 'Cancelled$order';
   }
 
   @override
   String more(String remaining) {
-    return '+' + remaining + ' more';
+    return '+$remaining more';
   }
 
   @override
   String addedToCartNoLongerAvailable(num added, String missing) {
-    return (added == 1 ? '1 item' : '$added items') + ' added to cart · ' + missing + ' no longer available';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added items',
+      one: '1 item',
+    );
+    return '$_temp0 added to cart · $missing no longer available';
   }
 
   @override
   String minimumOrderForDelivery(String currency) {
-    return 'Minimum Order for Delivery (' + currency + ')';
+    return 'Minimum Order for Delivery ($currency)';
   }
 
   @override
   String companyRegisteredSuccessfully(String companyname) {
-    return 'Company "' + companyname + '" registered successfully!';
+    return 'Company \"$companyname\" registered successfully!';
   }
 
   @override
   String queue(String l10n) {
-    return l10n + ' Queue';
+    return '$l10n Queue';
   }
 
   @override
   String items5(String o, String o2, String o3) {
-    return o + ' items · ' + o2 + o3;
+    return '$o items · $o2$o3';
   }
 
   @override
   String manifest(String l10n) {
-    return l10n + ' Manifest';
+    return '$l10n Manifest';
   }
 
   @override
   String qtySkuScan(String item) {
-    return 'Qty: ' + item + ' · SKU scan';
+    return 'Qty: $item · SKU scan';
   }
 
   @override
-  String yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails(String ticketid) {
-    return 'Your ticket ID is #' + ticketid + '.\nAn email has been triggered to ayush123@gmail.com with your attached account details.';
+  String
+  yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails(
+    String ticketid,
+  ) {
+    return 'Your ticket ID is #$ticketid.\nAn email has been triggered to ayush123@gmail.com with your attached account details.';
   }
 
   @override
   String ticket(String ticketid) {
-    return 'Ticket #' + ticketid;
+    return 'Ticket #$ticketid';
   }
 
   @override
   String items3(String filteredlist) {
-    return filteredlist + ' items';
+    return '$filteredlist items';
   }
 
   @override
   String all2(String widget) {
-    return 'All ' + widget;
+    return 'All $widget';
   }
 
   @override
   String productCount(num count) {
-    return (count == 1 ? '1 product' : '$count products');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products',
+      one: '1 product',
+    );
+    return '$_temp0';
   }
 
   @override
   String noProductsFound2(String categoryname) {
-    return 'No ' + categoryname + ' products found';
+    return 'No $categoryname products found';
   }
 
   @override
   String addedToCart(String product) {
-    return product + ' added to cart';
+    return '$product added to cart';
   }
 
   @override
   String voucherCopiedToClipboard(String code) {
-    return 'Voucher "' + code + '" copied to clipboard!';
+    return 'Voucher \"$code\" copied to clipboard!';
   }
 
   @override
   String msgIn(String company) {
-    return 'in ' + company;
+    return 'in $company';
   }
 
   @override
   String allProducts(String filtered) {
-    return 'All Products (' + filtered + ')';
+    return 'All Products ($filtered)';
   }
 
   @override
   String scrollForMoreLeft(String filtered) {
-    return 'Scroll for more (' + filtered + ' left)';
+    return 'Scroll for more ($filtered left)';
   }
 
   @override
   String reviewsCount(num stats) {
-    return ' (' + (stats == 1 ? '1 review' : '$stats reviews') + ')';
+    String _temp0 = intl.Intl.pluralLogic(
+      stats,
+      locale: localeName,
+      other: '$stats reviews',
+      one: '1 review',
+    );
+    return ' ($_temp0)';
   }
 
   @override
   String vouchersPlural11LiveOfferOtherLiveOffers(String sub, num vouchers) {
-    return sub + ' · ' + (vouchers == 1 ? '1 live offer' : '$vouchers live offers');
+    String _temp0 = intl.Intl.pluralLogic(
+      vouchers,
+      locale: localeName,
+      other: '$vouchers live offers',
+      one: '1 live offer',
+    );
+    return '$sub · $_temp0';
   }
 
   @override
   String useCode(String top) {
-    return 'Use Code: ' + top;
+    return 'Use Code: $top';
   }
 
   @override
   String minOrder3(String v) {
-    return 'Min order ₹' + v;
+    return 'Min order ₹$v';
   }
 
   @override
   String couponCopiedApplyAtCheckout(String v) {
-    return 'Coupon ' + v + ' copied! Apply at checkout';
+    return 'Coupon $v copied! Apply at checkout';
   }
 
   @override
   String deliveryLocationSetTo(String detected, String detected2) {
-    return 'Delivery location set to: ' + detected + ' (' + detected2 + ')';
+    return 'Delivery location set to: $detected ($detected2)';
   }
 
   @override
   String pincode3(String cleanpin) {
-    return 'Pincode ' + cleanpin;
+    return 'Pincode $cleanpin';
   }
 
   @override
   String deliveryLocationUpdatedTo(String finalcity, String cleanpin) {
-    return 'Delivery location updated to ' + finalcity + ' (' + cleanpin + ')';
+    return 'Delivery location updated to $finalcity ($cleanpin)';
   }
 
   @override
   String areYouSureYouWantToDelete2(String addr, String addr2) {
-    return 'Are you sure you want to delete "' + addr + ': ' + addr2 + '"?';
+    return 'Are you sure you want to delete \"$addr: $addr2\"?';
   }
 
   @override
   String saveHomeWorkOrOtherAddressSaved3(String addresses) {
-    return 'Save home, work or other address (saved: ' + addresses + '/3)';
+    return 'Save home, work or other address (saved: $addresses/3)';
   }
 
   @override
   String of3Added(String addresses) {
-    return addresses + ' of 3 added';
+    return '$addresses of 3 added';
   }
 
   @override
   String deliveryAvailableTo(String addr) {
-    return 'Delivery available to ' + addr;
+    return 'Delivery available to $addr';
   }
 
   @override
   String off2(String discountpercent) {
-    return '-' + discountpercent + '% OFF';
+    return '-$discountpercent% OFF';
   }
 
   @override
   String save2(String formatcurrency) {
-    return 'Save ' + formatcurrency;
+    return 'Save $formatcurrency';
   }
 
   @override
   String sku3(String skuof) {
-    return 'SKU: ' + skuof;
+    return 'SKU: $skuof';
   }
 
   @override
   String viewAllDetailsMore(String hidden) {
-    return 'View all details (' + hidden + ' more)';
+    return 'View all details ($hidden more)';
   }
 
   @override
   String addedToCart2(String p, String variantlabel) {
-    return p + variantlabel + ' added to cart';
+    return '$p$variantlabel added to cart';
   }
 
   @override
   String off3(String percent) {
-    return percent + '% OFF';
+    return '$percent% OFF';
   }
 
   @override
   String searchIn(String widget) {
-    return 'Search in ' + widget;
+    return 'Search in $widget';
   }
 
   @override
   String itemCount(num resultcount) {
-    return (resultcount == 1 ? '1 item' : '$resultcount items');
+    String _temp0 = intl.Intl.pluralLogic(
+      resultcount,
+      locale: localeName,
+      other: '$resultcount items',
+      one: '1 item',
+    );
+    return '$_temp0';
   }
 
   @override
   String noProductsFoundFor(String query) {
-    return 'No products found for "' + query + '"';
+    return 'No products found for \"$query\"';
   }
 
   @override
   String reviews2(String count) {
-    return count + ' reviews';
+    return '$count reviews';
   }
 
   @override
-  String get couldNotSignInWithProvidedCredentials => 'Could not sign in with provided credentials.';
+  String get couldNotSignInWithProvidedCredentials =>
+      'Could not sign in with provided credentials.';
 
   @override
   String noAdminProfileFoundForAccount(String email) {
-    return 'No admin profile found for account "' + email + '".';
+    return 'No admin profile found for account \"$email\".';
   }
 
   @override
-  String adminAccountIsAssignedToNot(String registeredname, String companyname) {
-    return 'Admin account is assigned to "' + registeredname + '", not "' + companyname + '".';
+  String adminAccountIsAssignedToNot(
+    String registeredname,
+    String companyname,
+  ) {
+    return 'Admin account is assigned to \"$registeredname\", not \"$companyname\".';
   }
 
   @override
   String noEmployeeProfileFoundForAccount(String email) {
-    return 'No employee profile found for account "' + email + '".';
+    return 'No employee profile found for account \"$email\".';
   }
 
   @override
@@ -2604,12 +2818,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String readyForPickupBy(String fmt) {
-    return 'Ready for pickup by ' + fmt;
+    return 'Ready for pickup by $fmt';
   }
 
   @override
   String arrivingBy(String fmt) {
-    return 'Arriving by ' + fmt;
+    return 'Arriving by $fmt';
   }
 
   @override
@@ -2620,12 +2834,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String today(String time) {
-    return time + ' today';
+    return '$time today';
   }
 
   @override
   String tomorrow(String time) {
-    return time + ' tomorrow';
+    return '$time tomorrow';
   }
 
   @override
@@ -2657,12 +2871,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String openNowCloses(String close, String closesuffix) {
-    return 'Open Now · Closes ' + close + closesuffix;
+    return 'Open Now · Closes $close$closesuffix';
   }
 
   @override
   String closedOpens(String time, String day) {
-    return 'Closed · Opens ' + time + day;
+    return 'Closed · Opens $time$day';
   }
 
   @override
@@ -2673,7 +2887,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String followers(String followercount) {
-    return followercount + ' followers';
+    return '$followercount followers';
   }
 
   @override
@@ -2686,10 +2900,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mrpMustBeGreaterThan0 => 'MRP must be greater than 0.';
 
   @override
-  String get sellingPriceCannotBeNegative => 'Selling price cannot be negative.';
+  String get sellingPriceCannotBeNegative =>
+      'Selling price cannot be negative.';
 
   @override
-  String get sellingPriceMustBeLowerThanTheMrpOrLeftAt0 => 'Selling price must be lower than the MRP (or left at 0).';
+  String get sellingPriceMustBeLowerThanTheMrpOrLeftAt0 =>
+      'Selling price must be lower than the MRP (or left at 0).';
 
   @override
   String get stockCannotBeNegative => 'Stock cannot be negative.';
@@ -2701,38 +2917,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickACategoryForThisProduct => 'Pick a category for this product.';
 
   @override
-  String get weightBasedProductsNeedAUnitKgG => 'Weight based products need a unit (kg, g, ...).';
+  String get weightBasedProductsNeedAUnitKgG =>
+      'Weight based products need a unit (kg, g, ...).';
 
   @override
   String get categoryNameIsRequired => 'Category name is required.';
 
   @override
-  String get aCategoryWithThisNameAlreadyExists => 'A category with this name already exists.';
+  String get aCategoryWithThisNameAlreadyExists =>
+      'A category with this name already exists.';
 
   @override
-  String get aCategoryCannotBeItsOwnParent => 'A category cannot be its own parent.';
+  String get aCategoryCannotBeItsOwnParent =>
+      'A category cannot be its own parent.';
 
   @override
   String get voucherCodeIsRequired => 'Voucher code is required.';
 
   @override
   String useAtLeastCharacters(String codeminlength) {
-    return 'Use at least ' + codeminlength + ' characters.';
+    return 'Use at least $codeminlength characters.';
   }
 
   @override
   String useAtMostCharacters(String codemaxlength) {
-    return 'Use at most ' + codemaxlength + ' characters.';
+    return 'Use at most $codemaxlength characters.';
   }
 
   @override
-  String get onlyLettersAndNumbersAreAllowed => 'Only letters and numbers are allowed.';
+  String get onlyLettersAndNumbersAreAllowed =>
+      'Only letters and numbers are allowed.';
 
   @override
-  String get thisCodeAlreadyExistsForThisStore => 'This code already exists for this store.';
+  String get thisCodeAlreadyExistsForThisStore =>
+      'This code already exists for this store.';
 
   @override
-  String get enterAPercentageGreaterThan0 => 'Enter a percentage greater than 0.';
+  String get enterAPercentageGreaterThan0 =>
+      'Enter a percentage greater than 0.';
 
   @override
   String get percentageCannotExceed100 => 'Percentage cannot exceed 100.';
@@ -2741,19 +2963,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterAnAmountGreaterThan0 => 'Enter an amount greater than 0.';
 
   @override
-  String get minimumOrderCannotBeNegative => 'Minimum order cannot be negative.';
+  String get minimumOrderCannotBeNegative =>
+      'Minimum order cannot be negative.';
 
   @override
   String get perUserLimitMustBeAtLeast1 => 'Per-user limit must be at least 1.';
 
   @override
-  String get totalUsageLimitMustBeAtLeast1 => 'Total usage limit must be at least 1.';
+  String get totalUsageLimitMustBeAtLeast1 =>
+      'Total usage limit must be at least 1.';
 
   @override
-  String get totalLimitCannotBeLowerThanThePerUserLimit => 'Total limit cannot be lower than the per-user limit.';
+  String get totalLimitCannotBeLowerThanThePerUserLimit =>
+      'Total limit cannot be lower than the per-user limit.';
 
   @override
-  String get expiryDateMustBeInTheFuture => 'Expiry date must be in the future.';
+  String get expiryDateMustBeInTheFuture =>
+      'Expiry date must be in the future.';
 
   @override
   String get selectAtLeastOneProduct => 'Select at least one product.';
@@ -2765,40 +2991,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voucherApplied2 => 'Voucher applied.';
 
   @override
-  String get thatCodeIsNotValidForThisStore => 'That code is not valid for this store.';
+  String get thatCodeIsNotValidForThisStore =>
+      'That code is not valid for this store.';
 
   @override
-  String get thisVoucherIsCurrentlyDisabled => 'This voucher is currently disabled.';
+  String get thisVoucherIsCurrentlyDisabled =>
+      'This voucher is currently disabled.';
 
   @override
   String get thisVoucherHasExpired => 'This voucher has expired.';
 
   @override
-  String get addAFewMoreItemsToUseThisVoucher => 'Add a few more items to use this voucher.';
+  String get addAFewMoreItemsToUseThisVoucher =>
+      'Add a few more items to use this voucher.';
 
   @override
-  String get thisVoucherDoesNotApplyToTheItemsInYourCart => 'This voucher does not apply to the items in your cart.';
+  String get thisVoucherDoesNotApplyToTheItemsInYourCart =>
+      'This voucher does not apply to the items in your cart.';
 
   @override
-  String get youHaveAlreadyUsedThisVoucherTheMaximumNumberOfTimes => 'You have already used this voucher the maximum number of times.';
+  String get youHaveAlreadyUsedThisVoucherTheMaximumNumberOfTimes =>
+      'You have already used this voucher the maximum number of times.';
 
   @override
-  String get thisVoucherHasReachedItsRedemptionLimit => 'This voucher has reached its redemption limit.';
+  String get thisVoucherHasReachedItsRedemptionLimit =>
+      'This voucher has reached its redemption limit.';
 
   @override
-  String get thisVoucherIsForFirstTimeOrdersOnly => 'This voucher is for first-time orders only.';
+  String get thisVoucherIsForFirstTimeOrdersOnly =>
+      'This voucher is for first-time orders only.';
 
   @override
   String get voucherCannotBeApplied => 'Voucher cannot be applied.';
 
   @override
   String onlyLeft(String left) {
-    return 'Only ' + left + ' left';
+    return 'Only $left left';
   }
 
   @override
   String near(String landmark) {
-    return 'Near ' + landmark;
+    return 'Near $landmark';
   }
 
   @override
@@ -2833,11 +3066,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String off4(String trim) {
-    return '₹' + trim + ' OFF';
+    return '₹$trim OFF';
   }
 
   @override
-  String get aNewVersionIsAvailablePleaseUpdate => 'A new version is available. Please update.';
+  String get aNewVersionIsAvailablePleaseUpdate =>
+      'A new version is available. Please update.';
 
   @override
   String get aNewVersionIsAvailable => 'A new version is available.';
@@ -2852,7 +3086,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guestCustomer => 'Guest Customer';
 
   @override
-  String get signInToSyncYourCartAndOrders => 'Sign in to sync your cart and orders';
+  String get signInToSyncYourCartAndOrders =>
+      'Sign in to sync your cart and orders';
 
   @override
   String get vouchers => 'Vouchers';
@@ -3014,19 +3249,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inThisCategory => 'In This Category';
 
   @override
-  String get noAssignedProductsMatchSearch => 'No assigned products match search';
+  String get noAssignedProductsMatchSearch =>
+      'No assigned products match search';
 
   @override
   String get noProductsAssignedYet => 'No products assigned yet';
 
   @override
-  String get noAvailableProductsMatchSearch => 'No available products match search';
+  String get noAvailableProductsMatchSearch =>
+      'No available products match search';
 
   @override
   String get allProductsAreAssigned => 'All products are assigned!';
 
   @override
-  String get msg6DigitAreaCodeForDeliveryService => '6-digit area code for delivery service';
+  String get msg6DigitAreaCodeForDeliveryService =>
+      '6-digit area code for delivery service';
 
   @override
   String get enterA6DigitPincode => 'Enter a 6-digit pincode';
@@ -3035,10 +3273,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pincodeMustBeExactly6Digits => 'Pincode must be exactly 6 digits';
 
   @override
-  String get ordersCanBeDeliveredToThisPincode => 'Orders can be delivered to this pincode';
+  String get ordersCanBeDeliveredToThisPincode =>
+      'Orders can be delivered to this pincode';
 
   @override
-  String get deliveryTemporarilySuspendedToThisPincode => 'Delivery temporarily suspended to this pincode';
+  String get deliveryTemporarilySuspendedToThisPincode =>
+      'Delivery temporarily suspended to this pincode';
 
   @override
   String get enterDeliveryCharge => 'Enter delivery charge';
@@ -3047,10 +3287,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterAValidAmount => 'Enter a valid amount';
 
   @override
-  String get customersGet0DeliveryFeeWhenOrderSubtotalMeetsThisAmount => 'Customers get ₹0 delivery fee when order subtotal meets this amount';
+  String get customersGet0DeliveryFeeWhenOrderSubtotalMeetsThisAmount =>
+      'Customers get ₹0 delivery fee when order subtotal meets this amount';
 
   @override
-  String get displayedToCustomersOnCheckoutProductPages => 'Displayed to customers on checkout & product pages';
+  String get displayedToCustomersOnCheckoutProductPages =>
+      'Displayed to customers on checkout & product pages';
 
   @override
   String get saving => 'Saving...';
@@ -3101,7 +3343,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterAValidEmail => 'Enter a valid email';
 
   @override
-  String get passwordMustBeAtLeast6Characters => 'Password must be at least 6 characters';
+  String get passwordMustBeAtLeast6Characters =>
+      'Password must be at least 6 characters';
 
   @override
   String get selectDateOfBirth => 'Select Date of Birth';
@@ -3125,13 +3368,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noOrdersYet2 => 'No orders yet';
 
   @override
-  String get ordersFromYourStoreWillAppearHereInstantly => 'Orders from your store will appear here instantly.';
+  String get ordersFromYourStoreWillAppearHereInstantly =>
+      'Orders from your store will appear here instantly.';
 
   @override
   String get noOrdersMatchTheseFilters => 'No orders match these filters';
 
   @override
-  String get clearTheSearchBoxOrPickAnotherStatus => 'Clear the search box or pick another status.';
+  String get clearTheSearchBoxOrPickAnotherStatus =>
+      'Clear the search box or pick another status.';
 
   @override
   String get all3 => 'All';
@@ -3152,13 +3397,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentDoneReceived => 'Payment: Done (Received)';
 
   @override
-  String get paymentPendingManualOffline => 'Payment: Pending (Manual / Offline)';
+  String get paymentPendingManualOffline =>
+      'Payment: Pending (Manual / Offline)';
 
   @override
   String get paymentConfirmedByStore => 'Payment confirmed by store';
 
   @override
-  String get customerWillPayOfflineToggleToMarkAsDone => 'Customer will pay offline. Toggle to mark as Done.';
+  String get customerWillPayOfflineToggleToMarkAsDone =>
+      'Customer will pay offline. Toggle to mark as Done.';
 
   @override
   String get payable => 'Payable';
@@ -3206,13 +3453,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msg1Box2Boxes5Boxes10Boxes => '1 box, 2 boxes, 5 boxes, 10 boxes';
 
   @override
-  String get msg1Pack2Packs5Packs10Packs => '1 pack, 2 packs, 5 packs, 10 packs';
+  String get msg1Pack2Packs5Packs10Packs =>
+      '1 pack, 2 packs, 5 packs, 10 packs';
 
   @override
   String get bottle => 'Bottle';
 
   @override
-  String get msg1Bottle2Bottles4Bottles6Bottles => '1 bottle, 2 bottles, 4 bottles, 6 bottles';
+  String get msg1Bottle2Bottles4Bottles6Bottles =>
+      '1 bottle, 2 bottles, 4 bottles, 6 bottles';
 
   @override
   String get redBlueBlackWhiteGreen => 'Red, Blue, Black, White, Green';
@@ -3248,10 +3497,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNewProduct => 'Add New Product';
 
   @override
-  String get updateCatalogItemDetailsPricingImagesVariantsAndSpecifications => 'Update catalog item details, pricing, images, variants, and specifications.';
+  String get updateCatalogItemDetailsPricingImagesVariantsAndSpecifications =>
+      'Update catalog item details, pricing, images, variants, and specifications.';
 
   @override
-  String get createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls => 'Create new catalog items with dynamic variants, custom options, gallery, and inventory controls.';
+  String
+  get createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls =>
+      'Create new catalog items with dynamic variants, custom options, gallery, and inventory controls.';
 
   @override
   String get productTitleIsRequired2 => 'Product title is required';
@@ -3332,7 +3584,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noVouchersYet => 'No vouchers yet';
 
   @override
-  String get createYourFirstCouponCodeToRunAPromotionForThisStore => 'Create your first coupon code to run a promotion for this store.';
+  String get createYourFirstCouponCodeToRunAPromotionForThisStore =>
+      'Create your first coupon code to run a promotion for this store.';
 
   @override
   String get createVoucher2 => 'Create Voucher';
@@ -3341,7 +3594,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noVouchersMatchTheseFilters => 'No vouchers match these filters';
 
   @override
-  String get tryClearingTheSearchBoxOrChoosingAll => 'Try clearing the search box or choosing "All".';
+  String get tryClearingTheSearchBoxOrChoosingAll =>
+      'Try clearing the search box or choosing \"All\".';
 
   @override
   String get paused => 'Paused';
@@ -3380,10 +3634,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveChanges2 => 'Save changes';
 
   @override
-  String get accessDeniedByServerPleaseCheckYourInternetConnectionAndTryAgain => 'Access denied by server. Please check your internet connection and try again.';
+  String get accessDeniedByServerPleaseCheckYourInternetConnectionAndTryAgain =>
+      'Access denied by server. Please check your internet connection and try again.';
 
   @override
-  String get invalidEmailPasswordOrCompanyCredentials => 'Invalid email, password, or company credentials.';
+  String get invalidEmailPasswordOrCompanyCredentials =>
+      'Invalid email, password, or company credentials.';
 
   @override
   String get authenticationFailed => 'Authentication failed.';
@@ -3392,19 +3648,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidAdminEmailOrPassword => 'Invalid admin email or password.';
 
   @override
-  String get thisAdminAccountHasBeenDisabled => 'This admin account has been disabled.';
+  String get thisAdminAccountHasBeenDisabled =>
+      'This admin account has been disabled.';
 
   @override
-  String get tooManyAttemptsPleaseWaitAMomentAndTryAgain => 'Too many attempts. Please wait a moment and try again.';
+  String get tooManyAttemptsPleaseWaitAMomentAndTryAgain =>
+      'Too many attempts. Please wait a moment and try again.';
 
   @override
-  String get invalidEmployeeEmailPasswordOrCompanyName => 'Invalid employee email, password, or company name.';
+  String get invalidEmployeeEmailPasswordOrCompanyName =>
+      'Invalid employee email, password, or company name.';
 
   @override
-  String get invalidEmployeeEmailOrPassword => 'Invalid employee email or password.';
+  String get invalidEmployeeEmailOrPassword =>
+      'Invalid employee email or password.';
 
   @override
-  String get thisEmployeeAccountHasBeenDisabled => 'This employee account has been disabled.';
+  String get thisEmployeeAccountHasBeenDisabled =>
+      'This employee account has been disabled.';
 
   @override
   String get shopper => 'Shopper';
@@ -3413,7 +3674,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enter10DigitNumber => 'Enter 10-digit number';
 
   @override
-  String get enterThe6DigitCodeSentViaSms => 'Enter the 6-digit code sent via SMS';
+  String get enterThe6DigitCodeSentViaSms =>
+      'Enter the 6-digit code sent via SMS';
 
   @override
   String get signingUp => 'Signing up...';
@@ -3431,10 +3693,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInWithGoogle => 'Sign in with Google';
 
   @override
-  String get enter10DigitIndianMobileNumber => 'Enter 10-digit Indian mobile number';
+  String get enter10DigitIndianMobileNumber =>
+      'Enter 10-digit Indian mobile number';
 
   @override
-  String get enterAValid10DigitMobileNumber => 'Enter a valid 10-digit mobile number';
+  String get enterAValid10DigitMobileNumber =>
+      'Enter a valid 10-digit mobile number';
 
   @override
   String get houseFlatNumberIsRequired => 'House / Flat number is required';
@@ -3458,7 +3722,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterAVoucherCode => 'Enter a voucher code.';
 
   @override
-  String get pleaseSelectADeliveryAddress => 'Please select a delivery address.';
+  String get pleaseSelectADeliveryAddress =>
+      'Please select a delivery address.';
 
   @override
   String get noOrderItemsAreAvailable => 'No order items are available.';
@@ -3488,25 +3753,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get usd => '\$ USD';
 
   @override
-  String get thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail => 'This email is already registered, but the password provided does not match. Please enter your existing password, sign in via Admin Login, or use a different email.';
+  String
+  get thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail =>
+      'This email is already registered, but the password provided does not match. Please enter your existing password, sign in via Admin Login, or use a different email.';
 
   @override
-  String get failedToObtainAuthenticatedUserId => 'Failed to obtain authenticated user ID.';
+  String get failedToObtainAuthenticatedUserId =>
+      'Failed to obtain authenticated user ID.';
 
   @override
   String get authenticationErrorOccurred => 'Authentication error occurred.';
 
   @override
-  String get passwordIsTooWeakPleaseUseAtLeast6Characters => 'Password is too weak. Please use at least 6 characters.';
+  String get passwordIsTooWeakPleaseUseAtLeast6Characters =>
+      'Password is too weak. Please use at least 6 characters.';
 
   @override
-  String get thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail => 'That email is already registered. Please sign in via Admin Login or use a different email.';
+  String
+  get thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail =>
+      'That email is already registered. Please sign in via Admin Login or use a different email.';
 
   @override
-  String get pleaseEnterAValidEmailAddress => 'Please enter a valid email address.';
+  String get pleaseEnterAValidEmailAddress =>
+      'Please enter a valid email address.';
 
   @override
-  String get invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin => 'Invalid credentials. If you already have an account, enter its existing password or sign in via Admin Login.';
+  String
+  get invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin =>
+      'Invalid credentials. If you already have an account, enter its existing password or sign in via Admin Login.';
 
   @override
   String get sentToAdmin => 'Sent to Admin';
@@ -3569,7 +3843,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deliveryContactAddress => 'Delivery / Contact Address';
 
   @override
-  String get enterYourAddressToAttachWithQuery => 'Enter your address to attach with query';
+  String get enterYourAddressToAttachWithQuery =>
+      'Enter your address to attach with query';
 
   @override
   String get subjectQuerySummary => 'Subject / Query Summary *';
@@ -3584,10 +3859,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailedQueryMessage => 'Detailed Query / Message *';
 
   @override
-  String get explainYourIssueQuestionsOrFeedbackInDetailSoWeCanAssistYouQuickly => 'Explain your issue, questions or feedback in detail so we can assist you quickly...';
+  String
+  get explainYourIssueQuestionsOrFeedbackInDetailSoWeCanAssistYouQuickly =>
+      'Explain your issue, questions or feedback in detail so we can assist you quickly...';
 
   @override
-  String get pleaseDescribeYourQueryInAtLeast10Characters => 'Please describe your query in at least 10 characters';
+  String get pleaseDescribeYourQueryInAtLeast10Characters =>
+      'Please describe your query in at least 10 characters';
 
   @override
   String get ordersTracking => 'Orders & Tracking';
@@ -3608,91 +3886,137 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discountsOffers => 'Discounts & Offers';
 
   @override
-  String get howDoITrackMyOrderStatusInRealTime => 'How do I track my order status in real time?';
+  String get howDoITrackMyOrderStatusInRealTime =>
+      'How do I track my order status in real time?';
 
   @override
-  String get youCanTrackYourLiveOrderProgressByNavigatingToAccountMyOrdersAndSelectingYourActiveOrder => 'You can track your live order progress by navigating to "Account > My Orders" and selecting your active order. ';
+  String
+  get youCanTrackYourLiveOrderProgressByNavigatingToAccountMyOrdersAndSelectingYourActiveOrder =>
+      'You can track your live order progress by navigating to \"Account > My Orders\" and selecting your active order. ';
 
   @override
-  String get youWillSeeStepByStepUpdatesFromOrderPlacedConfirmedPackedOutForDeliveryToDeliveredWithLiveStatusTimelines => 'You will see step-by-step updates from Order Placed, Confirmed, Packed, Out for Delivery, to Delivered with live status timelines.';
+  String
+  get youWillSeeStepByStepUpdatesFromOrderPlacedConfirmedPackedOutForDeliveryToDeliveredWithLiveStatusTimelines =>
+      'You will see step-by-step updates from Order Placed, Confirmed, Packed, Out for Delivery, to Delivered with live status timelines.';
 
   @override
-  String get canICancelOrModifyAnOrderAfterPlacingIt => 'Can I cancel or modify an order after placing it?';
+  String get canICancelOrModifyAnOrderAfterPlacingIt =>
+      'Can I cancel or modify an order after placing it?';
 
   @override
-  String get youCanCancelYourOrderFromTheOrderDetailsScreenBeforeItEntersThePackedOrOutForDeliveryState => 'You can cancel your order from the Order Details screen before it enters the "Packed" or "Out for Delivery" state. ';
+  String
+  get youCanCancelYourOrderFromTheOrderDetailsScreenBeforeItEntersThePackedOrOutForDeliveryState =>
+      'You can cancel your order from the Order Details screen before it enters the \"Packed\" or \"Out for Delivery\" state. ';
 
   @override
-  String get onceAnOrderIsPackedOrDispatchedByTheMerchantCancellationRequestsMustBeHandledByContactingCustomerSupport => 'Once an order is packed or dispatched by the merchant, cancellation requests must be handled by contacting customer support.';
+  String
+  get onceAnOrderIsPackedOrDispatchedByTheMerchantCancellationRequestsMustBeHandledByContactingCustomerSupport =>
+      'Once an order is packed or dispatched by the merchant, cancellation requests must be handled by contacting customer support.';
 
   @override
-  String get howIsTheDeliveryChargeCalculatedForMyLocation => 'How is the delivery charge calculated for my location?';
+  String get howIsTheDeliveryChargeCalculatedForMyLocation =>
+      'How is the delivery charge calculated for my location?';
 
   @override
-  String get deliveryChargesAreComputedDynamicallyBasedOnTheMerchantSDeliveryZoneRatesForYourPinCodeOrDistance => 'Delivery charges are computed dynamically based on the merchant\'s delivery zone rates for your PIN code or distance. ';
+  String
+  get deliveryChargesAreComputedDynamicallyBasedOnTheMerchantSDeliveryZoneRatesForYourPinCodeOrDistance =>
+      'Delivery charges are computed dynamically based on the merchant\'s delivery zone rates for your PIN code or distance. ';
 
   @override
-  String get whenYouSelectOrEnterYourDeliveryAddressAtCheckoutAnyApplicableDeliveryFeeIsTransparentlyShownInTheBillSummary => 'When you select or enter your delivery address at checkout, any applicable delivery fee is transparently shown in the bill summary.';
+  String
+  get whenYouSelectOrEnterYourDeliveryAddressAtCheckoutAnyApplicableDeliveryFeeIsTransparentlyShownInTheBillSummary =>
+      'When you select or enter your delivery address at checkout, any applicable delivery fee is transparently shown in the bill summary.';
 
   @override
-  String get whatAreTheEstimatedDeliveryTimelines => 'What are the estimated delivery timelines?';
+  String get whatAreTheEstimatedDeliveryTimelines =>
+      'What are the estimated delivery timelines?';
 
   @override
-  String get standardLocalDeliveriesTypicallyArriveWithinTheMerchantSDesignatedDeliveryWindowUsually3090MinutesForQuickCommerceItemsOr12BusinessDaysForStandardItems => 'Standard local deliveries typically arrive within the merchant\'s designated delivery window (usually 30–90 minutes for quick-commerce items or 1–2 business days for standard items). ';
+  String
+  get standardLocalDeliveriesTypicallyArriveWithinTheMerchantSDesignatedDeliveryWindowUsually3090MinutesForQuickCommerceItemsOr12BusinessDaysForStandardItems =>
+      'Standard local deliveries typically arrive within the merchant\'s designated delivery window (usually 30–90 minutes for quick-commerce items or 1–2 business days for standard items). ';
 
   @override
-  String get estimatedDeliveryTimesAreDisplayedOnTheProductPageAndCheckoutScreen => 'Estimated delivery times are displayed on the product page and checkout screen.';
+  String
+  get estimatedDeliveryTimesAreDisplayedOnTheProductPageAndCheckoutScreen =>
+      'Estimated delivery times are displayed on the product page and checkout screen.';
 
   @override
-  String get whatPaymentMethodsAreSupported => 'What payment methods are supported?';
+  String get whatPaymentMethodsAreSupported =>
+      'What payment methods are supported?';
 
   @override
-  String get weSupportManualCashOnDeliveryCodAndPhysicalPaymentUponDelivery => 'We support Manual / Cash on Delivery (COD) and physical payment upon delivery. ';
+  String get weSupportManualCashOnDeliveryCodAndPhysicalPaymentUponDelivery =>
+      'We support Manual / Cash on Delivery (COD) and physical payment upon delivery. ';
 
   @override
-  String get theDeliveryPartnerOrMerchantUpdatesThePaymentStatusDirectlyOnceThePaymentIsCompleted => 'The delivery partner or merchant updates the payment status directly once the payment is completed.';
+  String
+  get theDeliveryPartnerOrMerchantUpdatesThePaymentStatusDirectlyOnceThePaymentIsCompleted =>
+      'The delivery partner or merchant updates the payment status directly once the payment is completed.';
 
   @override
-  String get howDoRefundsWorkForCancelledOrders => 'How do refunds work for cancelled orders?';
+  String get howDoRefundsWorkForCancelledOrders =>
+      'How do refunds work for cancelled orders?';
 
   @override
-  String get ifAnOrderWasPrepaidOrCancelledBeforeFulfillmentYourRefundIsInitiatedImmediatelyByTheMerchant => 'If an order was prepaid or cancelled before fulfillment, your refund is initiated immediately by the merchant. ';
+  String
+  get ifAnOrderWasPrepaidOrCancelledBeforeFulfillmentYourRefundIsInitiatedImmediatelyByTheMerchant =>
+      'If an order was prepaid or cancelled before fulfillment, your refund is initiated immediately by the merchant. ';
 
   @override
-  String get refundsTypicallyReflectInYourOriginalPaymentSourceWithin35BusinessDays => 'Refunds typically reflect in your original payment source within 3–5 business days.';
+  String
+  get refundsTypicallyReflectInYourOriginalPaymentSourceWithin35BusinessDays =>
+      'Refunds typically reflect in your original payment source within 3–5 business days.';
 
   @override
-  String get whatIsTheReturnAndReplacementPolicy => 'What is the return and replacement policy?';
+  String get whatIsTheReturnAndReplacementPolicy =>
+      'What is the return and replacement policy?';
 
   @override
-  String get eligibleItemsCanBeReturnedOrReplacedWithin7DaysOfDeliveryIfTheyAreDamagedDefectiveOrDifferentFromDescribed => 'Eligible items can be returned or replaced within 7 days of delivery if they are damaged, defective, or different from described. ';
+  String
+  get eligibleItemsCanBeReturnedOrReplacedWithin7DaysOfDeliveryIfTheyAreDamagedDefectiveOrDifferentFromDescribed =>
+      'Eligible items can be returned or replaced within 7 days of delivery if they are damaged, defective, or different from described. ';
 
   @override
-  String get toRequestAReturnGoToYourOrderDetailsOrSubmitAQueryUsingTheContactSupportFormWithPhotosOfTheDamagedItem => 'To request a return, go to your order details or submit a query using the Contact Support form with photos of the damaged item.';
+  String
+  get toRequestAReturnGoToYourOrderDetailsOrSubmitAQueryUsingTheContactSupportFormWithPhotosOfTheDamagedItem =>
+      'To request a return, go to your order details or submit a query using the Contact Support form with photos of the damaged item.';
 
   @override
-  String get howDoIAddOrManageMultipleDeliveryAddresses => 'How do I add or manage multiple delivery addresses?';
+  String get howDoIAddOrManageMultipleDeliveryAddresses =>
+      'How do I add or manage multiple delivery addresses?';
 
   @override
-  String get goToAccountSavedAddressesToAddUpTo3SavedDeliveryLocationsHomeWorkOther => 'Go to "Account > Saved Addresses" to add up to 3 saved delivery locations (Home, Work, Other). ';
+  String
+  get goToAccountSavedAddressesToAddUpTo3SavedDeliveryLocationsHomeWorkOther =>
+      'Go to \"Account > Saved Addresses\" to add up to 3 saved delivery locations (Home, Work, Other). ';
 
   @override
-  String get youCanAlsoSelectOrSwitchYourActiveDeliveryAddressDirectlyFromTheTopBarOnTheHomeScreen => 'You can also select or switch your active delivery address directly from the top bar on the Home Screen.';
+  String
+  get youCanAlsoSelectOrSwitchYourActiveDeliveryAddressDirectlyFromTheTopBarOnTheHomeScreen =>
+      'You can also select or switch your active delivery address directly from the top bar on the Home Screen.';
 
   @override
-  String get howDoIApplyADiscountVoucherOrCouponCode => 'How do I apply a discount voucher or coupon code?';
+  String get howDoIApplyADiscountVoucherOrCouponCode =>
+      'How do I apply a discount voucher or coupon code?';
 
   @override
-  String get duringCheckoutTapTheApplyVoucherSectionUnderOrderSummary => 'During checkout, tap the "Apply Voucher" section under Order Summary. ';
+  String get duringCheckoutTapTheApplyVoucherSectionUnderOrderSummary =>
+      'During checkout, tap the \"Apply Voucher\" section under Order Summary. ';
 
   @override
-  String get selectAnAvailablePromoCodeOrTypeYourVoucherCodeToInstantlyReceiveADiscountOnEligibleCartItems => 'Select an available promo code or type your voucher code to instantly receive a discount on eligible cart items.';
+  String
+  get selectAnAvailablePromoCodeOrTypeYourVoucherCodeToInstantlyReceiveADiscountOnEligibleCartItems =>
+      'Select an available promo code or type your voucher code to instantly receive a discount on eligible cart items.';
 
   @override
-  String get howIsMyPersonalDataAndAccountInformationSecured => 'How is my personal data and account information secured?';
+  String get howIsMyPersonalDataAndAccountInformationSecured =>
+      'How is my personal data and account information secured?';
 
   @override
-  String get weEmployIndustryStandardEncryptionProtocolsAndSecureAuthenticationTokensToProtectYourPersonalInformationDeliveryAddressesAndOrderHistory => 'We employ industry-standard encryption protocols and secure authentication tokens to protect your personal information, delivery addresses, and order history.';
+  String
+  get weEmployIndustryStandardEncryptionProtocolsAndSecureAuthenticationTokensToProtectYourPersonalInformationDeliveryAddressesAndOrderHistory =>
+      'We employ industry-standard encryption protocols and secure authentication tokens to protect your personal information, delivery addresses, and order history.';
 
   @override
   String get shopByCategory => 'Shop by Category';
@@ -3728,7 +4052,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selfPickupOnly => 'Self-Pickup only';
 
   @override
-  String get homeDeliveryAvailableNoMinOrder => 'Home Delivery available • No min order';
+  String get homeDeliveryAvailableNoMinOrder =>
+      'Home Delivery available • No min order';
 
   @override
   String get storefrontService => 'Storefront service';
@@ -3773,22 +4098,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trendingNow2 => 'Trending Now 🔥';
 
   @override
-  String get enterYour10DigitIndianMobileNumber => 'Enter your 10-digit Indian mobile number';
+  String get enterYour10DigitIndianMobileNumber =>
+      'Enter your 10-digit Indian mobile number';
 
   @override
   String get useCurrentLocation => 'Use Current Location';
 
   @override
-  String get detectingYourCurrentLocation => 'Detecting your current location...';
+  String get detectingYourCurrentLocation =>
+      'Detecting your current location...';
 
   @override
-  String get autoDetectViaGpsDeviceNetwork => 'Auto-detect via GPS / Device network';
+  String get autoDetectViaGpsDeviceNetwork =>
+      'Auto-detect via GPS / Device network';
 
   @override
   String get maximum3AddressesSaved => 'Maximum 3 addresses saved';
 
   @override
-  String get deliveryNotAvailableToThisPincode => 'Delivery not available to this pincode';
+  String get deliveryNotAvailableToThisPincode =>
+      'Delivery not available to this pincode';
 
   @override
   String get highlights => 'Highlights';
@@ -3810,151 +4139,163 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String categoryCreatedSuccessfully(String category) {
-    return 'Category "' + category + '" created successfully!';
+    return 'Category \"$category\" created successfully!';
   }
 
   @override
   String reorderingInside(String parentname) {
-    return 'Reordering inside "' + parentname + '"';
+    return 'Reordering inside \"$parentname\"';
   }
 
   @override
   String deliveryChargeCreatedFor(String pincode) {
-    return 'Delivery charge created for ' + pincode;
+    return 'Delivery charge created for $pincode';
   }
 
   @override
   String freeOn2(String formatcurrency) {
-    return 'Free on > ' + formatcurrency;
+    return 'Free on > $formatcurrency';
   }
 
   @override
   String min(String formatcurrency) {
-    return 'Min: ' + formatcurrency;
+    return 'Min: $formatcurrency';
   }
 
   @override
   String employeeProvisionedSuccessfully(String emp) {
-    return 'Employee "' + emp + '" provisioned successfully!';
+    return 'Employee \"$emp\" provisioned successfully!';
   }
 
   @override
   String discount2(String order) {
-    return 'Discount' + order;
+    return 'Discount$order';
   }
 
   @override
   String productCreatedSuccessfully(String product) {
-    return 'Product "' + product + '" created successfully!';
+    return 'Product \"$product\" created successfully!';
   }
 
   @override
   String stock(String product, String product2) {
-    return 'Stock: ' + product + ' ' + product2;
+    return 'Stock: $product $product2';
   }
 
   @override
   String orderReport(String period) {
-    return period + ' Order Report';
+    return '$period Order Report';
   }
 
   @override
   String uses(String voucher, String voucher2) {
-    return voucher + '/' + voucher2 + ' uses';
+    return '$voucher/$voucher2 uses';
   }
 
   @override
   String usesUnlimited(String voucher) {
-    return voucher + ' uses (unlimited)';
+    return '$voucher uses (unlimited)';
   }
 
   @override
   String voucherCreated(String voucher) {
-    return 'Voucher ' + voucher + ' created.';
+    return 'Voucher $voucher created.';
   }
 
   @override
   String couldNotVerifyCompanyPleaseTryAgain(String e) {
-    return 'Could not verify company. Please try again.\n' + e;
+    return 'Could not verify company. Please try again.\n$e';
   }
 
   @override
   String isUnavailable(String item) {
-    return item + ' is unavailable';
+    return '$item is unavailable';
   }
 
   @override
   String isUnavailable2(String item, String item2) {
-    return item + ' (' + item2 + ') is unavailable';
+    return '$item ($item2) is unavailable';
   }
 
   @override
   String isOutOfStock(String item) {
-    return item + ' is out of stock';
+    return '$item is out of stock';
   }
 
   @override
   String quantityReducedToStock(String item, String qty) {
-    return item + ': quantity reduced to ' + qty + ' (stock)';
+    return '$item: quantity reduced to $qty (stock)';
   }
 
   @override
   String priceUpdatedFor(String item) {
-    return 'Price updated for ' + item;
+    return 'Price updated for $item';
   }
 
   @override
   String couldNotPlaceTheOrder(String e) {
-    return 'Could not place the order: ' + e;
+    return 'Could not place the order: $e';
   }
 
   @override
   String confirmPlaceOrder(String formatcurrency) {
-    return 'Confirm & Place Order · ' + formatcurrency;
+    return 'Confirm & Place Order · $formatcurrency';
   }
 
   @override
   String selfPickupOnlyMinOrder(String minorderformatted) {
-    return 'Self-Pickup only • Min order ' + minorderformatted;
+    return 'Self-Pickup only • Min order $minorderformatted';
   }
 
   @override
   String homeDeliveryAvailableMinOrder(String minorderformatted) {
-    return 'Home Delivery available • Min order ' + minorderformatted;
+    return 'Home Delivery available • Min order $minorderformatted';
   }
 
   @override
   String flatOff(String top) {
-    return 'Flat ' + top + '% OFF';
+    return 'Flat $top% OFF';
   }
 
   @override
   String flatOff2(String top) {
-    return 'Flat ₹' + top + ' OFF';
+    return 'Flat ₹$top OFF';
   }
 
   @override
   String validOnOrdersOver(String top) {
-    return 'Valid on orders over ₹' + top;
+    return 'Valid on orders over ₹$top';
   }
 
   @override
   String ordersOver(String voucher) {
-    return 'Orders over ₹' + voucher;
+    return 'Orders over ₹$voucher';
   }
 
   @override
   String deliverTo(String activeaddress) {
-    return 'Deliver to ' + activeaddress;
+    return 'Deliver to $activeaddress';
   }
 
   @override
   String itemsAddedToCart(num added) {
-    return (added == 1 ? '1 item added to cart' : '$added items added to cart');
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added items added to cart',
+      one: '1 item added to cart',
+    );
+    return '$_temp0';
   }
 
   @override
   String productsSelected(num n) {
-    return (n == 1 ? '1 product selected' : '$n products selected');
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n products selected',
+      one: '1 product selected',
+    );
+    return '$_temp0';
   }
 }

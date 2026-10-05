@@ -110,40 +110,55 @@ void main() {
         wishlistCubit: WishlistCubit(),
       );
 
-  testWidgets('layout stacks name, price, stock, SKU, variants, then content', (
-    tester,
-  ) async {
-    await repo.saveProduct(variantProduct);
-    await pumpDetails(tester, 'p_rice');
+  testWidgets(
+    'layout stacks name, price, unit type, stock, variants, then content',
+    (tester) async {
+      await repo.saveProduct(variantProduct);
+      await pumpDetails(tester, 'p_rice');
 
-    double yOf(Finder f) => tester.getTopLeft(f).dy;
+      double yOf(Finder f) => tester.getTopLeft(f).dy;
 
-    final name = find.text('Premium Basmati Rice');
-    final price = find.byKey(const Key('product-price'));
-    final stock = find.byKey(const Key('stock-label'));
-    final sku = find.byKey(const Key('product-sku'));
-    final variants = find.text('Select Variant');
-    final highlights = find.byKey(const Key('collapsible-toggle-Highlights'));
+      final name = find.text('Premium Basmati Rice');
+      final price = find.byKey(const Key('product-price'));
+      final unitType = find.byKey(const Key('product-unit-type'));
+      final sku = find.byKey(const Key('product-sku'));
+      final stock = find.byKey(const Key('stock-label'));
+      final variants = find.text('Select Variant');
+      final highlights = find.byKey(const Key('collapsible-toggle-Highlights'));
 
-    expect(name, findsOneWidget);
-    expect(price, findsOneWidget);
-    expect(stock, findsOneWidget);
-    expect(sku, findsOneWidget);
-    expect(variants, findsOneWidget);
+      expect(name, findsOneWidget);
+      expect(price, findsOneWidget);
+      expect(unitType, findsOneWidget);
+      expect(sku, findsOneWidget);
+      expect(stock, findsOneWidget);
+      expect(variants, findsOneWidget);
 
-    await tester.ensureVisible(highlights);
-    await tester.pumpAndSettle();
+      await tester.ensureVisible(highlights);
+      await tester.pumpAndSettle();
 
-    expect(yOf(name), lessThan(yOf(price)), reason: 'name above price');
-    expect(yOf(price), lessThan(yOf(stock)), reason: 'price above stock label');
-    expect(yOf(stock), lessThan(yOf(sku)), reason: 'stock above SKU');
-    expect(yOf(sku), lessThan(yOf(variants)), reason: 'SKU above Select Variant');
-    expect(
-      yOf(variants),
-      lessThan(yOf(find.byKey(const Key('collapsible-toggle-Highlights')))),
-      reason: 'variants above Highlights',
-    );
-  });
+      expect(yOf(name), lessThan(yOf(price)), reason: 'name above price');
+      expect(
+        yOf(price),
+        lessThan(yOf(unitType)),
+        reason: 'price above unit type',
+      );
+      expect(
+        yOf(unitType),
+        lessThan(yOf(stock)),
+        reason: 'unit type above stock label',
+      );
+      expect(
+        yOf(stock),
+        lessThan(yOf(variants)),
+        reason: 'stock above Select Variant',
+      );
+      expect(
+        yOf(variants),
+        lessThan(yOf(find.byKey(const Key('collapsible-toggle-Highlights')))),
+        reason: 'variants above Highlights',
+      );
+    },
+  );
 
   testWidgets('price row shows selling, MRP strike and discount %', (
     tester,
@@ -198,16 +213,32 @@ void main() {
     );
   });
 
-  testWidgets('variant change updates price and SKU live', (tester) async {
+  testWidgets('variant change updates price, unit type, and SKU live', (
+    tester,
+  ) async {
     await repo.saveProduct(variantProduct);
     await pumpDetails(tester, 'p_rice');
 
-    expect(find.text('SKU: RICE-1KG'), findsOneWidget);
+    expect(find.text('1 kg'), findsWidgets);
     expect(find.text('₹500'), findsWidgets);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('product-sku')),
+        matching: find.text('SKU: RICE-1KG'),
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('variant-chip-1'))); // 500g
     await tester.pumpAndSettle();
 
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('product-unit-type')),
+        matching: find.text('500 g'),
+      ),
+      findsOneWidget,
+    );
     expect(
       find.descendant(
         of: find.byKey(const Key('product-sku')),
@@ -261,7 +292,9 @@ void main() {
     await repo.saveProduct(variantProduct);
     await pumpDetails(tester, 'p_rice');
 
-    final highlightsToggle = find.byKey(const Key('collapsible-toggle-Highlights'));
+    final highlightsToggle = find.byKey(
+      const Key('collapsible-toggle-Highlights'),
+    );
     await tester.ensureVisible(highlightsToggle);
     await tester.pumpAndSettle();
 
@@ -279,8 +312,16 @@ void main() {
     await tester.tap(descToggle);
     await tester.pumpAndSettle();
 
-    expect(find.text('Basmati'), findsOneWidget, reason: 'highlights still open');
-    expect(find.text('India'), findsNothing, reason: 'third section capped at 2');
+    expect(
+      find.text('Basmati'),
+      findsOneWidget,
+      reason: 'highlights still open',
+    );
+    expect(
+      find.text('India'),
+      findsNothing,
+      reason: 'third section capped at 2',
+    );
   });
 
   testWidgets('keyValue sections render a table, text sections use Read more', (
@@ -313,39 +354,23 @@ void main() {
     expect(find.text('Cool & dry place'), findsOneWidget);
   });
 
-  testWidgets('more than two detail sections collapse behind View more', (
-    tester,
-  ) async {
+  testWidgets('all detail sections render directly on screen', (tester) async {
     await repo.saveProduct(variantProduct);
     await pumpDetails(tester, 'p_rice');
 
-    final viewMore = find.byKey(const Key('view-more-details'));
-    await tester.ensureVisible(viewMore);
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('collapsible-toggle-Description')), findsOneWidget);
+    expect(
+      find.byKey(const Key('collapsible-toggle-Description')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const Key('collapsible-toggle-Specifications')),
       findsOneWidget,
     );
     expect(
       find.byKey(const Key('collapsible-toggle-Country of Origin')),
-      findsNothing,
-    );
-
-    await tester.tap(viewMore);
-    await tester.pumpAndSettle();
-
-    expect(
-      find.byKey(const Key('collapsible-toggle-Country of Origin')),
       findsOneWidget,
     );
-    await tester.tap(find.byKey(const Key('view-less-details')));
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(const Key('collapsible-toggle-Country of Origin')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('view-more-details')), findsNothing);
   });
 
   testWidgets('legacy description and highlights strings still render', (
@@ -364,7 +389,9 @@ void main() {
     );
     await pumpDetails(tester, 'p_legacy');
 
-    final highlightsToggle = find.byKey(const Key('collapsible-toggle-Highlights'));
+    final highlightsToggle = find.byKey(
+      const Key('collapsible-toggle-Highlights'),
+    );
     await tester.ensureVisible(highlightsToggle);
     await tester.tap(highlightsToggle);
     await tester.pumpAndSettle();
@@ -396,7 +423,11 @@ void main() {
     await pumpDetails(tester, 'p_bare');
 
     expect(find.text('Bare Product'), findsOneWidget);
-    expect(find.text('Highlights'), findsNothing, reason: 'empty blocks hidden');
+    expect(
+      find.text('Highlights'),
+      findsNothing,
+      reason: 'empty blocks hidden',
+    );
     expect(find.text('Description'), findsNothing);
   });
 
@@ -421,7 +452,10 @@ void main() {
     await tester.tap(addBtn);
     await tester.pumpAndSettle();
 
-    expect(find.text('Premium Basmati Rice (500g) added to cart'), findsOneWidget);
+    expect(
+      find.text('Premium Basmati Rice (500g) added to cart'),
+      findsOneWidget,
+    );
     expect(cart.state.items.single.variant?.variantId, 'RICE-500');
     expect(cart.state.items.single.effectivePrice, 300);
   });

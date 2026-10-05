@@ -4,7 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// QR generation centre (Section 15.1): Product / Category / Company QR codes
 /// with style options and export.
@@ -30,7 +30,7 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           SegmentedButton<String>(
-            segments: const [
+            segments: [
               ButtonSegment(value: 'product', label: Text(AppLocalizations.of(context).product)),
               ButtonSegment(value: 'category', label: Text(AppLocalizations.of(context).category)),
               ButtonSegment(value: 'company', label: Text(AppLocalizations.of(context).company)),

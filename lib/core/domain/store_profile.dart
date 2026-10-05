@@ -44,7 +44,9 @@ class StoreHours {
     final suffix = h24 >= 12 ? L10n.current.pm : L10n.current.am;
     var h12 = h24 % 12;
     if (h12 == 0) h12 = 12;
-    return m == 0 ? '$h12 $suffix' : '$h12:${m.toString().padLeft(2, '0')} $suffix';
+    return m == 0
+        ? '$h12 $suffix'
+        : '$h12:${m.toString().padLeft(2, '0')} $suffix';
   }
 
   static WeeklyHours? _hoursFor(Company company, int weekday) {
@@ -113,7 +115,9 @@ class StoreHours {
         if (yesterday != null) {
           final yOpen = toMinutes(yesterday.openTime);
           final yClose = toMinutes(yesterday.closeTime);
-          if (yClose <= yOpen && !(yOpen == 0 && yClose == 0) && minutes < yClose) {
+          if (yClose <= yOpen &&
+              !(yOpen == 0 && yClose == 0) &&
+              minutes < yClose) {
             return yesterday;
           }
         }
@@ -132,7 +136,13 @@ class StoreHours {
       if (row == null || row.isClosed) continue;
       final open = toMinutes(row.openTime);
       if (open < 0) continue;
-      final opensAt = DateTime(day.year, day.month, day.day, open ~/ 60, open % 60);
+      final opensAt = DateTime(
+        day.year,
+        day.month,
+        day.day,
+        open ~/ 60,
+        open % 60,
+      );
       if (opensAt.isAfter(now)) return opensAt;
     }
     return null;
@@ -142,12 +152,15 @@ class StoreHours {
   static String openLabel(Company company, DateTime now) {
     final hours = activeHours(company, now);
     final close = hours == null ? '' : prettyTime(hours.closeTime);
-    final closeSuffix = hours != null &&
+    final closeSuffix =
+        hours != null &&
             toMinutes(hours.closeTime) <= toMinutes(hours.openTime) &&
             !(toMinutes(hours.openTime) == 0 && toMinutes(hours.closeTime) == 0)
         ? L10n.current.msgLate
         : '';
-    return close.isEmpty ? L10n.current.openNow2 : L10n.current.openNowCloses('${close}', '${closeSuffix}');
+    return close.isEmpty
+        ? L10n.current.openNow2
+        : L10n.current.openNowCloses(close, closeSuffix);
   }
 
   /// Red pill label while closed: `"Closed · Opens 9 AM Mon"`.
@@ -157,11 +170,10 @@ class StoreHours {
     final time = prettyTime(
       '${next.hour.toString().padLeft(2, '0')}:${next.minute.toString().padLeft(2, '0')}',
     );
-    final sameDay = next.year == now.year &&
-        next.month == now.month &&
-        next.day == now.day;
+    final sameDay =
+        next.year == now.year && next.month == now.month && next.day == now.day;
     final day = sameDay ? '' : ' ${_dayNames[next.weekday - 1]}';
-    return L10n.current.closedOpens('${time}', '${day}');
+    return L10n.current.closedOpens(time, day);
   }
 }
 
@@ -199,6 +211,7 @@ class StoreStats {
       reviewCount == 0 ? L10n.current.msgNew : averageRating.toStringAsFixed(1);
 
   /// "128 followers" / "1 follower".
-  String get followerLabel =>
-      followerCount == 1 ? L10n.current.msg1Follower : L10n.current.followers('${followerCount}');
+  String get followerLabel => followerCount == 1
+      ? L10n.current.msg1Follower
+      : L10n.current.followers('$followerCount');
 }

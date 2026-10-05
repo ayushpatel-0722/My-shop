@@ -1,3 +1,5 @@
+import 'package:myshop/core/models/product.dart';
+
 import '../models/cart_item.dart';
 import 'order_pricing.dart' show roundMoney;
 
@@ -84,10 +86,7 @@ class CartCalculator {
   ///   totalMrp       = Σ itemMrpTotal
   ///   totalDiscount  = totalMrp − subtotal
   ///   grandTotal     = subtotal + deliveryCharge
-  CartSummary summary(
-    List<CartItem> items, {
-    double deliveryCharge = 0,
-  }) {
+  CartSummary summary(List<CartItem> items, {double deliveryCharge = 0}) {
     var subtotal = 0.0;
     var totalMrp = 0.0;
     var count = 0;

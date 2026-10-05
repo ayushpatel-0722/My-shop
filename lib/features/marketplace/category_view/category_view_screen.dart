@@ -10,11 +10,12 @@ import '../../../core/models/category.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/product_card.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Category explorer screen.
 ///
@@ -71,7 +72,9 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
           },
         ),
         title: Text(
-          widget.categoryName.isNotEmpty ? widget.categoryName : AppLocalizations.of(context).category,
+          widget.categoryName.isNotEmpty
+              ? widget.categoryName
+              : AppLocalizations.of(context).category,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
@@ -165,11 +168,14 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
           };
 
           // 3. Child subcategories for chip filter bar (admin-defined order)
-          final subCategories = (activeCat != null
-                  ? categories.where((c) => c.parentId == activeCat!.id).toList()
-                  : <Category>[])
-              .toList()
-            ..sort(CategoryHierarchy.compareByOrder);
+          final subCategories =
+              (activeCat != null
+                      ? categories
+                            .where((c) => c.parentId == activeCat!.id)
+                            .toList()
+                      : <Category>[])
+                  .toList()
+                ..sort(CategoryHierarchy.compareByOrder);
 
           final effectiveFilterIds = _selectedSubCatId != null
               ? {_selectedSubCatId!}
@@ -230,8 +236,11 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                           if (idx == 0) {
                             final isSel = _selectedSubCatId == null;
                             return _SubCategoryPill(
-                              label:
-                                  AppLocalizations.of(context).all2('${widget.categoryName.isNotEmpty ? widget.categoryName : AppLocalizations.of(context).items4}'),
+                              label: AppLocalizations.of(context).all2(
+                                widget.categoryName.isNotEmpty
+                                    ? widget.categoryName
+                                    : AppLocalizations.of(context).items4,
+                              ),
                               isSelected: isSel,
                               onTap: () =>
                                   setState(() => _selectedSubCatId = null),
@@ -280,17 +289,18 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                           )
                         : LayoutBuilder(
                             builder: (context, constraints) {
-                              final width = constraints.maxWidth;
-                              final crossAxisCount = width >= 1000
-                                  ? 4
-                                  : width >= 700
-                                  ? 3
-                                  : 2;
-                              final childAspectRatio = width >= 1000
-                                  ? 0.68
-                                  : width >= 700
-                                  ? 0.65
-                                  : 0.62;
+                              final width = constraints.maxWidth - 32;
+                              final crossAxisCount =
+                                  ResponsiveGrid.calculateCrossAxisCount(
+                                    width,
+                                    maxCardWidth: 250,
+                                  );
+                              final childAspectRatio =
+                                  ResponsiveGrid.calculateProductAspectRatio(
+                                    width,
+                                    crossAxisCount,
+                                    showBrand: true,
+                                  );
                               return GridView.builder(
                                 padding: const EdgeInsets.all(16),
                                 physics: const BouncingScrollPhysics(),
@@ -494,7 +504,7 @@ class _EmptyCategory extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               categoryName.isNotEmpty
-                  ? AppLocalizations.of(context).noProductsFound2('${categoryName}')
+                  ? AppLocalizations.of(context).noProductsFound2(categoryName)
                   : AppLocalizations.of(context).noProductsInThisCategory,
               textAlign: TextAlign.center,
               style: const TextStyle(
@@ -505,7 +515,9 @@ class _EmptyCategory extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              AppLocalizations.of(context).productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere,
+              AppLocalizations.of(
+                context,
+              ).productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
             ),

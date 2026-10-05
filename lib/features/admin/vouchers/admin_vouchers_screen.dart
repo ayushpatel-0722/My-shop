@@ -11,7 +11,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Voucher engine — create, edit, pause and audit per-store coupon codes.
 ///
@@ -144,8 +144,9 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
                   }
                   return _EmptyState(
                     message: AppLocalizations.of(context).noVouchersYet,
-                    detail:
-                        AppLocalizations.of(context).createYourFirstCouponCodeToRunAPromotionForThisStore,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).createYourFirstCouponCodeToRunAPromotionForThisStore,
                     actionLabel: AppLocalizations.of(context).createVoucher2,
                     onAction: () => _openEditor(null),
                   );
@@ -153,8 +154,12 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
                 if (list.isEmpty) {
                   return _EmptyState(
                     icon: Icons.filter_alt_off_outlined,
-                    message: AppLocalizations.of(context).noVouchersMatchTheseFilters,
-                    detail: AppLocalizations.of(context).tryClearingTheSearchBoxOrChoosingAll,
+                    message: AppLocalizations.of(
+                      context,
+                    ).noVouchersMatchTheseFilters,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).tryClearingTheSearchBoxOrChoosingAll,
                   );
                 }
 
@@ -223,7 +228,11 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context).deleteVoucher2),
         content: Text(
-          AppLocalizations.of(context).willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount('${voucher.normalizedCode}'),
+          AppLocalizations.of(
+            context,
+          ).willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount(
+            voucher.normalizedCode,
+          ),
         ),
         actions: [
           TextButton(
@@ -246,13 +255,21 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
       await repo.deleteVoucher(voucher.id, companyId: _companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).voucherDeleted('${voucher.normalizedCode}'))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).voucherDeleted(voucher.normalizedCode),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).couldNotDeleteVoucher('${e}'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).couldNotDeleteVoucher('$e'),
+          ),
+        ),
+      );
     }
   }
 }
@@ -388,7 +405,9 @@ class _VoucherTile extends StatelessWidget {
         : AppLocalizations.of(context).active;
 
     final usage = voucher.maxUses > 0
-        ? AppLocalizations.of(context).uses('${voucher.usageCount}', '${voucher.maxUses}')
+        ? AppLocalizations.of(
+            context,
+          ).uses('${voucher.usageCount}', '${voucher.maxUses}')
         : AppLocalizations.of(context).usesUnlimited('${voucher.usageCount}');
 
     return ModernCard(
@@ -460,12 +479,28 @@ class _VoucherTile extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              AppLocalizations.of(context).minOrder4('${voucher.minOrderAmt.toStringAsFixed(0)}', '${voucher.scopeLabel}', '${voucher.appliesTo == VoucherScope.specificCategory ? ' (${voucher.categoryIds.length})' : ''}', '${voucher.appliesTo == VoucherScope.specificProduct ? ' (${voucher.productIds.length})' : ''}'),
+              AppLocalizations.of(context).minOrder4(
+                voucher.minOrderAmt.toStringAsFixed(0),
+                voucher.scopeLabel,
+                voucher.appliesTo == VoucherScope.specificCategory
+                    ? ' (${voucher.categoryIds.length})'
+                    : '',
+                voucher.appliesTo == VoucherScope.specificProduct
+                    ? ' (${voucher.productIds.length})'
+                    : '',
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 2),
             Text(
-              AppLocalizations.of(context).perShopperExpires('${usage}', '${voucher.perUserLimit}', '${voucher.firstTimeOnly ? AppLocalizations.of(context).firstOrderOnly2 : ''}', '${_fmt(voucher.expiryDate)}'),
+              AppLocalizations.of(context).perShopperExpires(
+                usage,
+                '${voucher.perUserLimit}',
+                voucher.firstTimeOnly
+                    ? AppLocalizations.of(context).firstOrderOnly2
+                    : '',
+                _fmt(context, voucher.expiryDate),
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             if (voucher.maxUses > 0) ...[
@@ -489,7 +524,9 @@ class _VoucherTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    voucher.isActive ? AppLocalizations.of(context).acceptingRedemptions : AppLocalizations.of(context).paused,
+                    voucher.isActive
+                        ? AppLocalizations.of(context).acceptingRedemptions
+                        : AppLocalizations.of(context).paused,
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -502,8 +539,9 @@ class _VoucherTile extends StatelessWidget {
     );
   }
 
-  static String _fmt(DateTime? date) =>
-      date == null ? 'never' : DateFormat(AppLocalizations.of(context).ddMmmYyyy).format(date);
+  static String _fmt(BuildContext context, DateTime? date) => date == null
+      ? 'never'
+      : DateFormat(AppLocalizations.of(context).ddMmmYyyy).format(date);
 }
 
 class _EmptyState extends StatelessWidget {
@@ -706,17 +744,23 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
         SnackBar(
           content: Text(
             _isEdit
-                ? AppLocalizations.of(context).voucherUpdated('${voucher.normalizedCode}')
-                : AppLocalizations.of(context).voucherCreated('${voucher.normalizedCode}'),
+                ? AppLocalizations.of(
+                    context,
+                  ).voucherUpdated(voucher.normalizedCode)
+                : AppLocalizations.of(
+                    context,
+                  ).voucherCreated(voucher.normalizedCode),
           ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).couldNotSaveVoucher('${e}'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotSaveVoucher('$e')),
+        ),
+      );
     }
   }
 
@@ -732,7 +776,9 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              _isEdit ? AppLocalizations.of(context).editVoucher2 : AppLocalizations.of(context).createVoucher2,
+              _isEdit
+                  ? AppLocalizations.of(context).editVoucher2
+                  : AppLocalizations.of(context).createVoucher2,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 14),
@@ -750,7 +796,9 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _type,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context).discountType),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).discountType,
+              ),
               items: [
                 for (final type in VoucherType.values)
                   DropdownMenuItem<String>(
@@ -819,7 +867,9 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _appliesTo,
-              decoration: InputDecoration(labelText: AppLocalizations.of(context).appliesTo),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).appliesTo,
+              ),
               items: [
                 for (final scope in VoucherScope.values)
                   DropdownMenuItem<String>(
@@ -861,7 +911,9 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
               subtitle: Text(
                 _expiryDate == null
                     ? AppLocalizations.of(context).noExpiry
-                    : DateFormat(AppLocalizations.of(context).ddMmmYyyy).format(_expiryDate!),
+                    : DateFormat(
+                        AppLocalizations.of(context).ddMmmYyyy,
+                      ).format(_expiryDate!),
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -872,7 +924,10 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                       tooltip: AppLocalizations.of(context).noExpiry,
                       onPressed: () => setState(() => _expiryDate = null),
                     ),
-                  TextButton(onPressed: _pickExpiry, child: Text(AppLocalizations.of(context).pick)),
+                  TextButton(
+                    onPressed: _pickExpiry,
+                    child: Text(AppLocalizations.of(context).pick),
+                  ),
                 ],
               ),
             ),
@@ -890,14 +945,18 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(AppLocalizations.of(context).firstOrderOnly),
-              subtitle: Text(AppLocalizations.of(context).onlyShoppersWithoutAPreviousOrder),
+              subtitle: Text(
+                AppLocalizations.of(context).onlyShoppersWithoutAPreviousOrder,
+              ),
               value: _firstTimeOnly,
               onChanged: (v) => setState(() => _firstTimeOnly = v),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(AppLocalizations.of(context).active),
-              subtitle: Text(AppLocalizations.of(context).pauseInsteadOfDeletingACampaign),
+              subtitle: Text(
+                AppLocalizations.of(context).pauseInsteadOfDeletingACampaign,
+              ),
               value: _isActive,
               onChanged: (v) => setState(() => _isActive = v),
             ),
@@ -911,7 +970,11 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                       width: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEdit ? AppLocalizations.of(context).saveChanges2 : AppLocalizations.of(context).createVoucher),
+                  : Text(
+                      _isEdit
+                          ? AppLocalizations.of(context).saveChanges2
+                          : AppLocalizations.of(context).createVoucher,
+                    ),
             ),
           ],
         ),
@@ -960,7 +1023,10 @@ class _CategoryPickerState extends State<_CategoryPicker> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).categories, style: TextStyle(fontSize: 12)),
+          Text(
+            AppLocalizations.of(context).categories,
+            style: TextStyle(fontSize: 12),
+          ),
           const SizedBox(height: 6),
           StreamBuilder<List<Category>>(
             stream: repo.categories(companyId: widget.companyId),
@@ -1042,7 +1108,10 @@ class _ProductPickerState extends State<_ProductPicker> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).products, style: TextStyle(fontSize: 12)),
+          Text(
+            AppLocalizations.of(context).products,
+            style: TextStyle(fontSize: 12),
+          ),
           const SizedBox(height: 6),
           StreamBuilder<List<Product>>(
             stream: repo.products(companyId: widget.companyId),

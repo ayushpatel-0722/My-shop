@@ -1,8 +1,13 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-// Regenerate with: flutter gen-l10n  (kept in sync manually in this repo)
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_gu.dart';
+import 'app_localizations_hi.dart';
 
 // ignore_for_file: type=lint
 
@@ -82,11 +87,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -681,19 +686,22 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Add dynamic key-value specifications (e.g. Fabric, Shelf Life, Processor, Storage, Origin) and return/delivery policies.'**
-  String get addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies;
+  String
+  get addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies;
 
   /// No description provided for @addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage.
   ///
   /// In en, this message translates to:
   /// **'Add multiple image URLs. The first image will automatically act as the Hero / Main product image.'**
-  String get addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage;
+  String
+  get addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage;
 
   /// No description provided for @addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits.
   ///
   /// In en, this message translates to:
   /// **'Add pincodes to define delivery fees, free delivery rules, or minimum order limits.'**
-  String get addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits;
+  String
+  get addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits;
 
   /// No description provided for @addProductsToYourCartAfterSigningInToContinueCheckout.
   ///
@@ -843,7 +851,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.'**
-  String get assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges;
+  String
+  get assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges;
 
   /// No description provided for @availableInventoryUnits.
   ///
@@ -1071,7 +1080,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Configure customizable option types (e.g. Size, Color, Weight, Storage) and automatically generate Cartesian combinations with distinct SKU, stock, and price overrides.'**
-  String get configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides;
+  String
+  get configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides;
 
   /// No description provided for @configureHierarchyCatalogClassificationAndAssignedProducts.
   ///
@@ -1103,11 +1113,11 @@ abstract class AppLocalizations {
   /// **'Contact Support'**
   String get contactSupport;
 
-  /// No description provided for @continue.
+  /// No description provided for @continueLabel.
   ///
   /// In en, this message translates to:
   /// **'Continue'**
-  String get continue;
+  String get continueLabel;
 
   /// No description provided for @continueWithGoogle.
   ///
@@ -1181,11 +1191,11 @@ abstract class AppLocalizations {
   /// **'Customer details'**
   String get customerDetails2;
 
-  /// No description provided for @default.
+  /// No description provided for @defaultBadge.
   ///
   /// In en, this message translates to:
   /// **'DEFAULT'**
-  String get default;
+  String get defaultBadge;
 
   /// No description provided for @dateOfBirth.
   ///
@@ -1599,7 +1609,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Gates login to scheduled working hours. When disabled, the employee cannot log into the mobile app.'**
-  String get gatesLoginToScheduledWorkingHoursWhenDisabledTheEmployeeCannotLogIntoTheMobileApp;
+  String
+  get gatesLoginToScheduledWorkingHoursWhenDisabledTheEmployeeCannotLogIntoTheMobileApp;
 
   /// No description provided for @gender.
   ///
@@ -2030,7 +2041,7 @@ abstract class AppLocalizations {
   /// No description provided for @noDetailSectionsYetTapAddSection.
   ///
   /// In en, this message translates to:
-  /// **'No detail sections yet — tap "Add Section".'**
+  /// **'No detail sections yet — tap \"Add Section\".'**
   String get noDetailSectionsYetTapAddSection;
 
   /// No description provided for @noEmployeesProvisioned.
@@ -2048,7 +2059,7 @@ abstract class AppLocalizations {
   /// No description provided for @noHighlightsYetTapAddHighlight.
   ///
   /// In en, this message translates to:
-  /// **'No highlights yet — tap "Add Highlight".'**
+  /// **'No highlights yet — tap \"Add Highlight\".'**
   String get noHighlightsYetTapAddHighlight;
 
   /// No description provided for @noMatchingFaqsFound.
@@ -2138,8 +2149,9 @@ abstract class AppLocalizations {
   /// No description provided for @noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix.
   ///
   /// In en, this message translates to:
-  /// **'No variants configured (single standard SKU). Tap "Add Option" to define dimensions, then "Generate Matrix".'**
-  String get noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix;
+  /// **'No variants configured (single standard SKU). Tap \"Add Option\" to define dimensions, then \"Generate Matrix\".'**
+  String
+  get noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix;
 
   /// No description provided for @noVouchersAvailableRightNow.
   ///
@@ -2253,7 +2265,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Out of Stock / Finished: Product will show as sold out on the storefront until restocked.'**
-  String get outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked;
+  String
+  get outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked;
 
   /// No description provided for @outOfStock.
   ///
@@ -2313,7 +2326,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Pay directly (Cash/UPI on delivery or pickup). Payment status will default to Pending and can be marked as Done by the admin.'**
-  String get payDirectlyCashUpiOnDeliveryOrPickupPaymentStatusWillDefaultToPendingAndCanBeMarkedAsDoneByTheAdmin;
+  String
+  get payDirectlyCashUpiOnDeliveryOrPickupPaymentStatusWillDefaultToPendingAndCanBeMarkedAsDoneByTheAdmin;
 
   /// No description provided for @perShopperLimit.
   ///
@@ -2415,7 +2429,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Please enter the required primary product details above to unlock variant options and matrix generation:'**
-  String get pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration;
+  String
+  get pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration;
 
   /// No description provided for @pleaseEnterYourMobileNumber.
   ///
@@ -2547,7 +2562,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Provision staff accounts with custom designations, salary, and operational access.'**
-  String get provisionStaffAccountsWithCustomDesignationsSalaryAndOperationalAccess;
+  String
+  get provisionStaffAccountsWithCustomDesignationsSalaryAndOperationalAccess;
 
   /// No description provided for @quantity.
   ///
@@ -2774,7 +2790,7 @@ abstract class AppLocalizations {
   /// No description provided for @sectionsShownUnderAllDetailsOnTheProductPage.
   ///
   /// In en, this message translates to:
-  /// **'Sections shown under "All Details" on the product page — '**
+  /// **'Sections shown under \"All Details\" on the product page — '**
   String get sectionsShownUnderAllDetailsOnTheProductPage;
 
   /// No description provided for @seeAll.
@@ -3009,7 +3025,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Submitting this form triggers an email to ayush123@gmail.com with your message and account details attached.'**
-  String get submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached;
+  String
+  get submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached;
 
   /// No description provided for @summary.
   ///
@@ -3177,7 +3194,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Unlimited Inventory: Product will always appear in stock for customers (ideal for digital goods or made-to-order items).'**
-  String get unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems;
+  String
+  get unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems;
 
   /// No description provided for @up.
   ///
@@ -3471,7 +3489,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'e.g. Free shipping on orders above ₹499. Easy 7-day hassle-free replacement for defective products.'**
-  String get eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts;
+  String
+  get eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts;
 
   /// No description provided for @eGFreshOrganicVegetables.
   ///
@@ -3620,7 +3639,7 @@ abstract class AppLocalizations {
   /// No description provided for @toUncategorised.
   ///
   /// In en, this message translates to:
-  /// **'to "Uncategorised"'**
+  /// **'to \"Uncategorised\"'**
   String get toUncategorised;
 
   /// No description provided for @subCategory.
@@ -3731,67 +3750,67 @@ abstract class AppLocalizations {
   /// **' · packed'**
   String get packed;
 
-  /// No description provided for @order.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Order #{order}'**
   String order(String order);
 
-  /// No description provided for @company2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Company: {order}'**
   String company2(String order);
 
-  /// No description provided for @total.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Total: ₹{order}'**
   String total(String order);
 
-  /// No description provided for @copyId.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Copy {label} ID'**
   String copyId(String label);
 
-  /// No description provided for @idCopiedToClipboard.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{label} ID copied to clipboard: {id}'**
   String idCopiedToClipboard(String label, String id);
 
-  /// No description provided for @id.
+  ///
   ///
   /// In en, this message translates to:
   /// **'ID: {id}'**
   String id(String id);
 
-  /// No description provided for @msg3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{user}: {user2} ({user3}/3)'**
   String msg3(String user, String user2, String user3);
 
-  /// No description provided for @priority.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{b} · priority {b2}'**
   String priority(String b, String b2);
 
-  /// No description provided for @aCategoryNamedAlreadyExistsInThisCompany.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'A category named "{trimmedname}" already exists in this company.'**
+  /// **'A category named \"{trimmedname}\" already exists in this company.'**
   String aCategoryNamedAlreadyExistsInThisCompany(String trimmedname);
 
-  /// No description provided for @categoryUpdatedSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Category "{category}" updated successfully!'**
+  /// **'Category \"{category}\" updated successfully!'**
   String categoryUpdatedSuccessfully(String category);
 
-  /// No description provided for @failedToSaveCategory.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to save category: {e}'**
@@ -3801,75 +3820,79 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Assign an existing parent category in the same company for nesting. Self and descendant categories are automatically blocked to prevent hierarchy cycles.'**
-  String get assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles;
+  String
+  get assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles;
 
-  /// No description provided for @noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Note: {invalidparentids} categories (this category and its descendants) are blocked from being chosen as parent.'**
-  String noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent(String invalidparentids);
+  String
+  noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent(
+    String invalidparentids,
+  );
 
-  /// No description provided for @couldNotSaveTheNewOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Could not save the new order: {e}'**
   String couldNotSaveTheNewOrder(String e);
 
-  /// No description provided for @backfillFailed.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Backfill failed: {e}'**
   String backfillFailed(String e);
 
-  /// No description provided for @delete2.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Delete "{category}"?'**
+  /// **'Delete \"{category}\"?'**
   String delete2(String category);
 
-  /// No description provided for @to.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'to "{parentname}"'**
+  /// **'to \"{parentname}\"'**
   String to(String parentname);
 
-  /// No description provided for @willMove2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'• {plural} will move {parentname}'**
   String willMove2(String plural, String parentname);
 
-  /// No description provided for @willMoveUpOneLevel.
+  ///
   ///
   /// In en, this message translates to:
   /// **'• {plural} will move up one level'**
   String willMoveUpOneLevel(String plural);
 
-  /// No description provided for @categoryDeleted.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Category "{category}" deleted.'**
+  /// **'Category \"{category}\" deleted.'**
   String categoryDeleted(String category);
 
-  /// No description provided for @failedToDeleteCategory.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to delete category: {e}'**
   String failedToDeleteCategory(String e);
 
-  /// No description provided for @sub.
+  ///
   ///
   /// In en, this message translates to:
   /// **' • {node} sub'**
   String sub(String node);
 
-  /// No description provided for @str.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{node}{node2}{node3}'**
   String str(String node, String node2, String node3);
 
-  /// No description provided for @under.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Under: {pathlabel}'**
@@ -3878,742 +3901,788 @@ abstract class AppLocalizations {
   /// No description provided for @swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder.
   ///
   /// In en, this message translates to:
-  /// **'Swipe right or tap + on available products to assign. Swipe left or tap – to remove. Drag the ≡ handle in "In This Category" to set the display order.'**
-  String get swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder;
+  /// **'Swipe right or tap + on available products to assign. Swipe left or tap – to remove. Drag the ≡ handle in \"In This Category\" to set the display order.'**
+  String
+  get swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder;
 
-  /// No description provided for @all.
+  ///
   ///
   /// In en, this message translates to:
   /// **'All ({filteredavailable})'**
   String all(String filteredavailable);
 
-  /// No description provided for @inCategory.
+  ///
   ///
   /// In en, this message translates to:
   /// **'In Category ({filteredassigned})'**
   String inCategory(String filteredassigned);
 
-  /// No description provided for @of.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{count} of {totalcount}'**
-  String of(String count, String totalcount);
+  String countOutOfTotal(String count, String totalcount);
 
-  /// No description provided for @deliveryChargeUpdatedFor.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Delivery charge updated for {pincode}'**
   String deliveryChargeUpdatedFor(String pincode);
 
-  /// No description provided for @failedToSaveDeliveryCharge.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to save delivery charge: {e}'**
   String failedToSaveDeliveryCharge(String e);
 
-  /// No description provided for @importedPincodesSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Imported {charges} pincodes successfully'**
   String importedPincodesSuccessfully(String charges);
 
-  /// No description provided for @areYouSureYouWantToRemoveDeliveryMappingForPincode.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to remove delivery mapping for pincode "{charge}"?'**
+  /// **'Are you sure you want to remove delivery mapping for pincode \"{charge}\"?'**
   String areYouSureYouWantToRemoveDeliveryMappingForPincode(String charge);
 
-  /// No description provided for @deliveryChargeForDeleted.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Delivery charge for "{charge}" deleted.'**
+  /// **'Delivery charge for \"{charge}\" deleted.'**
   String deliveryChargeForDeleted(String charge);
 
-  /// No description provided for @failedToDeleteDeliveryCharge.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to delete delivery charge: {e}'**
   String failedToDeleteDeliveryCharge(String e);
 
-  /// No description provided for @pincode2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Pincode: {charge}'**
   String pincode2(String charge);
 
-  /// No description provided for @charge.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Charge: {formatcurrency}'**
   String charge(String formatcurrency);
 
-  /// No description provided for @freeOn.
+  ///
   ///
   /// In en, this message translates to:
   /// **'• Free on > {formatcurrency}'**
   String freeOn(String formatcurrency);
 
-  /// No description provided for @minOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'• Min order: {formatcurrency}'**
   String minOrder(String formatcurrency);
 
-  /// No description provided for @eta.
+  ///
   ///
   /// In en, this message translates to:
   /// **'• ETA: {charge}'**
   String eta(String charge);
 
-  /// No description provided for @employeeUpdatedSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Employee "{emp}" updated successfully!'**
+  /// **'Employee \"{emp}\" updated successfully!'**
   String employeeUpdatedSuccessfully(String emp);
 
-  /// No description provided for @failedToSaveEmployee.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to save employee: {e}'**
   String failedToSaveEmployee(String e);
 
-  /// No description provided for @areYouSureYouWantToRemoveFromTheCompany.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to remove "{emp}" ({emp2}) from the company?'**
+  /// **'Are you sure you want to remove \"{emp}\" ({emp2}) from the company?'**
   String areYouSureYouWantToRemoveFromTheCompany(String emp, String emp2);
 
-  /// No description provided for @employeeDeleted.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Employee "{emp}" deleted.'**
+  /// **'Employee \"{emp}\" deleted.'**
   String employeeDeleted(String emp);
 
-  /// No description provided for @failedToDeleteEmployee.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to delete employee: {e}'**
   String failedToDeleteEmployee(String e);
 
-  /// No description provided for @itemS2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{order} item(s) · {order2}{order3}'**
   String itemS2(String order, String order2, String order3);
 
-  /// No description provided for @str2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{order}{order2}{order3}'**
   String str2(String order, String order2, String order3);
 
-  /// No description provided for @mark.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Mark {orderstatuslabel}'**
   String mark(String orderstatuslabel);
 
-  /// No description provided for @order2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Order {order} → {orderstatuslabel}'**
   String order2(String order, String orderstatuslabel);
 
-  /// No description provided for @couldNotUpdateOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Could not update order: {e}'**
   String couldNotUpdateOrder(String e);
 
-  /// No description provided for @orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Order {order} will be cancelled and the customer will see it under "Cancelled".'**
-  String orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(String order);
+  /// **'Order {order} will be cancelled and the customer will see it under \"Cancelled\".'**
+  String orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(
+    String order,
+  );
 
-  /// No description provided for @couldNotCancelOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Could not cancel order: {e}'**
   String couldNotCancelOrder(String e);
 
-  /// No description provided for @quantity12510.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Quantity (1 {currentunit}, 2 {currentunit2}, 5 {currentunit3}, 10 {currentunit4})'**
-  String quantity12510(String currentunit, String currentunit2, String currentunit3, String currentunit4);
+  String quantity12510(
+    String currentunit,
+    String currentunit2,
+    String currentunit3,
+    String currentunit4,
+  );
 
-  /// No description provided for @quantity246.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Quantity (2 {currentunit}, 4 {currentunit2}, 6 {currentunit3})'**
-  String quantity246(String currentunit, String currentunit2, String currentunit3);
+  String quantity246(
+    String currentunit,
+    String currentunit2,
+    String currentunit3,
+  );
 
-  /// No description provided for @pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Please complete the required product details above ({missingbasefields}) before configuring options.'**
-  String pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions(String missingbasefields);
+  String pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions(
+    String missingbasefields,
+  );
 
-  /// No description provided for @unitOptionsStrictlySynchronizedWith.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Unit options strictly synchronized with "{currentunit}"'**
+  /// **'Unit options strictly synchronized with \"{currentunit}\"'**
   String unitOptionsStrictlySynchronizedWith(String currentunit);
 
-  /// No description provided for @eG125.
+  ///
   ///
   /// In en, this message translates to:
   /// **'e.g. 1 {currentunit}, 2 {currentunit2}, 5 {currentunit3}'**
   String eG125(String currentunit, String currentunit2, String currentunit3);
 
-  /// No description provided for @quickTemplatesStrictlyFor.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Quick Templates (Strictly for {currentunit}):'**
   String quickTemplatesStrictlyFor(String currentunit);
 
-  /// No description provided for @cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Cannot add "{optname}" option. The product unit is locked to "{currentunit}". Please use Quantity or Size/Color.'**
-  String cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor(String optname, String currentunit);
+  /// **'Cannot add \"{optname}\" option. The product unit is locked to \"{currentunit}\". Please use Quantity or Size/Color.'**
+  String cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor(
+    String optname,
+    String currentunit,
+  );
 
-  /// No description provided for @pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Please complete the required product details above ({missingbasefields}) before generating matrix.'**
-  String pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix(String missingbasefields);
+  String pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix(
+    String missingbasefields,
+  );
 
-  /// No description provided for @generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Generated {variants} variant combinations with locked "{baseunittype}" unit & auto-calculated prices!'**
-  String generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices(String variants, String baseunittype);
+  /// **'Generated {variants} variant combinations with locked \"{baseunittype}\" unit & auto-calculated prices!'**
+  String generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices(
+    String variants,
+    String baseunittype,
+  );
 
-  /// No description provided for @pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Please complete the required product details above ({missingbasefields}) before adding variants.'**
-  String pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants(String missingbasefields);
+  String pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants(
+    String missingbasefields,
+  );
 
-  /// No description provided for @unitTypeLockedFromBaseProduct.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Unit Type: {lockedunittype} (Locked from Base Product)'**
   String unitTypeLockedFromBaseProduct(String lockedunittype);
 
-  /// No description provided for @eGLarge500PackOf2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'e.g. Large / 500{lockedunittype} / Pack of 2'**
   String eGLarge500PackOf2(String lockedunittype);
 
-  /// No description provided for @auto.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Auto: ₹{calculatedautoprice}'**
   String auto(String calculatedautoprice);
 
-  /// No description provided for @blankAutoCalculatesToBasedOnBasePrice.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Blank auto-calculates to ₹{calculatedautoprice} based on base price'**
   String blankAutoCalculatesToBasedOnBasePrice(String calculatedautoprice);
 
-  /// No description provided for @editVariant.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Edit Variant ({v})'**
   String editVariant(String v);
 
-  /// No description provided for @productUpdatedSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Product "{product}" updated successfully!'**
+  /// **'Product \"{product}\" updated successfully!'**
   String productUpdatedSuccessfully(String product);
 
-  /// No description provided for @failedToSaveProduct.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to save product: {e}'**
   String failedToSaveProduct(String e);
 
-  /// No description provided for @added.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{images} added'**
   String added(String images);
 
-  /// No description provided for @off.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{discountpercent}% OFF'**
   String off(String discountpercent);
 
-  /// No description provided for @variantCombinations.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{variants} Variant Combinations:'**
   String variantCombinations(String variants);
 
-  /// No description provided for @price2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Price: ₹{variants}'**
   String price2(String variants);
 
-  /// No description provided for @unitStock.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Unit: {variants} {variants2} • Stock: {variants3} • {variants4}{variants5}'**
-  String unitStock(String variants, String variants2, String variants3, String variants4, String variants5);
+  String unitStock(
+    String variants,
+    String variants2,
+    String variants3,
+    String variants4,
+    String variants5,
+  );
 
-  /// No description provided for @areYouSureYouWantToDelete.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete "{product}"?'**
+  /// **'Are you sure you want to delete \"{product}\"?'**
   String areYouSureYouWantToDelete(String product);
 
-  /// No description provided for @productDeleted.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Product "{product}" deleted.'**
+  /// **'Product \"{product}\" deleted.'**
   String productDeleted(String product);
 
-  /// No description provided for @failedToDeleteProduct.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Failed to delete product: {e}'**
   String failedToDeleteProduct(String e);
 
-  /// No description provided for @msgVar.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{product} var'**
   String msgVar(String product);
 
-  /// No description provided for @variants.
+  ///
   ///
   /// In en, this message translates to:
   /// **'• {product} variants'**
   String variants(String product);
 
-  /// No description provided for @deleteItsContentWillBeLost.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Delete "{section}"? Its content will be lost.'**
+  /// **'Delete \"{section}\"? Its content will be lost.'**
   String deleteItsContentWillBeLost(String section);
 
   /// No description provided for @sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables.
   ///
   /// In en, this message translates to:
-  /// **'Sections shown under "All Details" on the product page — Simple Text paragraphs or Title & Value tables.'**
-  String get sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables;
+  /// **'Sections shown under \"All Details\" on the product page — Simple Text paragraphs or Title & Value tables.'**
+  String
+  get sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables;
 
-  /// No description provided for @orders2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Orders: {orders}'**
   String orders2(String orders);
 
-  /// No description provided for @revenue.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Revenue: ₹{revenue}'**
   String revenue(String revenue);
 
-  /// No description provided for @willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'"{voucher}" will be removed. Shoppers who saved this code will no longer get the discount.'**
-  String willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount(String voucher);
+  /// **'\"{voucher}\" will be removed. Shoppers who saved this code will no longer get the discount.'**
+  String willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount(
+    String voucher,
+  );
 
-  /// No description provided for @voucherDeleted.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Voucher {voucher} deleted.'**
   String voucherDeleted(String voucher);
 
-  /// No description provided for @couldNotDeleteVoucher.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Could not delete voucher: {e}'**
   String couldNotDeleteVoucher(String e);
 
-  /// No description provided for @minOrder4.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Min order ₹{voucher} · {voucher2}{voucher3}{voucher4}'**
-  String minOrder4(String voucher, String voucher2, String voucher3, String voucher4);
+  String minOrder4(
+    String voucher,
+    String voucher2,
+    String voucher3,
+    String voucher4,
+  );
 
-  /// No description provided for @perShopperExpires.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{usage} · {voucher} per shopper{voucher2} · expires {fmt}'**
-  String perShopperExpires(String usage, String voucher, String voucher2, String fmt);
+  String perShopperExpires(
+    String usage,
+    String voucher,
+    String voucher2,
+    String fmt,
+  );
 
-  /// No description provided for @voucherUpdated.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Voucher {voucher} updated.'**
   String voucherUpdated(String voucher);
 
-  /// No description provided for @couldNotSaveVoucher.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Could not save voucher: {e}'**
   String couldNotSaveVoucher(String e);
 
-  /// No description provided for @companyNotFound.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Company "{companyname}" not found.'**
+  /// **'Company \"{companyname}\" not found.'**
   String companyNotFound(String companyname);
 
-  /// No description provided for @company3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Company: {widget}'**
   String company3(String widget);
 
-  /// No description provided for @errorCreatingAdmin.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Error creating admin: {e}'**
   String errorCreatingAdmin(String e);
 
-  /// No description provided for @otpSentTo.
+  ///
   ///
   /// In en, this message translates to:
   /// **'OTP sent to {mobile}'**
   String otpSentTo(String mobile);
 
-  /// No description provided for @error.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Error: {e}'**
   String error(String e);
 
-  /// No description provided for @otpResentTo.
+  ///
   ///
   /// In en, this message translates to:
   /// **'OTP resent to {mobile}'**
   String otpResentTo(String mobile);
 
-  /// No description provided for @verificationFailed.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Verification failed: {e}'**
   String verificationFailed(String e);
 
-  /// No description provided for @verificationError.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Verification error: {e}'**
   String verificationError(String e);
 
-  /// No description provided for @youSave.
+  ///
   ///
   /// In en, this message translates to:
   /// **'You save {formatcurrency}'**
   String youSave(String formatcurrency);
 
-  /// No description provided for @total2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Total: {item}'**
   String total2(String item);
 
-  /// No description provided for @removedFromCart.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{removed} removed from cart'**
   String removedFromCart(String removed);
 
-  /// No description provided for @savedToYourWishlist.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{removed} saved to your wishlist'**
   String savedToYourWishlist(String removed);
 
-  /// No description provided for @placeDirectOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Place Direct Order · {formatcurrency}'**
   String placeDirectOrder(String formatcurrency);
 
-  /// No description provided for @orderWillBeCancelledThisCannotBeUndone.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Order {order} will be cancelled. This cannot be undone.'**
   String orderWillBeCancelledThisCannotBeUndone(String order);
 
-  /// No description provided for @order3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Order {order}'**
   String order3(String order);
 
-  /// No description provided for @items.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{order} items · {formatdate}'**
   String items(String order, String formatdate);
 
-  /// No description provided for @msgOn.
+  ///
   ///
   /// In en, this message translates to:
   /// **' on {formatdate}'**
   String msgOn(String formatdate);
 
-  /// No description provided for @cancelled2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Cancelled{order}'**
   String cancelled2(String order);
 
-  /// No description provided for @more.
+  ///
   ///
   /// In en, this message translates to:
   /// **'+{remaining} more'**
   String more(String remaining);
 
-  /// No description provided for @addedToCartNoLongerAvailable.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{added, plural, =1{1 item} other{{added} items}} added to cart · {missing} no longer available'**
   String addedToCartNoLongerAvailable(num added, String missing);
 
-  /// No description provided for @minimumOrderForDelivery.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Minimum Order for Delivery ({currency})'**
   String minimumOrderForDelivery(String currency);
 
-  /// No description provided for @companyRegisteredSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Company "{companyname}" registered successfully!'**
+  /// **'Company \"{companyname}\" registered successfully!'**
   String companyRegisteredSuccessfully(String companyname);
 
-  /// No description provided for @queue.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{l10n} Queue'**
   String queue(String l10n);
 
-  /// No description provided for @items5.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{o} items · {o2}{o3}'**
   String items5(String o, String o2, String o3);
 
-  /// No description provided for @manifest.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{l10n} Manifest'**
   String manifest(String l10n);
 
-  /// No description provided for @qtySkuScan.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Qty: {item} · SKU scan'**
   String qtySkuScan(String item);
 
-  /// No description provided for @yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Your ticket ID is #{ticketid}.\nAn email has been triggered to ayush123@gmail.com with your attached account details.'**
-  String yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails(String ticketid);
+  String
+  yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails(
+    String ticketid,
+  );
 
-  /// No description provided for @ticket.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Ticket #{ticketid}'**
   String ticket(String ticketid);
 
-  /// No description provided for @items3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{filteredlist} items'**
   String items3(String filteredlist);
 
-  /// No description provided for @all2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'All {widget}'**
   String all2(String widget);
 
-  /// No description provided for @productCount.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 product} other{{count} products}}'**
   String productCount(num count);
 
-  /// No description provided for @noProductsFound2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'No {categoryname} products found'**
   String noProductsFound2(String categoryname);
 
-  /// No description provided for @addedToCart.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{product} added to cart'**
   String addedToCart(String product);
 
-  /// No description provided for @voucherCopiedToClipboard.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Voucher "{code}" copied to clipboard!'**
+  /// **'Voucher \"{code}\" copied to clipboard!'**
   String voucherCopiedToClipboard(String code);
 
-  /// No description provided for @msgIn.
+  ///
   ///
   /// In en, this message translates to:
   /// **'in {company}'**
   String msgIn(String company);
 
-  /// No description provided for @allProducts.
+  ///
   ///
   /// In en, this message translates to:
   /// **'All Products ({filtered})'**
   String allProducts(String filtered);
 
-  /// No description provided for @scrollForMoreLeft.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Scroll for more ({filtered} left)'**
   String scrollForMoreLeft(String filtered);
 
-  /// No description provided for @reviewsCount.
+  ///
   ///
   /// In en, this message translates to:
   /// **' ({stats, plural, =1{1 review} other{{stats} reviews}})'**
   String reviewsCount(num stats);
 
-  /// No description provided for @vouchersPlural11LiveOfferOtherLiveOffers.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{sub} · {vouchers, plural, =1{1 live offer} other{{vouchers} live offers}}'**
   String vouchersPlural11LiveOfferOtherLiveOffers(String sub, num vouchers);
 
-  /// No description provided for @useCode.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Use Code: {top}'**
   String useCode(String top);
 
-  /// No description provided for @minOrder3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Min order ₹{v}'**
   String minOrder3(String v);
 
-  /// No description provided for @couponCopiedApplyAtCheckout.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Coupon {v} copied! Apply at checkout'**
   String couponCopiedApplyAtCheckout(String v);
 
-  /// No description provided for @deliveryLocationSetTo.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Delivery location set to: {detected} ({detected2})'**
   String deliveryLocationSetTo(String detected, String detected2);
 
-  /// No description provided for @pincode3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Pincode {cleanpin}'**
   String pincode3(String cleanpin);
 
-  /// No description provided for @deliveryLocationUpdatedTo.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Delivery location updated to {finalcity} ({cleanpin})'**
   String deliveryLocationUpdatedTo(String finalcity, String cleanpin);
 
-  /// No description provided for @areYouSureYouWantToDelete2.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete "{addr}: {addr2}"?'**
+  /// **'Are you sure you want to delete \"{addr}: {addr2}\"?'**
   String areYouSureYouWantToDelete2(String addr, String addr2);
 
-  /// No description provided for @saveHomeWorkOrOtherAddressSaved3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Save home, work or other address (saved: {addresses}/3)'**
   String saveHomeWorkOrOtherAddressSaved3(String addresses);
 
-  /// No description provided for @of3Added.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{addresses} of 3 added'**
   String of3Added(String addresses);
 
-  /// No description provided for @deliveryAvailableTo.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Delivery available to {addr}'**
   String deliveryAvailableTo(String addr);
 
-  /// No description provided for @off2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'-{discountpercent}% OFF'**
   String off2(String discountpercent);
 
-  /// No description provided for @save2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Save {formatcurrency}'**
   String save2(String formatcurrency);
 
-  /// No description provided for @sku3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'SKU: {skuof}'**
   String sku3(String skuof);
 
-  /// No description provided for @viewAllDetailsMore.
+  ///
   ///
   /// In en, this message translates to:
   /// **'View all details ({hidden} more)'**
   String viewAllDetailsMore(String hidden);
 
-  /// No description provided for @addedToCart2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{p}{variantlabel} added to cart'**
   String addedToCart2(String p, String variantlabel);
 
-  /// No description provided for @off3.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{percent}% OFF'**
   String off3(String percent);
 
-  /// No description provided for @searchIn.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Search in {widget}'**
   String searchIn(String widget);
 
-  /// No description provided for @itemCount.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{resultcount, plural, =1{1 item} other{{resultcount} items}}'**
   String itemCount(num resultcount);
 
-  /// No description provided for @noProductsFoundFor.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'No products found for "{query}"'**
+  /// **'No products found for \"{query}\"'**
   String noProductsFoundFor(String query);
 
-  /// No description provided for @reviews2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{count} reviews'**
@@ -4625,22 +4694,22 @@ abstract class AppLocalizations {
   /// **'Could not sign in with provided credentials.'**
   String get couldNotSignInWithProvidedCredentials;
 
-  /// No description provided for @noAdminProfileFoundForAccount.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'No admin profile found for account "{email}".'**
+  /// **'No admin profile found for account \"{email}\".'**
   String noAdminProfileFoundForAccount(String email);
 
-  /// No description provided for @adminAccountIsAssignedToNot.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Admin account is assigned to "{registeredname}", not "{companyname}".'**
+  /// **'Admin account is assigned to \"{registeredname}\", not \"{companyname}\".'**
   String adminAccountIsAssignedToNot(String registeredname, String companyname);
 
-  /// No description provided for @noEmployeeProfileFoundForAccount.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'No employee profile found for account "{email}".'**
+  /// **'No employee profile found for account \"{email}\".'**
   String noEmployeeProfileFoundForAccount(String email);
 
   /// No description provided for @lowStock.
@@ -4685,13 +4754,13 @@ abstract class AppLocalizations {
   /// **'Rating (top picks first)'**
   String get ratingTopPicksFirst;
 
-  /// No description provided for @readyForPickupBy.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Ready for pickup by {fmt}'**
   String readyForPickupBy(String fmt);
 
-  /// No description provided for @arrivingBy.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Arriving by {fmt}'**
@@ -4709,13 +4778,13 @@ abstract class AppLocalizations {
   /// **'AM'**
   String get am;
 
-  /// No description provided for @today.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{time} today'**
   String today(String time);
 
-  /// No description provided for @tomorrow.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{time} tomorrow'**
@@ -4775,13 +4844,13 @@ abstract class AppLocalizations {
   /// **'Open Now'**
   String get openNow2;
 
-  /// No description provided for @openNowCloses.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Open Now · Closes {close}{closesuffix}'**
   String openNowCloses(String close, String closesuffix);
 
-  /// No description provided for @closedOpens.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Closed · Opens {time}{day}'**
@@ -4799,7 +4868,7 @@ abstract class AppLocalizations {
   /// **'1 follower'**
   String get msg1Follower;
 
-  /// No description provided for @followers.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{followercount} followers'**
@@ -4883,13 +4952,13 @@ abstract class AppLocalizations {
   /// **'Voucher code is required.'**
   String get voucherCodeIsRequired;
 
-  /// No description provided for @useAtLeastCharacters.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Use at least {codeminlength} characters.'**
   String useAtLeastCharacters(String codeminlength);
 
-  /// No description provided for @useAtMostCharacters.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Use at most {codemaxlength} characters.'**
@@ -5027,13 +5096,13 @@ abstract class AppLocalizations {
   /// **'Voucher cannot be applied.'**
   String get voucherCannotBeApplied;
 
-  /// No description provided for @onlyLeft.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Only {left} left'**
   String onlyLeft(String left);
 
-  /// No description provided for @near.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Near {landmark}'**
@@ -5099,7 +5168,7 @@ abstract class AppLocalizations {
   /// **'All categories'**
   String get allCategories;
 
-  /// No description provided for @off4.
+  ///
   ///
   /// In en, this message translates to:
   /// **'₹{trim} OFF'**
@@ -5937,7 +6006,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Create new catalog items with dynamic variants, custom options, gallery, and inventory controls.'**
-  String get createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls;
+  String
+  get createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls;
 
   /// No description provided for @productTitleIsRequired2.
   ///
@@ -6116,7 +6186,7 @@ abstract class AppLocalizations {
   /// No description provided for @tryClearingTheSearchBoxOrChoosingAll.
   ///
   /// In en, this message translates to:
-  /// **'Try clearing the search box or choosing "All".'**
+  /// **'Try clearing the search box or choosing \"All\".'**
   String get tryClearingTheSearchBoxOrChoosingAll;
 
   /// No description provided for @paused.
@@ -6404,14 +6474,15 @@ abstract class AppLocalizations {
   /// No description provided for @usd.
   ///
   /// In en, this message translates to:
-  /// **'$ USD'**
+  /// **'\$ USD'**
   String get usd;
 
   /// No description provided for @thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail.
   ///
   /// In en, this message translates to:
   /// **'This email is already registered, but the password provided does not match. Please enter your existing password, sign in via Admin Login, or use a different email.'**
-  String get thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail;
+  String
+  get thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail;
 
   /// No description provided for @failedToObtainAuthenticatedUserId.
   ///
@@ -6435,7 +6506,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'That email is already registered. Please sign in via Admin Login or use a different email.'**
-  String get thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail;
+  String
+  get thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail;
 
   /// No description provided for @pleaseEnterAValidEmailAddress.
   ///
@@ -6447,7 +6519,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Invalid credentials. If you already have an account, enter its existing password or sign in via Admin Login.'**
-  String get invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin;
+  String
+  get invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin;
 
   /// No description provided for @sentToAdmin.
   ///
@@ -6656,14 +6729,16 @@ abstract class AppLocalizations {
   /// No description provided for @youCanTrackYourLiveOrderProgressByNavigatingToAccountMyOrdersAndSelectingYourActiveOrder.
   ///
   /// In en, this message translates to:
-  /// **'You can track your live order progress by navigating to "Account > My Orders" and selecting your active order. '**
-  String get youCanTrackYourLiveOrderProgressByNavigatingToAccountMyOrdersAndSelectingYourActiveOrder;
+  /// **'You can track your live order progress by navigating to \"Account > My Orders\" and selecting your active order. '**
+  String
+  get youCanTrackYourLiveOrderProgressByNavigatingToAccountMyOrdersAndSelectingYourActiveOrder;
 
   /// No description provided for @youWillSeeStepByStepUpdatesFromOrderPlacedConfirmedPackedOutForDeliveryToDeliveredWithLiveStatusTimelines.
   ///
   /// In en, this message translates to:
   /// **'You will see step-by-step updates from Order Placed, Confirmed, Packed, Out for Delivery, to Delivered with live status timelines.'**
-  String get youWillSeeStepByStepUpdatesFromOrderPlacedConfirmedPackedOutForDeliveryToDeliveredWithLiveStatusTimelines;
+  String
+  get youWillSeeStepByStepUpdatesFromOrderPlacedConfirmedPackedOutForDeliveryToDeliveredWithLiveStatusTimelines;
 
   /// No description provided for @canICancelOrModifyAnOrderAfterPlacingIt.
   ///
@@ -6674,14 +6749,16 @@ abstract class AppLocalizations {
   /// No description provided for @youCanCancelYourOrderFromTheOrderDetailsScreenBeforeItEntersThePackedOrOutForDeliveryState.
   ///
   /// In en, this message translates to:
-  /// **'You can cancel your order from the Order Details screen before it enters the "Packed" or "Out for Delivery" state. '**
-  String get youCanCancelYourOrderFromTheOrderDetailsScreenBeforeItEntersThePackedOrOutForDeliveryState;
+  /// **'You can cancel your order from the Order Details screen before it enters the \"Packed\" or \"Out for Delivery\" state. '**
+  String
+  get youCanCancelYourOrderFromTheOrderDetailsScreenBeforeItEntersThePackedOrOutForDeliveryState;
 
   /// No description provided for @onceAnOrderIsPackedOrDispatchedByTheMerchantCancellationRequestsMustBeHandledByContactingCustomerSupport.
   ///
   /// In en, this message translates to:
   /// **'Once an order is packed or dispatched by the merchant, cancellation requests must be handled by contacting customer support.'**
-  String get onceAnOrderIsPackedOrDispatchedByTheMerchantCancellationRequestsMustBeHandledByContactingCustomerSupport;
+  String
+  get onceAnOrderIsPackedOrDispatchedByTheMerchantCancellationRequestsMustBeHandledByContactingCustomerSupport;
 
   /// No description provided for @howIsTheDeliveryChargeCalculatedForMyLocation.
   ///
@@ -6693,13 +6770,15 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Delivery charges are computed dynamically based on the merchant\'s delivery zone rates for your PIN code or distance. '**
-  String get deliveryChargesAreComputedDynamicallyBasedOnTheMerchantSDeliveryZoneRatesForYourPinCodeOrDistance;
+  String
+  get deliveryChargesAreComputedDynamicallyBasedOnTheMerchantSDeliveryZoneRatesForYourPinCodeOrDistance;
 
   /// No description provided for @whenYouSelectOrEnterYourDeliveryAddressAtCheckoutAnyApplicableDeliveryFeeIsTransparentlyShownInTheBillSummary.
   ///
   /// In en, this message translates to:
   /// **'When you select or enter your delivery address at checkout, any applicable delivery fee is transparently shown in the bill summary.'**
-  String get whenYouSelectOrEnterYourDeliveryAddressAtCheckoutAnyApplicableDeliveryFeeIsTransparentlyShownInTheBillSummary;
+  String
+  get whenYouSelectOrEnterYourDeliveryAddressAtCheckoutAnyApplicableDeliveryFeeIsTransparentlyShownInTheBillSummary;
 
   /// No description provided for @whatAreTheEstimatedDeliveryTimelines.
   ///
@@ -6711,13 +6790,15 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Standard local deliveries typically arrive within the merchant\'s designated delivery window (usually 30–90 minutes for quick-commerce items or 1–2 business days for standard items). '**
-  String get standardLocalDeliveriesTypicallyArriveWithinTheMerchantSDesignatedDeliveryWindowUsually3090MinutesForQuickCommerceItemsOr12BusinessDaysForStandardItems;
+  String
+  get standardLocalDeliveriesTypicallyArriveWithinTheMerchantSDesignatedDeliveryWindowUsually3090MinutesForQuickCommerceItemsOr12BusinessDaysForStandardItems;
 
   /// No description provided for @estimatedDeliveryTimesAreDisplayedOnTheProductPageAndCheckoutScreen.
   ///
   /// In en, this message translates to:
   /// **'Estimated delivery times are displayed on the product page and checkout screen.'**
-  String get estimatedDeliveryTimesAreDisplayedOnTheProductPageAndCheckoutScreen;
+  String
+  get estimatedDeliveryTimesAreDisplayedOnTheProductPageAndCheckoutScreen;
 
   /// No description provided for @whatPaymentMethodsAreSupported.
   ///
@@ -6735,7 +6816,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'The delivery partner or merchant updates the payment status directly once the payment is completed.'**
-  String get theDeliveryPartnerOrMerchantUpdatesThePaymentStatusDirectlyOnceThePaymentIsCompleted;
+  String
+  get theDeliveryPartnerOrMerchantUpdatesThePaymentStatusDirectlyOnceThePaymentIsCompleted;
 
   /// No description provided for @howDoRefundsWorkForCancelledOrders.
   ///
@@ -6747,13 +6829,15 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'If an order was prepaid or cancelled before fulfillment, your refund is initiated immediately by the merchant. '**
-  String get ifAnOrderWasPrepaidOrCancelledBeforeFulfillmentYourRefundIsInitiatedImmediatelyByTheMerchant;
+  String
+  get ifAnOrderWasPrepaidOrCancelledBeforeFulfillmentYourRefundIsInitiatedImmediatelyByTheMerchant;
 
   /// No description provided for @refundsTypicallyReflectInYourOriginalPaymentSourceWithin35BusinessDays.
   ///
   /// In en, this message translates to:
   /// **'Refunds typically reflect in your original payment source within 3–5 business days.'**
-  String get refundsTypicallyReflectInYourOriginalPaymentSourceWithin35BusinessDays;
+  String
+  get refundsTypicallyReflectInYourOriginalPaymentSourceWithin35BusinessDays;
 
   /// No description provided for @whatIsTheReturnAndReplacementPolicy.
   ///
@@ -6765,13 +6849,15 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Eligible items can be returned or replaced within 7 days of delivery if they are damaged, defective, or different from described. '**
-  String get eligibleItemsCanBeReturnedOrReplacedWithin7DaysOfDeliveryIfTheyAreDamagedDefectiveOrDifferentFromDescribed;
+  String
+  get eligibleItemsCanBeReturnedOrReplacedWithin7DaysOfDeliveryIfTheyAreDamagedDefectiveOrDifferentFromDescribed;
 
   /// No description provided for @toRequestAReturnGoToYourOrderDetailsOrSubmitAQueryUsingTheContactSupportFormWithPhotosOfTheDamagedItem.
   ///
   /// In en, this message translates to:
   /// **'To request a return, go to your order details or submit a query using the Contact Support form with photos of the damaged item.'**
-  String get toRequestAReturnGoToYourOrderDetailsOrSubmitAQueryUsingTheContactSupportFormWithPhotosOfTheDamagedItem;
+  String
+  get toRequestAReturnGoToYourOrderDetailsOrSubmitAQueryUsingTheContactSupportFormWithPhotosOfTheDamagedItem;
 
   /// No description provided for @howDoIAddOrManageMultipleDeliveryAddresses.
   ///
@@ -6782,14 +6868,16 @@ abstract class AppLocalizations {
   /// No description provided for @goToAccountSavedAddressesToAddUpTo3SavedDeliveryLocationsHomeWorkOther.
   ///
   /// In en, this message translates to:
-  /// **'Go to "Account > Saved Addresses" to add up to 3 saved delivery locations (Home, Work, Other). '**
-  String get goToAccountSavedAddressesToAddUpTo3SavedDeliveryLocationsHomeWorkOther;
+  /// **'Go to \"Account > Saved Addresses\" to add up to 3 saved delivery locations (Home, Work, Other). '**
+  String
+  get goToAccountSavedAddressesToAddUpTo3SavedDeliveryLocationsHomeWorkOther;
 
   /// No description provided for @youCanAlsoSelectOrSwitchYourActiveDeliveryAddressDirectlyFromTheTopBarOnTheHomeScreen.
   ///
   /// In en, this message translates to:
   /// **'You can also select or switch your active delivery address directly from the top bar on the Home Screen.'**
-  String get youCanAlsoSelectOrSwitchYourActiveDeliveryAddressDirectlyFromTheTopBarOnTheHomeScreen;
+  String
+  get youCanAlsoSelectOrSwitchYourActiveDeliveryAddressDirectlyFromTheTopBarOnTheHomeScreen;
 
   /// No description provided for @howDoIApplyADiscountVoucherOrCouponCode.
   ///
@@ -6800,14 +6888,15 @@ abstract class AppLocalizations {
   /// No description provided for @duringCheckoutTapTheApplyVoucherSectionUnderOrderSummary.
   ///
   /// In en, this message translates to:
-  /// **'During checkout, tap the "Apply Voucher" section under Order Summary. '**
+  /// **'During checkout, tap the \"Apply Voucher\" section under Order Summary. '**
   String get duringCheckoutTapTheApplyVoucherSectionUnderOrderSummary;
 
   /// No description provided for @selectAnAvailablePromoCodeOrTypeYourVoucherCodeToInstantlyReceiveADiscountOnEligibleCartItems.
   ///
   /// In en, this message translates to:
   /// **'Select an available promo code or type your voucher code to instantly receive a discount on eligible cart items.'**
-  String get selectAnAvailablePromoCodeOrTypeYourVoucherCodeToInstantlyReceiveADiscountOnEligibleCartItems;
+  String
+  get selectAnAvailablePromoCodeOrTypeYourVoucherCodeToInstantlyReceiveADiscountOnEligibleCartItems;
 
   /// No description provided for @howIsMyPersonalDataAndAccountInformationSecured.
   ///
@@ -6819,7 +6908,8 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'We employ industry-standard encryption protocols and secure authentication tokens to protect your personal information, delivery addresses, and order history.'**
-  String get weEmployIndustryStandardEncryptionProtocolsAndSecureAuthenticationTokensToProtectYourPersonalInformationDeliveryAddressesAndOrderHistory;
+  String
+  get weEmployIndustryStandardEncryptionProtocolsAndSecureAuthenticationTokensToProtectYourPersonalInformationDeliveryAddressesAndOrderHistory;
 
   /// No description provided for @shopByCategory.
   ///
@@ -7049,181 +7139,181 @@ abstract class AppLocalizations {
   /// **'Browse All Products'**
   String get browseAllProducts;
 
-  /// No description provided for @categoryCreatedSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Category "{category}" created successfully!'**
+  /// **'Category \"{category}\" created successfully!'**
   String categoryCreatedSuccessfully(String category);
 
-  /// No description provided for @reorderingInside.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Reordering inside "{parentname}"'**
+  /// **'Reordering inside \"{parentname}\"'**
   String reorderingInside(String parentname);
 
-  /// No description provided for @deliveryChargeCreatedFor.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Delivery charge created for {pincode}'**
   String deliveryChargeCreatedFor(String pincode);
 
-  /// No description provided for @freeOn2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Free on > {formatcurrency}'**
   String freeOn2(String formatcurrency);
 
-  /// No description provided for @min.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Min: {formatcurrency}'**
   String min(String formatcurrency);
 
-  /// No description provided for @employeeProvisionedSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Employee "{emp}" provisioned successfully!'**
+  /// **'Employee \"{emp}\" provisioned successfully!'**
   String employeeProvisionedSuccessfully(String emp);
 
-  /// No description provided for @discount2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Discount{order}'**
   String discount2(String order);
 
-  /// No description provided for @productCreatedSuccessfully.
+  ///
   ///
   /// In en, this message translates to:
-  /// **'Product "{product}" created successfully!'**
+  /// **'Product \"{product}\" created successfully!'**
   String productCreatedSuccessfully(String product);
 
-  /// No description provided for @stock.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Stock: {product} {product2}'**
   String stock(String product, String product2);
 
-  /// No description provided for @orderReport.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{period} Order Report'**
   String orderReport(String period);
 
-  /// No description provided for @uses.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{voucher}/{voucher2} uses'**
   String uses(String voucher, String voucher2);
 
-  /// No description provided for @usesUnlimited.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{voucher} uses (unlimited)'**
   String usesUnlimited(String voucher);
 
-  /// No description provided for @voucherCreated.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Voucher {voucher} created.'**
   String voucherCreated(String voucher);
 
-  /// No description provided for @couldNotVerifyCompanyPleaseTryAgain.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Could not verify company. Please try again.\n{e}'**
   String couldNotVerifyCompanyPleaseTryAgain(String e);
 
-  /// No description provided for @isUnavailable.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{item} is unavailable'**
   String isUnavailable(String item);
 
-  /// No description provided for @isUnavailable2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{item} ({item2}) is unavailable'**
   String isUnavailable2(String item, String item2);
 
-  /// No description provided for @isOutOfStock.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{item} is out of stock'**
   String isOutOfStock(String item);
 
-  /// No description provided for @quantityReducedToStock.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{item}: quantity reduced to {qty} (stock)'**
   String quantityReducedToStock(String item, String qty);
 
-  /// No description provided for @priceUpdatedFor.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Price updated for {item}'**
   String priceUpdatedFor(String item);
 
-  /// No description provided for @couldNotPlaceTheOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Could not place the order: {e}'**
   String couldNotPlaceTheOrder(String e);
 
-  /// No description provided for @confirmPlaceOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Confirm & Place Order · {formatcurrency}'**
   String confirmPlaceOrder(String formatcurrency);
 
-  /// No description provided for @selfPickupOnlyMinOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Self-Pickup only • Min order {minorderformatted}'**
   String selfPickupOnlyMinOrder(String minorderformatted);
 
-  /// No description provided for @homeDeliveryAvailableMinOrder.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Home Delivery available • Min order {minorderformatted}'**
   String homeDeliveryAvailableMinOrder(String minorderformatted);
 
-  /// No description provided for @flatOff.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Flat {top}% OFF'**
   String flatOff(String top);
 
-  /// No description provided for @flatOff2.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Flat ₹{top} OFF'**
   String flatOff2(String top);
 
-  /// No description provided for @validOnOrdersOver.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Valid on orders over ₹{top}'**
   String validOnOrdersOver(String top);
 
-  /// No description provided for @ordersOver.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Orders over ₹{voucher}'**
   String ordersOver(String voucher);
 
-  /// No description provided for @deliverTo.
+  ///
   ///
   /// In en, this message translates to:
   /// **'Deliver to {activeaddress}'**
   String deliverTo(String activeaddress);
 
-  /// No description provided for @itemsAddedToCart.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{added, plural, =1{1 item added to cart} other{{added} items added to cart}}'**
   String itemsAddedToCart(num added);
 
-  /// No description provided for @productsSelected.
+  ///
   ///
   /// In en, this message translates to:
   /// **'{n, plural, =1{1 product selected} other{{n} products selected}}'**

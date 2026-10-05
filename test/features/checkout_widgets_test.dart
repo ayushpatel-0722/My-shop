@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/models/company.dart';
 import 'package:myshop/core/models/customer.dart';
@@ -20,8 +20,8 @@ void main() {
   setUp(TestHarness.setupPlatformChannels);
 
   Widget shell(Widget child) => MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
 
     theme: ThemeData.light(),
     home: Scaffold(body: SingleChildScrollView(child: child)),
@@ -52,7 +52,11 @@ void main() {
     ) async {
       await tester.pumpWidget(
         buildTestApp(
-          const CustomerDetailsCard(name: '', email: 'asha@mail.com', mobile: ''),
+          const CustomerDetailsCard(
+            name: '',
+            email: 'asha@mail.com',
+            mobile: '',
+          ),
           user: TestHarness.shopper,
         ),
       );
@@ -73,33 +77,37 @@ void main() {
     final home = TestHarness.homeAddress;
     final work = TestHarness.workAddress;
 
-    testWidgets('lists saved addresses as selectable cards with an add button', (
-      tester,
-    ) async {
-      AddressEntry? selected;
-      await tester.pumpWidget(
-        shell(
-          StatefulBuilder(
-            builder: (context, setState) => AddressSelector(
-              addresses: const [TestHarness.homeAddress, TestHarness.workAddress],
-              selectedAddressId: selected?.id,
-              onSelected: (a) => setState(() => selected = a),
-              onEdit: (_) {},
-              onAddNew: () {},
+    testWidgets(
+      'lists saved addresses as selectable cards with an add button',
+      (tester) async {
+        AddressEntry? selected;
+        await tester.pumpWidget(
+          shell(
+            StatefulBuilder(
+              builder: (context, setState) => AddressSelector(
+                addresses: const [
+                  TestHarness.homeAddress,
+                  TestHarness.workAddress,
+                ],
+                selectedAddressId: selected?.id,
+                onSelected: (a) => setState(() => selected = a),
+                onEdit: (_) {},
+                onAddNew: () {},
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byKey(Key('address-card-${home.id}')), findsOneWidget);
-      expect(find.byKey(Key('address-card-${work.id}')), findsOneWidget);
-      expect(find.text('2/3'), findsOneWidget, reason: 'capacity counter');
-      expect(find.byKey(const Key('add-new-address')), findsOneWidget);
+        expect(find.byKey(Key('address-card-${home.id}')), findsOneWidget);
+        expect(find.byKey(Key('address-card-${work.id}')), findsOneWidget);
+        expect(find.text('2/3'), findsOneWidget, reason: 'capacity counter');
+        expect(find.byKey(const Key('add-new-address')), findsOneWidget);
 
-      await tester.tap(find.byKey(Key('address-card-${work.id}')));
-      await tester.pumpAndSettle();
-      expect(selected?.id, work.id);
-    });
+        await tester.tap(find.byKey(Key('address-card-${work.id}')));
+        await tester.pumpAndSettle();
+        expect(selected?.id, work.id);
+      },
+    );
 
     testWidgets('offers the empty state for a profile without addresses', (
       tester,
@@ -160,11 +168,13 @@ void main() {
     const both = Company(
       id: 'c_both',
       name: 'GreenLeaf Organics',
+      slug: 'c_both',
       deliveryTypes: ['self_pickup', 'home_delivery'],
     );
     const pickupOnly = Company(
       id: 'c_pickup',
       name: 'TechTronics Hub',
+      slug: 'c_pickup',
       deliveryTypes: ['self_pickup'],
     );
 
@@ -184,10 +194,7 @@ void main() {
 
       expect(find.text('Home delivery'), findsOneWidget);
       expect(find.text('Self pickup'), findsOneWidget);
-      expect(
-        find.text('This shop does not offer home delivery'),
-        findsNothing,
-      );
+      expect(find.text('This shop does not offer home delivery'), findsNothing);
     });
 
     testWidgets('pickup-only shops explain themselves and auto-select pickup', (
@@ -216,11 +223,9 @@ void main() {
       final selector = tester.widget<SegmentedButton<String>>(
         find.byKey(const Key('delivery-type-selector')),
       );
-      expect(
-        selector.selected,
-        {DeliveryType.selfPickup},
-        reason: 'home is impossible -> self pickup is used',
-      );
+      expect(selector.selected, {
+        DeliveryType.selfPickup,
+      }, reason: 'home is impossible -> self pickup is used');
     });
 
     testWidgets('tapping a segment reports the new type', (tester) async {

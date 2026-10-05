@@ -9,7 +9,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
 import 'widgets/structured_content_editors.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Full-screen form for creating and editing a Product with Dynamic Variant Generation.
 ///
@@ -106,12 +106,16 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   /// List of missing required fields before variant configuration can be unlocked.
   List<String> get _missingBaseFields {
     final missing = <String>[];
-    if (_nameCtrl.text.trim().isEmpty) missing.add(AppLocalizations.of(context).productTitle2);
+    if (_nameCtrl.text.trim().isEmpty) {
+      missing.add(AppLocalizations.of(context).productTitle2);
+    }
     final price = double.tryParse(_priceCtrl.text.trim()) ?? 0;
     if (price <= 0) missing.add(AppLocalizations.of(context).baseMrpPrice);
     final unit = double.tryParse(_unitCtrl.text.trim()) ?? 0;
     if (unit <= 0) missing.add(AppLocalizations.of(context).baseUnitValue);
-    if (_baseSkuCtrl.text.trim().isEmpty) missing.add(AppLocalizations.of(context).baseSku);
+    if (_baseSkuCtrl.text.trim().isEmpty) {
+      missing.add(AppLocalizations.of(context).baseSku);
+    }
     return missing;
   }
 
@@ -137,7 +141,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     }
   }
 
-
   // --- Structured content: migration + legacy compatibility ---
 
   /// Old products carry `highlights` / `subDetails` as plain strings; split
@@ -159,7 +162,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     return [
       for (var i = 0; i < lines.length; i++)
         HighlightItem(
-          id: 'h_mig_' + DateTime.now().microsecondsSinceEpoch.toString() + '_$i',
+          id: 'h_mig_${DateTime.now().microsecondsSinceEpoch}_$i',
           title: '',
           value: lines[i],
           order: i,
@@ -180,7 +183,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     if (raw.isEmpty) return <DetailSection>[];
     return [
       DetailSection(
-        id: 'd_mig_' + DateTime.now().microsecondsSinceEpoch.toString(),
+        id: 'd_mig_${DateTime.now().microsecondsSinceEpoch}',
         title: AppLocalizations.of(context).description,
         type: DetailSectionType.text,
         text: raw,
@@ -342,7 +345,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     if (urls.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).pleaseEnterAValidHttpOrHttpsImageUrl),
+          content: Text(
+            AppLocalizations.of(context).pleaseEnterAValidHttpOrHttpsImageUrl,
+          ),
         ),
       );
       return;
@@ -454,7 +459,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       chips.add(
         ActionChip(
           label: Text(
-            AppLocalizations.of(context).quantity12510('${currentUnit}', '${currentUnit}', '${currentUnit}', '${currentUnit}'),
+            AppLocalizations.of(
+              context,
+            ).quantity12510(currentUnit, currentUnit, currentUnit, currentUnit),
             style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
@@ -467,7 +474,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       chips.add(
         ActionChip(
           label: Text(
-            AppLocalizations.of(context).quantity246('${currentUnit}', '${currentUnit}', '${currentUnit}'),
+            AppLocalizations.of(
+              context,
+            ).quantity246(currentUnit, currentUnit, currentUnit),
             style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
@@ -559,7 +568,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
-            valuesCtrl.text = AppLocalizations.of(context).msg50mg100mg250mg500mg;
+            valuesCtrl.text = AppLocalizations.of(
+              context,
+            ).msg50mg100mg250mg500mg;
           },
         ),
       );
@@ -585,7 +596,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).box;
-            valuesCtrl.text = AppLocalizations.of(context).msg1Box2Boxes5Boxes10Boxes;
+            valuesCtrl.text = AppLocalizations.of(
+              context,
+            ).msg1Box2Boxes5Boxes10Boxes;
           },
         ),
       );
@@ -598,7 +611,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).pack;
-            valuesCtrl.text = AppLocalizations.of(context).msg1Pack2Packs5Packs10Packs;
+            valuesCtrl.text = AppLocalizations.of(
+              context,
+            ).msg1Pack2Packs5Packs10Packs;
           },
         ),
       );
@@ -611,7 +626,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).bottle;
-            valuesCtrl.text = AppLocalizations.of(context).msg1Bottle2Bottles4Bottles6Bottles;
+            valuesCtrl.text = AppLocalizations.of(
+              context,
+            ).msg1Bottle2Bottles4Bottles6Bottles;
           },
         ),
       );
@@ -652,7 +669,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions('${_missingBaseFields.join(", ")}'),
+            AppLocalizations.of(
+              context,
+            ).pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions(
+              _missingBaseFields.join(", "),
+            ),
           ),
           backgroundColor: Colors.orange.shade800,
         ),
@@ -697,7 +718,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        AppLocalizations.of(context).unitOptionsStrictlySynchronizedWith('${currentUnit}'),
+                        AppLocalizations.of(
+                          context,
+                        ).unitOptionsStrictlySynchronizedWith(currentUnit),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -721,15 +744,20 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
               TextField(
                 controller: valuesCtrl,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context).optionValuesCommaSeparated,
-                  hintText:
-                      AppLocalizations.of(context).eG125('${currentUnit}', '${currentUnit}', '${currentUnit}'),
+                  labelText: AppLocalizations.of(
+                    context,
+                  ).optionValuesCommaSeparated,
+                  hintText: AppLocalizations.of(
+                    context,
+                  ).eG125(currentUnit, currentUnit, currentUnit),
                   prefixIcon: const Icon(Icons.list),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                AppLocalizations.of(context).quickTemplatesStrictlyFor('${currentUnit}'),
+                AppLocalizations.of(
+                  context,
+                ).quickTemplatesStrictlyFor(currentUnit),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -789,7 +817,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      AppLocalizations.of(context).cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor('${optName}', '${currentUnit}'),
+                      AppLocalizations.of(
+                        context,
+                      ).cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor(
+                        optName,
+                        currentUnit,
+                      ),
                     ),
                     backgroundColor: Colors.orange.shade800,
                   ),
@@ -853,7 +886,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     if (u == 'quintal' || u == 'qtl') {
       return qty * 100000.0;
     }
-    if (u == 'ton' || u == 'tonne' || u == AppLocalizations.of(context).metricTon) {
+    if (u == 'ton' ||
+        u == 'tonne' ||
+        u == AppLocalizations.of(context).metricTon) {
       return qty * 1000000.0;
     }
     if (u == 'lb' || u == 'lbs' || u == 'pound' || u == 'pounds') {
@@ -1115,7 +1150,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix('${_missingBaseFields.join(", ")}'),
+            AppLocalizations.of(
+              context,
+            ).pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix(
+              _missingBaseFields.join(", "),
+            ),
           ),
           backgroundColor: Colors.orange.shade800,
         ),
@@ -1127,7 +1166,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).pleaseAddAtLeastOneOptionFirstToGenerateCombinations,
+            AppLocalizations.of(
+              context,
+            ).pleaseAddAtLeastOneOptionFirstToGenerateCombinations,
           ),
         ),
       );
@@ -1245,7 +1286,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          AppLocalizations.of(context).generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices('${_variants.length}', '${baseUnitType}'),
+          AppLocalizations.of(
+            context,
+          ).generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices(
+            '${_variants.length}',
+            baseUnitType,
+          ),
         ),
         backgroundColor: Colors.green.shade700,
       ),
@@ -1257,7 +1303,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants('${_missingBaseFields.join(", ")}'),
+            AppLocalizations.of(
+              context,
+            ).pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants(
+              _missingBaseFields.join(", "),
+            ),
           ),
           backgroundColor: Colors.orange.shade800,
         ),
@@ -1326,7 +1376,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            AppLocalizations.of(context).unitTypeLockedFromBaseProduct('${lockedUnitType}'),
+                            AppLocalizations.of(
+                              context,
+                            ).unitTypeLockedFromBaseProduct(lockedUnitType),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -1360,7 +1412,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     controller: colorCtrl,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).colorOptional,
-                      hintText: AppLocalizations.of(context).eGRedMidnightBlueBlack,
+                      hintText: AppLocalizations.of(
+                        context,
+                      ).eGRedMidnightBlueBlack,
                       prefixIcon: Icon(Icons.palette_outlined),
                     ),
                   ),
@@ -1370,8 +1424,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                   TextField(
                     controller: labelCtrl,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).variantLabelNameOptional,
-                      hintText: AppLocalizations.of(context).eGLarge500PackOf2('${lockedUnitType}'),
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).variantLabelNameOptional,
+                      hintText: AppLocalizations.of(
+                        context,
+                      ).eGLarge500PackOf2(lockedUnitType),
                       prefixIcon: const Icon(Icons.label_outline),
                     ),
                   ),
@@ -1429,11 +1487,18 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     ),
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).price,
-                      hintText:
-                          AppLocalizations.of(context).auto('${calculatedAutoPrice.toStringAsFixed(2)}'),
+                      hintText: AppLocalizations.of(
+                        context,
+                      ).auto(calculatedAutoPrice.toStringAsFixed(2)),
                       helperText: priceOverrideCtrl.text.trim().isEmpty
-                          ? AppLocalizations.of(context).blankAutoCalculatesToBasedOnBasePrice('${calculatedAutoPrice.toStringAsFixed(2)}')
-                          : AppLocalizations.of(context).customPriceOverrideApplied,
+                          ? AppLocalizations.of(
+                              context,
+                            ).blankAutoCalculatesToBasedOnBasePrice(
+                              calculatedAutoPrice.toStringAsFixed(2),
+                            )
+                          : AppLocalizations.of(
+                              context,
+                            ).customPriceOverrideApplied,
                       helperMaxLines: 2,
                       prefixIcon: const Icon(Icons.currency_rupee),
                     ),
@@ -1470,9 +1535,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       : defaultTitle;
 
                   final attrs = <String, String>{
-                    AppLocalizations.of(context).unit: '$unitVal $lockedUnitType',
-                    if (colorVal.isNotEmpty) AppLocalizations.of(context).color: colorVal,
-                    if (customLabel.isNotEmpty) AppLocalizations.of(context).option: customLabel,
+                    AppLocalizations.of(context).unit:
+                        '$unitVal $lockedUnitType',
+                    if (colorVal.isNotEmpty)
+                      AppLocalizations.of(context).color: colorVal,
+                    if (customLabel.isNotEmpty)
+                      AppLocalizations.of(context).option: customLabel,
                   };
 
                   final variant = ProductVariant(
@@ -1538,7 +1606,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
           return AlertDialog(
             title: Text(
-              AppLocalizations.of(context).editVariant('${v.title.isNotEmpty ? v.title : v.sku}'),
+              AppLocalizations.of(
+                context,
+              ).editVariant(v.title.isNotEmpty ? v.title : v.sku),
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -1573,7 +1643,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            AppLocalizations.of(context).unitTypeLockedFromBaseProduct('${lockedUnitType}'),
+                            AppLocalizations.of(
+                              context,
+                            ).unitTypeLockedFromBaseProduct(lockedUnitType),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -1607,7 +1679,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     controller: colorCtrl,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).colorOptional,
-                      hintText: AppLocalizations.of(context).eGRedMidnightBlueBlack,
+                      hintText: AppLocalizations.of(
+                        context,
+                      ).eGRedMidnightBlueBlack,
                       prefixIcon: Icon(Icons.palette_outlined),
                     ),
                   ),
@@ -1664,11 +1738,18 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     ),
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).price,
-                      hintText:
-                          AppLocalizations.of(context).auto('${calculatedAutoPrice.toStringAsFixed(2)}'),
+                      hintText: AppLocalizations.of(
+                        context,
+                      ).auto(calculatedAutoPrice.toStringAsFixed(2)),
                       helperText: priceCtrl.text.trim().isEmpty
-                          ? AppLocalizations.of(context).blankAutoCalculatesToBasedOnBasePrice('${calculatedAutoPrice.toStringAsFixed(2)}')
-                          : AppLocalizations.of(context).customPriceOverrideApplied,
+                          ? AppLocalizations.of(
+                              context,
+                            ).blankAutoCalculatesToBasedOnBasePrice(
+                              calculatedAutoPrice.toStringAsFixed(2),
+                            )
+                          : AppLocalizations.of(
+                              context,
+                            ).customPriceOverrideApplied,
                       helperMaxLines: 2,
                       prefixIcon: const Icon(Icons.currency_rupee),
                     ),
@@ -1750,7 +1831,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).pleaseCheckAllRequiredFields)),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).pleaseCheckAllRequiredFields,
+          ),
+        ),
       );
       return;
     }
@@ -1793,9 +1878,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       // Structured content: drop untouched rows/sections, then validate.
       final highlights = _highlights.where((h) => !h.isEmpty).toList();
       final allDetails = _allDetails
-          .where(
-            (s) => s.title.trim().isNotEmpty || !s.isEmptyContent,
-          )
+          .where((s) => s.title.trim().isNotEmpty || !s.isEmptyContent)
           .toList();
       if (highlights.any((h) => h.isHalfWritten) ||
           !HighlightsEditor.isValid(highlights) ||
@@ -1805,7 +1888,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(context).pleaseCompleteTheProductHighlightsAndAllDetailsSections,
+                AppLocalizations.of(
+                  context,
+                ).pleaseCompleteTheProductHighlightsAndAllDetailsSections,
               ),
               backgroundColor: Colors.orange,
             ),
@@ -1855,8 +1940,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         SnackBar(
           content: Text(
             isEditMode
-                ? AppLocalizations.of(context).productUpdatedSuccessfully('${product.name}')
-                : AppLocalizations.of(context).productCreatedSuccessfully('${product.name}'),
+                ? AppLocalizations.of(
+                    context,
+                  ).productUpdatedSuccessfully(product.name)
+                : AppLocalizations.of(
+                    context,
+                  ).productCreatedSuccessfully(product.name),
           ),
           backgroundColor: Colors.green.shade700,
         ),
@@ -1871,7 +1960,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).failedToSaveProduct('${e}')),
+          content: Text(AppLocalizations.of(context).failedToSaveProduct('$e')),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -1903,7 +1992,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? AppLocalizations.of(context).editProduct : AppLocalizations.of(context).addNewProduct),
+        title: Text(
+          isEditMode
+              ? AppLocalizations.of(context).editProduct
+              : AppLocalizations.of(context).addNewProduct,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -1943,8 +2036,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             const SizedBox(height: 4),
                             Text(
                               isEditMode
-                                  ? AppLocalizations.of(context).updateCatalogItemDetailsPricingImagesVariantsAndSpecifications
-                                  : AppLocalizations.of(context).createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls,
+                                  ? AppLocalizations.of(
+                                      context,
+                                    ).updateCatalogItemDetailsPricingImagesVariantsAndSpecifications
+                                  : AppLocalizations.of(
+                                      context,
+                                    ).createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: isDark
                                     ? AppTheme.textSecondaryDark
@@ -1984,8 +2081,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               _companyName.isNotEmpty
                                   ? _companyName
                                   : (_companyId.isNotEmpty
-                                        ? AppLocalizations.of(context).companyScope
-                                        : AppLocalizations.of(context).globalScope),
+                                        ? AppLocalizations.of(
+                                            context,
+                                          ).companyScope
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).globalScope),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -2030,20 +2131,26 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           controller: _nameCtrl,
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).productTitle,
-                            hintText:
-                                AppLocalizations.of(context).eGOrganicHassAvocadoChanderiSilkSaree15In1SweetsBox,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).productTitle,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).eGOrganicHassAvocadoChanderiSilkSaree15In1SweetsBox,
                             prefixIcon: Icon(Icons.title),
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? AppLocalizations.of(context).productTitleIsRequired2
+                              ? AppLocalizations.of(
+                                  context,
+                                ).productTitleIsRequired2
                               : null,
                         ),
                         const SizedBox(height: 16),
                         HighlightsEditor(
                           value: _highlights,
                           showErrors: _contentShowErrors,
-                          onChanged: (rows) => setState(() => _highlights = rows),
+                          onChanged: (rows) =>
+                              setState(() => _highlights = rows),
                         ),
                         const SizedBox(height: 20),
                         AllDetailsEditor(
@@ -2083,7 +2190,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               ),
                             ),
                             Text(
-                              AppLocalizations.of(context).added('${_images.length}'),
+                              AppLocalizations.of(
+                                context,
+                              ).added('${_images.length}'),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark
@@ -2095,7 +2204,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          AppLocalizations.of(context).addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage,
+                          AppLocalizations.of(
+                            context,
+                          ).addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: isDark
                                 ? AppTheme.textSecondaryDark
@@ -2109,8 +2220,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               child: TextFormField(
                                 controller: _imageUrlCtrl,
                                 decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context).imageUrl,
-                                  hintText: AppLocalizations.of(context).httpsImagesUnsplashCom,
+                                  labelText: AppLocalizations.of(
+                                    context,
+                                  ).imageUrl,
+                                  hintText: AppLocalizations.of(
+                                    context,
+                                  ).httpsImagesUnsplashCom,
                                   prefixIcon: Icon(Icons.link),
                                 ),
                                 onFieldSubmitted: (_) => _addImageUrl(),
@@ -2221,7 +2336,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                                       BorderRadius.circular(4),
                                                 ),
                                                 child: Text(
-                                                  AppLocalizations.of(context).heroMain,
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  ).heroMain,
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 10,
@@ -2245,7 +2362,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                                         ),
                                                   ),
                                                   child: Text(
-                                                    AppLocalizations.of(context).makeHero,
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    ).makeHero,
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 10,
@@ -2283,7 +2402,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           ),
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).mrpOriginalPrice,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).mrpOriginalPrice,
                             hintText: AppLocalizations.of(context).eG99900,
                             prefixIcon: Icon(Icons.currency_rupee),
                           ),
@@ -2305,7 +2426,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           ),
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).sellingDiscountedPrice,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).sellingDiscountedPrice,
                             hintText: AppLocalizations.of(context).eG79900,
                             prefixIcon: const Icon(Icons.local_offer_outlined),
                             suffix: hasDiscount
@@ -2319,7 +2442,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      AppLocalizations.of(context).off('${discountPercent}'),
+                                      AppLocalizations.of(
+                                        context,
+                                      ).off('$discountPercent'),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 11,
@@ -2335,8 +2460,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           controller: _baseSkuCtrl,
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).baseSkuProductCode,
-                            hintText: AppLocalizations.of(context).eGProdHoney01,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).baseSkuProductCode,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).eGProdHoney01,
                             prefixIcon: Icon(Icons.qr_code_2),
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
@@ -2347,8 +2476,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         final colorField = TextFormField(
                           controller: _colorCtrl,
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).productBaseColorOptional,
-                            hintText: AppLocalizations.of(context).eGRedMidnightBlueMatteBlack,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).productBaseColorOptional,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).eGRedMidnightBlueMatteBlack,
                             prefixIcon: Icon(Icons.palette_outlined),
                           ),
                         );
@@ -2357,17 +2490,25 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           controller: _stockCtrl,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).stockQuantity,
-                            hintText: AppLocalizations.of(context).availableInventoryUnits,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).stockQuantity,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).availableInventoryUnits,
                             prefixIcon: Icon(Icons.warehouse_outlined),
                           ),
                           validator: (v) {
                             if (_stockMode == 'specific') {
                               if (v == null || v.trim().isEmpty) {
-                                return AppLocalizations.of(context).enterInventoryCount;
+                                return AppLocalizations.of(
+                                  context,
+                                ).enterInventoryCount;
                               }
                               if (int.tryParse(v) == null) {
-                                return AppLocalizations.of(context).validInteger;
+                                return AppLocalizations.of(
+                                  context,
+                                ).validInteger;
                               }
                             }
                             return null;
@@ -2432,7 +2573,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    AppLocalizations.of(context).pricingMeasurement,
+                                    AppLocalizations.of(
+                                      context,
+                                    ).pricingMeasurement,
                                     style: theme.textTheme.titleMedium
                                         ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
@@ -2469,7 +2612,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
                             // Stock Availability Selection (Specific Count / Unlimited / Finished)
                             Text(
-                              AppLocalizations.of(context).stockAvailabilityInventoryMode,
+                              AppLocalizations.of(
+                                context,
+                              ).stockAvailabilityInventoryMode,
                               style: theme.textTheme.labelMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -2483,7 +2628,11 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   ButtonSegment<String>(
                                     value: 'specific',
                                     label: Text(
-                                      isNarrow ? AppLocalizations.of(context).count : AppLocalizations.of(context).specificCount,
+                                      isNarrow
+                                          ? AppLocalizations.of(context).count
+                                          : AppLocalizations.of(
+                                              context,
+                                            ).specificCount,
                                     ),
                                     icon: const Icon(
                                       Icons.format_list_numbered,
@@ -2494,8 +2643,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                     value: 'unlimited',
                                     label: Text(
                                       isNarrow
-                                          ? AppLocalizations.of(context).unlimited
-                                          : AppLocalizations.of(context).unlimitedStock,
+                                          ? AppLocalizations.of(
+                                              context,
+                                            ).unlimited
+                                          : AppLocalizations.of(
+                                              context,
+                                            ).unlimitedStock,
                                     ),
                                     icon: const Icon(
                                       Icons.all_inclusive,
@@ -2506,8 +2659,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                     value: 'out_of_stock',
                                     label: Text(
                                       isNarrow
-                                          ? AppLocalizations.of(context).outOfStock2
-                                          : AppLocalizations.of(context).finishedOutOfStock,
+                                          ? AppLocalizations.of(
+                                              context,
+                                            ).outOfStock2
+                                          : AppLocalizations.of(
+                                              context,
+                                            ).finishedOutOfStock,
                                     ),
                                     icon: const Icon(Icons.block, size: 18),
                                   ),
@@ -2552,7 +2709,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        AppLocalizations.of(context).unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems,
+                                        AppLocalizations.of(
+                                          context,
+                                        ).unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
@@ -2586,7 +2745,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                     const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        AppLocalizations.of(context).outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked,
+                                        AppLocalizations.of(
+                                          context,
+                                        ).outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
@@ -2615,14 +2776,24 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   ButtonSegment<String>(
                                     value: 'quantity_based',
                                     label: Text(
-                                      isNarrow ? AppLocalizations.of(context).quantity : AppLocalizations.of(context).quantityBased2,
+                                      isNarrow
+                                          ? AppLocalizations.of(
+                                              context,
+                                            ).quantity
+                                          : AppLocalizations.of(
+                                              context,
+                                            ).quantityBased2,
                                     ),
                                     icon: const Icon(Icons.tag, size: 18),
                                   ),
                                   ButtonSegment<String>(
                                     value: 'weight_based',
                                     label: Text(
-                                      isNarrow ? AppLocalizations.of(context).weight : AppLocalizations.of(context).weightBased2,
+                                      isNarrow
+                                          ? AppLocalizations.of(context).weight
+                                          : AppLocalizations.of(
+                                              context,
+                                            ).weightBased2,
                                     ),
                                     icon: const Icon(Icons.scale, size: 18),
                                   ),
@@ -2674,9 +2845,15 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                               color: Colors.transparent,
                               child: SwitchListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: Text(AppLocalizations.of(context).featuredRecommendation),
+                                title: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).featuredRecommendation,
+                                ),
                                 subtitle: Text(
-                                  AppLocalizations.of(context).flagThisProductToAppearInTheRecommendationsEngineCarousel,
+                                  AppLocalizations.of(
+                                    context,
+                                  ).flagThisProductToAppearInTheRecommendationsEngineCarousel,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: isDark
@@ -2814,7 +2991,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                       ? _showAddOptionDialog
                                       : null,
                                   icon: const Icon(Icons.add, size: 16),
-                                  label: Text(AppLocalizations.of(context).addOption),
+                                  label: Text(
+                                    AppLocalizations.of(context).addOption,
+                                  ),
                                 ),
                                 FilledButton.icon(
                                   onPressed: _isVariantSectionEnabled
@@ -2824,14 +3003,18 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                     Icons.auto_awesome,
                                     size: 16,
                                   ),
-                                  label: Text(AppLocalizations.of(context).generateMatrix),
+                                  label: Text(
+                                    AppLocalizations.of(context).generateMatrix,
+                                  ),
                                 ),
                                 FilledButton.tonalIcon(
                                   onPressed: _isVariantSectionEnabled
                                       ? _showAddManualVariantDialog
                                       : null,
                                   icon: const Icon(Icons.add, size: 16),
-                                  label: Text(AppLocalizations.of(context).addVariant),
+                                  label: Text(
+                                    AppLocalizations.of(context).addVariant,
+                                  ),
                                 ),
                               ],
                             ),
@@ -2839,7 +3022,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          AppLocalizations.of(context).configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides,
+                          AppLocalizations.of(
+                            context,
+                          ).configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: isDark
                                 ? AppTheme.textSecondaryDark
@@ -2872,7 +3057,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        AppLocalizations.of(context).variantConfigurationLocked,
+                                        AppLocalizations.of(
+                                          context,
+                                        ).variantConfigurationLocked,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
@@ -2884,7 +3071,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  AppLocalizations.of(context).pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration,
+                                  AppLocalizations.of(
+                                    context,
+                                  ).pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration,
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.amber.shade900,
@@ -3013,7 +3202,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                AppLocalizations.of(context).noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix,
+                                AppLocalizations.of(
+                                  context,
+                                ).noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isDark
@@ -3029,7 +3220,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppLocalizations.of(context).variantCombinations('${_variants.length}'),
+                                AppLocalizations.of(
+                                  context,
+                                ).variantCombinations('${_variants.length}'),
                                 style: theme.textTheme.labelMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -3108,7 +3301,31 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              AppLocalizations.of(context).unitStock('${_variants[idx].unitValue > 0 ? (_variants[idx].unitValue == _variants[idx].unitValue.roundToDouble() ? _variants[idx].unitValue.toInt() : _variants[idx].unitValue) : (_variants[idx].size.isNotEmpty ? _variants[idx].size : "1")}', '${_variants[idx].unitType.isNotEmpty ? _variants[idx].unitType : _unitTypeCtrl.text.trim()}', '${_variants[idx].isUnlimitedStock ? AppLocalizations.of(context).unlimited : _variants[idx].stockQty}', '${_variants[idx].priceOverride > 0 ? AppLocalizations.of(context).price2('${_variants[idx].priceOverride % 1 == 0 ? _variants[idx].priceOverride.toInt() : _variants[idx].priceOverride.toStringAsFixed(2)}') : AppLocalizations.of(context).basePrice}', '${_variants[idx].attributes.isNotEmpty ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}" : ""}'),
+                                              AppLocalizations.of(
+                                                context,
+                                              ).unitStock(
+                                                '${_variants[idx].unitValue > 0 ? (_variants[idx].unitValue == _variants[idx].unitValue.roundToDouble() ? _variants[idx].unitValue.toInt() : _variants[idx].unitValue) : (_variants[idx].size.isNotEmpty ? _variants[idx].size : "1")}',
+                                                _variants[idx]
+                                                        .unitType
+                                                        .isNotEmpty
+                                                    ? _variants[idx].unitType
+                                                    : _unitTypeCtrl.text.trim(),
+                                                '${_variants[idx].isUnlimitedStock ? AppLocalizations.of(context).unlimited : _variants[idx].stockQty}',
+                                                _variants[idx].priceOverride > 0
+                                                    ? AppLocalizations.of(
+                                                        context,
+                                                      ).price2(
+                                                        '${_variants[idx].priceOverride % 1 == 0 ? _variants[idx].priceOverride.toInt() : _variants[idx].priceOverride.toStringAsFixed(2)}',
+                                                      )
+                                                    : AppLocalizations.of(
+                                                        context,
+                                                      ).basePrice,
+                                                _variants[idx]
+                                                        .attributes
+                                                        .isNotEmpty
+                                                    ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}"
+                                                    : "",
+                                              ),
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 color: isDark
@@ -3125,7 +3342,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                           Icons.edit_outlined,
                                           size: 18,
                                         ),
-                                        tooltip: AppLocalizations.of(context).editStockPriceOverride,
+                                        tooltip: AppLocalizations.of(
+                                          context,
+                                        ).editStockPriceOverride,
                                         onPressed: () => _editVariant(idx),
                                       ),
                                       IconButton(
@@ -3133,7 +3352,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                           Icons.delete_outline,
                                           size: 18,
                                         ),
-                                        tooltip: AppLocalizations.of(context).remove,
+                                        tooltip: AppLocalizations.of(
+                                          context,
+                                        ).remove,
                                         onPressed: () => _removeVariant(idx),
                                       ),
                                     ],
@@ -3166,7 +3387,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                AppLocalizations.of(context).specificationsPolicies,
+                                AppLocalizations.of(
+                                  context,
+                                ).specificationsPolicies,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -3184,7 +3407,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          AppLocalizations.of(context).addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies,
+                          AppLocalizations.of(
+                            context,
+                          ).addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: isDark
                                 ? AppTheme.textSecondaryDark
@@ -3203,8 +3428,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   child: TextFormField(
                                     controller: _specControllers[i].key,
                                     decoration: InputDecoration(
-                                      labelText: AppLocalizations.of(context).specKey,
-                                      hintText: AppLocalizations.of(context).eGFabricShelfLife,
+                                      labelText: AppLocalizations.of(
+                                        context,
+                                      ).specKey,
+                                      hintText: AppLocalizations.of(
+                                        context,
+                                      ).eGFabricShelfLife,
                                     ),
                                   ),
                                 ),
@@ -3214,8 +3443,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                   child: TextFormField(
                                     controller: _specControllers[i].value,
                                     decoration: InputDecoration(
-                                      labelText: AppLocalizations.of(context).specValue,
-                                      hintText: AppLocalizations.of(context).eGPureSilk30Days,
+                                      labelText: AppLocalizations.of(
+                                        context,
+                                      ).specValue,
+                                      hintText: AppLocalizations.of(
+                                        context,
+                                      ).eGPureSilk30Days,
                                     ),
                                   ),
                                 ),
@@ -3235,9 +3468,12 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                           controller: _policyCtrl,
                           maxLines: 3,
                           decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context).deliveryReturnPolicy,
-                            hintText:
-                                AppLocalizations.of(context).eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts,
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).deliveryReturnPolicy,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts,
                             alignLabelWithHint: true,
                             prefixIcon: Icon(Icons.local_shipping_outlined),
                           ),
@@ -3252,7 +3488,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                   // Save / Publish Action
                   // ==========================================
                   ModernButton(
-                    text: isEditMode ? AppLocalizations.of(context).updateProduct : AppLocalizations.of(context).createProduct,
+                    text: isEditMode
+                        ? AppLocalizations.of(context).updateProduct
+                        : AppLocalizations.of(context).createProduct,
                     icon: const Icon(Icons.check, size: 20),
                     isLoading: _isSaving,
                     height: 52,

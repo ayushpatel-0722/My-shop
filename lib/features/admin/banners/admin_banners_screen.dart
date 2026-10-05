@@ -1,3 +1,5 @@
+import 'package:myshop/app/l10n/app_localizations.dart';
+
 import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +8,6 @@ import '../../../core/models/banner.dart';
 import '../../../core/services/service_locator.dart';
 import '../../auth/auth_cubit.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Offer banner manager — upload graphics, configure action targets and
 /// schedule start/end (Section 13.1).
@@ -31,7 +32,9 @@ class AdminBannersScreen extends StatelessWidget {
         builder: (context, snap) {
           final list = snap.data ?? const <OfferBanner>[];
           if (list.isEmpty) {
-            return Center(child: Text(AppLocalizations.of(context).noOfferBanners));
+            return Center(
+              child: Text(AppLocalizations.of(context).noOfferBanners),
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -44,7 +47,9 @@ class AdminBannersScreen extends StatelessWidget {
                   leading: const Icon(Icons.image),
                   title: Text(b.id),
                   subtitle: Text(
-                    AppLocalizations.of(context).priority('${b.actionType.name}', '${b.priority}'),
+                    AppLocalizations.of(
+                      context,
+                    ).priority(b.actionType.name, '${b.priority}'),
                   ),
                   trailing: const Icon(Icons.drag_handle),
                 ),
@@ -105,15 +110,25 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
           const SizedBox(height: 16),
           TextField(
             controller: _imageUrlCtrl,
-            decoration: InputDecoration(labelText: AppLocalizations.of(context).imageUrl),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).imageUrl,
+            ),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _actionType,
-            decoration: InputDecoration(labelText: AppLocalizations.of(context).tapAction),
-            items: const [
-              DropdownMenuItem(value: 'product', child: Text(AppLocalizations.of(context).product)),
-              DropdownMenuItem(value: 'category', child: Text(AppLocalizations.of(context).category)),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).tapAction,
+            ),
+            items: [
+              DropdownMenuItem(
+                value: 'product',
+                child: Text(AppLocalizations.of(context).product),
+              ),
+              DropdownMenuItem(
+                value: 'category',
+                child: Text(AppLocalizations.of(context).category),
+              ),
               DropdownMenuItem(
                 value: 'external_url',
                 child: Text(AppLocalizations.of(context).externalUrl),

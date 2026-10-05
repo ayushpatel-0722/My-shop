@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/models/product.dart';
 import 'package:myshop/features/admin/products/widgets/structured_content_editors.dart';

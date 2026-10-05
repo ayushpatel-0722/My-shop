@@ -10,7 +10,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Master order pipeline for the signed-in store.
 ///
@@ -121,15 +121,20 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   return _CenteredMessage(
                     icon: Icons.receipt_long_outlined,
                     message: AppLocalizations.of(context).noOrdersYet2,
-                    detail:
-                        AppLocalizations.of(context).ordersFromYourStoreWillAppearHereInstantly,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).ordersFromYourStoreWillAppearHereInstantly,
                   );
                 }
                 if (visible.isEmpty) {
                   return _CenteredMessage(
                     icon: Icons.filter_alt_off_outlined,
-                    message: AppLocalizations.of(context).noOrdersMatchTheseFilters,
-                    detail: AppLocalizations.of(context).clearTheSearchBoxOrPickAnotherStatus,
+                    message: AppLocalizations.of(
+                      context,
+                    ).noOrdersMatchTheseFilters,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).clearTheSearchBoxOrPickAnotherStatus,
                   );
                 }
 
@@ -373,12 +378,20 @@ class _OrderCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              AppLocalizations.of(context).itemS2('${order.itemCount}', '${order.isSelfPickup ? AppLocalizations.of(context).selfPickup : AppLocalizations.of(context).homeDelivery2}', '${order.pincode.isNotEmpty ? ' · ${order.pincode}' : ''}'),
+              AppLocalizations.of(context).itemS2(
+                '${order.itemCount}',
+                order.isSelfPickup
+                    ? AppLocalizations.of(context).selfPickup
+                    : AppLocalizations.of(context).homeDelivery2,
+                order.pincode.isNotEmpty ? ' · ${order.pincode}' : '',
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             if (order.createdAt != null)
               Text(
-                DateFormat(AppLocalizations.of(context).ddMmmHhMmA).format(order.createdAt!),
+                DateFormat(
+                  AppLocalizations.of(context).ddMmmHhMmA,
+                ).format(order.createdAt!),
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             if (order.customerName.isNotEmpty ||
@@ -406,7 +419,17 @@ class _OrderCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        AppLocalizations.of(context).str2('${order.customerName.isNotEmpty ? order.customerName : AppLocalizations.of(context).customer}', '${order.customerPhone.isNotEmpty ? " · ${order.customerPhone}" : ""}', '${order.customerEmail.isNotEmpty ? " (${order.customerEmail})" : ""}'),
+                        AppLocalizations.of(context).str2(
+                          order.customerName.isNotEmpty
+                              ? order.customerName
+                              : AppLocalizations.of(context).customer,
+                          order.customerPhone.isNotEmpty
+                              ? " · ${order.customerPhone}"
+                              : "",
+                          order.customerEmail.isNotEmpty
+                              ? " (${order.customerEmail})"
+                              : "",
+                        ),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -449,7 +472,9 @@ class _OrderCard extends StatelessWidget {
                 title: Text(
                   order.isPaid
                       ? AppLocalizations.of(context).paymentDoneReceived
-                      : AppLocalizations.of(context).paymentPendingManualOffline,
+                      : AppLocalizations.of(
+                          context,
+                        ).paymentPendingManualOffline,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -461,7 +486,9 @@ class _OrderCard extends StatelessWidget {
                 subtitle: Text(
                   order.isPaid
                       ? AppLocalizations.of(context).paymentConfirmedByStore
-                      : AppLocalizations.of(context).customerWillPayOfflineToggleToMarkAsDone,
+                      : AppLocalizations.of(
+                          context,
+                        ).customerWillPayOfflineToggleToMarkAsDone,
                   style: const TextStyle(fontSize: 11),
                 ),
                 value: order.isPaid,
@@ -476,7 +503,11 @@ class _OrderCard extends StatelessWidget {
                     child: FilledButton.tonal(
                       key: Key('order-advance-${order.id}'),
                       onPressed: () => _advance(context, next),
-                      child: Text(AppLocalizations.of(context).mark('${orderStatusLabel(context, next)}')),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).mark(orderStatusLabel(context, next)),
+                      ),
                     ),
                   ),
                 if (next != null && cancellable) const SizedBox(width: 8),
@@ -506,15 +537,19 @@ class _OrderCard extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).order2('${order.reference}', '${orderStatusLabel(context, next)}'),
+            AppLocalizations.of(
+              context,
+            ).order2(order.reference, orderStatusLabel(context, next)),
           ),
         ),
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).couldNotUpdateOrder('${e}'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotUpdateOrder('$e')),
+        ),
+      );
     }
   }
 
@@ -524,7 +559,11 @@ class _OrderCard extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context).cancelThisOrder),
         content: Text(
-          AppLocalizations.of(context).orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled('${order.reference}'),
+          AppLocalizations.of(
+            context,
+          ).orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(
+            order.reference,
+          ),
         ),
         actions: [
           TextButton(
@@ -547,9 +586,11 @@ class _OrderCard extends StatelessWidget {
       await repo.cancelOrder(order.id);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).couldNotCancelOrder('${e}'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotCancelOrder('$e')),
+        ),
+      );
     }
   }
 }
@@ -572,16 +613,28 @@ class _BillBreakdown extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _row(AppLocalizations.of(context).items4, formatCurrency(order.subtotal)),
+          _row(
+            AppLocalizations.of(context).items4,
+            formatCurrency(order.subtotal),
+          ),
           if (order.discountAmount > 0)
             _row(
-              AppLocalizations.of(context).discount2('${order.voucherCode.isNotEmpty ? ' (${order.voucherCode})' : ''}'),
+              AppLocalizations.of(context).discount2(
+                order.voucherCode.isNotEmpty ? ' (${order.voucherCode})' : '',
+              ),
               '− ${formatCurrency(order.discountAmount)}',
               color: Colors.green.shade700,
             ),
-          _row(AppLocalizations.of(context).delivery, formatCurrency(order.deliveryCharge)),
+          _row(
+            AppLocalizations.of(context).delivery,
+            formatCurrency(order.deliveryCharge),
+          ),
           const Divider(height: 12),
-          _row(AppLocalizations.of(context).payable, formatCurrency(order.totalAmount), bold: true),
+          _row(
+            AppLocalizations.of(context).payable,
+            formatCurrency(order.totalAmount),
+            bold: true,
+          ),
         ],
       ),
     );

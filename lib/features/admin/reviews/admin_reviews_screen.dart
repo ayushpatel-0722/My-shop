@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/review.dart';
 import '../../../core/services/service_locator.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Reviews panel — view all ratings, hide inappropriate ones (Section 14.2).
 class AdminReviewsScreen extends StatelessWidget {

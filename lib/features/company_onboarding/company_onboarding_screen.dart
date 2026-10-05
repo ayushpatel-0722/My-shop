@@ -124,7 +124,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _categoryCtrl,
               decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).storeCategory,
-                hintText: AppLocalizations.of(context).eGGroceryStaplesSupermarketElectronics,
+                hintText: AppLocalizations.of(
+                  context,
+                ).eGGroceryStaplesSupermarketElectronics,
                 prefixIcon: Icon(Icons.category_outlined),
               ),
             ),
@@ -134,7 +136,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: l10n.appSubtitle,
-                hintText: AppLocalizations.of(context).eGFreshOrganicGroceriesDeliveredDaily,
+                hintText: AppLocalizations.of(
+                  context,
+                ).eGFreshOrganicGroceriesDeliveredDaily,
                 prefixIcon: const Icon(Icons.description_outlined),
               ),
             ),
@@ -143,7 +147,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _addressCtrl,
               decoration: InputDecoration(
                 labelText: l10n.address,
-                hintText: AppLocalizations.of(context).eG12MarketStreetAhmedabad,
+                hintText: AppLocalizations.of(
+                  context,
+                ).eG12MarketStreetAhmedabad,
                 prefixIcon: const Icon(Icons.location_on_outlined),
               ),
             ),
@@ -226,9 +232,15 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             Text(AppLocalizations.of(context).currency),
             const SizedBox(height: 8),
             SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'INR', label: Text(AppLocalizations.of(context).inr)),
-                ButtonSegment(value: 'USD', label: Text(AppLocalizations.of(context).usd)),
+              segments: [
+                ButtonSegment(
+                  value: 'INR',
+                  label: Text(AppLocalizations.of(context).inr),
+                ),
+                ButtonSegment(
+                  value: 'USD',
+                  label: Text(AppLocalizations.of(context).usd),
+                ),
               ],
               selected: {_currency},
               onSelectionChanged: (s) => setState(() => _currency = s.first),
@@ -252,8 +264,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                 controller: _minOrderCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText:
-                      AppLocalizations.of(context).minimumOrderForDelivery('${_currency == 'USD' ? '\$' : '₹'}'),
+                  labelText: AppLocalizations.of(
+                    context,
+                  ).minimumOrderForDelivery(_currency == 'USD' ? '\$' : '₹'),
                   hintText: AppLocalizations.of(context).eG1990ForNoMinimum,
                   prefixIcon: const Icon(Icons.shopping_bag_outlined),
                 ),
@@ -290,7 +303,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               keyboardType: TextInputType.url,
               decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).companyBannerUrl,
-                hintText: AppLocalizations.of(context).httpsExampleComStoreBannerJpg,
+                hintText: AppLocalizations.of(
+                  context,
+                ).httpsExampleComStoreBannerJpg,
                 prefixIcon: Icon(Icons.panorama_outlined),
               ),
             ),
@@ -299,8 +314,12 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _profileImageUrlCtrl,
               keyboardType: TextInputType.url,
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).companyStorefrontProfileImageUrl,
-                hintText: AppLocalizations.of(context).httpsExampleComStorefrontPhotoJpg,
+                labelText: AppLocalizations.of(
+                  context,
+                ).companyStorefrontProfileImageUrl,
+                hintText: AppLocalizations.of(
+                  context,
+                ).httpsExampleComStorefrontPhotoJpg,
                 prefixIcon: Icon(Icons.storefront_outlined),
               ),
             ),
@@ -377,7 +396,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     if (companyName.isEmpty || companyPass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).companyNameAndPasswordAreRequired),
+          content: Text(
+            AppLocalizations.of(context).companyNameAndPasswordAreRequired,
+          ),
         ),
       );
       return;
@@ -385,26 +406,33 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     if (adminName.isEmpty || adminEmail.isEmpty || adminPass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).adminNameEmailAndPasswordAreRequired),
+          content: Text(
+            AppLocalizations.of(context).adminNameEmailAndPasswordAreRequired,
+          ),
         ),
       );
       return;
     }
     if (adminPass != adminPassConfirm) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).adminPasswordsDoNotMatch)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).adminPasswordsDoNotMatch),
+        ),
       );
       return;
     }
     if (adminPass.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).adminPasswordMustBeAtLeast6Characters),
+          content: Text(
+            AppLocalizations.of(context).adminPasswordMustBeAtLeast6Characters,
+          ),
         ),
       );
       return;
     }
 
+    final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
     try {
       // 1. Create or authenticate Admin Auth user first.
@@ -428,8 +456,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                 signInError.code == 'wrong-password') {
               throw FirebaseAuthException(
                 code: 'email-already-in-use',
-                message:
-                    AppLocalizations.of(context).thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail,
+                message: l10n
+                    .thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail,
               );
             }
             rethrow;
@@ -441,7 +469,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
 
       final uid = userCred.user?.uid;
       if (uid == null) {
-        throw Exception(AppLocalizations.of(context).failedToObtainAuthenticatedUserId);
+        throw Exception(l10n.failedToObtainAuthenticatedUserId);
       }
 
       // 2. Create Company in Firestore & Realtime Database
@@ -550,7 +578,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).companyRegisteredSuccessfully('${companyName}')),
+          content: Text(l10n.companyRegisteredSuccessfully(companyName)),
         ),
       );
 
@@ -559,20 +587,20 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       debugPrint(
         'FirebaseAuthException during onboarding: ${e.code} ${e.message}',
       );
-      String userMsg = e.message ?? AppLocalizations.of(context).authenticationErrorOccurred;
+      String userMsg = e.message ?? l10n.authenticationErrorOccurred;
       if (e.code == 'weak-password') {
-        userMsg = AppLocalizations.of(context).passwordIsTooWeakPleaseUseAtLeast6Characters;
+        userMsg = l10n.passwordIsTooWeakPleaseUseAtLeast6Characters;
       } else if (e.code == 'email-already-in-use') {
         userMsg =
             e.message ??
-            AppLocalizations.of(context).thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail;
+            l10n.thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail;
       } else if (e.code == 'invalid-email') {
-        userMsg = AppLocalizations.of(context).pleaseEnterAValidEmailAddress;
+        userMsg = l10n.pleaseEnterAValidEmailAddress;
       } else if (e.code == 'invalid-credential' || e.code == 'wrong-password') {
-        userMsg =
-            AppLocalizations.of(context).invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin;
+        userMsg = l10n
+            .invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin;
       } else if (e.code == 'too-many-requests') {
-        userMsg = AppLocalizations.of(context).tooManyAttemptsPleaseWaitAMomentAndTryAgain;
+        userMsg = l10n.tooManyAttemptsPleaseWaitAMomentAndTryAgain;
       }
       if (mounted) {
         ScaffoldMessenger.of(
@@ -585,7 +613,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).error('${e.toString()}'))));
+        ).showSnackBar(SnackBar(content: Text(l10n.error(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);

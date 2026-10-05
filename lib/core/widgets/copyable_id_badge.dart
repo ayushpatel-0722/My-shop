@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Small monospace chip showing a document id; tapping copies it.
 ///
@@ -23,7 +23,7 @@ class CopyableIdBadge extends StatelessWidget {
     final theme = Theme.of(context);
     final label = this.label ?? AppLocalizations.of(context).id2;
     return Tooltip(
-      message: AppLocalizations.of(context).copyId('${label}'),
+      message: AppLocalizations.of(context).copyId(label),
       child: InkWell(
         borderRadius: BorderRadius.circular(4),
         onTap: () {
@@ -31,7 +31,9 @@ class CopyableIdBadge extends StatelessWidget {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context).idCopiedToClipboard('${label}', '${id}')),
+              content: Text(
+                AppLocalizations.of(context).idCopiedToClipboard(label, id),
+              ),
               duration: const Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
             ),
@@ -54,7 +56,7 @@ class CopyableIdBadge extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  AppLocalizations.of(context).id('${id}'),
+                  AppLocalizations.of(context).id(id),
                   style: TextStyle(
                     fontSize: 11,
                     fontFamily: 'monospace',

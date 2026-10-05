@@ -87,7 +87,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         return Center(
                           child: Padding(
                             padding: EdgeInsets.all(32),
-                            child: Text(AppLocalizations.of(context).noOrdersWithThisStatus),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).noOrdersWithThisStatus,
+                            ),
                           ),
                         );
                       }
@@ -137,7 +141,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).keepTrackOfYourActiveDeliveriesAndPastPurchases,
+              AppLocalizations.of(
+                context,
+              ).keepTrackOfYourActiveDeliveriesAndPastPurchases,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
@@ -198,7 +204,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).exploreProductsAndPlaceYourFirstOrderToday,
+              AppLocalizations.of(
+                context,
+              ).exploreProductsAndPlaceYourFirstOrderToday,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
@@ -298,7 +306,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       Row(
                         children: [
                           Text(
-                            AppLocalizations.of(context).order3('${order.reference}'),
+                            AppLocalizations.of(
+                              context,
+                            ).order3(order.reference),
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
@@ -509,7 +519,9 @@ class _PaymentIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: paid ? AppLocalizations.of(context).paid : AppLocalizations.of(context).paymentOnDelivery,
+      message: paid
+          ? AppLocalizations.of(context).paid
+          : AppLocalizations.of(context).paymentOnDelivery,
       child: Icon(
         paid ? Icons.check_circle : Icons.account_balance_wallet_outlined,
         size: 16,
@@ -536,7 +548,9 @@ class _PaymentChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        paid ? AppLocalizations.of(context).paid : AppLocalizations.of(context).payOnDelivery,
+        paid
+            ? AppLocalizations.of(context).paid
+            : AppLocalizations.of(context).payOnDelivery,
         style: TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.bold,
@@ -577,7 +591,7 @@ class _ItemPreview extends StatelessWidget {
               ),
             ),
             child: Text(
-              AppLocalizations.of(context).more('${remaining}'),
+              AppLocalizations.of(context).more('$remaining'),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -674,7 +688,9 @@ class _ReorderButton extends StatelessWidget {
         SnackBar(
           content: Text(
             missing > 0
-                ? AppLocalizations.of(context).addedToCartNoLongerAvailable(added, '${missing}')
+                ? AppLocalizations.of(
+                    context,
+                  ).addedToCartNoLongerAvailable(added, '$missing')
                 : AppLocalizations.of(context).itemsAddedToCart(added),
           ),
           duration: const Duration(seconds: 2),
@@ -688,7 +704,9 @@ class _ReorderButton extends StatelessWidget {
     } else {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).theseProductsAreNoLongerAvailable),
+          content: Text(
+            AppLocalizations.of(context).theseProductsAreNoLongerAvailable,
+          ),
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -723,7 +741,12 @@ class _StatusChips extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             children: [
-              _chip(context, AppLocalizations.of(context).all3, orders.length, 'all'),
+              _chip(
+                context,
+                AppLocalizations.of(context).all3,
+                orders.length,
+                'all',
+              ),
               for (final status in OrderStatusRules.openStatuses)
                 _chip(
                   context,

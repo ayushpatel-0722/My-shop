@@ -10,7 +10,7 @@ import '../../../core/services/service_locator.dart';
 import '../../account/widgets/add_edit_address_dialog.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Flipkart / Amazon style Location & Address Selector Bottom Sheet.
 class LocationPickerSheet extends StatefulWidget {
@@ -57,7 +57,9 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).deliveryLocationSetTo('${detected.shortLocation}', '${detected.pincode}'),
+            AppLocalizations.of(
+              context,
+            ).deliveryLocationSetTo(detected.shortLocation, detected.pincode),
           ),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
@@ -71,7 +73,9 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
     if (cleanPin.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).pleaseEnterAValid6DigitPincode),
+          content: Text(
+            AppLocalizations.of(context).pleaseEnterAValid6DigitPincode,
+          ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
         ),
@@ -85,12 +89,12 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
 
     final pinAddress = AddressEntry(
       id: 'pin_$cleanPin',
-      name: AppLocalizations.of(context).deliverTo('${cleanPin}'),
+      name: AppLocalizations.of(context).deliverTo(cleanPin),
       address: finalCity,
       city: finalCity,
       state: finalState,
       pincode: cleanPin,
-      label: AppLocalizations.of(context).pincode3('${cleanPin}'),
+      label: AppLocalizations.of(context).pincode3(cleanPin),
       isDefault: true,
     );
 
@@ -99,7 +103,11 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context).deliveryLocationUpdatedTo('${finalCity}', '${cleanPin}')),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          ).deliveryLocationUpdatedTo(finalCity, cleanPin),
+        ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -111,7 +119,9 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).maximum3AddressesAllowedPleaseEditOrRemoveAnAddress,
+            AppLocalizations.of(
+              context,
+            ).maximum3AddressesAllowedPleaseEditOrRemoveAnAddress,
           ),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
@@ -142,19 +152,20 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
   void _onDeleteAddress(BuildContext context, AddressEntry addr) async {
     final authCubit = context.read<AuthCubit>();
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(AppLocalizations.of(context).deleteAddress),
+        title: Text(l10n.deleteAddress),
         content: Text(
-          AppLocalizations.of(context).areYouSureYouWantToDelete2('${addr.label}', '${addr.shortLocation}'),
+          l10n.areYouSureYouWantToDelete2(addr.label, addr.shortLocation),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(AppLocalizations.of(context).cancel),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -162,7 +173,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(AppLocalizations.of(context).delete),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -173,7 +184,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
       if (ok) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).addressDeleted),
+            content: Text(l10n.addressDeleted),
             duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
@@ -248,7 +259,9 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                         ),
                       ),
                       Text(
-                        AppLocalizations.of(context).selectAnAddressToSeeProductAvailabilityAndDeliveryFees,
+                        AppLocalizations.of(
+                          context,
+                        ).selectAnAddressToSeeProductAvailabilityAndDeliveryFees,
                         style: TextStyle(
                           fontSize: 11.5,
                           color: Color(0xFF6B7280),
@@ -294,7 +307,9 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                         LengthLimitingTextInputFormatter(6),
                       ],
                       decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context).enter6DigitDeliveryPincode,
+                        hintText: AppLocalizations.of(
+                          context,
+                        ).enter6DigitDeliveryPincode,
                         hintStyle: TextStyle(
                           color: Color(0xFF94A3B8),
                           fontSize: 13,
@@ -340,8 +355,12 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                   bgColor: const Color(0xFFFFEBEA),
                   title: AppLocalizations.of(context).useCurrentLocation,
                   subtitle: _detectingLocation
-                      ? AppLocalizations.of(context).detectingYourCurrentLocation
-                      : AppLocalizations.of(context).autoDetectViaGpsDeviceNetwork,
+                      ? AppLocalizations.of(
+                          context,
+                        ).detectingYourCurrentLocation
+                      : AppLocalizations.of(
+                          context,
+                        ).autoDetectViaGpsDeviceNetwork,
                   isLoading: _detectingLocation,
                   onTap: _detectingLocation ? null : _useCurrentLocation,
                 ),
@@ -356,7 +375,11 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                   title: AppLocalizations.of(context).addNewAddress,
                   subtitle: addresses.length >= 3
                       ? AppLocalizations.of(context).maximum3AddressesSaved
-                      : AppLocalizations.of(context).saveHomeWorkOrOtherAddressSaved3('${addresses.length}'),
+                      : AppLocalizations.of(
+                          context,
+                        ).saveHomeWorkOrOtherAddressSaved3(
+                          '${addresses.length}',
+                        ),
                   trailingBadge: '${addresses.length}/3',
                   onTap: () => _onAddNewAddress(context, addresses),
                 ),
@@ -376,7 +399,9 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                         ),
                       ),
                       Text(
-                        AppLocalizations.of(context).of3Added('${addresses.length}'),
+                        AppLocalizations.of(
+                          context,
+                        ).of3Added('${addresses.length}'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF9CA3AF),
@@ -514,7 +539,9 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
     required VoidCallback onEdit,
     required VoidCallback onDelete,
   }) {
-    final label = addr.label.isNotEmpty ? addr.label : AppLocalizations.of(context).home;
+    final label = addr.label.isNotEmpty
+        ? addr.label
+        : AppLocalizations.of(context).home;
     final isHome = label.toLowerCase() == 'home';
     final isWork = label.toLowerCase() == 'work';
 
@@ -603,8 +630,8 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        AppLocalizations.of(context).default,
-                        style: TextStyle(
+                        AppLocalizations.of(context).defaultBadge,
+                        style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF00875A),
@@ -691,7 +718,10 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                       foregroundColor: const Color(0xFF4B5563),
                     ),
                     icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: Text(AppLocalizations.of(context).edit, style: TextStyle(fontSize: 12.5)),
+                    label: Text(
+                      AppLocalizations.of(context).edit,
+                      style: TextStyle(fontSize: 12.5),
+                    ),
                     onPressed: onEdit,
                   ),
                   const SizedBox(width: 8),
@@ -767,8 +797,14 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
               const SizedBox(width: 6),
               Text(
                 delivers
-                    ? AppLocalizations.of(context).deliveryAvailableTo('${addr.pincode.isNotEmpty ? addr.pincode : AppLocalizations.of(context).thisAddress}')
-                    : AppLocalizations.of(context).deliveryNotAvailableToThisPincode,
+                    ? AppLocalizations.of(context).deliveryAvailableTo(
+                        addr.pincode.isNotEmpty
+                            ? addr.pincode
+                            : AppLocalizations.of(context).thisAddress,
+                      )
+                    : AppLocalizations.of(
+                        context,
+                      ).deliveryNotAvailableToThisPincode,
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,

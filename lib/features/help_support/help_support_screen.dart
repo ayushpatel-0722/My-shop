@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/routes/app_router.dart';
 import '../../app/theme/app_theme.dart';
 import 'models/faq_item.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -111,7 +111,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: AppLocalizations.of(context).searchFaqsOrdersReturnsPayments,
+                hintText: AppLocalizations.of(
+                  context,
+                ).searchFaqsOrdersReturnsPayments,
                 hintStyle: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF9CA3AF),
@@ -225,19 +227,21 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         AppLocalizations.of(context).haveASpecificIssue,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1E2229),
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        AppLocalizations.of(context).submitASupportQueryDirectlyToOurTeam,
-                        style: TextStyle(
+                        AppLocalizations.of(
+                          context,
+                        ).submitASupportQueryDirectlyToOurTeam,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF6B7280),
                         ),
@@ -317,7 +321,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    AppLocalizations.of(context).tryAdjustingYourSearchTermsOrSubmitAQueryToOurSupportStaff,
+                    AppLocalizations.of(
+                      context,
+                    ).tryAdjustingYourSearchTermsOrSubmitAQueryToOurSupportStaff,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                   ),

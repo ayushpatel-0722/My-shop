@@ -39,9 +39,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _selectedImageIndex = 0;
   int _selectedVariantIndex = -1;
 
-  /// Sections hidden behind the "View more" button.
-  bool _showAllDetailSections = false;
-
   late PageController _pageController;
 
   @override
@@ -119,9 +116,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               children: [
                 const Icon(Icons.error_outline, size: 56, color: Colors.grey),
                 const SizedBox(height: 12),
-                Text(AppLocalizations.of(context).productNotFound, style: TextStyle(fontSize: 18)),
+                Text(
+                  AppLocalizations.of(context).productNotFound,
+                  style: TextStyle(fontSize: 18),
+                ),
                 const SizedBox(height: 8),
-                TextButton(onPressed: handleBack, child: Text(AppLocalizations.of(context).goBack)),
+                TextButton(
+                  onPressed: handleBack,
+                  child: Text(AppLocalizations.of(context).goBack),
+                ),
               ],
             ),
           ),
@@ -135,6 +138,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     final effectivePrice = p.priceOf(selectedVariant);
     final effectiveMrp = p.mrpOf(selectedVariant);
     final unitDisplay = _variantDisplay(selectedVariant, p);
+    final unitText = _unitTextOf(selectedVariant, p);
+    final skuText = _skuOf(selectedVariant, p);
 
     return Scaffold(
       appBar: AppBar(
@@ -166,6 +171,47 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         mrp: effectiveMrp,
                         symbol: symbol,
                       ),
+                      if (unitText.isNotEmpty || skuText.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            if (unitText.isNotEmpty)
+                              Text(
+                                unitText,
+                                key: const Key('product-unit-type'),
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                            if (unitText.isNotEmpty && skuText.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                child: Text(
+                                  '•',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            if (skuText.isNotEmpty)
+                              Text(
+                                AppLocalizations.of(context).sku3(skuText),
+                                key: const Key('product-sku'),
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12.5,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 10),
 
                       // ------------------------------------------ 4. Stock label
@@ -177,21 +223,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             p.isUnlimitedStock,
                         stock: selectedVariant?.stockQty ?? p.stockQty,
                       ),
-                      const SizedBox(height: 6),
 
-                      // ------------------------------------------------ 5. SKU
-                      if (_skuOf(selectedVariant, p).isNotEmpty)
-                        Text(
-                          AppLocalizations.of(context).sku3('${_skuOf(selectedVariant, p)}'),
-                          key: const Key('product-sku'),
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 12,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-
-                      // ------------------------------------- 6. Select Variant
+                      // ------------------------------------- 5. Select Variant
                       if (p.variants.isNotEmpty) ...[
                         const SizedBox(height: 18),
                         _VariantPicker(
@@ -203,11 +236,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                       ],
 
-                      // ------------------------------- 7. Quantity selector hint
-                      const SizedBox(height: 14),
-                      _QtyHint(qty: _qty),
-
-                      // -------------------------- 8. Highlights (collapsible)
+                      // -------------------------- 6. Highlights (collapsible)
                       ..._highlightsBlocks(p),
 
                       // --------------------- 9. All Details (each collapsible)
@@ -245,6 +274,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return p.name;
   }
 
+  String _unitTextOf(ProductVariant? variant, Product p) {
+    if (variant != null && variant.unitValue > 0) {
+      final uType = variant.unitType.isNotEmpty ? variant.unitType : p.unitType;
+      return CartUnit.format(variant.unitValue, uType);
+    }
+    if (variant != null && variant.label.isNotEmpty) {
+      return variant.label;
+    }
+    if (p.unit > 0 && p.unitType.isNotEmpty) {
+      return CartUnit.format(p.unit, p.unitType);
+    }
+    if (p.unitType.isNotEmpty) {
+      return p.unitType;
+    }
+    return '';
+  }
+
   String _skuOf(ProductVariant? variant, Product p) {
     final vs = variant?.sku.trim() ?? '';
     return vs.isNotEmpty ? vs : p.sku.trim();
@@ -255,19 +301,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   List<Widget> _highlightsBlocks(Product p) {
     // Rows with a value render even without a title (migrated legacy
     // highlights land as value-only rows).
-    final highlights = p.sortedHighlights
-        .where((h) => h.isUsable)
-        .toList();
+    final highlights = p.sortedHighlights.where((h) => h.isUsable).toList();
     final legacy = p.subDetails.trim();
 
     // Legacy fallback: old products only carry a highlights string.
     if (highlights.isEmpty && legacy.isEmpty) return const [];
 
     final content = highlights.isEmpty
-        ? Text(
-            legacy,
-            style: const TextStyle(fontSize: 13.5, height: 1.45),
-          )
+        ? Text(legacy, style: const TextStyle(fontSize: 13.5, height: 1.45))
         : Column(
             children: [
               for (final h in highlights)
@@ -306,14 +347,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     return [
       const SizedBox(height: 8),
-      CollapsibleSection(title: AppLocalizations.of(context).highlights, child: content),
+      CollapsibleSection(
+        title: AppLocalizations.of(context).highlights,
+        child: content,
+      ),
     ];
   }
 
   List<Widget> _allDetailsBlocks(Product p) {
-    var sections = p.sortedAllDetails
-        .where((s) => !s.isEmptyContent)
-        .toList();
+    var sections = p.sortedAllDetails.where((s) => !s.isEmptyContent).toList();
 
     // Legacy fallback: a plain description becomes one text section.
     if (sections.isEmpty && p.details.trim().isNotEmpty) {
@@ -327,47 +369,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     }
     if (sections.isEmpty) return const [];
 
-    const visibleCount = 2;
-    final visible = _showAllDetailSections
-        ? sections
-        : sections.take(visibleCount).toList();
-    final hidden = sections.length - visible.length;
-
     return [
       const SizedBox(height: 4),
-      for (final section in visible) ...[
+      for (final section in sections) ...[
         CollapsibleSection(
-          title: section.title.isEmpty ? AppLocalizations.of(context).details : section.title,
+          title: section.title.isEmpty
+              ? AppLocalizations.of(context).details
+              : section.title,
           child: section.isKeyValue
-                ? KeyValueTable(
-                    rows: [
-                      for (final item in section.sortedItems)
-                        (title: item.title, value: item.value),
-                    ],
-                  )
-                : ExpandableText(text: section.text.trim()),
+              ? KeyValueTable(
+                  rows: [
+                    for (final item in section.sortedItems)
+                      (title: item.title, value: item.value),
+                  ],
+                )
+              : ExpandableText(text: section.text.trim()),
         ),
       ],
-      if (hidden > 0 && !_showAllDetailSections)
-        Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: OutlinedButton.icon(
-            key: const Key('view-more-details'),
-            onPressed: () => setState(() => _showAllDetailSections = true),
-            icon: const Icon(Icons.unfold_more, size: 18),
-            label: Text(AppLocalizations.of(context).viewAllDetailsMore('${hidden}')),
-          ),
-        ),
-      if (_showAllDetailSections && sections.length > visibleCount)
-        Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: TextButton.icon(
-            key: const Key('view-less-details'),
-            onPressed: () => setState(() => _showAllDetailSections = false),
-            icon: const Icon(Icons.unfold_less, size: 18),
-            label: Text(AppLocalizations.of(context).showLess),
-          ),
-        ),
     ];
   }
 
@@ -661,7 +679,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                AppLocalizations.of(context).addedToCart2('${p.name}', '${variantLabel}'),
+                                AppLocalizations.of(
+                                  context,
+                                ).addedToCart2(p.name, variantLabel),
                               ),
                               duration: const Duration(seconds: 2),
                               action: SnackBarAction(
@@ -683,7 +703,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         }
                       }
                     : null,
-                child: Text(inStock ? l10n.addToCart : AppLocalizations.of(context).outOfStock2),
+                child: Text(
+                  inStock
+                      ? l10n.addToCart
+                      : AppLocalizations.of(context).outOfStock2,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -834,7 +858,7 @@ class _StockLabel extends StatelessWidget {
       text = AppLocalizations.of(context).outOfStock2;
       color = Colors.red.shade700;
     } else if (!isUnlimited && stock <= _lowThreshold) {
-      text = AppLocalizations.of(context).onlyLeft('${stock}');
+      text = AppLocalizations.of(context).onlyLeft('$stock');
       color = Colors.orange.shade800;
     } else {
       text = AppLocalizations.of(context).inStock;
@@ -884,7 +908,9 @@ class _VariantPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selected = selectedIndex >= 0 ? selectedIndex : product.defaultVariantIndex;
+    final selected = selectedIndex >= 0
+        ? selectedIndex
+        : product.defaultVariantIndex;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -926,9 +952,7 @@ class _VariantPicker extends StatelessWidget {
               label: Text(
                 '$label (${formatCurrency(vPrice, symbol: symbol)})',
                 style: TextStyle(
-                  fontWeight: isSelected
-                      ? FontWeight.bold
-                      : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
               selected: isSelected,
@@ -939,40 +963,6 @@ class _VariantPicker extends StatelessWidget {
                   : null,
             );
           }),
-        ),
-      ],
-    );
-  }
-}
-
-/// Small quantity summary shown in the page flow (the real picker lives in
-/// the bottom bar).
-class _QtyHint extends StatelessWidget {
-  final int qty;
-
-  const _QtyHint({required this.qty});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          AppLocalizations.of(context).quantity,
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(width: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            '× $qty',
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-          ),
         ),
       ],
     );

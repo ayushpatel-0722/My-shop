@@ -13,7 +13,7 @@ import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Product management for the signed-in store.
 ///
@@ -134,7 +134,11 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    _chip(AppLocalizations.of(context).all3, products.length, ProductStockFilter.all),
+                    _chip(
+                      AppLocalizations.of(context).all3,
+                      products.length,
+                      ProductStockFilter.all,
+                    ),
                     _chip(
                       AppLocalizations.of(context).inStock2,
                       summary.inStock,
@@ -179,7 +183,11 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                   return Center(
                     child: Padding(
                       padding: EdgeInsets.all(28),
-                      child: Text(AppLocalizations.of(context).noProductsMatchTheseFilters),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).noProductsMatchTheseFilters,
+                      ),
                     ),
                   );
                 }
@@ -231,7 +239,9 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context).deleteProduct),
-        content: Text(AppLocalizations.of(context).areYouSureYouWantToDelete('${product.name}')),
+        content: Text(
+          AppLocalizations.of(context).areYouSureYouWantToDelete(product.name),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -253,13 +263,21 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       await repo.deleteProduct(product.id, companyId: _companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).productDeleted('${product.name}'))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).productDeleted(product.name),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).failedToDeleteProduct('${e}'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).failedToDeleteProduct('$e'),
+          ),
+        ),
+      );
     }
   }
 }
@@ -377,7 +395,9 @@ class _ProductTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      categoryName.isEmpty ? AppLocalizations.of(context).uncategorised : categoryName,
+                      categoryName.isEmpty
+                          ? AppLocalizations.of(context).uncategorised
+                          : categoryName,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(
@@ -391,7 +411,9 @@ class _ProductTile extends StatelessWidget {
                     Text(
                       product.isUnlimitedStock
                           ? AppLocalizations.of(context).stockUnlimited
-                          : AppLocalizations.of(context).stock('${product.stockQty}', '${product.unitType}'),
+                          : AppLocalizations.of(
+                              context,
+                            ).stock('${product.stockQty}', product.unitType),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -454,7 +476,9 @@ class _ProductTile extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              AppLocalizations.of(context).msgVar('${product.variants.length}'),
+                              AppLocalizations.of(
+                                context,
+                              ).msgVar('${product.variants.length}'),
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
@@ -566,7 +590,9 @@ class _ProductTile extends StatelessWidget {
                       ),
                     if (product.variants.isNotEmpty)
                       Text(
-                        AppLocalizations.of(context).variants('${product.variants.length}'),
+                        AppLocalizations.of(
+                          context,
+                        ).variants('${product.variants.length}'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -576,7 +602,9 @@ class _ProductTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  categoryName.isEmpty ? AppLocalizations.of(context).uncategorised : categoryName,
+                  categoryName.isEmpty
+                      ? AppLocalizations.of(context).uncategorised
+                      : categoryName,
                   style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
                 const SizedBox(height: 6),

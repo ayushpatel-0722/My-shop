@@ -33,3 +33,36 @@ extension ResponsiveContext on BuildContext {
   /// True when the screen width is 1024 or wider.
   bool get isDesktop => screenWidth >= AppBreakpoints.tabletMax;
 }
+
+/// Grid sizing utilities ensuring product cards do not exceed max width and
+/// adaptively increase column count as screen width grows.
+class ResponsiveGrid {
+  const ResponsiveGrid._();
+
+  /// Calculates the grid cross-axis count so that cards never exceed [maxCardWidth].
+  static int calculateCrossAxisCount(
+    double availableWidth, {
+    double maxCardWidth = 250.0,
+    double spacing = 12.0,
+    int minCount = 2,
+    int maxCount = 8,
+  }) {
+    final count = ((availableWidth + spacing) / (maxCardWidth + spacing))
+        .ceil();
+    return count.clamp(minCount, maxCount);
+  }
+
+  /// Calculates dynamic childAspectRatio based on card width to prevent overflow
+  /// while keeping cards compact.
+  static double calculateProductAspectRatio(
+    double availableWidth,
+    int crossAxisCount, {
+    double spacing = 12.0,
+    bool showBrand = false,
+  }) {
+    final cardWidth =
+        (availableWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
+    final cardHeight = (cardWidth / 1.15) + (showBrand ? 118 : 108);
+    return (cardWidth / cardHeight).clamp(0.58, 0.75);
+  }
+}

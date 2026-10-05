@@ -15,7 +15,7 @@ import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/section_header.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Categories Screen displaying All Shops and All Shop Categories with rich styling.
 class CategoriesScreen extends StatelessWidget {

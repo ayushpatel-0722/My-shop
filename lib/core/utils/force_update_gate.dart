@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../services/remote_config_service.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
 import '../../app/l10n/l10n_service.dart';
 
 /// Blocking "Update Required" screen (Section 18.2) shown when the installed
@@ -65,6 +65,8 @@ class _ForceUpdateGateState extends State<ForceUpdateGate> {
         if (snap.data == true) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: _UpdateScreen(
               message:
                   widget.remoteConfig?.updateMessage ??
@@ -104,7 +106,10 @@ class _UpdateScreen extends StatelessWidget {
               Text(message, textAlign: TextAlign.center),
               const SizedBox(height: 32),
               // NOTE: link this to your Play Store / App Store listing.
-              FilledButton(onPressed: () {}, child: Text(AppLocalizations.of(context).update)),
+              FilledButton(
+                onPressed: () {},
+                child: Text(AppLocalizations.of(context).update),
+              ),
             ],
           ),
         ),

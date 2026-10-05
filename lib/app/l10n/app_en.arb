@@ -167,7 +167,7 @@
   "confirmPassword": "Confirm password",
   "contactDetails": "Contact Details",
   "contactSupport": "Contact Support",
-  "continue": "Continue",
+  "continueLabel": "Continue",
   "continueWithGoogle": "Continue with Google",
   "copyLink": "Copy link",
   "couldNotSendOtpPleaseTryAgain": "Could not send OTP. Please try again.",
@@ -180,7 +180,7 @@
   "currency": "Currency",
   "customerDetails": "Customer Details",
   "customerDetails2": "Customer details",
-  "default": "DEFAULT",
+  "defaultBadge": "DEFAULT",
   "dateOfBirth": "Date of Birth",
   "default2": "Default",
   "defineStaffCompensationPackageAndPaymentFrequency": "Define staff compensation package and payment frequency.",
@@ -853,8 +853,8 @@
       }
     }
   },
-  "of": "{count} of {totalcount}",
-  "@of": {
+  "countOutOfTotal": "{count} of {totalcount}",
+  "@countOutOfTotal": {
     "description": "",
     "placeholders": {
       "count": {

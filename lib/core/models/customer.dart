@@ -1,4 +1,5 @@
 import '../../app/l10n/l10n_service.dart';
+
 /// Customer / shopper model (Firestore: /users, docId = Firebase Auth UID).
 class Customer {
   final String id; // = Firebase Auth UID
@@ -67,7 +68,7 @@ class AddressEntry {
   final double lat;
   final double lng;
 
-  AddressEntry({
+  const AddressEntry({
     this.id = '',
     this.name = '',
     this.phone = '',
@@ -79,10 +80,10 @@ class AddressEntry {
     this.state = '',
     this.pincode = '',
     this.isDefault = false,
-    String? label,
+    this.label = 'Home',
     this.lat = 0,
     this.lng = 0,
-  }) : label = label ?? L10n.current.home;
+  });
 
   /// Maximum saved addresses per user (enforced in the app layer).
   static const int maxAddresses = 3;
@@ -96,7 +97,7 @@ class AddressEntry {
       if (houseNo.trim().isNotEmpty) houseNo.trim(),
       if (address.trim().isNotEmpty) address.trim(),
       if (line2.trim().isNotEmpty) line2.trim(),
-      if (landmark.trim().isNotEmpty) L10n.current.near('${landmark.trim()}'),
+      if (landmark.trim().isNotEmpty) L10n.current.near(landmark.trim()),
       if (city.trim().isNotEmpty) city.trim(),
       if (state.trim().isNotEmpty) state.trim(),
       if (pincode.trim().isNotEmpty) pincode.trim(),

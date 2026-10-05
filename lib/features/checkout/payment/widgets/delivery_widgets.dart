@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../../../core/models/company.dart';
-import '../../../core/models/order.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/models/company.dart';
+import 'package:myshop/core/models/order.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// "Delivery Type" selector for one shop's order block.
 ///
@@ -145,7 +144,11 @@ class PickupShopCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.storefront_outlined, size: 18, color: theme.colorScheme.primary),
+              Icon(
+                Icons.storefront_outlined,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -167,7 +170,11 @@ class PickupShopCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on_outlined, size: 15, color: Colors.grey),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 15,
+                  color: Colors.grey,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -202,7 +209,11 @@ class PickupShopCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.schedule_outlined, size: 15, color: Colors.grey),
+                const Icon(
+                  Icons.schedule_outlined,
+                  size: 15,
+                  color: Colors.grey,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_locator.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Recommended products manager — pin a product, else auto best-seller
 /// fallback (Section 13.3).
@@ -116,7 +116,7 @@ class _PinProductSheetState extends State<_PinProductSheet> {
           DropdownButtonFormField<String>(
             initialValue: _strategy,
             decoration: InputDecoration(labelText: AppLocalizations.of(context).strategy),
-            items: const [
+            items: [
               DropdownMenuItem(value: 'curated', child: Text(AppLocalizations.of(context).curated)),
               DropdownMenuItem(
                 value: 'top_sellers',

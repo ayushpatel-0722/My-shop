@@ -15,6 +15,7 @@ import '../../../core/models/review.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
@@ -146,9 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final activeAddress = AuthSession.activeAddress;
     final deliverToTitle =
         activeAddress != null && activeAddress.name.isNotEmpty
-        ? AppLocalizations.of(context).deliverTo('${activeAddress.name}')
+        ? AppLocalizations.of(context).deliverTo(activeAddress.name)
         : activeAddress != null && activeAddress.label.isNotEmpty
-        ? AppLocalizations.of(context).deliverTo('${activeAddress.label}')
+        ? AppLocalizations.of(context).deliverTo(activeAddress.label)
         : AppLocalizations.of(context).deliverTo2;
     final deliverToAddress = activeAddress != null
         ? (activeAddress.shortLocation.isNotEmpty
@@ -323,7 +324,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          AppLocalizations.of(context).searchProductsCategoriesOrStores,
+                          AppLocalizations.of(
+                            context,
+                          ).searchProductsCategoriesOrStores,
                           style: const TextStyle(
                             color: Color(0xFF9CA3AF),
                             fontSize: 14,
@@ -500,7 +503,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                AppLocalizations.of(context).promoCodeFestive50CopiedToClipboard,
+                                AppLocalizations.of(
+                                  context,
+                                ).promoCodeFestive50CopiedToClipboard,
                               ),
                               backgroundColor: Color(0xFF1E8F66),
                               duration: Duration(seconds: 2),
@@ -907,7 +912,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 3),
                 Text(
                   v.minOrderAmt > 0
-                      ? AppLocalizations.of(context).minOrder3('${v.minOrderAmt.toStringAsFixed(0)}')
+                      ? AppLocalizations.of(
+                          context,
+                        ).minOrder3(v.minOrderAmt.toStringAsFixed(0))
                       : (v.firstTimeOnly
                             ? AppLocalizations.of(context).firstOrderOnly
                             : AppLocalizations.of(context).onAllOrders),
@@ -940,7 +947,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         size: 18,
                       ),
                       const SizedBox(width: 8),
-                      Text(AppLocalizations.of(context).couponCopiedApplyAtCheckout('${v.code}')),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).couponCopiedApplyAtCheckout(v.code),
+                      ),
                     ],
                   ),
                   backgroundColor: const Color(0xFF1E8F66),
@@ -974,7 +985,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    isClaimed ? AppLocalizations.of(context).copied : AppLocalizations.of(context).copy,
+                    isClaimed
+                        ? AppLocalizations.of(context).copied
+                        : AppLocalizations.of(context).copy,
                     style: TextStyle(
                       color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
                       fontSize: 10,
@@ -1299,20 +1312,34 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProductGridView(List<Product> products) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.63,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemCount: products.length,
-        itemBuilder: (context, i) => ProductCard(
-          product: products[i],
-          onTap: () => context.push(AppRoutes.productPath(products[i].id)),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final crossAxisCount = ResponsiveGrid.calculateCrossAxisCount(
+            width,
+            maxCardWidth: 250,
+          );
+          final childAspectRatio = ResponsiveGrid.calculateProductAspectRatio(
+            width,
+            crossAxisCount,
+            showBrand: true,
+          );
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: childAspectRatio,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: products.length,
+            itemBuilder: (context, i) => ProductCard(
+              product: products[i],
+              onTap: () => context.push(AppRoutes.productPath(products[i].id)),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1387,7 +1414,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (list.isEmpty) {
                       return Center(
                         child: Text(
-                          AppLocalizations.of(context).noVouchersAvailableRightNow,
+                          AppLocalizations.of(
+                            context,
+                          ).noVouchersAvailableRightNow,
                           style: TextStyle(color: Color(0xFF6B7280)),
                         ),
                       );
@@ -1479,7 +1508,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                         .toList();
                     if (list.isEmpty) {
-                      return Center(child: Text(AppLocalizations.of(context).noShopsAvailable));
+                      return Center(
+                        child: Text(
+                          AppLocalizations.of(context).noShopsAvailable,
+                        ),
+                      );
                     }
                     return ListView.separated(
                       controller: scrollController,
@@ -1570,7 +1603,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      isOpen ? AppLocalizations.of(context).openNow2 : AppLocalizations.of(context).closed,
+                                      isOpen
+                                          ? AppLocalizations.of(
+                                              context,
+                                            ).openNow2
+                                          : AppLocalizations.of(context).closed,
                                       style: TextStyle(
                                         fontSize: 11.5,
                                         color: isOpen
@@ -1671,18 +1708,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               AppLocalizations.of(context).addMobileNumber,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
-                              AppLocalizations.of(context).forInstantOrderUpdatesDeliverySms,
-                              style: TextStyle(
+                              AppLocalizations.of(
+                                context,
+                              ).forInstantOrderUpdatesDeliverySms,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: Colors.black54,
                               ),
@@ -1702,7 +1741,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       hintText: '9876543210',
                       prefixText: '+91  ',
                       prefixIcon: const Icon(Icons.phone),
-                      helperText: AppLocalizations.of(context).enterYour10DigitIndianMobileNumber,
+                      helperText: AppLocalizations.of(
+                        context,
+                      ).enterYour10DigitIndianMobileNumber,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -1720,7 +1761,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? raw.substring(1)
                           : raw;
                       if (!RegExp(r'^[6-9]\d{9}$').hasMatch(digits)) {
-                        return AppLocalizations.of(context).enterAValid10DigitMobileNumber;
+                        return AppLocalizations.of(
+                          context,
+                        ).enterAValid10DigitMobileNumber;
                       }
                       return null;
                     },
@@ -1747,6 +1790,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             final scaffoldMessenger = ScaffoldMessenger.of(
                               context,
                             );
+                            final l10n = AppLocalizations.of(context);
                             final navigator = Navigator.of(sheetContext);
                             final ok = await authCubit.updateUserMobile(raw);
                             if (navigator.canPop()) {
@@ -1756,7 +1800,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               scaffoldMessenger.showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    AppLocalizations.of(context).mobileNumberSavedSuccessfully,
+                                    l10n.mobileNumberSavedSuccessfully,
                                   ),
                                   backgroundColor: Colors.green,
                                 ),

@@ -76,8 +76,8 @@ class ReportService {
             style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
-          pw.Text(L10n.current.order('${order.id.toUpperCase()}')),
-          pw.Text(L10n.current.company2('${order.companyName}')),
+          pw.Text(L10n.current.order(order.id.toUpperCase())),
+          pw.Text(L10n.current.company2(order.companyName)),
           pw.SizedBox(height: 16),
           pw.TableHelper.fromTextArray(
             headers: const ['Item', 'Qty', 'Unit Price', 'Total'],

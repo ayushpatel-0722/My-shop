@@ -21,6 +21,7 @@ import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
@@ -28,7 +29,7 @@ import '../widgets/common_carousel.dart';
 import '../widgets/location_picker_sheet.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/product_card.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Company micro-storefront, restructured into clear "aisles":
 ///
@@ -114,7 +115,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).addedToCart('${product.name}')),
+          content: Text(AppLocalizations.of(context).addedToCart(product.name)),
           duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: AppLocalizations.of(context).viewCart2,
@@ -139,7 +140,9 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).voucherCopiedToClipboard('${code}')),
+          content: Text(
+            AppLocalizations.of(context).voucherCopiedToClipboard(code),
+          ),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -624,7 +627,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               ),
               const SizedBox(width: 6),
               Text(
-                AppLocalizations.of(context).msgIn('${company.name}'),
+                AppLocalizations.of(context).msgIn(company.name),
                 style: const TextStyle(
                   fontSize: 11.5,
                   color: Color(0xFF6C757D),
@@ -762,16 +765,16 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
-                final crossAxisCount = width >= 1000
-                    ? 4
-                    : width >= 700
-                    ? 3
-                    : 2;
-                final childAspectRatio = width >= 1000
-                    ? 0.68
-                    : width >= 700
-                    ? 0.65
-                    : 0.63;
+                final crossAxisCount = ResponsiveGrid.calculateCrossAxisCount(
+                  width,
+                  maxCardWidth: 250,
+                );
+                final childAspectRatio =
+                    ResponsiveGrid.calculateProductAspectRatio(
+                      width,
+                      crossAxisCount,
+                      showBrand: false,
+                    );
                 return GridView.builder(
                   key: const Key('all-products-grid'),
                   shrinkWrap: true,
@@ -800,7 +803,9 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             padding: const EdgeInsets.only(top: 12),
             child: Center(
               child: Text(
-                AppLocalizations.of(context).scrollForMoreLeft('${filtered.length - visible.length}'),
+                AppLocalizations.of(
+                  context,
+                ).scrollForMoreLeft('${filtered.length - visible.length}'),
                 style: const TextStyle(
                   fontSize: 11.5,
                   color: Color(0xFF94A3B8),
@@ -1040,7 +1045,9 @@ class _ShopDetailsBlock extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        AppLocalizations.of(context).reviewsCount(stats.reviewCount),
+                        AppLocalizations.of(
+                          context,
+                        ).reviewsCount(stats.reviewCount),
                         style: const TextStyle(
                           color: Color(0xFF6C757D),
                           fontSize: 12,
@@ -1125,14 +1132,18 @@ class _ShopDetailsBlock extends StatelessWidget {
       icon = Icons.storefront_outlined;
       iconColor = const Color(0xFF0F766E);
       label = hasMinOrder
-          ? AppLocalizations.of(context).selfPickupOnlyMinOrder('${minOrderFormatted}')
+          ? AppLocalizations.of(
+              context,
+            ).selfPickupOnlyMinOrder(minOrderFormatted)
           : AppLocalizations.of(context).selfPickupOnly;
     } else if (company.allowsHomeDelivery) {
       // Home delivery allowed
       icon = Icons.local_shipping_outlined;
       iconColor = const Color(0xFFE03131);
       label = hasMinOrder
-          ? AppLocalizations.of(context).homeDeliveryAvailableMinOrder('${minOrderFormatted}')
+          ? AppLocalizations.of(
+              context,
+            ).homeDeliveryAvailableMinOrder(minOrderFormatted)
           : AppLocalizations.of(context).homeDeliveryAvailableNoMinOrder;
     } else {
       // Neither or fallback
@@ -1262,7 +1273,7 @@ class _OfferCarousel extends StatelessWidget {
           }
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _voucherPage(vouchers),
+            child: _voucherPage(context, vouchers),
           );
         },
       ),
@@ -1302,15 +1313,21 @@ class _OfferCarousel extends StatelessWidget {
   }
 
   /// One promo page listing the store's live voucher codes.
-  Widget _voucherPage(List<Voucher> vouchers) {
+  Widget _voucherPage(BuildContext context, List<Voucher> vouchers) {
     final top = vouchers.first;
     final title = top.discountType == 'percentage'
-        ? AppLocalizations.of(context).flatOff('${top.discountValue.toStringAsFixed(0)}')
+        ? AppLocalizations.of(
+            context,
+          ).flatOff(top.discountValue.toStringAsFixed(0))
         : top.discountType == 'free_shipping'
         ? AppLocalizations.of(context).freeDeliveryOnYourOrder
-        : AppLocalizations.of(context).flatOff2('${top.discountValue.toStringAsFixed(0)}');
+        : AppLocalizations.of(
+            context,
+          ).flatOff2(top.discountValue.toStringAsFixed(0));
     final sub = top.minOrderAmt > 0
-        ? AppLocalizations.of(context).validOnOrdersOver('${top.minOrderAmt.toStringAsFixed(0)}')
+        ? AppLocalizations.of(
+            context,
+          ).validOnOrdersOver(top.minOrderAmt.toStringAsFixed(0))
         : AppLocalizations.of(context).storeExclusiveDeal;
 
     return Container(
@@ -1369,7 +1386,12 @@ class _OfferCarousel extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  AppLocalizations.of(context).vouchersPlural11LiveOfferOtherLiveOffers('${sub}', vouchers.length),
+                  AppLocalizations.of(
+                    context,
+                  ).vouchersPlural11LiveOfferOtherLiveOffers(
+                    sub,
+                    vouchers.length,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.white70, fontSize: 11.5),
@@ -1387,7 +1409,7 @@ class _OfferCarousel extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      AppLocalizations.of(context).useCode('${top.code}'),
+                      AppLocalizations.of(context).useCode(top.code),
                       style: const TextStyle(
                         color: Color(0xFFB3261E),
                         fontWeight: FontWeight.w800,
@@ -1698,13 +1720,19 @@ class _StoreCouponCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final discountTitle = voucher.discountType == 'percentage'
-        ? AppLocalizations.of(context).off('${voucher.discountValue.toStringAsFixed(0)}')
+        ? AppLocalizations.of(
+            context,
+          ).off(voucher.discountValue.toStringAsFixed(0))
         : voucher.discountType == 'free_shipping'
         ? AppLocalizations.of(context).freeDel
-        : AppLocalizations.of(context).off4('${voucher.discountValue.toStringAsFixed(0)}');
+        : AppLocalizations.of(
+            context,
+          ).off4(voucher.discountValue.toStringAsFixed(0));
 
     final sub = voucher.minOrderAmt > 0
-        ? AppLocalizations.of(context).ordersOver('${voucher.minOrderAmt.toStringAsFixed(0)}')
+        ? AppLocalizations.of(
+            context,
+          ).ordersOver(voucher.minOrderAmt.toStringAsFixed(0))
         : AppLocalizations.of(context).noMinOrder;
 
     final isFreeDel = voucher.discountType == 'free_shipping';

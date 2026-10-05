@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Reusable section title with an optional "view all" action.
 class SectionHeader extends StatelessWidget {

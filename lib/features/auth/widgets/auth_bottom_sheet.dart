@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/models/customer.dart';
 import '../auth_cubit.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Multi-step Bottom Sheet that handles guest authentication:
 /// 1. Google Sign-In
@@ -84,7 +84,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).signInFailedPleaseTryAgain),
+          content: Text(
+            AppLocalizations.of(context).signInFailedPleaseTryAgain,
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -123,7 +125,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).failedToSaveMobileNumberTryAgain),
+          content: Text(
+            AppLocalizations.of(context).failedToSaveMobileNumberTryAgain,
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -161,7 +165,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).failedToSaveAddressTryAgain),
+          content: Text(
+            AppLocalizations.of(context).failedToSaveAddressTryAgain,
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -254,19 +260,21 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
                     AppLocalizations.of(context).welcomeToBazaar,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  SizedBox(height: 3),
+                  const SizedBox(height: 3),
                   Text(
-                    AppLocalizations.of(context).signInToPlaceOrdersSaveCartApplyVouchers,
-                    style: TextStyle(fontSize: 13, color: Colors.black54),
+                    AppLocalizations.of(
+                      context,
+                    ).signInToPlaceOrdersSaveCartApplyVouchers,
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                 ],
               ),
@@ -295,16 +303,16 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(
+                  children: [
+                    const Icon(
                       Icons.g_mobiledata_rounded,
                       size: 30,
                       color: Color(0xFFEA4335),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
                       AppLocalizations.of(context).continueWithGoogle,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
@@ -316,7 +324,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
         const SizedBox(height: 16),
         Center(
           child: Text(
-            AppLocalizations.of(context).byContinuingYouAgreeToOurTermsPrivacyPolicy,
+            AppLocalizations.of(
+              context,
+            ).byContinuingYouAgreeToOurTermsPrivacyPolicy,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 11, color: Colors.black45),
           ),
@@ -353,18 +363,23 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       AppLocalizations.of(context).enterMobileNumber,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
-                      AppLocalizations.of(context).forDeliveryTrackingOrderSmsUpdates,
-                      style: TextStyle(fontSize: 13, color: Colors.black54),
+                      AppLocalizations.of(
+                        context,
+                      ).forDeliveryTrackingOrderSmsUpdates,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
@@ -381,7 +396,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               hintText: '9876543210',
               prefixText: '+91  ',
               prefixIcon: const Icon(Icons.phone),
-              helperText: AppLocalizations.of(context).enter10DigitIndianMobileNumber,
+              helperText: AppLocalizations.of(
+                context,
+              ).enter10DigitIndianMobileNumber,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -396,7 +413,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                   ? raw.substring(1)
                   : raw;
               if (!RegExp(r'^[6-9]\d{9}$').hasMatch(digits)) {
-                return AppLocalizations.of(context).enterAValid10DigitMobileNumber;
+                return AppLocalizations.of(
+                  context,
+                ).enterAValid10DigitMobileNumber;
               }
               return null;
             },
@@ -422,8 +441,11 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                     ),
                   )
                 : Text(
-                    AppLocalizations.of(context).continue,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    AppLocalizations.of(context).continueLabel,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
           ),
         ],
@@ -459,18 +481,23 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       AppLocalizations.of(context).deliveryAddress,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
-                      AppLocalizations.of(context).enterYourAddressForAccurateDelivery,
-                      style: TextStyle(fontSize: 13, color: Colors.black54),
+                      AppLocalizations.of(
+                        context,
+                      ).enterYourAddressForAccurateDelivery,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
@@ -496,7 +523,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             controller: _streetCtrl,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).streetAreaLandmark,
-              hintText: AppLocalizations.of(context).eGGreenValleyRoadNearCityMall,
+              hintText: AppLocalizations.of(
+                context,
+              ).eGGreenValleyRoadNearCityMall,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -520,7 +549,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             ),
             validator: (v) {
               final val = (v ?? '').trim();
-              if (val.isEmpty) return AppLocalizations.of(context).pincodeIsRequired;
+              if (val.isEmpty) {
+                return AppLocalizations.of(context).pincodeIsRequired;
+              }
               if (val.length != 6 || int.tryParse(val) == null) {
                 return AppLocalizations.of(context).enterAValid6DigitPincode;
               }

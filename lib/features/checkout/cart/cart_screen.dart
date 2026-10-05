@@ -134,7 +134,9 @@ class CartScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context).addProductsToYourCartAfterSigningInToContinueCheckout,
+              AppLocalizations.of(
+                context,
+              ).addProductsToYourCartAfterSigningInToContinueCheckout,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
@@ -227,7 +229,9 @@ class CartScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            AppLocalizations.of(context).youSave('${formatCurrency(summary.totalDiscount)}'),
+                            AppLocalizations.of(
+                              context,
+                            ).youSave(formatCurrency(summary.totalDiscount)),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -249,7 +253,9 @@ class CartScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                       if (summary.totalDiscount > 0) ...[
@@ -475,8 +481,7 @@ class _CartLineCard extends StatelessWidget {
                         canAdd: canAdd && item.isInStock,
                         canRemove: canRemove,
                         isDark: isDark,
-                        onRemove: () =>
-                            cubit.decrementByCartKey(item.cartKey),
+                        onRemove: () => cubit.decrementByCartKey(item.cartKey),
                         onAdd: () => cubit.incrementByCartKey(item.cartKey),
                       ),
                       if (stockWarning != null) ...[
@@ -522,7 +527,9 @@ class _CartLineCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        AppLocalizations.of(context).total2('${item.totalUnitLabel}'),
+                        AppLocalizations.of(
+                          context,
+                        ).total2(item.totalUnitLabel),
                         key: Key('cart-total-unit-${item.cartKey}'),
                         style: TextStyle(
                           fontSize: 11,
@@ -578,7 +585,9 @@ class _CartLineCard extends StatelessWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).removedFromCart('${removed.product.name}')),
+          content: Text(
+            AppLocalizations.of(context).removedFromCart(removed.product.name),
+          ),
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
@@ -590,7 +599,9 @@ class _CartLineCard extends StatelessWidget {
                 ..showSnackBar(
                   SnackBar(
                     content: Text(
-                      AppLocalizations.of(context).savedToYourWishlist('${removed.product.name}'),
+                      AppLocalizations.of(
+                        context,
+                      ).savedToYourWishlist(removed.product.name),
                     ),
                     duration: const Duration(seconds: 2),
                     behavior: SnackBarBehavior.floating,

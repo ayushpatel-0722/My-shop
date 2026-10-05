@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/locale_cubit.dart';
 
 import '../../app/routes/app_router.dart';
 import '../../app/theme/app_theme.dart';
@@ -8,8 +10,6 @@ import '../auth/auth_cubit.dart';
 import '../auth/widgets/auth_bottom_sheet.dart';
 import '../marketplace/widgets/location_picker_sheet.dart';
 import '../marketplace/widgets/marketplace_bottom_nav.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
-import 'package:my_shop/app/l10n/locale_cubit.dart';
 
 /// Full-screen Account/Profile screen with AppBar and MarketplaceBottomNav.
 class AccountScreen extends StatelessWidget {
@@ -70,7 +70,7 @@ class AccountScreen extends StatelessWidget {
   }
 
   Widget _sectionHeader(
-    BuildContext c,
+    BuildContext context,
     String title, {
     VoidCallback? onViewAll,
   }) {
@@ -262,7 +262,9 @@ class AccountScreen extends StatelessWidget {
                     color: Color(0xFFFF5247),
                   ),
                   title: Text(AppLocalizations.of(context).myOrders),
-                  subtitle: Text(AppLocalizations.of(context).ordersTrackingStatus),
+                  subtitle: Text(
+                    AppLocalizations.of(context).ordersTrackingStatus,
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     if (user == null) {
@@ -279,7 +281,9 @@ class AccountScreen extends StatelessWidget {
                     color: Color(0xFF3D38D9),
                   ),
                   title: Text(AppLocalizations.of(context).notificationCentre),
-                  subtitle: Text(AppLocalizations.of(context).orderUpdatesPromoAlerts),
+                  subtitle: Text(
+                    AppLocalizations.of(context).orderUpdatesPromoAlerts,
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.go(AppRoutes.notifications),
                 ),
@@ -306,7 +310,9 @@ class AccountScreen extends StatelessWidget {
                       ),
                       title: Text(AppLocalizations.of(context).adminDashboard),
                       subtitle: Text(
-                        AppLocalizations.of(context).manageProductsCategoriesOrders,
+                        AppLocalizations.of(
+                          context,
+                        ).manageProductsCategoriesOrders,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.go(AppRoutes.adminLogin),
@@ -321,7 +327,9 @@ class AccountScreen extends StatelessWidget {
                       ),
                       title: Text(AppLocalizations.of(context).employeePortal),
                       subtitle: Text(
-                        AppLocalizations.of(context).packingOrderQueueFulfillment,
+                        AppLocalizations.of(
+                          context,
+                        ).packingOrderQueueFulfillment,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.go(AppRoutes.employeeLogin),
@@ -351,10 +359,7 @@ class AccountScreen extends StatelessWidget {
                         value: locale.languageCode,
                         underline: const SizedBox.shrink(),
                         items: const [
-                          DropdownMenuItem(
-                            value: 'en',
-                            child: Text('English'),
-                          ),
+                          DropdownMenuItem(value: 'en', child: Text('English')),
                           DropdownMenuItem(
                             value: 'hi',
                             child: Text('हिन्दी (Hindi)'),
@@ -379,11 +384,22 @@ class AccountScreen extends StatelessWidget {
                   title: Text(AppLocalizations.of(context).savedAddresses2),
                   subtitle: user != null && user.addresses.isNotEmpty
                       ? Text(
-                          AppLocalizations.of(context).msg3('${user.defaultAddress?.label ?? AppLocalizations.of(context).default2}', '${user.defaultAddress?.shortLocation ?? user.defaultAddress?.formattedAddress ?? ''}', '${user.addresses.length}'),
+                          AppLocalizations.of(context).msg3(
+                            user.defaultAddress?.label ??
+                                AppLocalizations.of(context).default2,
+                            user.defaultAddress?.shortLocation ??
+                                user.defaultAddress?.formattedAddress ??
+                                '',
+                            '${user.addresses.length}',
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         )
-                      : Text(AppLocalizations.of(context).manageDeliveryLocations03),
+                      : Text(
+                          AppLocalizations.of(
+                            context,
+                          ).manageDeliveryLocations03,
+                        ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     LocationPickerSheet.show(context);
@@ -393,7 +409,9 @@ class AccountScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.help_outline),
                   title: Text(AppLocalizations.of(context).helpSupport),
-                  subtitle: Text(AppLocalizations.of(context).faqsCustomerHelplineQueryForm),
+                  subtitle: Text(
+                    AppLocalizations.of(context).faqsCustomerHelplineQueryForm,
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push(AppRoutes.helpSupport),
                 ),

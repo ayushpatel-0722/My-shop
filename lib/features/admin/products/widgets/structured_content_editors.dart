@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/models/product.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Editors for the two structured product content blocks (Flipkart style):
 ///
@@ -80,7 +80,11 @@ class _HighlightsEditorState extends State<HighlightsEditor> {
       children: [
         Row(
           children: [
-            Icon(Icons.format_list_bulleted, color: theme.colorScheme.primary, size: 20),
+            Icon(
+              Icons.format_list_bulleted,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -100,7 +104,9 @@ class _HighlightsEditorState extends State<HighlightsEditor> {
         ),
         const SizedBox(height: 4),
         Text(
-          AppLocalizations.of(context).titleAndValueRowsShownAsTheCompactHighlightsListOnTheProductPage,
+          AppLocalizations.of(
+            context,
+          ).titleAndValueRowsShownAsTheCompactHighlightsListOnTheProductPage,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -233,7 +239,10 @@ class HighlightRowEditor extends StatelessWidget {
                 iconSize: 18,
                 tooltip: AppLocalizations.of(context).deleteRow,
                 onPressed: onRemove,
-                icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: theme.colorScheme.error,
+                ),
               ),
             ],
           ),
@@ -303,7 +312,11 @@ class _AllDetailsEditorState extends State<AllDetailsEditor> {
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context).deleteSection),
         content: Text(
-          AppLocalizations.of(context).deleteItsContentWillBeLost('${section.title.isEmpty ? AppLocalizations.of(context).untitledSection : section.title}'),
+          AppLocalizations.of(context).deleteItsContentWillBeLost(
+            section.title.isEmpty
+                ? AppLocalizations.of(context).untitledSection
+                : section.title,
+          ),
         ),
         actions: [
           TextButton(
@@ -343,7 +356,11 @@ class _AllDetailsEditorState extends State<AllDetailsEditor> {
       children: [
         Row(
           children: [
-            Icon(Icons.menu_book_outlined, color: theme.colorScheme.primary, size: 20),
+            Icon(
+              Icons.menu_book_outlined,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -363,7 +380,9 @@ class _AllDetailsEditorState extends State<AllDetailsEditor> {
         ),
         const SizedBox(height: 4),
         Text(
-          AppLocalizations.of(context).sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables,
+          AppLocalizations.of(
+            context,
+          ).sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -440,7 +459,8 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
 
   Future<void> _onTypeChanged(String? newType) async {
     if (newType == null || newType == widget.section.type) return;
-    final hasContent = widget.section.text.trim().isNotEmpty ||
+    final hasContent =
+        widget.section.text.trim().isNotEmpty ||
         widget.section.items.any((i) => !i.isEmpty);
     if (hasContent) {
       // Changing the type clears the existing content — confirm first.
@@ -449,7 +469,9 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
         builder: (ctx) => AlertDialog(
           title: Text(AppLocalizations.of(context).changeSectionType),
           content: Text(
-            AppLocalizations.of(context).switchingTheTypeWillClearTheContentOfThisSectionContinue,
+            AppLocalizations.of(
+              context,
+            ).switchingTheTypeWillClearTheContentOfThisSectionContinue,
           ),
           actions: [
             TextButton(
@@ -575,7 +597,9 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      isText ? AppLocalizations.of(context).simpleText : AppLocalizations.of(context).titleValue,
+                      isText
+                          ? AppLocalizations.of(context).simpleText
+                          : AppLocalizations.of(context).titleValue,
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
@@ -624,11 +648,12 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                     style: const TextStyle(fontSize: 13.5),
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).sectionTitle,
-                      hintText: AppLocalizations.of(context).eGDescriptionGeneralDisplayFeatures,
+                      hintText: AppLocalizations.of(
+                        context,
+                      ).eGDescriptionGeneralDisplayFeatures,
                       isDense: true,
                       border: const OutlineInputBorder(),
-                      errorText:
-                          widget.showErrors && s.title.trim().isEmpty
+                      errorText: widget.showErrors && s.title.trim().isEmpty
                           ? AppLocalizations.of(context).sectionTitleIsRequired
                           : null,
                     ),
@@ -636,7 +661,7 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    value: DetailSectionType.isValid(s.type)
+                    initialValue: DetailSectionType.isValid(s.type)
                         ? s.type
                         : DetailSectionType.text,
                     isDense: true,
@@ -644,7 +669,7 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                       labelText: AppLocalizations.of(context).sectionType,
                       border: OutlineInputBorder(),
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: DetailSectionType.text,
                         child: Text(AppLocalizations.of(context).simpleText),
@@ -665,23 +690,25 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                       style: const TextStyle(fontSize: 13),
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context).text,
-                        hintText: AppLocalizations.of(context).longDescriptionShownAsAParagraph,
+                        hintText: AppLocalizations.of(
+                          context,
+                        ).longDescriptionShownAsAParagraph,
                         alignLabelWithHint: true,
                         border: const OutlineInputBorder(),
-                        errorText:
-                            widget.showErrors && s.text.trim().isEmpty
+                        errorText: widget.showErrors && s.text.trim().isEmpty
                             ? AppLocalizations.of(context).textIsRequired
                             : null,
                       ),
-                      onChanged: (v) =>
-                          widget.onChanged(s.copyWith(text: v)),
+                      onChanged: (v) => widget.onChanged(s.copyWith(text: v)),
                     ),
                   ] else ...[
                     if (widget.showErrors && s.items.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
-                          AppLocalizations.of(context).addAtLeastOneCompleteTitleValueRow,
+                          AppLocalizations.of(
+                            context,
+                          ).addAtLeastOneCompleteTitleValueRow,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.error,

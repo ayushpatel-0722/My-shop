@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../core/models/customer.dart';
 import '../../auth/auth_cubit.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Modal bottom sheet for adding or editing a delivery address (up to 3 addresses).
 class AddEditAddressSheet extends StatefulWidget {

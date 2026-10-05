@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../../../core/models/customer.dart';
-import '../../account/widgets/add_edit_address_dialog.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/models/customer.dart';
+import 'package:myshop/features/account/widgets/add_edit_address_dialog.dart';
 
 /// "Delivery Address" section: the user's saved addresses (max 3) as
 /// selectable radio cards with inline edit, plus an "Add New Address" button
@@ -120,9 +119,7 @@ class _AddressCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                selected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_off,
+                selected ? Icons.radio_button_checked : Icons.radio_button_off,
                 size: 20,
                 color: selected
                     ? theme.colorScheme.primary
@@ -147,7 +144,9 @@ class _AddressCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            address.label.isEmpty ? AppLocalizations.of(context).home : address.label,
+                            address.label.isEmpty
+                                ? AppLocalizations.of(context).home
+                                : address.label,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,

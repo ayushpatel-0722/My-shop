@@ -43,12 +43,16 @@ class OrderTrackingScreen extends StatelessWidget {
 
           if (order == null) {
             if (snap.connectionState == ConnectionState.waiting) {
-              return M3CenterLoader(message: AppLocalizations.of(context).loadingOrderDetails);
+              return M3CenterLoader(
+                message: AppLocalizations.of(context).loadingOrderDetails,
+              );
             }
             return Center(
               child: Padding(
                 padding: EdgeInsets.all(28),
-                child: Text(AppLocalizations.of(context).thisOrderIsNoLongerAvailable),
+                child: Text(
+                  AppLocalizations.of(context).thisOrderIsNoLongerAvailable,
+                ),
               ),
             );
           }
@@ -181,7 +185,9 @@ class OrderTrackingScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context).cancelThisOrder),
         content: Text(
-          AppLocalizations.of(context).orderWillBeCancelledThisCannotBeUndone('${order.reference}'),
+          AppLocalizations.of(
+            context,
+          ).orderWillBeCancelledThisCannotBeUndone(order.reference),
         ),
         actions: [
           TextButton(
@@ -204,9 +210,11 @@ class OrderTrackingScreen extends StatelessWidget {
       await repo.cancelOrder(order.id);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).couldNotCancelOrder('${e}'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotCancelOrder('$e')),
+        ),
+      );
     }
   }
 
@@ -214,13 +222,17 @@ class OrderTrackingScreen extends StatelessWidget {
     return Column(
       children: [
         Text(
-          AppLocalizations.of(context).order3('${order.reference}'),
+          AppLocalizations.of(context).order3(order.reference),
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
-        Text(AppLocalizations.of(context).items('${order.itemCount}', '${formatDate(order.createdAt)}')),
+        Text(
+          AppLocalizations.of(
+            context,
+          ).items('${order.itemCount}', formatDate(order.createdAt)),
+        ),
         const SizedBox(height: 10),
         OrderStatusBadge(status: order.orderStatus),
       ],
@@ -239,7 +251,13 @@ class OrderTrackingScreen extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              AppLocalizations.of(context).cancelled2('${order.cancelledAt == null ? '' : AppLocalizations.of(context).msgOn('${formatDate(order.cancelledAt)}')}'),
+              AppLocalizations.of(context).cancelled2(
+                order.cancelledAt == null
+                    ? ''
+                    : AppLocalizations.of(
+                        context,
+                      ).msgOn(formatDate(order.cancelledAt)),
+              ),
               style: const TextStyle(
                 color: Color(0xFFDC2626),
                 fontWeight: FontWeight.bold,

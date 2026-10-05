@@ -18,7 +18,7 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).queue('${l10n.packing}')),
+        title: Text(AppLocalizations.of(context).queue(l10n.packing)),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -37,8 +37,7 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
           companyId: context.watch<AuthCubit>().currentUser?.companyId ?? '',
         ),
         builder: (context, snap) {
-          final employeeId =
-              context.watch<AuthCubit>().currentUser?.id ?? '';
+          final employeeId = context.watch<AuthCubit>().currentUser?.id ?? '';
           final orders = (snap.data ?? const <Order>[])
               .where(
                 (o) =>
@@ -51,13 +50,17 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
 
           if (snap.connectionState == ConnectionState.waiting &&
               orders.isEmpty) {
-            return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+            return const Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
+            );
           }
           if (orders.isEmpty) {
             return Center(
               child: Padding(
                 padding: EdgeInsets.all(28),
-                child: Text(AppLocalizations.of(context).noPackingTasksAssigned),
+                child: Text(
+                  AppLocalizations.of(context).noPackingTasksAssigned,
+                ),
               ),
             );
           }
@@ -76,7 +79,15 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    AppLocalizations.of(context).items5('${o.itemCount}', '${o.isSelfPickup ? AppLocalizations.of(context).pickup : AppLocalizations.of(context).delivery}', '${o.employeePackingDone ? AppLocalizations.of(context).packed : ''}'),
+                    AppLocalizations.of(context).items5(
+                      '${o.itemCount}',
+                      o.isSelfPickup
+                          ? AppLocalizations.of(context).pickup
+                          : AppLocalizations.of(context).delivery,
+                      o.employeePackingDone
+                          ? AppLocalizations.of(context).packed
+                          : '',
+                    ),
                   ),
                   trailing: FilledButton(
                     onPressed: () => context.go(

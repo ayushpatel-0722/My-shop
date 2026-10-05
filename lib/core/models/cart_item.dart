@@ -37,9 +37,8 @@ class VariantSnapshot {
   bool get hasUnit => unitValue > 0 && unitType.isNotEmpty;
 
   /// "500 g" style pack size, falling back to the display label.
-  String get unitLabel => hasUnit
-      ? CartUnit.format(unitValue, unitType)
-      : label;
+  String get unitLabel =>
+      hasUnit ? CartUnit.format(unitValue, unitType) : label;
 
   /// True when stock is not tracked at all.
   bool get isUnlimitedStock => stock < 0;
@@ -56,9 +55,7 @@ class VariantSnapshot {
     final price = variant.priceOverride > 0
         ? variant.priceOverride
         : product.price;
-    final mrpBase = variant.mrpOverride > 0
-        ? variant.mrpOverride
-        : product.mrp;
+    final mrpBase = variant.mrpOverride > 0 ? variant.mrpOverride : product.mrp;
     var unitValue = variant.unitValue;
     var unitType = variant.unitType;
     if (unitValue <= 0 || unitType.isEmpty) {
@@ -194,7 +191,10 @@ class CartItem {
       variant: variantMap is Map
           ? VariantSnapshot.fromMap(Map<String, dynamic>.from(variantMap))
           : null,
-      qty: (map['quantity'] as num?)?.toInt() ?? (map['qty'] as num?)?.toInt() ?? 1,
+      qty:
+          (map['quantity'] as num?)?.toInt() ??
+          (map['qty'] as num?)?.toInt() ??
+          1,
     );
   }
 
@@ -252,8 +252,9 @@ class CartItem {
     return vid.isEmpty ? product.id : '${product.id}_$vid';
   }
 
-  String get displayName =>
-      variantLabel.isNotEmpty ? '${product.name} ($variantLabel)' : product.name;
+  String get displayName => variantLabel.isNotEmpty
+      ? '${product.name} ($variantLabel)'
+      : product.name;
 
   /// Display label of the variant snapshot ("500g"), or '' without a variant.
   String get variantLabel => variant?.label ?? '';
@@ -319,7 +320,7 @@ class CartItem {
   String? stockWarningLabel({int threshold = 5}) {
     final left = trackedStock;
     if (left == null || left <= 0 || left > threshold) return null;
-    return L10n.current.onlyLeft('${left}');
+    return L10n.current.onlyLeft('$left');
   }
 
   // ----------------------------------------------------------- Stepper UI ---

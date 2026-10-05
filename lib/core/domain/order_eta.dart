@@ -22,14 +22,24 @@ class OrderEta {
     switch (order.orderStatus) {
       case OrderStatus.packing:
         return pickup
-            ? L10n.current.readyForPickupBy('${_fmt(now.add(Duration(minutes: handling)), now)}')
-            : L10n.current.arrivingBy('${_fmt(now.add(Duration(minutes: handling + delivery)), now)}');
+            ? L10n.current.readyForPickupBy(
+                _fmt(now.add(Duration(minutes: handling)), now),
+              )
+            : L10n.current.arrivingBy(
+                _fmt(now.add(Duration(minutes: handling + delivery)), now),
+              );
       case OrderStatus.ready:
         return pickup
-            ? L10n.current.readyForPickupBy('${_fmt(now.add(const Duration(minutes: 10)), now)}')
-            : L10n.current.arrivingBy('${_fmt(now.add(Duration(minutes: delivery)), now)}');
+            ? L10n.current.readyForPickupBy(
+                _fmt(now.add(const Duration(minutes: 10)), now),
+              )
+            : L10n.current.arrivingBy(
+                _fmt(now.add(Duration(minutes: delivery)), now),
+              );
       case OrderStatus.onTheWay:
-        return L10n.current.arrivingBy('${_fmt(now.add(Duration(minutes: delivery)), now)}');
+        return L10n.current.arrivingBy(
+          _fmt(now.add(Duration(minutes: delivery)), now),
+        );
       default:
         return null;
     }
@@ -53,8 +63,8 @@ class OrderEta {
         t.month == tomorrow.month &&
         t.day == tomorrow.day;
 
-    if (sameDay) return L10n.current.today('${time}');
-    if (isTomorrow) return L10n.current.tomorrow('${time}');
+    if (sameDay) return L10n.current.today(time);
+    if (isTomorrow) return L10n.current.tomorrow(time);
     return time;
   }
 

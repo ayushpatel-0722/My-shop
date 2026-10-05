@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -11,7 +12,6 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
 import 'widgets/product_assignment_picker.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Screen for creating and editing a Category with dual-panel product assignment.
 ///
@@ -40,7 +40,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
   final _nameCtrl = TextEditingController();
   final _detailsCtrl = TextEditingController();
-  final _typeCtrl = TextEditingController(text: AppLocalizations.of(context).grocery);
+  late final _typeCtrl = TextEditingController(
+    text: AppLocalizations.of(context).grocery,
+  );
   final _iconCtrl = TextEditingController(text: '🛍️');
 
   String _companyId = '';
@@ -83,7 +85,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     '🎮',
   ];
 
-  final List<String> _suggestedTypes = [
+  late final List<String> _suggestedTypes = [
     AppLocalizations.of(context).grocery,
     AppLocalizations.of(context).electronics,
     AppLocalizations.of(context).fashionApparel,
@@ -134,7 +136,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     _loadedCategoryId = cat.id;
     _nameCtrl.text = cat.name;
     _detailsCtrl.text = cat.details;
-    _typeCtrl.text = cat.type.isNotEmpty ? cat.type : AppLocalizations.of(context).grocery;
+    _typeCtrl.text = cat.type.isNotEmpty
+        ? cat.type
+        : AppLocalizations.of(context).grocery;
     _iconCtrl.text = cat.iconUrl.isNotEmpty ? cat.iconUrl : '🛍️';
     _selectedParentId = cat.parentId?.isNotEmpty == true ? cat.parentId : null;
     _selectedProductIds = List<String>.from(cat.productList);
@@ -190,7 +194,11 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     if (_selectedProductIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).pleaseSelectAtLeastOneProductForTheCategory),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            ).pleaseSelectAtLeastOneProductForTheCategory,
+          ),
           backgroundColor: Colors.orange,
         ),
       );
@@ -216,7 +224,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context).aCategoryNamedAlreadyExistsInThisCompany('${trimmedName}'),
+            AppLocalizations.of(
+              context,
+            ).aCategoryNamedAlreadyExistsInThisCompany(trimmedName),
           ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
@@ -229,7 +239,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       if (_selectedParentId == currentCatId) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).aCategoryCannotHaveItselfAsItsParent),
+            content: Text(
+              AppLocalizations.of(context).aCategoryCannotHaveItselfAsItsParent,
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -241,7 +253,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context).invalidParentSelectingADescendantCategoryCreatesACycle,
+              AppLocalizations.of(
+                context,
+              ).invalidParentSelectingADescendantCategoryCreatesACycle,
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
@@ -274,8 +288,12 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
         SnackBar(
           content: Text(
             isEditMode
-                ? AppLocalizations.of(context).categoryUpdatedSuccessfully('${category.name}')
-                : AppLocalizations.of(context).categoryCreatedSuccessfully('${category.name}'),
+                ? AppLocalizations.of(
+                    context,
+                  ).categoryUpdatedSuccessfully(category.name)
+                : AppLocalizations.of(
+                    context,
+                  ).categoryCreatedSuccessfully(category.name),
           ),
           backgroundColor: Colors.green.shade700,
         ),
@@ -290,7 +308,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).failedToSaveCategory('${e}')),
+          content: Text(
+            AppLocalizations.of(context).failedToSaveCategory('$e'),
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -344,7 +364,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
     if (_isLoadingCategory) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).loadingCategory)),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).loadingCategory),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -383,7 +405,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
               builder: (ctx) => AlertDialog(
                 title: Text(AppLocalizations.of(context).discardChanges),
                 content: Text(
-                  AppLocalizations.of(context).youHaveUnsavedChangesLeaveWithoutSaving,
+                  AppLocalizations.of(
+                    context,
+                  ).youHaveUnsavedChangesLeaveWithoutSaving,
                 ),
                 actions: [
                   TextButton(
@@ -391,9 +415,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                     child: Text(AppLocalizations.of(context).keepEditing),
                   ),
                   FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.red,
-                    ),
+                    style: FilledButton.styleFrom(backgroundColor: Colors.red),
                     onPressed: () => Navigator.of(ctx).pop(true),
                     child: Text(AppLocalizations.of(context).discard),
                   ),
@@ -403,375 +425,430 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
             if (discard == true && mounted) navigator.pop();
           },
           child: Scaffold(
-          appBar: AppBar(
-            title: Text(isEditMode ? AppLocalizations.of(context).editCategory : AppLocalizations.of(context).addNewCategory),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go(AppRoutes.adminCategories);
-                }
-              },
+            appBar: AppBar(
+              title: Text(
+                isEditMode
+                    ? AppLocalizations.of(context).editCategory
+                    : AppLocalizations.of(context).addNewCategory,
+              ),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go(AppRoutes.adminCategories);
+                  }
+                },
+              ),
             ),
-          ),
-          body: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 840),
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: context.isMobile ? 14 : 20,
-                    vertical: context.isMobile ? 16 : 24,
-                  ),
-                  children: [
-                    // Header Info
-                    if (context.isMobile)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                isEditMode
-                                    ? AppLocalizations.of(context).editCategory
-                                    : AppLocalizations.of(context).categoryDetails,
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              _buildCompanyPill(theme),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            AppLocalizations.of(context).configureHierarchyCatalogClassificationAndAssignedProducts,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark
-                                  ? AppTheme.textSecondaryDark
-                                  : AppTheme.textSecondaryLight,
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+            body: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 840),
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.isMobile ? 14 : 20,
+                      vertical: context.isMobile ? 16 : 24,
+                    ),
+                    children: [
+                      // Header Info
+                      if (context.isMobile)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   isEditMode
-                                      ? AppLocalizations.of(context).editCategory
-                                      : AppLocalizations.of(context).categoryDetails,
-                                  style: theme.textTheme.headlineSmall
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                      ? AppLocalizations.of(
+                                          context,
+                                        ).editCategory
+                                      : AppLocalizations.of(
+                                          context,
+                                        ).categoryDetails,
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                const SizedBox(height: 4),
+                                _buildCompanyPill(theme),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).configureHierarchyCatalogClassificationAndAssignedProducts,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: isDark
+                                    ? AppTheme.textSecondaryDark
+                                    : AppTheme.textSecondaryLight,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    isEditMode
+                                        ? AppLocalizations.of(
+                                            context,
+                                          ).editCategory
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).categoryDetails,
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).configureHierarchyCatalogClassificationAndAssignedProducts,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: isDark
+                                          ? AppTheme.textSecondaryDark
+                                          : AppTheme.textSecondaryLight,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            _buildCompanyPill(theme),
+                          ],
+                        ),
+                      const SizedBox(height: 20),
+
+                      // Card 1: Core Information (Name, Type, Details)
+                      ModernCard(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.label_outline,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
                                 Text(
-                                  AppLocalizations.of(context).configureHierarchyCatalogClassificationAndAssignedProducts,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: isDark
-                                        ? AppTheme.textSecondaryDark
-                                        : AppTheme.textSecondaryLight,
+                                  AppLocalizations.of(context).basicInformation,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCompanyPill(theme),
-                        ],
-                      ),
-                    const SizedBox(height: 20),
-
-                    // Card 1: Core Information (Name, Type, Details)
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.label_outline,
-                                color: theme.colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                AppLocalizations.of(context).basicInformation,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _nameCtrl,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(
+                                  context,
+                                ).categoryName,
+                                hintText: AppLocalizations.of(
+                                  context,
+                                ).eGFreshOrganicVegetables,
+                                prefixIcon: Icon(
+                                  Icons.drive_file_rename_outline,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _nameCtrl,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).categoryName,
-                              hintText: AppLocalizations.of(context).eGFreshOrganicVegetables,
-                              prefixIcon: Icon(Icons.drive_file_rename_outline),
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) {
+                                  return AppLocalizations.of(
+                                    context,
+                                  ).categoryNameIsRequired2;
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return AppLocalizations.of(context).categoryNameIsRequired2;
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _typeCtrl,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).classificationType,
-                              hintText: AppLocalizations.of(context).eGGroceryElectronics,
-                              prefixIcon: Icon(Icons.category_outlined),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _typeCtrl,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(
+                                  context,
+                                ).classificationType,
+                                hintText: AppLocalizations.of(
+                                  context,
+                                ).eGGroceryElectronics,
+                                prefixIcon: Icon(Icons.category_outlined),
+                              ),
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) {
+                                  return AppLocalizations.of(
+                                    context,
+                                  ).classificationTypeIsRequired;
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return AppLocalizations.of(context).classificationTypeIsRequired;
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: _suggestedTypes.map((type) {
-                              final isSelected = _typeCtrl.text.trim() == type;
-                              return ChoiceChip(
-                                label: Text(
-                                  type,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() => _typeCtrl.text = type);
-                                  }
-                                },
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _detailsCtrl,
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).descriptionDetails,
-                              hintText:
-                                  AppLocalizations.of(context).descriptionShownOnTheCategoryHeader,
-                              alignLabelWithHint: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Card 2: Icon & Visual Branding
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.palette_outlined,
-                                color: theme.colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                AppLocalizations.of(context).iconVisuals,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _buildIconPreview(context),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _iconCtrl,
-                                  onChanged: (_) => setState(() {}),
-                                  decoration: InputDecoration(
-                                    labelText:
-                                        AppLocalizations.of(context).categoryIconImageUrlOrEmoji,
-                                    hintText:
-                                        AppLocalizations.of(context).enterImageUrlOrEmojiEG,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            AppLocalizations.of(context).quickSelectEmoji,
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 6),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _suggestedEmojis.map((emoji) {
-                              return ActionChip(
-                                label: Text(
-                                  emoji,
-                                  style: const TextStyle(fontSize: 18),
-                                ),
-                                onPressed: () =>
-                                    setState(() => _iconCtrl.text = emoji),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Card 3: Nesting Hierarchy & Cycle Prevention
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.account_tree_outlined,
-                                color: theme.colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                AppLocalizations.of(context).hierarchyNesting,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            AppLocalizations.of(context).assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark
-                                  ? AppTheme.textSecondaryDark
-                                  : AppTheme.textSecondaryLight,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          DropdownButtonFormField<String?>(
-                            isExpanded: true,
-                            initialValue:
-                                validParentCategories.any(
-                                  (c) => c.id == _selectedParentId,
-                                )
-                                ? _selectedParentId
-                                : null,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).parentCategory,
-                              prefixIcon: Icon(Icons.subdirectory_arrow_right),
-                            ),
-                            items: [
-                              DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text(
-                                  AppLocalizations.of(context).noneTopLevelCategory,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              ...validParentCategories.map((c) {
-                                final prefix = (c.hasIcon && !c.hasImageIcon)
-                                    ? '${c.iconUrl} '
-                                    : '📁 ';
-                                return DropdownMenuItem<String?>(
-                                  value: c.id,
-                                  child: Text(
-                                    '$prefix${c.name}',
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }),
-                            ],
-                            onChanged: (val) =>
-                                setState(() => _selectedParentId = val),
-                          ),
-                          if (invalidParentIds.isNotEmpty && isEditMode) ...[
                             const SizedBox(height: 8),
-                            Text(
-                              AppLocalizations.of(context).noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent('${invalidParentIds.length}'),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic,
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: _suggestedTypes.map((type) {
+                                final isSelected =
+                                    _typeCtrl.text.trim() == type;
+                                return ChoiceChip(
+                                  label: Text(
+                                    type,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  selected: isSelected,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() => _typeCtrl.text = type);
+                                    }
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _detailsCtrl,
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(
+                                  context,
+                                ).descriptionDetails,
+                                hintText: AppLocalizations.of(
+                                  context,
+                                ).descriptionShownOnTheCategoryHeader,
+                                alignLabelWithHint: true,
                               ),
                             ),
                           ],
-                        ],
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                    // Card 4: Interactive Product Assignment Picker
-                    StreamBuilder<List<Product>>(
-                      stream: repo.products(companyId: _companyId),
-                      builder: (context, prodSnap) {
-                        final allCompanyProducts =
-                            prodSnap.data ?? const <Product>[];
+                      // Card 2: Icon & Visual Branding
+                      ModernCard(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.palette_outlined,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(context).iconVisuals,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _buildIconPreview(context),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _iconCtrl,
+                                    onChanged: (_) => setState(() {}),
+                                    decoration: InputDecoration(
+                                      labelText: AppLocalizations.of(
+                                        context,
+                                      ).categoryIconImageUrlOrEmoji,
+                                      hintText: AppLocalizations.of(
+                                        context,
+                                      ).enterImageUrlOrEmojiEG,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              AppLocalizations.of(context).quickSelectEmoji,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _suggestedEmojis.map((emoji) {
+                                return ActionChip(
+                                  label: Text(
+                                    emoji,
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => _iconCtrl.text = emoji),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
 
-                        return ModernCard(
-                          padding: const EdgeInsets.all(20),
-                          child: ProductAssignmentPicker(
-                            allProducts: allCompanyProducts,
-                            selectedProductIds: _selectedProductIds,
-                            onSelectedChanged: (updatedList) {
-                              setState(() => _selectedProductIds = updatedList);
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                      const SizedBox(height: 20),
 
-                    const SizedBox(height: 32),
+                      // Card 3: Nesting Hierarchy & Cycle Prevention
+                      ModernCard(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.account_tree_outlined,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AppLocalizations.of(context).hierarchyNesting,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: isDark
+                                    ? AppTheme.textSecondaryDark
+                                    : AppTheme.textSecondaryLight,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            DropdownButtonFormField<String?>(
+                              isExpanded: true,
+                              initialValue:
+                                  validParentCategories.any(
+                                    (c) => c.id == _selectedParentId,
+                                  )
+                                  ? _selectedParentId
+                                  : null,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(
+                                  context,
+                                ).parentCategory,
+                                prefixIcon: Icon(
+                                  Icons.subdirectory_arrow_right,
+                                ),
+                              ),
+                              items: [
+                                DropdownMenuItem<String?>(
+                                  value: null,
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).noneTopLevelCategory,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                ...validParentCategories.map((c) {
+                                  final prefix = (c.hasIcon && !c.hasImageIcon)
+                                      ? '${c.iconUrl} '
+                                      : '📁 ';
+                                  return DropdownMenuItem<String?>(
+                                    value: c.id,
+                                    child: Text(
+                                      '$prefix${c.name}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }),
+                              ],
+                              onChanged: (val) =>
+                                  setState(() => _selectedParentId = val),
+                            ),
+                            if (invalidParentIds.isNotEmpty && isEditMode) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent(
+                                  '${invalidParentIds.length}',
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
 
-                    // Save Action Button
-                    ModernButton(
-                      text: isEditMode ? AppLocalizations.of(context).saveChanges : AppLocalizations.of(context).createCategory,
-                      icon: const Icon(Icons.check, size: 20),
-                      isLoading: _isSaving,
-                      height: 52,
-                      onPressed: _isSaving
-                          ? null
-                          : () => _handleSave(existingCategories),
-                    ),
+                      const SizedBox(height: 20),
 
-                    const SizedBox(height: 40),
-                  ],
+                      // Card 4: Interactive Product Assignment Picker
+                      StreamBuilder<List<Product>>(
+                        stream: repo.products(companyId: _companyId),
+                        builder: (context, prodSnap) {
+                          final allCompanyProducts =
+                              prodSnap.data ?? const <Product>[];
+
+                          return ModernCard(
+                            padding: const EdgeInsets.all(20),
+                            child: ProductAssignmentPicker(
+                              allProducts: allCompanyProducts,
+                              selectedProductIds: _selectedProductIds,
+                              onSelectedChanged: (updatedList) {
+                                setState(
+                                  () => _selectedProductIds = updatedList,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Save Action Button
+                      ModernButton(
+                        text: isEditMode
+                            ? AppLocalizations.of(context).saveChanges
+                            : AppLocalizations.of(context).createCategory,
+                        icon: const Icon(Icons.check, size: 20),
+                        isLoading: _isSaving,
+                        height: 52,
+                        onPressed: _isSaving
+                            ? null
+                            : () => _handleSave(existingCategories),
+                      ),
+
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         );
       },
     );
@@ -797,7 +874,9 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
             child: Text(
               _companyName.isNotEmpty
                   ? _companyName
-                  : (_companyId.isNotEmpty ? AppLocalizations.of(context).companyScope : AppLocalizations.of(context).globalScope),
+                  : (_companyId.isNotEmpty
+                        ? AppLocalizations.of(context).companyScope
+                        : AppLocalizations.of(context).globalScope),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

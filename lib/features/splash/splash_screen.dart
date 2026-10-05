@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/routes/app_router.dart';
 import '../auth/auth_cubit.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Branded splash screen (Section 3). Shows the logo while the auth session is
 /// being restored, then routes to the appropriate dashboard (if already signed

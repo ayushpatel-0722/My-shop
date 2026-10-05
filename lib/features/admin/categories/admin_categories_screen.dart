@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/category_tree.dart';
@@ -11,7 +12,6 @@ import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
-import 'package:my_shop/app/l10n/app_localizations.dart';
 
 /// Admin category manager with a real hierarchy view.
 ///
@@ -53,7 +53,6 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     super.dispose();
   }
 
-
   String get _companyId => AuthSession.currentUser?.companyId ?? '';
 
   @override
@@ -65,14 +64,18 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       actions: [
         IconButton(
           key: const Key('category-reorder-toggle'),
-          icon: Icon(
-            _reorderMode ? Icons.playlist_add_check : Icons.swap_vert,
-          ),
-          tooltip: _reorderMode ? AppLocalizations.of(context).doneReordering : AppLocalizations.of(context).reorder,
+          icon: Icon(_reorderMode ? Icons.playlist_add_check : Icons.swap_vert),
+          tooltip: _reorderMode
+              ? AppLocalizations.of(context).doneReordering
+              : AppLocalizations.of(context).reorder,
           onPressed: () {
             if (_searchCtrl.text.trim().isNotEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context).clearSearchToReorder)),
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context).clearSearchToReorder,
+                  ),
+                ),
               );
               return;
             }
@@ -85,7 +88,9 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
         IconButton(
           key: const Key('category-backfill-order'),
           icon: const Icon(Icons.sort),
-          tooltip: AppLocalizations.of(context).backfillOrderingForOldCategories,
+          tooltip: AppLocalizations.of(
+            context,
+          ).backfillOrderingForOldCategories,
           onPressed: () => _backfillOrder(),
         ),
         IconButton(
@@ -163,8 +168,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                     tree: tree,
                     parentId: _reorderParentId,
                     categories: effective,
-                    onEnterLevel: (id) =>
-                        setState(() => _reorderParentId = id),
+                    onEnterLevel: (id) => setState(() => _reorderParentId = id),
                     onExitLevel: (id) => setState(() {
                       final node = tree
                           .flatten()
@@ -186,7 +190,11 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                     return Center(
                       child: Padding(
                         padding: EdgeInsets.all(28),
-                        child: Text(AppLocalizations.of(context).noCategoriesMatchThisSearch),
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).noCategoriesMatchThisSearch,
+                        ),
                       ),
                     );
                   }
@@ -273,7 +281,6 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     );
   }
 
-
   /// Applies optimistic sortOrder overrides until Firestore confirms them.
   List<Category> _applyPending(List<Category> categories) {
     if (_pendingSortOrders.isEmpty) return categories;
@@ -307,7 +314,11 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           ..addAll(previous);
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).couldNotSaveTheNewOrder('${e}'))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).couldNotSaveTheNewOrder('$e'),
+          ),
+        ),
       );
     }
   }
@@ -319,12 +330,18 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       await repo.backfillCategorySortOrder(companyId: _companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).categoryOrderingBackfilled)),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).categoryOrderingBackfilled,
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).backfillFailed('${e}'))),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).backfillFailed('$e')),
+        ),
       );
     }
   }
@@ -348,15 +365,30 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context).delete2('${category.name}')),
+            Text(AppLocalizations.of(context).delete2(category.name)),
             const SizedBox(height: 10),
             if (category.productList.isNotEmpty)
               Text(
-                AppLocalizations.of(context).willMove2('${_plural(category.productList.length, AppLocalizations.of(context).assignedProduct, AppLocalizations.of(context).assignedProducts)}', '${parentName == null ? AppLocalizations.of(context).toUncategorised : AppLocalizations.of(context).to('${parentName}')}'),
+                AppLocalizations.of(context).willMove2(
+                  _plural(
+                    category.productList.length,
+                    AppLocalizations.of(context).assignedProduct,
+                    AppLocalizations.of(context).assignedProducts,
+                  ),
+                  parentName == null
+                      ? AppLocalizations.of(context).toUncategorised
+                      : AppLocalizations.of(context).to(parentName),
+                ),
               ),
             if (children.isNotEmpty)
               Text(
-                AppLocalizations.of(context).willMoveUpOneLevel('${_plural(children.length, AppLocalizations.of(context).subCategory, AppLocalizations.of(context).subCategories)}'),
+                AppLocalizations.of(context).willMoveUpOneLevel(
+                  _plural(
+                    children.length,
+                    AppLocalizations.of(context).subCategory,
+                    AppLocalizations.of(context).subCategories,
+                  ),
+                ),
               ),
             if (category.productList.isEmpty && children.isEmpty)
               Text(AppLocalizations.of(context).thisCategoryIsEmpty),
@@ -382,13 +414,21 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       await repo.deleteCategory(category.id, companyId: category.companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).categoryDeleted('${category.name}'))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).categoryDeleted(category.name),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).failedToDeleteCategory('${e}'))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).failedToDeleteCategory('$e'),
+          ),
+        ),
+      );
     }
   }
 }
@@ -412,7 +452,10 @@ class _SummaryRow extends StatelessWidget {
         const SizedBox(width: 8),
         _Stat(label: AppLocalizations.of(context).topLevel, value: '$roots'),
         const SizedBox(width: 8),
-        _Stat(label: AppLocalizations.of(context).assignedProducts2, value: '$products'),
+        _Stat(
+          label: AppLocalizations.of(context).assignedProducts2,
+          value: '$products',
+        ),
       ],
     );
   }
@@ -519,7 +562,9 @@ class _CategoryTile extends StatelessWidget {
                         : Icons.keyboard_arrow_down,
                     size: 20,
                   ),
-                  tooltip: collapsed ? AppLocalizations.of(context).expand : AppLocalizations.of(context).collapse,
+                  tooltip: collapsed
+                      ? AppLocalizations.of(context).expand
+                      : AppLocalizations.of(context).collapse,
                   onPressed: onToggle,
                 ),
                 const SizedBox(width: 4),
@@ -575,7 +620,19 @@ class _CategoryTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      AppLocalizations.of(context).str('${node.category.type.isEmpty ? AppLocalizations.of(context).uncategorisedType : node.category.type}', '${node.category.companyId.isNotEmpty ? AppLocalizations.of(context).store : AppLocalizations.of(context).global}', '${node.children.isNotEmpty ? AppLocalizations.of(context).sub('${node.descendantCount}') : ''}'),
+                      AppLocalizations.of(context).str(
+                        node.category.type.isEmpty
+                            ? AppLocalizations.of(context).uncategorisedType
+                            : node.category.type,
+                        node.category.companyId.isNotEmpty
+                            ? AppLocalizations.of(context).store
+                            : AppLocalizations.of(context).global,
+                        node.children.isNotEmpty
+                            ? AppLocalizations.of(
+                                context,
+                              ).sub('${node.descendantCount}')
+                            : '',
+                      ),
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurface.withValues(
@@ -588,7 +645,7 @@ class _CategoryTile extends StatelessWidget {
                     if (pathLabel.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
-                        AppLocalizations.of(context).under('${pathLabel}'),
+                        AppLocalizations.of(context).under(pathLabel),
                         style: const TextStyle(
                           fontSize: 11,
                           color: Colors.grey,
@@ -665,7 +722,9 @@ class _CategoryTile extends StatelessWidget {
                     : Icons.keyboard_arrow_down,
                 size: 20,
               ),
-              tooltip: collapsed ? AppLocalizations.of(context).expand : AppLocalizations.of(context).collapse,
+              tooltip: collapsed
+                  ? AppLocalizations.of(context).expand
+                  : AppLocalizations.of(context).collapse,
               onPressed: onToggle,
             )
           else
@@ -721,13 +780,25 @@ class _CategoryTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  AppLocalizations.of(context).str('${node.category.type.isEmpty ? AppLocalizations.of(context).uncategorisedType : node.category.type}', '${node.category.companyId.isNotEmpty ? AppLocalizations.of(context).store : AppLocalizations.of(context).global}', '${node.children.isNotEmpty ? AppLocalizations.of(context).sub('${node.descendantCount}') : ''}'),
+                  AppLocalizations.of(context).str(
+                    node.category.type.isEmpty
+                        ? AppLocalizations.of(context).uncategorisedType
+                        : node.category.type,
+                    node.category.companyId.isNotEmpty
+                        ? AppLocalizations.of(context).store
+                        : AppLocalizations.of(context).global,
+                    node.children.isNotEmpty
+                        ? AppLocalizations.of(
+                            context,
+                          ).sub('${node.descendantCount}')
+                        : '',
+                  ),
                   style: const TextStyle(fontSize: 12),
                 ),
                 if (pathLabel.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
-                    AppLocalizations.of(context).under('${pathLabel}'),
+                    AppLocalizations.of(context).under(pathLabel),
                     style: const TextStyle(
                       fontSize: 11,
                       color: Colors.grey,
@@ -851,7 +922,9 @@ class _EmptyCategories extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context).createYourFirstCategoryAndAssignProductsToOrganizeYourStore,
+            AppLocalizations.of(
+              context,
+            ).createYourFirstCategoryAndAssignProductsToOrganizeYourStore,
             style: TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
@@ -898,7 +971,8 @@ class _CategoryReorderView extends StatelessWidget {
 
   void _handleReorder(int oldIndex, int newIndex) {
     final siblings = [
-      for (final n in _siblings) n.category.copyWith(sortOrder: n.category.sortOrder),
+      for (final n in _siblings)
+        n.category.copyWith(sortOrder: n.category.sortOrder),
     ];
     if (oldIndex < 0 || oldIndex >= siblings.length) return;
     if (newIndex > oldIndex) newIndex -= 1;
@@ -937,7 +1011,9 @@ class _CategoryReorderView extends StatelessWidget {
                 child: Text(
                   parentId.isEmpty
                       ? AppLocalizations.of(context).reorderingTopLevel
-                      : AppLocalizations.of(context).reorderingInside('${parentName}'),
+                      : AppLocalizations.of(
+                          context,
+                        ).reorderingInside(parentName),
                   key: const Key('reorder-level-label'),
                   style: TextStyle(
                     fontSize: 12.5,
@@ -965,7 +1041,9 @@ class _CategoryReorderView extends StatelessWidget {
               ? Center(
                   child: Padding(
                     padding: EdgeInsets.all(28),
-                    child: Text(AppLocalizations.of(context).noCategoriesAtThisLevel),
+                    child: Text(
+                      AppLocalizations.of(context).noCategoriesAtThisLevel,
+                    ),
                   ),
                 )
               : ReorderableListView.builder(
@@ -982,6 +1060,7 @@ class _CategoryReorderView extends StatelessWidget {
                       child: child,
                     );
                   },
+                  // ignore: deprecated_member_use
                   onReorder: _handleReorder,
                   itemBuilder: (context, i) {
                     final node = siblings[i];
@@ -1000,7 +1079,9 @@ class _CategoryReorderView extends StatelessWidget {
                             ReorderableDragStartListener(
                               index: i,
                               child: Tooltip(
-                                message: AppLocalizations.of(context).dragToReorder,
+                                message: AppLocalizations.of(
+                                  context,
+                                ).dragToReorder,
                                 child: Container(
                                   key: Key('category-drag-handle-${cat.id}'),
                                   padding: const EdgeInsets.all(6),
