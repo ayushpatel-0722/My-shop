@@ -15,6 +15,7 @@ import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/section_header.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Categories Screen displaying All Shops and All Shop Categories with rich styling.
 class CategoriesScreen extends StatelessWidget {
@@ -42,8 +43,8 @@ class CategoriesScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 1,
-        title: const Text(
-          'Categories & Shops',
+        title: Text(
+          AppLocalizations.of(context).categoriesShops,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Color(0xFF1E2229),
@@ -117,12 +118,12 @@ class CategoriesScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(Icons.search, color: Color(0xFFFF5247), size: 20),
                       SizedBox(width: 10),
                       Text(
-                        'Search categories, brands, or shops...',
+                        AppLocalizations.of(context).searchCategoriesBrandsOrShops,
                         style: TextStyle(
                           color: Color(0xFF9CA3AF),
                           fontSize: 14,
@@ -140,7 +141,7 @@ class CategoriesScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
               child: SectionHeader(
-                title: 'Shop by Category',
+                title: AppLocalizations.of(context).shopByCategory,
                 onViewAll: () => context.go(AppRoutes.search),
               ),
             ),
@@ -152,7 +153,7 @@ class CategoriesScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
               child: SectionHeader(
-                title: 'Explore All Shops & Stores',
+                title: AppLocalizations.of(context).exploreAllShopsStores,
                 onViewAll: () => context.go(AppRoutes.search),
               ),
             ),
@@ -208,9 +209,9 @@ class CategoriesScreen extends StatelessWidget {
 
         final list = snap.data ?? const <Category>[];
         if (list.isEmpty) {
-          return const SizedBox(
+          return SizedBox(
             height: 120,
-            child: Center(child: Text('No categories yet')),
+            child: Center(child: Text(AppLocalizations.of(context).noCategoriesYet)),
           );
         }
 
@@ -218,9 +219,9 @@ class CategoriesScreen extends StatelessWidget {
         // reachable from their parent, so mixing them in duplicated entries.
         final roots = CategoryTree.build(list).roots;
         if (roots.isEmpty) {
-          return const SizedBox(
+          return SizedBox(
             height: 120,
-            child: Center(child: Text('No categories yet')),
+            child: Center(child: Text(AppLocalizations.of(context).noCategoriesYet)),
           );
         }
 
@@ -345,12 +346,12 @@ class CategoriesScreen extends StatelessWidget {
 
         final list = snap.data ?? const <Company>[];
         if (list.isEmpty) {
-          return const SliverToBoxAdapter(
+          return SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.all(32),
               child: Center(
                 child: Text(
-                  'No shops registered yet',
+                  AppLocalizations.of(context).noShopsRegisteredYet,
                   style: TextStyle(color: Colors.black54),
                 ),
               ),
@@ -499,7 +500,7 @@ class CategoriesScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                isOpen ? 'Open now' : 'Closed',
+                                isOpen ? AppLocalizations.of(context).openNow : AppLocalizations.of(context).closed,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
@@ -533,10 +534,10 @@ class CategoriesScreen extends StatelessWidget {
                                 const SizedBox(width: 2),
                                 Text(
                                   offersHomeDelivery && offersPickup
-                                      ? 'Delivery & pickup'
+                                      ? AppLocalizations.of(context).deliveryPickup
                                       : offersHomeDelivery
-                                      ? 'Home delivery'
-                                      : 'Self pickup',
+                                      ? AppLocalizations.of(context).homeDelivery2
+                                      : AppLocalizations.of(context).selfPickup,
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import '../models/company.dart';
 import '../models/order.dart';
 import 'order_status.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Delivery-estimate copy for the order history cards.
 ///
@@ -21,14 +22,24 @@ class OrderEta {
     switch (order.orderStatus) {
       case OrderStatus.packing:
         return pickup
-            ? 'Ready for pickup by ${_fmt(now.add(Duration(minutes: handling)), now)}'
-            : 'Arriving by ${_fmt(now.add(Duration(minutes: handling + delivery)), now)}';
+            ? L10n.current.readyForPickupBy(
+                _fmt(now.add(Duration(minutes: handling)), now),
+              )
+            : L10n.current.arrivingBy(
+                _fmt(now.add(Duration(minutes: handling + delivery)), now),
+              );
       case OrderStatus.ready:
         return pickup
-            ? 'Ready for pickup by ${_fmt(now.add(const Duration(minutes: 10)), now)}'
-            : 'Arriving by ${_fmt(now.add(Duration(minutes: delivery)), now)}';
+            ? L10n.current.readyForPickupBy(
+                _fmt(now.add(const Duration(minutes: 10)), now),
+              )
+            : L10n.current.arrivingBy(
+                _fmt(now.add(Duration(minutes: delivery)), now),
+              );
       case OrderStatus.onTheWay:
-        return 'Arriving by ${_fmt(now.add(Duration(minutes: delivery)), now)}';
+        return L10n.current.arrivingBy(
+          _fmt(now.add(Duration(minutes: delivery)), now),
+        );
       default:
         return null;
     }
@@ -37,7 +48,7 @@ class OrderEta {
   /// "6:30 PM today" / "9:00 AM tomorrow".
   static String _fmt(DateTime t, [DateTime? refNow]) {
     final now = refNow ?? DateTime.now();
-    final suffix = t.hour >= 12 ? 'PM' : 'AM';
+    final suffix = t.hour >= 12 ? L10n.current.pm : L10n.current.am;
     var h12 = t.hour % 12;
     if (h12 == 0) h12 = 12;
     final time = t.minute == 0
@@ -52,8 +63,8 @@ class OrderEta {
         t.month == tomorrow.month &&
         t.day == tomorrow.day;
 
-    if (sameDay) return '$time today';
-    if (isTomorrow) return '$time tomorrow';
+    if (sameDay) return L10n.current.today(time);
+    if (isTomorrow) return L10n.current.tomorrow(time);
     return time;
   }
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/routes/app_router.dart';
 import '../../app/theme/app_theme.dart';
 import 'models/faq_item.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -53,8 +54,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Help & Support',
+        title: Text(
+          AppLocalizations.of(context).helpSupport,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
         ),
         backgroundColor: Colors.white,
@@ -82,8 +83,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               ),
               onPressed: () => context.push(AppRoutes.contactSupport),
               icon: const Icon(Icons.help_outline, size: 18),
-              label: const Text(
-                'Help',
+              label: Text(
+                AppLocalizations.of(context).help,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
@@ -110,7 +111,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                hintText: 'Search FAQs, orders, returns, payments...',
+                hintText: AppLocalizations.of(
+                  context,
+                ).searchFaqsOrdersReturnsPayments,
                 hintStyle: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF9CA3AF),
@@ -159,7 +162,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                           : const Color(0xFF6B7280),
                     ),
                     label: Text(
-                      cat.label,
+                      faqCategoryLabel(cat),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: isSelected
@@ -224,19 +227,21 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Have a specific issue?',
-                        style: TextStyle(
+                        AppLocalizations.of(context).haveASpecificIssue,
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1E2229),
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        'Submit a support query directly to our team.',
-                        style: TextStyle(
+                        AppLocalizations.of(
+                          context,
+                        ).submitASupportQueryDirectlyToOurTeam,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF6B7280),
                         ),
@@ -258,8 +263,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     elevation: 0,
                   ),
                   onPressed: () => context.push(AppRoutes.contactSupport),
-                  child: const Text(
-                    'Write to Us',
+                  child: Text(
+                    AppLocalizations.of(context).writeToUs,
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -271,8 +276,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           // Section Title
           Row(
             children: [
-              const Text(
-                'Frequently Asked Questions',
+              Text(
+                AppLocalizations.of(context).frequentlyAskedQuestions,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -281,7 +286,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               ),
               const Spacer(),
               Text(
-                '${filteredList.length} items',
+                AppLocalizations.of(context).items3('${filteredList.length}'),
                 style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
               ),
             ],
@@ -306,8 +311,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     color: Color(0xFFD1D5DB),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'No matching FAQs found',
+                  Text(
+                    AppLocalizations.of(context).noMatchingFaqsFound,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -315,8 +320,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Try adjusting your search terms or submit a query to our support staff.',
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    ).tryAdjustingYourSearchTermsOrSubmitAQueryToOurSupportStaff,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                   ),
@@ -332,7 +339,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     ),
                     onPressed: () => context.push(AppRoutes.contactSupport),
                     icon: const Icon(Icons.help_outline, size: 16),
-                    label: const Text('Contact Support'),
+                    label: Text(AppLocalizations.of(context).contactSupport),
                   ),
                 ],
               ),

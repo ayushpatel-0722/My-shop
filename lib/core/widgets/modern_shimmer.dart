@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
+import '../utils/responsive_extensions.dart';
 
 /// A modern, silky-smooth animated shimmer effect for loading states, skeletons, and cards.
 class ModernShimmer extends StatefulWidget {
@@ -212,17 +213,31 @@ class M3ProductGridSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.63,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemCount: itemCount,
-        itemBuilder: (context, index) => const M3ProductCardSkeleton(),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final crossAxisCount = ResponsiveGrid.calculateCrossAxisCount(
+            width,
+            maxCardWidth: 250,
+          );
+          final childAspectRatio = ResponsiveGrid.calculateProductAspectRatio(
+            width,
+            crossAxisCount,
+            showBrand: true,
+          );
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: childAspectRatio,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: itemCount,
+            itemBuilder: (context, index) => const M3ProductCardSkeleton(),
+          );
+        },
       ),
     );
   }

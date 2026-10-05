@@ -11,6 +11,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Voucher engine — create, edit, pause and audit per-store coupon codes.
 ///
@@ -73,12 +74,12 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Vouchers',
+      title: AppLocalizations.of(context).vouchers,
       actions: [
         IconButton(
           key: const Key('voucher-create-button'),
           icon: const Icon(Icons.add),
-          tooltip: 'Create voucher',
+          tooltip: AppLocalizations.of(context).createVoucher,
           onPressed: () => _openEditor(null),
         ),
       ],
@@ -90,7 +91,7 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
               key: const Key('voucher-search-field'),
               controller: _searchCtrl,
               decoration: InputDecoration(
-                labelText: 'Search by code',
+                labelText: AppLocalizations.of(context).searchByCode,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchCtrl.text.isEmpty
                     ? null
@@ -142,18 +143,23 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
                     );
                   }
                   return _EmptyState(
-                    message: 'No vouchers yet',
-                    detail:
-                        'Create your first coupon code to run a promotion for this store.',
-                    actionLabel: 'Create Voucher',
+                    message: AppLocalizations.of(context).noVouchersYet,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).createYourFirstCouponCodeToRunAPromotionForThisStore,
+                    actionLabel: AppLocalizations.of(context).createVoucher2,
                     onAction: () => _openEditor(null),
                   );
                 }
                 if (list.isEmpty) {
-                  return const _EmptyState(
+                  return _EmptyState(
                     icon: Icons.filter_alt_off_outlined,
-                    message: 'No vouchers match these filters',
-                    detail: 'Try clearing the search box or choosing "All".',
+                    message: AppLocalizations.of(
+                      context,
+                    ).noVouchersMatchTheseFilters,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).tryClearingTheSearchBoxOrChoosingAll,
                   );
                 }
 
@@ -186,13 +192,13 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
   String _filterLabel(VoucherFilter filter) {
     switch (filter) {
       case VoucherFilter.all:
-        return 'All';
+        return AppLocalizations.of(context).all3;
       case VoucherFilter.active:
-        return 'Active';
+        return AppLocalizations.of(context).active;
       case VoucherFilter.paused:
-        return 'Paused';
+        return AppLocalizations.of(context).paused;
       case VoucherFilter.expired:
-        return 'Expired';
+        return AppLocalizations.of(context).expired;
     }
   }
 
@@ -220,22 +226,25 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete voucher?'),
+        title: Text(AppLocalizations.of(context).deleteVoucher2),
         content: Text(
-          '"${voucher.normalizedCode}" will be removed. Shoppers who saved '
-          'this code will no longer get the discount.',
+          AppLocalizations.of(
+            context,
+          ).willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount(
+            voucher.normalizedCode,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -246,13 +255,21 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
       await repo.deleteVoucher(voucher.id, companyId: _companyId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Voucher ${voucher.normalizedCode} deleted.')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).voucherDeleted(voucher.normalizedCode),
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not delete voucher: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).couldNotDeleteVoucher('$e'),
+          ),
+        ),
+      );
     }
   }
 }
@@ -275,7 +292,7 @@ class _SummaryRow extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            label: 'Total',
+            label: AppLocalizations.of(context).totalAmount,
             value: '${vouchers.length}',
             icon: Icons.local_offer_outlined,
             color: Colors.indigo,
@@ -284,7 +301,7 @@ class _SummaryRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _StatCard(
-            label: 'Live',
+            label: AppLocalizations.of(context).live2,
             value: '$active',
             icon: Icons.check_circle_outline,
             color: Colors.green,
@@ -293,7 +310,7 @@ class _SummaryRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _StatCard(
-            label: 'Paused',
+            label: AppLocalizations.of(context).paused,
             value: '$paused',
             icon: Icons.pause_circle_outline,
             color: Colors.orange,
@@ -302,7 +319,7 @@ class _SummaryRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _StatCard(
-            label: 'Expired',
+            label: AppLocalizations.of(context).expired,
             value: '$expired',
             icon: Icons.event_busy_outlined,
             color: Colors.redAccent,
@@ -380,16 +397,18 @@ class _VoucherTile extends StatelessWidget {
         ? Colors.purple
         : Colors.green;
     final statusLabel = !voucher.isActive
-        ? 'Paused'
+        ? AppLocalizations.of(context).paused
         : expired
-        ? 'Expired'
+        ? AppLocalizations.of(context).expired
         : exhausted
-        ? 'Limit reached'
-        : 'Active';
+        ? AppLocalizations.of(context).limitReached
+        : AppLocalizations.of(context).active;
 
     final usage = voucher.maxUses > 0
-        ? '${voucher.usageCount}/${voucher.maxUses} uses'
-        : '${voucher.usageCount} uses (unlimited)';
+        ? AppLocalizations.of(
+            context,
+          ).uses('${voucher.usageCount}', '${voucher.maxUses}')
+        : AppLocalizations.of(context).usesUnlimited('${voucher.usageCount}');
 
     return ModernCard(
       child: Padding(
@@ -439,7 +458,7 @@ class _VoucherTile extends StatelessWidget {
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.edit_outlined, size: 20),
-                  tooltip: 'Edit voucher',
+                  tooltip: AppLocalizations.of(context).editVoucher,
                   onPressed: onEdit,
                 ),
                 IconButton(
@@ -448,7 +467,7 @@ class _VoucherTile extends StatelessWidget {
                     size: 20,
                     color: Colors.redAccent,
                   ),
-                  tooltip: 'Delete voucher',
+                  tooltip: AppLocalizations.of(context).deleteVoucher,
                   onPressed: onDelete,
                 ),
               ],
@@ -460,17 +479,28 @@ class _VoucherTile extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Min order ₹${voucher.minOrderAmt.toStringAsFixed(0)} · '
-              '${voucher.scopeLabel}'
-              '${voucher.appliesTo == VoucherScope.specificCategory ? ' (${voucher.categoryIds.length})' : ''}'
-              '${voucher.appliesTo == VoucherScope.specificProduct ? ' (${voucher.productIds.length})' : ''}',
+              AppLocalizations.of(context).minOrder4(
+                voucher.minOrderAmt.toStringAsFixed(0),
+                voucher.scopeLabel,
+                voucher.appliesTo == VoucherScope.specificCategory
+                    ? ' (${voucher.categoryIds.length})'
+                    : '',
+                voucher.appliesTo == VoucherScope.specificProduct
+                    ? ' (${voucher.productIds.length})'
+                    : '',
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 2),
             Text(
-              '$usage · ${voucher.perUserLimit} per shopper'
-              '${voucher.firstTimeOnly ? ' · first order only' : ''} · '
-              'expires ${_fmt(voucher.expiryDate)}',
+              AppLocalizations.of(context).perShopperExpires(
+                usage,
+                '${voucher.perUserLimit}',
+                voucher.firstTimeOnly
+                    ? AppLocalizations.of(context).firstOrderOnly2
+                    : '',
+                _fmt(context, voucher.expiryDate),
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             if (voucher.maxUses > 0) ...[
@@ -494,7 +524,9 @@ class _VoucherTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    voucher.isActive ? 'Accepting redemptions' : 'Paused',
+                    voucher.isActive
+                        ? AppLocalizations.of(context).acceptingRedemptions
+                        : AppLocalizations.of(context).paused,
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -507,8 +539,9 @@ class _VoucherTile extends StatelessWidget {
     );
   }
 
-  static String _fmt(DateTime? date) =>
-      date == null ? 'never' : DateFormat('dd MMM yyyy').format(date);
+  static String _fmt(BuildContext context, DateTime? date) => date == null
+      ? 'never'
+      : DateFormat(AppLocalizations.of(context).ddMmmYyyy).format(date);
 }
 
 class _EmptyState extends StatelessWidget {
@@ -644,7 +677,7 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
       initialDate: _expiryDate ?? now.add(const Duration(days: 30)),
       firstDate: now,
       lastDate: now.add(const Duration(days: 365 * 5)),
-      helpText: 'Voucher expiry',
+      helpText: AppLocalizations.of(context).voucherExpiry,
     );
     if (picked == null) return;
     setState(() {
@@ -711,17 +744,23 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
         SnackBar(
           content: Text(
             _isEdit
-                ? 'Voucher ${voucher.normalizedCode} updated.'
-                : 'Voucher ${voucher.normalizedCode} created.',
+                ? AppLocalizations.of(
+                    context,
+                  ).voucherUpdated(voucher.normalizedCode)
+                : AppLocalizations.of(
+                    context,
+                  ).voucherCreated(voucher.normalizedCode),
           ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not save voucher: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotSaveVoucher('$e')),
+        ),
+      );
     }
   }
 
@@ -737,7 +776,9 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              _isEdit ? 'Edit Voucher' : 'Create Voucher',
+              _isEdit
+                  ? AppLocalizations.of(context).editVoucher2
+                  : AppLocalizations.of(context).createVoucher2,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 14),
@@ -746,16 +787,18 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
               controller: _codeCtrl,
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
-                labelText: 'Code *',
-                hintText: 'WELCOME20',
+                labelText: AppLocalizations.of(context).code,
+                hintText: AppLocalizations.of(context).welcome20,
                 errorText: _errors['code'],
-                helperText: 'Letters and numbers only',
+                helperText: AppLocalizations.of(context).lettersAndNumbersOnly,
               ),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _type,
-              decoration: const InputDecoration(labelText: 'Discount type'),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).discountType,
+              ),
               items: [
                 for (final type in VoucherType.values)
                   DropdownMenuItem<String>(
@@ -775,8 +818,8 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                 ),
                 decoration: InputDecoration(
                   labelText: _type == VoucherType.percentage
-                      ? 'Discount % *'
-                      : 'Discount amount (₹) *',
+                      ? AppLocalizations.of(context).discount3
+                      : AppLocalizations.of(context).discountAmount,
                   errorText: _errors['discountValue'],
                 ),
               ),
@@ -789,7 +832,7 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                 decimal: true,
               ),
               decoration: InputDecoration(
-                labelText: 'Minimum order amount (₹)',
+                labelText: AppLocalizations.of(context).minimumOrderAmount,
                 errorText: _errors['minOrderAmt'],
               ),
             ),
@@ -802,7 +845,7 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                     controller: _perUserCtrl,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Per shopper limit',
+                      labelText: AppLocalizations.of(context).perShopperLimit,
                       errorText: _errors['perUserLimit'],
                     ),
                   ),
@@ -814,7 +857,7 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                     controller: _maxUsesCtrl,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Total redemptions',
+                      labelText: AppLocalizations.of(context).totalRedemptions,
                       errorText: _errors['maxUses'],
                     ),
                   ),
@@ -824,7 +867,9 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _appliesTo,
-              decoration: const InputDecoration(labelText: 'Applies to'),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).appliesTo,
+              ),
               items: [
                 for (final scope in VoucherScope.values)
                   DropdownMenuItem<String>(
@@ -862,11 +907,13 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.event),
-              title: const Text('Expiry date'),
+              title: Text(AppLocalizations.of(context).expiryDate),
               subtitle: Text(
                 _expiryDate == null
-                    ? 'No expiry'
-                    : DateFormat('dd MMM yyyy').format(_expiryDate!),
+                    ? AppLocalizations.of(context).noExpiry
+                    : DateFormat(
+                        AppLocalizations.of(context).ddMmmYyyy,
+                      ).format(_expiryDate!),
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -874,10 +921,13 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                   if (_expiryDate != null)
                     IconButton(
                       icon: const Icon(Icons.clear),
-                      tooltip: 'No expiry',
+                      tooltip: AppLocalizations.of(context).noExpiry,
                       onPressed: () => setState(() => _expiryDate = null),
                     ),
-                  TextButton(onPressed: _pickExpiry, child: const Text('Pick')),
+                  TextButton(
+                    onPressed: _pickExpiry,
+                    child: Text(AppLocalizations.of(context).pick),
+                  ),
                 ],
               ),
             ),
@@ -894,15 +944,19 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
               ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('First order only'),
-              subtitle: const Text('Only shoppers without a previous order'),
+              title: Text(AppLocalizations.of(context).firstOrderOnly),
+              subtitle: Text(
+                AppLocalizations.of(context).onlyShoppersWithoutAPreviousOrder,
+              ),
               value: _firstTimeOnly,
               onChanged: (v) => setState(() => _firstTimeOnly = v),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Active'),
-              subtitle: const Text('Pause instead of deleting a campaign'),
+              title: Text(AppLocalizations.of(context).active),
+              subtitle: Text(
+                AppLocalizations.of(context).pauseInsteadOfDeletingACampaign,
+              ),
               value: _isActive,
               onChanged: (v) => setState(() => _isActive = v),
             ),
@@ -916,7 +970,11 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
                       width: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEdit ? 'Save changes' : 'Create voucher'),
+                  : Text(
+                      _isEdit
+                          ? AppLocalizations.of(context).saveChanges2
+                          : AppLocalizations.of(context).createVoucher,
+                    ),
             ),
           ],
         ),
@@ -965,15 +1023,18 @@ class _CategoryPickerState extends State<_CategoryPicker> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Categories', style: TextStyle(fontSize: 12)),
+          Text(
+            AppLocalizations.of(context).categories,
+            style: TextStyle(fontSize: 12),
+          ),
           const SizedBox(height: 6),
           StreamBuilder<List<Category>>(
             stream: repo.categories(companyId: widget.companyId),
             builder: (context, snap) {
               final list = snap.data ?? const <Category>[];
               if (list.isEmpty) {
-                return const Text(
-                  'No categories found for this store.',
+                return Text(
+                  AppLocalizations.of(context).noCategoriesFoundForThisStore,
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 );
               }
@@ -1047,15 +1108,18 @@ class _ProductPickerState extends State<_ProductPicker> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Products', style: TextStyle(fontSize: 12)),
+          Text(
+            AppLocalizations.of(context).products,
+            style: TextStyle(fontSize: 12),
+          ),
           const SizedBox(height: 6),
           StreamBuilder<List<Product>>(
             stream: repo.products(companyId: widget.companyId),
             builder: (context, snap) {
               final list = snap.data ?? const <Product>[];
               if (list.isEmpty) {
-                return const Text(
-                  'No products found for this store.',
+                return Text(
+                  AppLocalizations.of(context).noProductsFoundForThisStore,
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 );
               }

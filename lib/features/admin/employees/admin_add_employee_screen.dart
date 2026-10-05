@@ -8,6 +8,7 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Screen for creating and editing an Employee (Section 6.3 & 17.1).
 ///
@@ -31,11 +32,7 @@ class AdminAddEmployeeScreen extends StatefulWidget {
   final Employee? employee;
   final String? employeeId;
 
-  const AdminAddEmployeeScreen({
-    super.key,
-    this.employee,
-    this.employeeId,
-  });
+  const AdminAddEmployeeScreen({super.key, this.employee, this.employeeId});
 
   @override
   State<AdminAddEmployeeScreen> createState() => _AdminAddEmployeeScreenState();
@@ -70,14 +67,14 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
   bool _canManageInventory = false;
   bool _canViewReports = false;
 
-  static const List<String> _roles = [
+  List<String> get _roles => [
     'Picker',
-    'Manufacturer',
-    'Manager',
-    'Dispatcher',
-    'Cashier',
-    'Supervisor',
-    'Quality Inspector',
+    AppLocalizations.of(context).manufacturer,
+    AppLocalizations.of(context).manager,
+    AppLocalizations.of(context).dispatcher,
+    AppLocalizations.of(context).cashier,
+    AppLocalizations.of(context).supervisor,
+    AppLocalizations.of(context).qualityInspector,
   ];
 
   bool get isEditMode => widget.employee != null || widget.employeeId != null;
@@ -184,13 +181,18 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
         _companyId = sessionCompany;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No company scope found for current admin.')),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).noCompanyScopeFoundForCurrentAdmin,
+            ),
+          ),
         );
         return;
       }
     }
 
-    final empId = _loadedEmployeeId ?? widget.employee?.id ?? widget.employeeId ?? '';
+    final empId =
+        _loadedEmployeeId ?? widget.employee?.id ?? widget.employeeId ?? '';
 
     setState(() => _isSaving = true);
 
@@ -234,8 +236,12 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
         SnackBar(
           content: Text(
             isEditMode
-                ? 'Employee "${emp.name}" updated successfully!'
-                : 'Employee "${emp.name}" provisioned successfully!',
+                ? AppLocalizations.of(
+                    context,
+                  ).employeeUpdatedSuccessfully(emp.name)
+                : AppLocalizations.of(
+                    context,
+                  ).employeeProvisionedSuccessfully(emp.name),
           ),
           backgroundColor: Colors.green.shade700,
         ),
@@ -250,7 +256,9 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to save employee: $e'),
+          content: Text(
+            AppLocalizations.of(context).failedToSaveEmployee('$e'),
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -266,14 +274,20 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
 
     if (_isLoadingEmployee) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Loading Employee...')),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).loadingEmployee),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? 'Edit Employee' : 'Provision Employee'),
+        title: Text(
+          isEditMode
+              ? AppLocalizations.of(context).editEmployee
+              : AppLocalizations.of(context).provisionEmployee,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -295,380 +309,559 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                // Header & Read-only Company Scope Pill
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isEditMode ? 'Employee Profile' : 'Staff Provisioning',
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Manage staff account, designation, salary, and operational access.',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                  // Header & Read-only Company Scope Pill
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isEditMode
+                                  ? AppLocalizations.of(context).employeeProfile
+                                  : AppLocalizations.of(
+                                      context,
+                                    ).staffProvisioning,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                            const SizedBox(height: 4),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).manageStaffAccountDesignationSalaryAndOperationalAccess,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: isDark
+                                    ? AppTheme.textSecondaryDark
+                                    : AppTheme.textSecondaryLight,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.store, size: 16, color: theme.colorScheme.primary),
-                          const SizedBox(width: 6),
-                          Text(
-                            _companyName.isNotEmpty
-                                ? _companyName
-                                : (_companyId.isNotEmpty
-                                    ? 'Company Scope'
-                                    : 'Global Scope'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.3,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.store,
+                              size: 16,
                               color: theme.colorScheme.primary,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 6),
+                            Text(
+                              _companyName.isNotEmpty
+                                  ? _companyName
+                                  : (_companyId.isNotEmpty
+                                        ? AppLocalizations.of(
+                                            context,
+                                          ).companyScope
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).globalScope),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
 
-                // Card 1: Account & Profile Information
-                ModernCard(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.person_outline, color: theme.colorScheme.primary, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Basic Information',
-                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _nameCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Full Name *',
-                          hintText: 'e.g. Ramesh Kumar',
-                          prefixIcon: Icon(Icons.badge_outlined),
+                  // Card 1: Account & Profile Information
+                  ModernCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.person_outline,
+                              color: theme.colorScheme.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              AppLocalizations.of(context).basicInformation,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Full name is required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Login Email *',
-                          hintText: 'e.g. ramesh@company.com',
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Email is required';
-                          if (!v.contains('@') || !v.contains('.')) return 'Enter a valid email';
-                          return null;
-                        },
-                      ),
-                      if (!isEditMode) ...[
                         const SizedBox(height: 16),
                         TextFormField(
-                          controller: _passwordCtrl,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Initial Password *',
-                            hintText: 'Minimum 6 characters',
-                            prefixIcon: Icon(Icons.lock_outline),
+                          controller: _nameCtrl,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context).fullName,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).eGRameshKumar,
+                            prefixIcon: Icon(Icons.badge_outlined),
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? AppLocalizations.of(context).fullNameIsRequired
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _emailCtrl,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context).loginEmail,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).eGRameshCompanyCom,
+                            prefixIcon: Icon(Icons.email_outlined),
                           ),
                           validator: (v) {
-                            if (!isEditMode && (v == null || v.trim().length < 6)) {
-                              return 'Password must be at least 6 characters';
+                            if (v == null || v.trim().isEmpty) {
+                              return AppLocalizations.of(
+                                context,
+                              ).emailIsRequired;
+                            }
+                            if (!v.contains('@') || !v.contains('.')) {
+                              return AppLocalizations.of(
+                                context,
+                              ).enterAValidEmail;
                             }
                             return null;
                           },
                         ),
+                        if (!isEditMode) ...[
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _passwordCtrl,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(
+                                context,
+                              ).initialPassword,
+                              hintText: AppLocalizations.of(
+                                context,
+                              ).minimum6Characters,
+                              prefixIcon: Icon(Icons.lock_outline),
+                            ),
+                            validator: (v) {
+                              if (!isEditMode &&
+                                  (v == null || v.trim().length < 6)) {
+                                return AppLocalizations.of(
+                                  context,
+                                ).passwordMustBeAtLeast6Characters;
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          initialValue: _roles.contains(_role)
+                              ? _role
+                              : _roles.first,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).designationRole,
+                            prefixIcon: Icon(Icons.work_outline),
+                          ),
+                          items: _roles.map((r) {
+                            return DropdownMenuItem(value: r, child: Text(r));
+                          }).toList(),
+                          onChanged: (v) =>
+                              setState(() => _role = v ?? 'Picker'),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppLocalizations.of(context).gender,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<String>(
+                            segments: [
+                              ButtonSegment(
+                                value: 'male',
+                                label: Text(AppLocalizations.of(context).male),
+                                icon: const Icon(Icons.male, size: 18),
+                              ),
+                              ButtonSegment(
+                                value: 'female',
+                                label: Text(
+                                  AppLocalizations.of(context).female,
+                                ),
+                                icon: const Icon(Icons.female, size: 18),
+                              ),
+                              ButtonSegment(
+                                value: 'other',
+                                label: Text(AppLocalizations.of(context).other),
+                                icon: const Icon(Icons.person, size: 18),
+                              ),
+                            ],
+                            selected: {_gender},
+                            onSelectionChanged: (set) =>
+                                setState(() => _gender = set.first),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        InkWell(
+                          onTap: _pickDate,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(
+                                context,
+                              ).dateOfBirth,
+                              prefixIcon: Icon(Icons.cake_outlined),
+                              suffixIcon: Icon(
+                                Icons.calendar_today_outlined,
+                                size: 18,
+                              ),
+                            ),
+                            child: Text(
+                              _selectedDob != null
+                                  ? '${_selectedDob!.day.toString().padLeft(2, '0')}/${_selectedDob!.month.toString().padLeft(2, '0')}/${_selectedDob!.year}'
+                                  : AppLocalizations.of(
+                                      context,
+                                    ).selectDateOfBirth,
+                              style: TextStyle(
+                                color: _selectedDob != null
+                                    ? (isDark ? Colors.white : Colors.black87)
+                                    : Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _addressCtrl,
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).residentialAddress,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).streetAreaCityPincode,
+                            prefixIcon: Icon(Icons.home_outlined),
+                            alignLabelWithHint: true,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _detailsCtrl,
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).notesQualifications,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).emergencyContactCertificationsQualifications,
+                            prefixIcon: Icon(Icons.notes_outlined),
+                            alignLabelWithHint: true,
+                          ),
+                        ),
                       ],
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        initialValue: _roles.contains(_role) ? _role : _roles.first,
-                        decoration: const InputDecoration(
-                          labelText: 'Designation / Role *',
-                          prefixIcon: Icon(Icons.work_outline),
-                        ),
-                        items: _roles.map((r) {
-                          return DropdownMenuItem(value: r, child: Text(r));
-                        }).toList(),
-                        onChanged: (v) => setState(() => _role = v ?? 'Picker'),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Gender',
-                        style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: SegmentedButton<String>(
-                          segments: const [
-                            ButtonSegment(value: 'male', label: Text('Male'), icon: Icon(Icons.male, size: 18)),
-                            ButtonSegment(value: 'female', label: Text('Female'), icon: Icon(Icons.female, size: 18)),
-                            ButtonSegment(value: 'other', label: Text('Other'), icon: Icon(Icons.person, size: 18)),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Card 2: Compensation / Salary (Monthly or Yearly)
+                  ModernCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.currency_rupee,
+                              color: theme.colorScheme.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              AppLocalizations.of(context).compensationSalary,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
-                          selected: {_gender},
-                          onSelectionChanged: (set) => setState(() => _gender = set.first),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: _pickDate,
-                        borderRadius: BorderRadius.circular(12),
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            labelText: 'Date of Birth',
-                            prefixIcon: Icon(Icons.cake_outlined),
-                            suffixIcon: Icon(Icons.calendar_today_outlined, size: 18),
+                        const SizedBox(height: 6),
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          ).defineStaffCompensationPackageAndPaymentFrequency,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? AppTheme.textSecondaryDark
+                                : AppTheme.textSecondaryLight,
                           ),
-                          child: Text(
-                            _selectedDob != null
-                                ? '${_selectedDob!.day.toString().padLeft(2, '0')}/${_selectedDob!.month.toString().padLeft(2, '0')}/${_selectedDob!.year}'
-                                : 'Select Date of Birth',
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _salaryCtrl,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(
+                              context,
+                            ).salaryAmount,
+                            hintText: AppLocalizations.of(context).eG25000,
+                            prefixIcon: Icon(
+                              Icons.account_balance_wallet_outlined,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppLocalizations.of(context).salaryFrequency,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<String>(
+                            segments: [
+                              ButtonSegment(
+                                value: 'monthly',
+                                label: Text(
+                                  AppLocalizations.of(context).monthlyMonth,
+                                ),
+                                icon: const Icon(
+                                  Icons.calendar_month_outlined,
+                                  size: 18,
+                                ),
+                              ),
+                              ButtonSegment(
+                                value: 'yearly',
+                                label: Text(
+                                  AppLocalizations.of(context).yearlyCtcYear,
+                                ),
+                                icon: const Icon(
+                                  Icons.date_range_outlined,
+                                  size: 18,
+                                ),
+                              ),
+                            ],
+                            selected: {_salaryType},
+                            onSelectionChanged: (set) =>
+                                setState(() => _salaryType = set.first),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Card 3: Shift & Work Schedule Controls
+                  ModernCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              color: theme.colorScheme.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              AppLocalizations.of(context).shiftWorkStatus,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(AppLocalizations.of(context).shiftActive),
+                          subtitle: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).gatesLoginToScheduledWorkingHoursWhenDisabledTheEmployeeCannotLogIntoTheMobileApp,
                             style: TextStyle(
-                              color: _selectedDob != null
-                                  ? (isDark ? Colors.white : Colors.black87)
-                                  : Colors.grey,
+                              fontSize: 12,
+                              color: isDark
+                                  ? AppTheme.textSecondaryDark
+                                  : AppTheme.textSecondaryLight,
                             ),
                           ),
+                          value: _shiftActive,
+                          onChanged: (v) => setState(() => _shiftActive = v),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _addressCtrl,
-                        maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Residential Address',
-                          hintText: 'Street, area, city, pincode...',
-                          prefixIcon: Icon(Icons.home_outlined),
-                          alignLabelWithHint: true,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _detailsCtrl,
-                        maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Notes & Qualifications',
-                          hintText: 'Emergency contact, certifications, qualifications...',
-                          prefixIcon: Icon(Icons.notes_outlined),
-                          alignLabelWithHint: true,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // Card 2: Compensation / Salary (Monthly or Yearly)
-                ModernCard(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.currency_rupee, color: theme.colorScheme.primary, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Compensation & Salary',
-                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Define staff compensation package and payment frequency.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _salaryCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(
-                          labelText: 'Salary Amount (₹)',
-                          hintText: 'e.g. 25000',
-                          prefixIcon: Icon(Icons.account_balance_wallet_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Salary Frequency',
-                        style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: SegmentedButton<String>(
-                          segments: const [
-                            ButtonSegment(
-                              value: 'monthly',
-                              label: Text('Monthly (₹/month)'),
-                              icon: Icon(Icons.calendar_month_outlined, size: 18),
+                  // Card 4: Granular Operational Permissions
+                  ModernCard(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.security_outlined,
+                              color: theme.colorScheme.primary,
+                              size: 20,
                             ),
-                            ButtonSegment(
-                              value: 'yearly',
-                              label: Text('Yearly / CTC (₹/year)'),
-                              icon: Icon(Icons.date_range_outlined, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              ).operationalPermissions,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
-                          selected: {_salaryType},
-                          onSelectionChanged: (set) => setState(() => _salaryType = set.first),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Card 3: Shift & Work Schedule Controls
-                ModernCard(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.schedule, color: theme.colorScheme.primary, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Shift & Work Status',
-                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Shift Active'),
-                        subtitle: Text(
-                          'Gates login to scheduled working hours. When disabled, the employee cannot log into the mobile app.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                        const SizedBox(height: 6),
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          ).assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? AppTheme.textSecondaryDark
+                                : AppTheme.textSecondaryLight,
                           ),
                         ),
-                        value: _shiftActive,
-                        onChanged: (v) => setState(() => _shiftActive = v),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Card 4: Granular Operational Permissions
-                ModernCard(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.security_outlined, color: theme.colorScheme.primary, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Operational Permissions',
-                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                        const SizedBox(height: 12),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          value: _canPack,
+                          title: Text(
+                            AppLocalizations.of(context).orderPackingCanpack,
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight,
+                          subtitle: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).accessPackingHubToVerifyItemsAndMarkOrdersAsPacked,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _canPack = v ?? false),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        value: _canPack,
-                        title: const Text('Order Packing (canPack)'),
-                        subtitle: const Text('Access packing hub to verify items and mark orders as packed.', style: TextStyle(fontSize: 12)),
-                        onChanged: (v) => setState(() => _canPack = v ?? false),
-                      ),
-                      const Divider(height: 8),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        value: _canDispatch,
-                        title: const Text('Order Dispatch (canDispatch)'),
-                        subtitle: const Text('Assign delivery riders and dispatch orders for fulfillment.', style: TextStyle(fontSize: 12)),
-                        onChanged: (v) => setState(() => _canDispatch = v ?? false),
-                      ),
-                      const Divider(height: 8),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        value: _canManageInventory,
-                        title: const Text('Inventory Management (canManageInventory)'),
-                        subtitle: const Text('View and update stock counts and warehouse alerts.', style: TextStyle(fontSize: 12)),
-                        onChanged: (v) => setState(() => _canManageInventory = v ?? false),
-                      ),
-                      const Divider(height: 8),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        value: _canViewReports,
-                        title: const Text('Reports & Analytics (canViewReports)'),
-                        subtitle: const Text('View daily employee activity and operations logs.', style: TextStyle(fontSize: 12)),
-                        onChanged: (v) => setState(() => _canViewReports = v ?? false),
-                      ),
-                    ],
+                        const Divider(height: 8),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          value: _canDispatch,
+                          title: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).orderDispatchCandispatch,
+                          ),
+                          subtitle: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).assignDeliveryRidersAndDispatchOrdersForFulfillment,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _canDispatch = v ?? false),
+                        ),
+                        const Divider(height: 8),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          value: _canManageInventory,
+                          title: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).inventoryManagementCanmanageinventory,
+                          ),
+                          subtitle: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).viewAndUpdateStockCountsAndWarehouseAlerts,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _canManageInventory = v ?? false),
+                        ),
+                        const Divider(height: 8),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          value: _canViewReports,
+                          title: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).reportsAnalyticsCanviewreports,
+                          ),
+                          subtitle: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).viewDailyEmployeeActivityAndOperationsLogs,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          onChanged: (v) =>
+                              setState(() => _canViewReports = v ?? false),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-                // Save Action Button
-                ModernButton(
-                  text: isEditMode ? 'Save Changes' : 'Provision Employee Account',
-                  icon: const Icon(Icons.check, size: 20),
-                  isLoading: _isSaving,
-                  height: 52,
-                  onPressed: _isSaving ? null : _handleSave,
-                ),
+                  // Save Action Button
+                  ModernButton(
+                    text: isEditMode
+                        ? AppLocalizations.of(context).saveChanges
+                        : AppLocalizations.of(context).provisionEmployeeAccount,
+                    icon: const Icon(Icons.check, size: 20),
+                    isLoading: _isSaving,
+                    height: 52,
+                    onPressed: _isSaving ? null : _handleSave,
+                  ),
 
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

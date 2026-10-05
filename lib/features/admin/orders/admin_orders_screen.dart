@@ -10,6 +10,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Master order pipeline for the signed-in store.
 ///
@@ -62,7 +63,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Orders Pipeline',
+      title: AppLocalizations.of(context).ordersPipeline,
       child: Column(
         children: [
           Padding(
@@ -71,8 +72,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               key: const Key('order-search-field'),
               controller: _searchCtrl,
               decoration: InputDecoration(
-                labelText: 'Search orders',
-                hintText: 'Reference, pincode, product…',
+                labelText: AppLocalizations.of(context).searchOrders,
+                hintText: AppLocalizations.of(context).referencePincodeProduct,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchCtrl.text.isEmpty
                     ? null
@@ -117,18 +118,23 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   );
                 }
                 if (all.isEmpty) {
-                  return const _CenteredMessage(
+                  return _CenteredMessage(
                     icon: Icons.receipt_long_outlined,
-                    message: 'No orders yet',
-                    detail:
-                        'Orders from your store will appear here instantly.',
+                    message: AppLocalizations.of(context).noOrdersYet2,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).ordersFromYourStoreWillAppearHereInstantly,
                   );
                 }
                 if (visible.isEmpty) {
-                  return const _CenteredMessage(
+                  return _CenteredMessage(
                     icon: Icons.filter_alt_off_outlined,
-                    message: 'No orders match these filters',
-                    detail: 'Clear the search box or pick another status.',
+                    message: AppLocalizations.of(
+                      context,
+                    ).noOrdersMatchTheseFilters,
+                    detail: AppLocalizations.of(
+                      context,
+                    ).clearTheSearchBoxOrPickAnotherStatus,
                   );
                 }
 
@@ -186,7 +192,7 @@ class _StatusFilterBar extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              _chip('All', orders.length, 'all'),
+              _chip(AppLocalizations.of(context).all3, orders.length, 'all'),
               for (final status in OrderStatusRules.boardColumns)
                 _chip(
                   orderStatusLabel(context, status),
@@ -232,21 +238,21 @@ class _PipelineSummary extends StatelessWidget {
           children: [
             Expanded(
               child: _Metric(
-                label: 'Open orders',
+                label: AppLocalizations.of(context).openOrders,
                 value: '$open',
                 icon: Icons.timelapse,
               ),
             ),
             Expanded(
               child: _Metric(
-                label: 'All orders',
+                label: AppLocalizations.of(context).allOrders,
                 value: '${orders.length}',
                 icon: Icons.receipt_long,
               ),
             ),
             Expanded(
               child: _Metric(
-                label: 'Revenue',
+                label: AppLocalizations.of(context).revenue2,
                 value: formatCurrency(revenue),
                 icon: Icons.currency_rupee,
               ),
@@ -314,10 +320,10 @@ class _PipelineColumn extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           if (orders.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'Nothing here',
+                AppLocalizations.of(context).nothingHere,
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
             )
@@ -372,14 +378,20 @@ class _OrderCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              '${order.itemCount} item(s) · '
-              '${order.isSelfPickup ? 'Self pickup' : 'Home delivery'}'
-              '${order.pincode.isNotEmpty ? ' · ${order.pincode}' : ''}',
+              AppLocalizations.of(context).itemS2(
+                '${order.itemCount}',
+                order.isSelfPickup
+                    ? AppLocalizations.of(context).selfPickup
+                    : AppLocalizations.of(context).homeDelivery2,
+                order.pincode.isNotEmpty ? ' · ${order.pincode}' : '',
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             if (order.createdAt != null)
               Text(
-                DateFormat('dd MMM, hh:mm a').format(order.createdAt!),
+                DateFormat(
+                  AppLocalizations.of(context).ddMmmHhMmA,
+                ).format(order.createdAt!),
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             if (order.customerName.isNotEmpty ||
@@ -407,9 +419,17 @@ class _OrderCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        '${order.customerName.isNotEmpty ? order.customerName : "Customer"}'
-                        '${order.customerPhone.isNotEmpty ? " · ${order.customerPhone}" : ""}'
-                        '${order.customerEmail.isNotEmpty ? " (${order.customerEmail})" : ""}',
+                        AppLocalizations.of(context).str2(
+                          order.customerName.isNotEmpty
+                              ? order.customerName
+                              : AppLocalizations.of(context).customer,
+                          order.customerPhone.isNotEmpty
+                              ? " · ${order.customerPhone}"
+                              : "",
+                          order.customerEmail.isNotEmpty
+                              ? " (${order.customerEmail})"
+                              : "",
+                        ),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -451,8 +471,10 @@ class _OrderCard extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                 title: Text(
                   order.isPaid
-                      ? 'Payment: Done (Received)'
-                      : 'Payment: Pending (Manual / Offline)',
+                      ? AppLocalizations.of(context).paymentDoneReceived
+                      : AppLocalizations.of(
+                          context,
+                        ).paymentPendingManualOffline,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -463,8 +485,10 @@ class _OrderCard extends StatelessWidget {
                 ),
                 subtitle: Text(
                   order.isPaid
-                      ? 'Payment confirmed by store'
-                      : 'Customer will pay offline. Toggle to mark as Done.',
+                      ? AppLocalizations.of(context).paymentConfirmedByStore
+                      : AppLocalizations.of(
+                          context,
+                        ).customerWillPayOfflineToggleToMarkAsDone,
                   style: const TextStyle(fontSize: 11),
                 ),
                 value: order.isPaid,
@@ -479,7 +503,11 @@ class _OrderCard extends StatelessWidget {
                     child: FilledButton.tonal(
                       key: Key('order-advance-${order.id}'),
                       onPressed: () => _advance(context, next),
-                      child: Text('Mark ${orderStatusLabel(context, next)}'),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).mark(orderStatusLabel(context, next)),
+                      ),
                     ),
                   ),
                 if (next != null && cancellable) const SizedBox(width: 8),
@@ -491,7 +519,7 @@ class _OrderCard extends StatelessWidget {
                         foregroundColor: theme.colorScheme.error,
                       ),
                       onPressed: () => _confirmCancel(context),
-                      child: const Text('Cancel order'),
+                      child: Text(AppLocalizations.of(context).cancelOrder),
                     ),
                   ),
               ],
@@ -509,15 +537,19 @@ class _OrderCard extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Order ${order.reference} → ${orderStatusLabel(context, next)}',
+            AppLocalizations.of(
+              context,
+            ).order2(order.reference, orderStatusLabel(context, next)),
           ),
         ),
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not update order: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotUpdateOrder('$e')),
+        ),
+      );
     }
   }
 
@@ -525,22 +557,25 @@ class _OrderCard extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel this order?'),
+        title: Text(AppLocalizations.of(context).cancelThisOrder),
         content: Text(
-          'Order ${order.reference} will be cancelled and the customer will '
-          'see it under "Cancelled".',
+          AppLocalizations.of(
+            context,
+          ).orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(
+            order.reference,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Keep'),
+            child: Text(AppLocalizations.of(context).keep),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Cancel order'),
+            child: Text(AppLocalizations.of(context).cancelOrder),
           ),
         ],
       ),
@@ -551,9 +586,11 @@ class _OrderCard extends StatelessWidget {
       await repo.cancelOrder(order.id);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not cancel order: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotCancelOrder('$e')),
+        ),
+      );
     }
   }
 }
@@ -576,16 +613,28 @@ class _BillBreakdown extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _row('Items', formatCurrency(order.subtotal)),
+          _row(
+            AppLocalizations.of(context).items4,
+            formatCurrency(order.subtotal),
+          ),
           if (order.discountAmount > 0)
             _row(
-              'Discount${order.voucherCode.isNotEmpty ? ' (${order.voucherCode})' : ''}',
+              AppLocalizations.of(context).discount2(
+                order.voucherCode.isNotEmpty ? ' (${order.voucherCode})' : '',
+              ),
               '− ${formatCurrency(order.discountAmount)}',
               color: Colors.green.shade700,
             ),
-          _row('Delivery', formatCurrency(order.deliveryCharge)),
+          _row(
+            AppLocalizations.of(context).delivery,
+            formatCurrency(order.deliveryCharge),
+          ),
           const Divider(height: 12),
-          _row('Payable', formatCurrency(order.totalAmount), bold: true),
+          _row(
+            AppLocalizations.of(context).payable,
+            formatCurrency(order.totalAmount),
+            bold: true,
+          ),
         ],
       ),
     );

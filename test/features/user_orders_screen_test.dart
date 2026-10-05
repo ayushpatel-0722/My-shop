@@ -428,7 +428,7 @@ void main() {
 
       final line = cart.state.items.single;
       expect(line.product.id, 'p_phone');
-      expect(line.variant?.sku, 'NOVA-X5-BLK');
+      expect(line.variant?.variantId, 'NOVA-X5-BLK');
     });
 
     testWidgets('tapping a star opens the review sheet pre-filled', (

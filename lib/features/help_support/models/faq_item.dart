@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/l10n/l10n_service.dart';
+
 enum FaqCategory {
   all('All', Icons.grid_view_rounded),
   orders('Orders & Tracking', Icons.local_shipping_outlined),
@@ -14,13 +16,33 @@ enum FaqCategory {
   const FaqCategory(this.label, this.icon);
 }
 
+/// Localized label for a [FaqCategory] filter chip.
+String faqCategoryLabel(FaqCategory category) {
+  switch (category) {
+    case FaqCategory.all:
+      return L10n.current.all3;
+    case FaqCategory.orders:
+      return L10n.current.ordersTracking;
+    case FaqCategory.delivery:
+      return L10n.current.deliveryShipping;
+    case FaqCategory.payments:
+      return L10n.current.paymentsRefunds;
+    case FaqCategory.returns:
+      return L10n.current.returnsExchanges;
+    case FaqCategory.account:
+      return L10n.current.accountSecurity;
+    case FaqCategory.vouchers:
+      return L10n.current.discountsOffers;
+  }
+}
+
 class FaqItem {
   final String id;
   final String question;
   final String answer;
   final FaqCategory category;
 
-  const FaqItem({
+  FaqItem({
     required this.id,
     required this.question,
     required this.answer,
@@ -29,84 +51,86 @@ class FaqItem {
 }
 
 /// Comprehensive pre-populated FAQs
-final List<FaqItem> defaultFaqs = [
-  const FaqItem(
+/// The built-in FAQ content, evaluated per call so it follows the
+/// current language (see `LocaleCubit`).
+List<FaqItem> get defaultFaqs => [
+  FaqItem(
     id: 'faq_1',
     category: FaqCategory.orders,
-    question: 'How do I track my order status in real time?',
+    question: L10n.current.howDoITrackMyOrderStatusInRealTime,
     answer:
-        'You can track your live order progress by navigating to "Account > My Orders" and selecting your active order. '
-        'You will see step-by-step updates from Order Placed, Confirmed, Packed, Out for Delivery, to Delivered with live status timelines.',
+        L10n.current.youCanTrackYourLiveOrderProgressByNavigatingToAccountMyOrdersAndSelectingYourActiveOrder +
+        L10n.current.youWillSeeStepByStepUpdatesFromOrderPlacedConfirmedPackedOutForDeliveryToDeliveredWithLiveStatusTimelines,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_2',
     category: FaqCategory.orders,
-    question: 'Can I cancel or modify an order after placing it?',
+    question: L10n.current.canICancelOrModifyAnOrderAfterPlacingIt,
     answer:
-        'You can cancel your order from the Order Details screen before it enters the "Packed" or "Out for Delivery" state. '
-        'Once an order is packed or dispatched by the merchant, cancellation requests must be handled by contacting customer support.',
+        L10n.current.youCanCancelYourOrderFromTheOrderDetailsScreenBeforeItEntersThePackedOrOutForDeliveryState +
+        L10n.current.onceAnOrderIsPackedOrDispatchedByTheMerchantCancellationRequestsMustBeHandledByContactingCustomerSupport,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_3',
     category: FaqCategory.delivery,
-    question: 'How is the delivery charge calculated for my location?',
+    question: L10n.current.howIsTheDeliveryChargeCalculatedForMyLocation,
     answer:
-        'Delivery charges are computed dynamically based on the merchant\'s delivery zone rates for your PIN code or distance. '
-        'When you select or enter your delivery address at checkout, any applicable delivery fee is transparently shown in the bill summary.',
+        L10n.current.deliveryChargesAreComputedDynamicallyBasedOnTheMerchantSDeliveryZoneRatesForYourPinCodeOrDistance +
+        L10n.current.whenYouSelectOrEnterYourDeliveryAddressAtCheckoutAnyApplicableDeliveryFeeIsTransparentlyShownInTheBillSummary,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_4',
     category: FaqCategory.delivery,
-    question: 'What are the estimated delivery timelines?',
+    question: L10n.current.whatAreTheEstimatedDeliveryTimelines,
     answer:
-        'Standard local deliveries typically arrive within the merchant\'s designated delivery window (usually 30–90 minutes for quick-commerce items or 1–2 business days for standard items). '
-        'Estimated delivery times are displayed on the product page and checkout screen.',
+        L10n.current.standardLocalDeliveriesTypicallyArriveWithinTheMerchantSDesignatedDeliveryWindowUsually3090MinutesForQuickCommerceItemsOr12BusinessDaysForStandardItems +
+        L10n.current.estimatedDeliveryTimesAreDisplayedOnTheProductPageAndCheckoutScreen,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_5',
     category: FaqCategory.payments,
-    question: 'What payment methods are supported?',
+    question: L10n.current.whatPaymentMethodsAreSupported,
     answer:
-        'We support Manual / Cash on Delivery (COD) and physical payment upon delivery. '
-        'The delivery partner or merchant updates the payment status directly once the payment is completed.',
+        L10n.current.weSupportManualCashOnDeliveryCodAndPhysicalPaymentUponDelivery +
+        L10n.current.theDeliveryPartnerOrMerchantUpdatesThePaymentStatusDirectlyOnceThePaymentIsCompleted,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_6',
     category: FaqCategory.payments,
-    question: 'How do refunds work for cancelled orders?',
+    question: L10n.current.howDoRefundsWorkForCancelledOrders,
     answer:
-        'If an order was prepaid or cancelled before fulfillment, your refund is initiated immediately by the merchant. '
-        'Refunds typically reflect in your original payment source within 3–5 business days.',
+        L10n.current.ifAnOrderWasPrepaidOrCancelledBeforeFulfillmentYourRefundIsInitiatedImmediatelyByTheMerchant +
+        L10n.current.refundsTypicallyReflectInYourOriginalPaymentSourceWithin35BusinessDays,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_7',
     category: FaqCategory.returns,
-    question: 'What is the return and replacement policy?',
+    question: L10n.current.whatIsTheReturnAndReplacementPolicy,
     answer:
-        'Eligible items can be returned or replaced within 7 days of delivery if they are damaged, defective, or different from described. '
-        'To request a return, go to your order details or submit a query using the Contact Support form with photos of the damaged item.',
+        L10n.current.eligibleItemsCanBeReturnedOrReplacedWithin7DaysOfDeliveryIfTheyAreDamagedDefectiveOrDifferentFromDescribed +
+        L10n.current.toRequestAReturnGoToYourOrderDetailsOrSubmitAQueryUsingTheContactSupportFormWithPhotosOfTheDamagedItem,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_8',
     category: FaqCategory.account,
-    question: 'How do I add or manage multiple delivery addresses?',
+    question: L10n.current.howDoIAddOrManageMultipleDeliveryAddresses,
     answer:
-        'Go to "Account > Saved Addresses" to add up to 3 saved delivery locations (Home, Work, Other). '
-        'You can also select or switch your active delivery address directly from the top bar on the Home Screen.',
+        L10n.current.goToAccountSavedAddressesToAddUpTo3SavedDeliveryLocationsHomeWorkOther +
+        L10n.current.youCanAlsoSelectOrSwitchYourActiveDeliveryAddressDirectlyFromTheTopBarOnTheHomeScreen,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_9',
     category: FaqCategory.vouchers,
-    question: 'How do I apply a discount voucher or coupon code?',
+    question: L10n.current.howDoIApplyADiscountVoucherOrCouponCode,
     answer:
-        'During checkout, tap the "Apply Voucher" section under Order Summary. '
-        'Select an available promo code or type your voucher code to instantly receive a discount on eligible cart items.',
+        L10n.current.duringCheckoutTapTheApplyVoucherSectionUnderOrderSummary +
+        L10n.current.selectAnAvailablePromoCodeOrTypeYourVoucherCodeToInstantlyReceiveADiscountOnEligibleCartItems,
   ),
-  const FaqItem(
+  FaqItem(
     id: 'faq_10',
     category: FaqCategory.account,
-    question: 'How is my personal data and account information secured?',
+    question: L10n.current.howIsMyPersonalDataAndAccountInformationSecured,
     answer:
-        'We employ industry-standard encryption protocols and secure authentication tokens to protect your personal information, delivery addresses, and order history.',
+        L10n.current.weEmployIndustryStandardEncryptionProtocolsAndSecureAuthenticationTokensToProtectYourPersonalInformationDeliveryAddressesAndOrderHistory,
   ),
 ];

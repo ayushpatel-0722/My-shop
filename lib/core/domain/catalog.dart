@@ -1,5 +1,6 @@
 import '../models/category.dart';
 import '../models/product.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Stock health of a product, shared by the admin list and the store front.
 enum StockStatus {
@@ -13,13 +14,13 @@ enum StockStatus {
   String get label {
     switch (this) {
       case StockStatus.outOfStock:
-        return 'Out of stock';
+        return L10n.current.outOfStock;
       case StockStatus.lowStock:
-        return 'Low stock';
+        return L10n.current.lowStock;
       case StockStatus.inStock:
-        return 'In stock';
+        return L10n.current.inStock2;
       case StockStatus.unlimited:
-        return 'Unlimited';
+        return L10n.current.unlimited;
     }
   }
 }
@@ -40,17 +41,17 @@ enum ProductSort {
   String get label {
     switch (this) {
       case ProductSort.relevance:
-        return 'Relevance';
+        return L10n.current.relevance;
       case ProductSort.nameAsc:
-        return 'Name (A–Z)';
+        return L10n.current.nameAZ;
       case ProductSort.nameDesc:
-        return 'Name (Z–A)';
+        return L10n.current.nameZA;
       case ProductSort.priceAsc:
-        return 'Price (low to high)';
+        return L10n.current.priceLowToHigh;
       case ProductSort.priceDesc:
-        return 'Price (high to low)';
+        return L10n.current.priceHighToLow;
       case ProductSort.rating:
-        return 'Rating (top picks first)';
+        return L10n.current.ratingTopPicksFirst;
     }
   }
 }
@@ -69,6 +70,11 @@ class CatalogQuery {
   /// Stock at or below this quantity is reported as [StockStatus.lowStock].
   final int lowStockThreshold;
 
+  /// The curated order for the active category (Category.productList).
+  /// Applied by [ProductSort.relevance]; products missing from the list are
+  /// shown after the listed ones (alphabetical tiebreak).
+  final List<String> productOrder;
+
   const CatalogQuery({
     this.search = '',
     this.categoryIds = const <String>{},
@@ -79,6 +85,7 @@ class CatalogQuery {
     this.includeOutOfStockLast = true,
     this.sort = ProductSort.relevance,
     this.lowStockThreshold = 20,
+    this.productOrder = const <String>[],
   });
 
   CatalogQuery copyWith({
@@ -91,6 +98,7 @@ class CatalogQuery {
     bool? includeOutOfStockLast,
     ProductSort? sort,
     int? lowStockThreshold,
+    List<String>? productOrder,
   }) => CatalogQuery(
     search: search ?? this.search,
     categoryIds: categoryIds ?? this.categoryIds,
@@ -101,6 +109,7 @@ class CatalogQuery {
     includeOutOfStockLast: includeOutOfStockLast ?? this.includeOutOfStockLast,
     sort: sort ?? this.sort,
     lowStockThreshold: lowStockThreshold ?? this.lowStockThreshold,
+    productOrder: productOrder ?? this.productOrder,
   );
 
   bool get hasSearch => search.trim().isNotEmpty;
@@ -114,6 +123,7 @@ class CatalogQuery {
       !hasCompanyFilter &&
       !inStockOnly &&
       !discountedOnly &&
+      productOrder.isEmpty &&
       sort == ProductSort.relevance;
 
   @override
@@ -257,6 +267,20 @@ class Catalog {
         );
         break;
       case ProductSort.relevance:
+        // Category curates its own product order (Category.productList).
+        if (query.productOrder.isNotEmpty) {
+          final orderIndex = <String, int>{
+            for (var i = 0; i < query.productOrder.length; i++)
+              query.productOrder[i]: i,
+          };
+          int rank(Product p) =>
+              orderIndex[p.id] ?? (orderIndex.length + 1);
+          filtered.sort((a, b) {
+            final byOrder = rank(a).compareTo(rank(b));
+            if (byOrder != 0) return byOrder;
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          });
+        }
         break;
     }
 
@@ -284,6 +308,31 @@ class Catalog {
   /// Distinct category ids present in [products].
   static Set<String> usedCategoryIds(Iterable<Product> products) =>
       products.map((p) => p.categoryId).where((id) => id.isNotEmpty).toSet();
+
+  /// Sorts [products] by their position inside a category's ordered
+  /// `productList` (array position = display order).
+  ///
+  /// Products missing from the array keep their relative order at the end.
+  static List<Product> orderByAssignment(
+    Iterable<Product> products,
+    List<String> productList,
+  ) {
+    final rank = <String, int>{};
+    for (var i = 0; i < productList.length; i++) {
+      rank.putIfAbsent(productList[i], () => i);
+    }
+    final list = products.toList();
+    final originalIndex = <String, int>{
+      for (var i = 0; i < list.length; i++) list[i].id: i,
+    };
+    list.sort((a, b) {
+      final ra = rank[a.id] ?? 1 << 30;
+      final rb = rank[b.id] ?? 1 << 30;
+      if (ra != rb) return ra.compareTo(rb);
+      return (originalIndex[a.id] ?? 0).compareTo(originalIndex[b.id] ?? 0);
+    });
+    return list;
+  }
 
   /// Products that will disappear from the store front soon.
   static List<Product> lowStock(

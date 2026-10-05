@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../../app/theme/app_theme.dart';
 import '../../../../core/models/product.dart';
@@ -9,17 +10,26 @@ import '../../../../core/widgets/modern_card.dart';
 ///
 /// Features:
 /// - Two panels: **All Products** (available) & **In This Category** (assigned).
-/// - Each product card shows exactly:
+/// - Each product card shows:
 ///   - Name
 ///   - Price (effective selling price: discountAmt if set/valid, else amount)
 ///   - Product ID (short/monospace)
-/// - Swipe right / tap '+' on an All Products card -> moves to In This Category.
-/// - Swipe left / tap '–' on an In This Category card -> moves back to All Products.
-/// - Live "X products selected" counter.
+/// - Swipe right / tap '+' on an All Products card -> moves to In This Category
+///   (appended to the END of the display order).
+/// - Swipe left / tap '–' on an In This Category card -> moves back.
+/// - **In This Category ordering**: the drag handle (≡) reorders the display
+///   order inside the category. Only the handle starts a drag, so the swipe
+///   gestures still work. Ordering is local state — nothing is written until
+///   the admin taps Save Changes. Reordering is disabled while searching.
+/// - Position numbers (1, 2, 3…) on the assigned cards.
+/// - Live "X product(s) selected" counter.
 /// - Search box filtering both panels simultaneously by product name or ID.
-/// - Responsive layout: side-by-side columns on wide screens, segmented tabs on mobile.
+/// - Responsive layout: side-by-side columns on wide screens, segmented tabs.
 class ProductAssignmentPicker extends StatefulWidget {
   final List<Product> allProducts;
+
+  /// Assigned product ids **in display order** (array position = position the
+  /// customer sees inside the category).
   final List<String> selectedProductIds;
   final ValueChanged<List<String>> onSelectedChanged;
 
@@ -48,6 +58,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
 
   void _addProduct(String id) {
     if (!widget.selectedProductIds.contains(id)) {
+      // Newly assigned products are appended to the END of the order.
       final updated = List<String>.from(widget.selectedProductIds)..add(id);
       widget.onSelectedChanged(updated);
     }
@@ -78,6 +89,32 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
     widget.onSelectedChanged(updated);
   }
 
+  /// Reorders the assigned list (display order = [selectedProductIds] order).
+  void _reorderAssigned(int oldIndex, int newIndex) {
+    final ordered = _orderedAssignedIds();
+    if (oldIndex < 0 || oldIndex >= ordered.length) return;
+    if (newIndex > oldIndex) newIndex -= 1;
+    if (newIndex < 0 || newIndex >= ordered.length) return;
+
+    final moved = ordered.removeAt(oldIndex);
+    ordered.insert(newIndex, moved);
+
+    // Keep any ids that are not in the product catalogue at the end.
+    final known = ordered.toSet();
+    final unknown = widget.selectedProductIds
+        .where((id) => !known.contains(id))
+        .toList();
+    widget.onSelectedChanged([...ordered, ...unknown]);
+  }
+
+  /// Assigned ids ordered by the display order, limited to known products.
+  List<String> _orderedAssignedIds() {
+    final byId = {for (final p in widget.allProducts) p.id: p};
+    return widget.selectedProductIds
+        .where((id) => byId.containsKey(id))
+        .toList();
+  }
+
   bool _matchesQuery(Product p) {
     if (_searchQuery.isEmpty) return true;
     final q = _searchQuery.toLowerCase();
@@ -86,20 +123,29 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
     return nameMatch || idMatch;
   }
 
+  /// "1 product selected" / "2 products selected".
+  String get _selectedLabel {
+    final n = widget.selectedProductIds.length;
+    return AppLocalizations.of(context).productsSelected(n);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     final selectedSet = widget.selectedProductIds.toSet();
+    final byId = {for (final p in widget.allProducts) p.id: p};
 
-    // Partition products into available vs assigned
+    // Partition products into available vs assigned. The assigned list follows
+    // the manual display order (selectedProductIds array position).
     final availableProducts = widget.allProducts
         .where((p) => !selectedSet.contains(p.id))
         .toList();
-    final assignedProducts = widget.allProducts
-        .where((p) => selectedSet.contains(p.id))
-        .toList();
+    final assignedProducts = [
+      for (final id in widget.selectedProductIds)
+        if (byId[id] != null) byId[id]!,
+    ];
 
     // Filter by search query
     final filteredAvailable = availableProducts.where(_matchesQuery).toList();
@@ -125,7 +171,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Product Assignment',
+                  AppLocalizations.of(context).productAssignment,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -160,7 +206,8 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '${widget.selectedProductIds.length} selected',
+                    _selectedLabel,
+                    key: const Key('assignment-counter'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -180,7 +227,9 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
 
         // Hint instructions
         Text(
-          'Swipe right or tap + on available products to assign. Swipe left or tap – to remove.',
+          AppLocalizations.of(
+            context,
+          ).swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder,
           style: theme.textTheme.bodySmall?.copyWith(
             color: isDark
                 ? AppTheme.textSecondaryDark
@@ -193,7 +242,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
         TextField(
           controller: _searchCtrl,
           decoration: InputDecoration(
-            hintText: 'Search products by name or ID...',
+            hintText: AppLocalizations.of(context).searchProductsByNameOrId,
             prefixIcon: const Icon(Icons.search, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
@@ -211,6 +260,17 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
           ),
           onChanged: (val) => setState(() => _searchQuery = val.trim()),
         ),
+        if (_searchQuery.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            AppLocalizations.of(context).clearSearchToReorder,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontStyle: FontStyle.italic,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
 
         // Responsive Picker Panels
@@ -227,7 +287,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   Expanded(
                     child: _buildPanel(
                       context,
-                      title: 'All Products',
+                      title: AppLocalizations.of(context).allProducts2,
                       count: filteredAvailable.length,
                       totalCount: availableProducts.length,
                       isAssignedPanel: false,
@@ -242,7 +302,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   Expanded(
                     child: _buildPanel(
                       context,
-                      title: 'In This Category',
+                      title: AppLocalizations.of(context).inThisCategory,
                       count: filteredAssigned.length,
                       totalCount: assignedProducts.length,
                       isAssignedPanel: true,
@@ -263,23 +323,31 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                       ButtonSegment<int>(
                         value: 0,
                         icon: const Icon(Icons.storefront_outlined, size: 18),
-                        label: Text('All (${filteredAvailable.length})'),
+                        label: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).all('${filteredAvailable.length}'),
+                        ),
                       ),
                       ButtonSegment<int>(
                         value: 1,
                         icon: const Icon(Icons.category_outlined, size: 18),
-                        label: Text('In Category (${filteredAssigned.length})'),
+                        label: Text(
+                          AppLocalizations.of(
+                            context,
+                          ).inCategory('${filteredAssigned.length}'),
+                        ),
                       ),
                     ],
                     selected: {_mobileTab},
-                    onSelectionChanged: (val) =>
-                        setState(() => _mobileTab = val.first),
+                    onSelectionChanged: (s) =>
+                        setState(() => _mobileTab = s.first),
                   ),
                   const SizedBox(height: 14),
                   if (_mobileTab == 0)
                     _buildPanel(
                       context,
-                      title: 'All Products',
+                      title: AppLocalizations.of(context).allProducts2,
                       count: filteredAvailable.length,
                       totalCount: availableProducts.length,
                       isAssignedPanel: false,
@@ -291,7 +359,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   else
                     _buildPanel(
                       context,
-                      title: 'In This Category',
+                      title: AppLocalizations.of(context).inThisCategory,
                       count: filteredAssigned.length,
                       totalCount: assignedProducts.length,
                       isAssignedPanel: true,
@@ -322,39 +390,40 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    // Position lookup for the "1, 2, 3…" badges (assigned panel only).
+    final positionOf = <String, int>{};
+    if (isAssignedPanel) {
+      for (var i = 0; i < widget.selectedProductIds.length; i++) {
+        positionOf[widget.selectedProductIds[i]] = i + 1;
+      }
+    }
+
+    final canReorder =
+        isAssignedPanel && _searchQuery.isEmpty && products.length > 1;
+
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2430) : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppTheme.borderDark : AppTheme.borderLight,
-        ),
-      ),
       padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Panel Title Row
+          // Panel Header + bulk action
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Row(
                   children: [
-                    Icon(
-                      isAssignedPanel ? Icons.check_box : Icons.grid_view,
-                      size: 16,
-                      color: isAssignedPanel
-                          ? Colors.green.shade600
-                          : theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         title,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
@@ -373,7 +442,9 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                       ),
                       child: Text(
                         _searchQuery.isNotEmpty
-                            ? '$count of $totalCount'
+                            ? AppLocalizations.of(
+                                context,
+                              ).countOutOfTotal('$count', '$totalCount')
                             : '$count',
                         style: const TextStyle(
                           fontSize: 11,
@@ -391,7 +462,10 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                   ),
-                  child: const Text('Add All', style: TextStyle(fontSize: 12)),
+                  child: Text(
+                    AppLocalizations.of(context).addAll,
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               if (isAssignedPanel && onRemoveAll != null)
                 TextButton(
@@ -401,8 +475,8 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                     visualDensity: VisualDensity.compact,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                   ),
-                  child: const Text(
-                    'Clear All',
+                  child: Text(
+                    AppLocalizations.of(context).clearAll,
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
@@ -429,11 +503,19 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   Text(
                     isAssignedPanel
                         ? (_searchQuery.isNotEmpty
-                              ? 'No assigned products match search'
-                              : 'No products assigned yet')
+                              ? AppLocalizations.of(
+                                  context,
+                                ).noAssignedProductsMatchSearch
+                              : AppLocalizations.of(
+                                  context,
+                                ).noProductsAssignedYet)
                         : (_searchQuery.isNotEmpty
-                              ? 'No available products match search'
-                              : 'All products are assigned!'),
+                              ? AppLocalizations.of(
+                                  context,
+                                ).noAvailableProductsMatchSearch
+                              : AppLocalizations.of(
+                                  context,
+                                ).allProductsAreAssigned),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
@@ -443,27 +525,105 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
           else
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 380),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: products.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 6),
-                itemBuilder: (context, index) {
-                  final p = products[index];
-                  return _buildProductCard(context, p, isAssignedPanel);
-                },
-              ),
+              child: canReorder
+                  ? _buildReorderableAssigned(context, products, positionOf)
+                  : _buildPlainList(
+                      context,
+                      products,
+                      isAssignedPanel,
+                      positionOf,
+                    ),
             ),
         ],
       ),
     );
   }
 
+  /// Plain list for the "All" panel (and the assigned panel while searching).
+  Widget _buildPlainList(
+    BuildContext context,
+    List<Product> products,
+    bool isAssignedPanel,
+    Map<String, int> positionOf,
+  ) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: products.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 6),
+      itemBuilder: (context, index) {
+        final p = products[index];
+        return _buildProductCard(
+          context,
+          p,
+          isAssignedPanel,
+          position: positionOf[p.id],
+        );
+      },
+    );
+  }
+
+  /// Drag-to-reorder list of the assigned products (display order).
+  Widget _buildReorderableAssigned(
+    BuildContext context,
+    List<Product> products,
+    Map<String, int> positionOf,
+  ) {
+    return ReorderableListView(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
+      proxyDecorator: (child, index, animation) {
+        // Lifted card while dragging.
+        return Material(
+          elevation: 6,
+          borderRadius: BorderRadius.circular(12),
+          color: Theme.of(context).colorScheme.surface,
+          child: child,
+        );
+      },
+      // ignore: deprecated_member_use
+      onReorder: _reorderAssigned,
+      children: [
+        for (var i = 0; i < products.length; i++)
+          Padding(
+            key: ValueKey('assigned_${products[i].id}'),
+            padding: const EdgeInsets.only(bottom: 6),
+            child: _buildProductCard(
+              context,
+              products[i],
+              true,
+              position: positionOf[products[i].id],
+              dragHandle: ReorderableDragStartListener(
+                index: i,
+                child: Tooltip(
+                  message: AppLocalizations.of(context).dragToReorder,
+                  child: Container(
+                    key: Key('drag-handle-${products[i].id}'),
+                    padding: const EdgeInsets.all(6),
+                    child: Icon(
+                      Icons.drag_handle,
+                      size: 18,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.45),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildProductCard(
     BuildContext context,
     Product product,
-    bool isAssigned,
-  ) {
+    bool isAssigned, {
+    int? position,
+    Widget? dragHandle,
+  }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -473,10 +633,36 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
         : product.amount;
 
     final cardContent = ModernCard(
+      key: Key('assign-card-${product.id}'),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Drag handle (assigned panel only) — the ONLY drag starter.
+          ?dragHandle,
+
+          // Position badge (assigned panel).
+          if (isAssigned && position != null)
+            Container(
+              key: Key('assign-position-${product.id}'),
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '$position',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
+
           // Product Info: Name, Price, Monospace Short ID
           Expanded(
             child: Column(
@@ -556,14 +742,14 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
           if (!isAssigned)
             IconButton(
               icon: const Icon(Icons.add_circle, color: Colors.green),
-              tooltip: 'Add to Category',
+              tooltip: AppLocalizations.of(context).addToCategory,
               visualDensity: VisualDensity.compact,
               onPressed: () => _addProduct(product.id),
             )
           else
             IconButton(
               icon: const Icon(Icons.remove_circle, color: Colors.redAccent),
-              tooltip: 'Remove from Category',
+              tooltip: AppLocalizations.of(context).removeFromCategory,
               visualDensity: VisualDensity.compact,
               onPressed: () => _removeProduct(product.id),
             ),
@@ -585,12 +771,12 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
             color: Colors.green.shade600,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Row(
+          child: Row(
             children: [
               Icon(Icons.add_circle, color: Colors.white, size: 20),
               SizedBox(width: 8),
               Text(
-                'Assign',
+                AppLocalizations.of(context).assign,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -614,11 +800,11 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
             color: Colors.red.shade600,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                'Remove',
+                AppLocalizations.of(context).remove,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

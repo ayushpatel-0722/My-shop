@@ -294,4 +294,33 @@ void main() {
     expect(cart.state.items.single.product.id, 'p_tomato');
     expect(cart.state.items.single.qty, 1);
   });
+
+  testWidgets(
+    'product grid columns scale up with screen width keeping card width <= 250',
+    (tester) async {
+      // Test on tablet/wide viewport (width 1000)
+      tester.view.physicalSize = const Size(1000, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await pumpStore(tester);
+
+      final gridFinder = find.byKey(const Key('all-products-grid'));
+      expect(gridFinder, findsOneWidget);
+
+      final gridWidget = tester.widget<GridView>(gridFinder);
+      final delegate =
+          gridWidget.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
+      // Available width is 1000 - 32 = 968.
+      // ((968 + 12) / (250 + 12)).ceil() = ceil(980 / 262) = 4 columns.
+      expect(delegate.crossAxisCount, 4);
+
+      final cardWidth = (968 - (4 - 1) * 12) / 4;
+      expect(cardWidth, lessThanOrEqualTo(250.0));
+    },
+  );
 }

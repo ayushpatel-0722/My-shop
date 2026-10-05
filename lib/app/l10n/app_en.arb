@@ -1,5 +1,4 @@
 {
-  "@@locale": "en",
   "appTitle": "Bazaar",
   "appSubtitle": "Multi-tenant commerce platform",
   "continueAs": "Continue as...",
@@ -75,5 +74,2785 @@
   "totalAmount": "Total",
   "deliveryCharge": "Delivery charge",
   "discount": "Discount",
-  "subtotal": "Subtotal"
+  "subtotal": "Subtotal",
+  "aCategoryCannotHaveItselfAsItsParent": "A category cannot have itself as its parent.",
+  "accessPackingHubToVerifyItemsAndMarkOrdersAsPacked": "Access packing hub to verify items and mark orders as packed.",
+  "account": "Account",
+  "active": "Active",
+  "add": "Add",
+  "addAddress": "Add Address",
+  "addAll": "Add All",
+  "addCategory": "Add Category",
+  "addDeliveryCharge": "Add Delivery Charge",
+  "addHighlight": "Add Highlight",
+  "addMobileNumber": "Add Mobile Number",
+  "addNewAddress": "Add New Address",
+  "addOption": "Add Option",
+  "addProduct": "Add Product",
+  "addProductOption": "Add Product Option",
+  "addProductVariant": "Add Product Variant",
+  "addRow": "Add Row",
+  "addSection": "Add Section",
+  "addSpec": "Add Spec",
+  "addVariant": "Add Variant",
+  "addAtLeastOneCompleteTitleValueRow": "Add at least one complete title & value row",
+  "addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies": "Add dynamic key-value specifications (e.g. Fabric, Shelf Life, Processor, Storage, Origin) and return/delivery policies.",
+  "addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage": "Add multiple image URLs. The first image will automatically act as the Hero / Main product image.",
+  "addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits": "Add pincodes to define delivery fees, free delivery rules, or minimum order limits.",
+  "addProductsToYourCartAfterSigningInToContinueCheckout": "Add products to your cart after signing in to continue checkout.",
+  "addToCategory": "Add to Category",
+  "addYourFirstProductToStartSelling": "Add your first product to start selling.",
+  "addressDetails": "Address Details",
+  "addressLine1HouseFlatBlock": "Address Line 1 (House / Flat / Block) *",
+  "addressLine2StreetArea": "Address Line 2 (Street / Area)",
+  "addressDeleted": "Address deleted",
+  "admin": "Admin",
+  "adminConsole": "Admin Console",
+  "adminDashboard": "Admin Dashboard",
+  "adminEmail": "Admin email",
+  "adminName": "Admin name",
+  "adminNameEmailAndPasswordAreRequired": "Admin name, email, and password are required.",
+  "adminPasswordMustBeAtLeast6Characters": "Admin password must be at least 6 characters.",
+  "adminPasswordsDoNotMatch": "Admin passwords do not match.",
+  "allActiveCoupons": "All Active Coupons",
+  "allDetails": "All Details",
+  "allShopsStores": "All Shops & Stores",
+  "alreadyHaveAnAccountLogIn": "Already have an account? Log In",
+  "appliesTo": "Applies to",
+  "apply": "Apply",
+  "assign": "Assign",
+  "assignAnExistingParentCategoryInTheSameCompanyForNesting": "Assign an existing parent category in the same company for nesting. ",
+  "assignDeliveryRidersAndDispatchOrdersForFulfillment": "Assign delivery riders and dispatch orders for fulfillment.",
+  "assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges": "Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.",
+  "availableInventoryUnits": "Available inventory units",
+  "backfillOrderingForOldCategories": "Backfill ordering for old categories",
+  "baseMeasurementType": "Base Measurement Type",
+  "baseSkuProductCode": "Base SKU / Product Code *",
+  "basicInformation": "Basic Information",
+  "bottle1Bottle2Bottles4Bottles6Bottles": "Bottle (1 bottle, 2 bottles, 4 bottles, 6 bottles)",
+  "box1Box2Boxes5Boxes10Boxes": "Box (1 box, 2 boxes, 5 boxes, 10 boxes)",
+  "byContinuingYouAgreeToOurTermsPrivacyPolicy": "By continuing, you agree to our Terms & Privacy Policy",
+  "cancelOrder": "Cancel order",
+  "cancelThisOrder": "Cancel this order?",
+  "categoriesShops": "Categories & Shops",
+  "category": "Category",
+  "categoryIconImageUrlOrEmoji": "Category Icon (Image URL or Emoji)",
+  "categoryName": "Category Name *",
+  "categoryOrderingBackfilled": "Category ordering backfilled.",
+  "change": "Change",
+  "changeClear": "Change & Clear",
+  "changeSectionType": "Change Section Type",
+  "city": "City *",
+  "classificationType": "Classification / Type *",
+  "clearAll": "Clear All",
+  "clearSearch": "Clear Search",
+  "clearSearchToReorder": "Clear search to reorder",
+  "close": "Close",
+  "clothingSizeSMLXlXxl": "Clothing Size (S, M, L, XL, XXL)",
+  "code": "Code *",
+  "codeFestive50": "Code: FESTIVE50",
+  "colorNavyCrimsonOliveGold": "Color (Navy, Crimson, Olive, Gold)",
+  "colorOptional": "Color (Optional)",
+  "colorRedBlueBlackWhiteGreen": "Color (Red, Blue, Black, White, Green)",
+  "company": "Company",
+  "companyBannerUrl": "Company Banner URL",
+  "companyBrandingImages": "Company Branding & Images",
+  "companyLogoUrl": "Company Logo URL",
+  "companyStorefrontProfileImageUrl": "Company Storefront / Profile Image URL",
+  "companyNameAndPasswordAreRequired": "Company name and password are required.",
+  "compensationSalary": "Compensation & Salary",
+  "configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides": "Configure customizable option types (e.g. Size, Color, Weight, Storage) and automatically generate Cartesian combinations with distinct SKU, stock, and price overrides.",
+  "configureHierarchyCatalogClassificationAndAssignedProducts": "Configure hierarchy, catalog classification, and assigned products.",
+  "configuredOptionSets": "Configured Option Sets:",
+  "confirmPassword": "Confirm password",
+  "contactDetails": "Contact Details",
+  "contactSupport": "Contact Support",
+  "continueLabel": "Continue",
+  "continueWithGoogle": "Continue with Google",
+  "copyLink": "Copy link",
+  "couldNotSendOtpPleaseTryAgain": "Could not send OTP. Please try again.",
+  "couldNotSendOtpPleaseVerifyYourNumberOrTryAgain": "Could not send OTP. Please verify your number or try again.",
+  "createOfferBanner": "Create Offer Banner",
+  "createVoucher": "Create voucher",
+  "createYourFirstCategoryAndAssignProductsToOrganizeYourStore": "Create your first category and assign products to organize your store.",
+  "crossSell": "Cross-sell",
+  "curated": "Curated",
+  "currency": "Currency",
+  "customerDetails": "Customer Details",
+  "customerDetails2": "Customer details",
+  "defaultBadge": "DEFAULT",
+  "dateOfBirth": "Date of Birth",
+  "default2": "Default",
+  "defineStaffCompensationPackageAndPaymentFrequency": "Define staff compensation package and payment frequency.",
+  "delete": "Delete",
+  "deleteAddress": "Delete Address",
+  "deleteCategory": "Delete Category",
+  "deleteDeliveryCharge": "Delete Delivery Charge",
+  "deleteEmployee": "Delete Employee",
+  "deleteEmployeeAccount": "Delete Employee Account",
+  "deleteProduct": "Delete Product",
+  "deleteSection": "Delete Section",
+  "deleteRow": "Delete row",
+  "deleteSection2": "Delete section",
+  "deleteVoucher": "Delete voucher",
+  "deleteVoucher2": "Delete voucher?",
+  "deliveryReturnPolicy": "Delivery & Return Policy",
+  "deliveryAddress": "Delivery Address",
+  "deliveryType": "Delivery Type",
+  "deliveryAddress2": "Delivery address",
+  "deliveryTypes": "Delivery types",
+  "deliveryWillAlwaysBeFree0ForAllOrdersToThisPincode": "Delivery will always be FREE (₹0) for all orders to this pincode.",
+  "descriptionDetails": "Description / Details",
+  "descriptionShownOnTheCategoryHeader": "Description shown on the category header...",
+  "designationRole": "Designation / Role *",
+  "discard": "Discard",
+  "discardChanges": "Discard changes?",
+  "discountType": "Discount type",
+  "dragTheHandleToSetTheOrderCustomersSee": "Drag the ≡ handle to set the order customers see.",
+  "edit": "Edit",
+  "editCategory": "Edit Category",
+  "editDeliveryCharge": "Edit Delivery Charge",
+  "editEmployee": "Edit Employee",
+  "editProduct": "Edit Product",
+  "editStockPriceOverride": "Edit Stock & Price Override",
+  "editVoucher": "Edit voucher",
+  "emergencyContactCertificationsQualifications": "Emergency contact, certifications, qualifications...",
+  "employeePortal": "Employee Portal",
+  "enter6DigitDeliveryPincode": "Enter 6-digit delivery pincode",
+  "enterMobileNumber": "Enter Mobile Number",
+  "enterAValid10DigitIndianMobileNumberEG9876543210": "Enter a valid 10-digit Indian mobile number (e.g. 9876543210)",
+  "enterImageUrlOrEmojiEG": "Enter image URL or emoji (e.g. 🛍️)",
+  "enterYourAddressForAccurateDelivery": "Enter your address for accurate delivery",
+  "estimatedDeliveryTimeEta": "Estimated Delivery Time (ETA)",
+  "estimatedDeliveryTimeOptional": "Estimated Delivery Time (Optional)",
+  "excelXlsx": "Excel (.xlsx)",
+  "expiryDate": "Expiry date",
+  "exploreProductsAndPlaceYourFirstOrderToday": "Explore products and place your first order today!",
+  "exportCatalogSheet": "Export catalog sheet",
+  "externalUrl": "External URL",
+  "faqsCustomerHelplineQueryForm": "FAQs, customer helpline & query form",
+  "freeDelivery": "FREE DELIVERY",
+  "failedToSaveAddressPleaseTryAgain": "Failed to save address. Please try again.",
+  "failedToSaveAddressTryAgain": "Failed to save address. Try again.",
+  "failedToSaveMobileNumberTryAgain": "Failed to save mobile number. Try again.",
+  "fallbackStrategy": "Fallback strategy",
+  "featuredRecommendation": "Featured Recommendation",
+  "female": "Female",
+  "firstAdminAccount": "First Admin Account",
+  "firstOrderOnly": "First order only",
+  "fixedPaidCharge": "Fixed / Paid Charge",
+  "flagThisProductToAppearInTheRecommendationsEngineCarousel": "Flag this product to appear in the recommendations engine carousel.",
+  "flat50OffFreeDelivery": "Flat 50% Off + Free Delivery",
+  "forDeliveryTrackingOrderSmsUpdates": "For delivery tracking & order SMS updates",
+  "forInstantOrderUpdatesDeliverySms": "For instant order updates & delivery SMS",
+  "freeDelivery2": "Free Delivery",
+  "freeDeliveryForOrdersAboveOptional": "Free Delivery for Orders Above (₹) (Optional)",
+  "frequentlyAskedQuestions": "Frequently Asked Questions",
+  "fullName": "Full Name *",
+  "gatesLoginToScheduledWorkingHoursWhenDisabledTheEmployeeCannotLogIntoTheMobileApp": "Gates login to scheduled working hours. When disabled, the employee cannot log into the mobile app.",
+  "gender": "Gender",
+  "generateMatrix": "Generate Matrix",
+  "goBack": "Go Back",
+  "grandFestiveMegaSale": "Grand Festive Mega Sale",
+  "greenleafOrganics": "GreenLeaf Organics",
+  "haveASpecificIssue": "Have a specific issue?",
+  "help": "Help",
+  "helpSupport": "Help & Support",
+  "heroMain": "Hero / Main",
+  "hierarchyNesting": "Hierarchy & Nesting",
+  "homeDelivery": "Home Delivery",
+  "homeDelivery2": "Home delivery",
+  "houseFlatFloorNo": "House / Flat / Floor No. *",
+  "invoice": "INVOICE",
+  "iconVisuals": "Icon & Visuals",
+  "imageUrl": "Image URL",
+  "importCsv": "Import CSV",
+  "inStock": "In Stock",
+  "inStock2": "In stock",
+  "incorrectCompanyPassword": "Incorrect company password.",
+  "initialPassword": "Initial Password *",
+  "invalidOtpPleaseCheckTheCodeAndTryAgain": "Invalid OTP. Please check the code and try again.",
+  "invalidOtpPleaseTryAgain": "Invalid OTP. Please try again.",
+  "invalidParentSelectingADescendantCategoryCreatesACycle": "Invalid parent: Selecting a descendant category creates a cycle.",
+  "inventoryManagementCanmanageinventory": "Inventory Management (canManageInventory)",
+  "issueCategory": "Issue Category *",
+  "keep": "Keep",
+  "keepEditing": "Keep Editing",
+  "keepTrackOfYourActiveDeliveriesAndPastPurchases": "Keep track of your active deliveries and past purchases.",
+  "limitedTimeOffer": "LIMITED TIME OFFER",
+  "landmarkOptional": "Landmark (optional)",
+  "latestInvoicePdf": "Latest invoice PDF",
+  "loadingCategory": "Loading Category...",
+  "loadingEmployee": "Loading Employee...",
+  "locked": "Locked",
+  "logOut": "Log Out",
+  "loginEmail": "Login Email *",
+  "longDescriptionShownAsAParagraph": "Long description shown as a paragraph...",
+  "mrpOriginalPrice": "MRP / Original Price (₹) *",
+  "makeHero": "Make Hero",
+  "male": "Male",
+  "manageDeliveryLocations03": "Manage delivery locations (0/3)",
+  "manageProductsCategoriesOrders": "Manage products, categories & orders",
+  "manageStaffAccountDesignationSalaryAndOperationalAccess": "Manage staff account, designation, salary, and operational access.",
+  "manualOfflinePayment": "Manual / Offline Payment",
+  "marketplace": "Marketplace",
+  "maximum3AddressesAllowedPleaseEditOrRemoveAnAddress": "Maximum 3 addresses allowed. Please edit or remove an address.",
+  "maybeLater": "Maybe Later",
+  "minimum6Characters": "Minimum 6 characters",
+  "minimumOrderAmount": "Minimum order amount (₹)",
+  "mobileNumber2": "Mobile Number *",
+  "mobileNumberSavedSuccessfully": "Mobile number saved successfully!",
+  "monthlyMonth": "Monthly (₹/month)",
+  "monthlyOrderReport": "Monthly order report",
+  "moveDown": "Move down",
+  "moveToWishlist": "Move to Wishlist?",
+  "moveUp": "Move up",
+  "multiTenantCommerce": "Multi-tenant commerce",
+  "myOrders": "My Orders",
+  "nameOrSku": "Name or SKU",
+  "noOrdersYet": "No Orders Yet",
+  "noAdminsYet": "No admins yet",
+  "noCategoriesAtThisLevel": "No categories at this level",
+  "noCategoriesFound": "No categories found",
+  "noCategoriesFoundForThisStore": "No categories found for this store.",
+  "noCategoriesMatchThisSearch": "No categories match this search",
+  "noCategoriesYet": "No categories yet",
+  "noCompanyIdentifiedPleaseEnsureYouAreLoggedInToYourCompany": "No company identified. Please ensure you are logged in to your company.",
+  "noCompanyScopeFoundForCurrentAdmin": "No company scope found for current admin.",
+  "noDeliveryChargesMatchThisPincode": "No delivery charges match this pincode",
+  "noDeliveryPincodesConfigured": "No delivery pincodes configured",
+  "noDetailSectionsYetTapAddSection": "No detail sections yet — tap \"Add Section\".",
+  "noEmployeesProvisioned": "No employees provisioned",
+  "noExpiry": "No expiry",
+  "noHighlightsYetTapAddHighlight": "No highlights yet — tap \"Add Highlight\".",
+  "noMatchingFaqsFound": "No matching FAQs found",
+  "noNotifications": "No notifications",
+  "noOfferBanners": "No offer banners",
+  "noOrdersToInvoiceYet": "No orders to invoice yet",
+  "noOrdersWithThisStatus": "No orders with this status",
+  "noPackingTasksAssigned": "No packing tasks assigned",
+  "noPinnedRecommendationsUsingBestSellers": "No pinned recommendations — using best-sellers",
+  "noProductsFound": "No products found",
+  "noProductsFoundForThisStore": "No products found for this store.",
+  "noProductsMatchTheseFilters": "No products match these filters",
+  "noReviewsYet": "No reviews yet",
+  "noSavedAddressesYet": "No saved addresses yet",
+  "noShopsAvailable": "No shops available",
+  "noShopsRegisteredYet": "No shops registered yet",
+  "noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix": "No variants configured (single standard SKU). Tap \"Add Option\" to define dimensions, then \"Generate Matrix\".",
+  "noVouchersAvailableRightNow": "No vouchers available right now.",
+  "noneTopLevelCategory": "None (Top-Level Category)",
+  "notesQualifications": "Notes & Qualifications",
+  "nothingHere": "Nothing here",
+  "or": "OR",
+  "otp": "OTP",
+  "offersFromThisStore": "Offers from this store",
+  "onlyShoppersWithoutAPreviousOrder": "Only shoppers without a previous order",
+  "open": "Open",
+  "operationalPermissions": "Operational Permissions",
+  "optionName": "Option Name *",
+  "optionValuesCommaSeparated": "Option Values (comma separated) *",
+  "orderDispatchCandispatch": "Order Dispatch (canDispatch)",
+  "orderPackingCanpack": "Order Packing (canPack)",
+  "orderNotFound": "Order not found",
+  "orderUpdatesPromoAlerts": "Order updates & promo alerts",
+  "ordersTrackingStatus": "Orders, tracking & status",
+  "other": "Other",
+  "outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked": "Out of Stock / Finished: Product will show as sold out on the storefront until restocked.",
+  "outOfStock": "Out of stock",
+  "pdf": "PDF",
+  "png": "PNG",
+  "pack": "Pack",
+  "pack1Pack2Packs5Packs10Packs": "Pack (1 pack, 2 packs, 5 packs, 10 packs)",
+  "packingDoneNotifiedAdmin": "Packing done — notified Admin",
+  "packingOrderQueueFulfillment": "Packing, order queue & fulfillment",
+  "parentCategory": "Parent Category",
+  "pauseInsteadOfDeletingACampaign": "Pause instead of deleting a campaign",
+  "payDirectlyCashUpiOnDeliveryOrPickupPaymentStatusWillDefaultToPendingAndCanBeMarkedAsDoneByTheAdmin": "Pay directly (Cash/UPI on delivery or pickup). Payment status will default to Pending and can be marked as Done by the admin.",
+  "perShopperLimit": "Per shopper limit",
+  "pick": "Pick",
+  "pickupFrom": "Pickup From",
+  "pinAProduct": "Pin a product",
+  "pincode": "Pincode *",
+  "pincodeInformation": "Pincode Information",
+  "placeOrder": "Place Order",
+  "pleaseAddAtLeastOneOptionFirstToGenerateCombinations": "Please add at least one Option first to generate combinations.",
+  "pleaseCheckAllRequiredFields": "Please check all required fields.",
+  "pleaseCompleteTheProductHighlightsAndAllDetailsSections": "Please complete the Product Highlights and All Details sections.",
+  "pleaseCompleteYourProfileNameMobileBeforePlacingAnOrder": "Please complete your profile (name & mobile) before placing an order.",
+  "pleaseEnterAValid6DigitPincode": "Please enter a valid 6-digit pincode",
+  "pleaseEnterAValidHttpOrHttpsImageUrl": "Please enter a valid HTTP or HTTPS image URL",
+  "pleaseEnterAdminEmailAndPassword": "Please enter admin email and password.",
+  "pleaseEnterCompanyNameAndCompanyPassword": "Please enter company name and company password.",
+  "pleaseEnterThe6DigitOtp": "Please enter the 6-digit OTP",
+  "pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration": "Please enter the required primary product details above to unlock variant options and matrix generation:",
+  "pleaseEnterYourMobileNumber": "Please enter your mobile number",
+  "pleaseEnterYourName": "Please enter your name",
+  "pleaseSelectAtLeastOneProductForTheCategory": "Please select at least one product for the category",
+  "popularSearches": "Popular Searches",
+  "postalPincode": "Postal Pincode *",
+  "price": "Price (₹) *",
+  "pricingChargeRules": "Pricing & Charge Rules",
+  "pricingMeasurement": "Pricing & Measurement",
+  "product": "Product",
+  "productAssignment": "Product Assignment",
+  "productBaseColorOptional": "Product Base Color (Optional)",
+  "productGallery": "Product Gallery",
+  "productHighlights": "Product Highlights",
+  "productId": "Product ID",
+  "productSpecification": "Product Specification",
+  "productTitle": "Product Title *",
+  "productNotFound": "Product not found",
+  "products": "Products",
+  "productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere": "Products assigned to this category (or its sub-categories) will show up here.",
+  "promoCodeFestive50CopiedToClipboard": "Promo Code FESTIVE50 copied to clipboard!",
+  "provisionEmployee": "Provision Employee",
+  "provisionStaffAccountsWithCustomDesignationsSalaryAndOperationalAccess": "Provision staff accounts with custom designations, salary, and operational access.",
+  "quantity": "Quantity",
+  "querySubmittedEmailSent": "Query Submitted & Email Sent!",
+  "quickSelectEmoji": "Quick select emoji:",
+  "readLess": "Read less",
+  "readMore": "Read more",
+  "referencePincodeProduct": "Reference, pincode, product…",
+  "remove": "Remove",
+  "removeFromCategory": "Remove from Category",
+  "reportsAnalyticsCanviewreports": "Reports & Analytics (canViewReports)",
+  "residentialAddress": "Residential Address",
+  "restoringSession": "Restoring session...",
+  "savedAddresses": "SAVED ADDRESSES",
+  "sku": "SKU",
+  "sku2": "SKU *",
+  "specialOffer": "SPECIAL OFFER",
+  "salaryAmount": "Salary Amount (₹)",
+  "salaryFrequency": "Salary Frequency",
+  "salaryNotSpecified": "Salary: Not specified",
+  "saveAddressContinue": "Save Address & Continue",
+  "saveAddressAs": "Save Address As",
+  "saveMobileNumber": "Save Mobile Number",
+  "saveOption": "Save Option",
+  "savedAddresses2": "Saved Addresses",
+  "scan": "Scan",
+  "scanQrBarcode": "Scan QR / Barcode",
+  "searchFaqsOrdersReturnsPayments": "Search FAQs, orders, returns, payments...",
+  "searchByCode": "Search by code",
+  "searchCategories": "Search categories",
+  "searchCategoriesBrandsOrShops": "Search categories, brands, or shops...",
+  "searchInThisStore": "Search in this store",
+  "searchOrders": "Search orders",
+  "searchPincode": "Search pincode",
+  "searchProducts": "Search products",
+  "searchProductsByNameOrId": "Search products by name or ID...",
+  "searchProductsCategoriesOrStores": "Search products, categories, or stores...",
+  "sectionTitle": "Section Title *",
+  "sectionType": "Section Type *",
+  "sectionsShownUnderAllDetailsOnTheProductPage": "Sections shown under \"All Details\" on the product page — ",
+  "seeAll": "See All",
+  "selectDeliveryLocation": "Select Delivery Location",
+  "selectVariant": "Select Variant",
+  "selectAnAddressToSeeProductAvailabilityAndDeliveryFees": "Select an address to see product availability and delivery fees",
+  "selfPickup": "Self pickup",
+  "selfPickup2": "Self-Pickup",
+  "sellingDiscountedPrice": "Selling / Discounted Price (₹)",
+  "sendToPrinter": "Send to printer",
+  "serviceableArea": "Serviceable Area",
+  "setAsDefaultDeliveryAddress": "Set as default delivery address",
+  "shiftWorkStatus": "Shift & Work Status",
+  "shiftActive": "Shift Active",
+  "shopNow": "Shop Now",
+  "shopperApp": "Shopper App",
+  "showLess": "Show less",
+  "showOutOfStockItems": "Show out-of-stock items",
+  "signIn": "Sign In",
+  "signInToViewCart": "Sign In to View Cart",
+  "signInToViewOrders": "Sign In to View Orders",
+  "signInToPlaceOrdersSaveCartApplyVouchers": "Sign in to place orders, save cart & apply vouchers",
+  "signInFailedPleaseTryAgain": "Sign-in failed. Please try again.",
+  "simpleText": "Simple Text",
+  "specKey": "Spec Key",
+  "specValue": "Spec Value",
+  "specificationsPolicies": "Specifications & Policies",
+  "standardDeliveryCharge": "Standard Delivery Charge (₹) *",
+  "startShopping": "Start Shopping",
+  "stockAvailabilityInventoryMode": "Stock Availability & Inventory Mode",
+  "stockAvailability": "Stock Availability *",
+  "stockQuantity": "Stock Quantity *",
+  "storeCategory": "Store Category",
+  "storeOnlySupportsSelfPickup": "Store only supports self-pickup",
+  "storeReviews": "Store reviews",
+  "strategy": "Strategy",
+  "streetAreaLandmark": "Street / Area / Landmark *",
+  "streetAreaCityPincode": "Street, area, city, pincode...",
+  "submitQuerySendEmail": "Submit Query & Send Email",
+  "submitASupportQueryDirectlyToOurTeam": "Submit a support query directly to our team.",
+  "submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached": "Submitting this form triggers an email to ayush123@gmail.com with your message and account details attached.",
+  "summary": "Summary",
+  "supportHelplineAyush123GmailCom": "Support Helpline: ayush123@gmail.com",
+  "swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOr": "Swipe right or tap + on available products to assign. Swipe left or ",
+  "switchingTheTypeWillClearTheContentOfThisSectionContinue": "Switching the type will clear the content of this section. Continue?",
+  "tapAction": "Tap action",
+  "text": "Text *",
+  "theseProductsAreNoLongerAvailable": "These products are no longer available",
+  "thisCategoryIsEmpty": "This category is empty.",
+  "thisOrderIsNoLongerAvailable": "This order is no longer available.",
+  "thisShopDoesNotOfferHomeDelivery": "This shop does not offer home delivery",
+  "thisStoreHasNoProductsYet": "This store has no products yet",
+  "title": "Title",
+  "titleValue": "Title & Value",
+  "title2": "Title *",
+  "titleAndValueRowsShownAsTheCompactHighlightsListOnTheProductPage": "Title and value rows shown as the compact highlights list on the product page.",
+  "topSellersTrendingCuratedCrossSell": "Top Sellers · Trending · Curated · Cross-sell",
+  "topSellers": "Top sellers",
+  "totalRedemptions": "Total redemptions",
+  "trackOrder": "Track order",
+  "trending": "Trending",
+  "tryAdjustingYourSearchTermsOrSubmitAQueryToOurSupportStaff": "Try adjusting your search terms or submit a query to our support staff.",
+  "tryCheckingForTyposOrSearchingForADifferentKeyword": "Try checking for typos or searching for a different keyword",
+  "unavailable": "Unavailable",
+  "unavailableItemsAreExcludedFromTheTotal": "Unavailable items are excluded from the total.",
+  "unitType": "Unit Type *",
+  "unitValue": "Unit Value *",
+  "unlimitedInventory": "Unlimited Inventory",
+  "unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems": "Unlimited Inventory: Product will always appear in stock for customers (ideal for digital goods or made-to-order items).",
+  "up": "Up",
+  "update": "Update",
+  "updateProfile": "Update Profile",
+  "updateRequired": "Update Required",
+  "value": "Value *",
+  "variantConfigurationLocked": "Variant Configuration Locked",
+  "variantLabelNameOptional": "Variant Label / Name (Optional)",
+  "variantMatrix": "Variant Matrix",
+  "verified": "Verified",
+  "verifiedMember": "Verified Member",
+  "verifiedLocalMerchants": "Verified local merchants",
+  "view": "View",
+  "viewAndUpdateStockCountsAndWarehouseAlerts": "View and update stock counts and warehouse alerts.",
+  "viewDailyEmployeeActivityAndOperationsLogs": "View daily employee activity and operations logs.",
+  "welcome20": "WELCOME20",
+  "weight100g200g500g1000g": "Weight (100g, 200g, 500g, 1000g)",
+  "weight1kg2kg5kg10kg": "Weight (1kg, 2kg, 5kg, 10kg)",
+  "weight1lb2lb5lb10lb": "Weight (1lb, 2lb, 5lb, 10lb)",
+  "weight250g500g1kg": "Weight (250g, 500g, 1kg)",
+  "weight500g1kg2kg5kg": "Weight (500g, 1kg, 2kg, 5kg)",
+  "weight50g100g250g500g": "Weight (50g, 100g, 250g, 500g)",
+  "weight50mg100mg250mg500mg": "Weight (50mg, 100mg, 250mg, 500mg)",
+  "welcomeToBazaar": "Welcome to Bazaar",
+  "wordDocx": "Word (.docx)",
+  "writeAShortMessage": "Write a short message",
+  "writeToUs": "Write to Us",
+  "yearlyCtcYear": "Yearly / CTC (₹/year)",
+  "yearlyOrderReport": "Yearly order report",
+  "yesCancel": "Yes, cancel",
+  "youHaveUnsavedChangesLeaveWithoutSaving": "You have unsaved changes. Leave without saving?",
+  "yourCartIsEmpty": "Your cart is empty",
+  "yourFullName": "Your full name",
+  "adminCompanyIn": "admin@company.in",
+  "eG1Or500": "e.g. 1 or 500",
+  "eG12DaysSameDay3045Mins": "e.g. 1-2 days, Same Day, 30-45 mins",
+  "eG12MarketStreetAhmedabad": "e.g. 12 Market Street, Ahmedabad",
+  "eG1990ForNoMinimum": "e.g. 199 (0 for no minimum)",
+  "eG25000": "e.g. 25000",
+  "eG380001": "e.g. 380001",
+  "eG40": "e.g. 40",
+  "eG499LeaveBlankIfNoFreeTier": "e.g. 499 (Leave blank if no free tier)",
+  "eG500125": "e.g. 500, 1, 2, 5",
+  "eG79900": "e.g. 799.00",
+  "eG99900": "e.g. 999.00",
+  "eGDescriptionGeneralDisplayFeatures": "e.g. Description, General, Display Features",
+  "eGFabricShelfLife": "e.g. Fabric / Shelf Life",
+  "eGFlat302BuildingA": "e.g. Flat 302, Building A",
+  "eGFlat402BlockA": "e.g. Flat 402, Block A",
+  "eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts": "e.g. Free shipping on orders above ₹499. Easy 7-day hassle-free replacement for defective products.",
+  "eGFreshOrganicVegetables": "e.g. Fresh Organic Vegetables",
+  "eGFreshOrganicGroceriesDeliveredDaily": "e.g. Fresh organic groceries delivered daily",
+  "eGGreenValleyRoadNearCityMall": "e.g. Green Valley Road, Near City Mall",
+  "eGGroceryStaplesSupermarketElectronics": "e.g. Grocery & Staples, Supermarket, Electronics",
+  "eGGroceryElectronics": "e.g. Grocery, Electronics",
+  "eGOmMartExpress": "e.g. Om Mart Express",
+  "eGOppositeCityMall": "e.g. Opposite City Mall",
+  "eGOrganicHassAvocadoChanderiSilkSaree15In1SweetsBox": "e.g. Organic Hass Avocado / Chanderi Silk Saree / 15-in-1 Sweets Box",
+  "eGProdHoney01": "e.g. PROD-HONEY-01",
+  "eGPureSilk30Days": "e.g. Pure Silk / 30 Days",
+  "eGQuantitySizeColor": "e.g. Quantity, Size, Color",
+  "eGRameshKumar": "e.g. Ramesh Kumar",
+  "eGRedMidnightBlueMatteBlack": "e.g. Red / Midnight Blue / Matte Black",
+  "eGRedMidnightBlueBlack": "e.g. Red, Midnight Blue, Black",
+  "eGSku500g01": "e.g. SKU-500G-01",
+  "eGVastrapurNearShivTemple": "e.g. Vastrapur, near Shiv Temple",
+  "eGRameshCompanyCom": "e.g. ramesh@company.com",
+  "httpsExampleComLogoPng": "https://example.com/logo.png",
+  "httpsExampleComStoreBannerJpg": "https://example.com/store_banner.jpg",
+  "httpsExampleComStorefrontPhotoJpg": "https://example.com/storefront_photo.jpg",
+  "httpsImagesUnsplashCom": "https://images.unsplash.com/...",
+  "inr": "₹ INR",
+  "assignedProduct": "assigned product",
+  "assignedProducts": "assigned products",
+  "toUncategorised": "to \"Uncategorised\"",
+  "subCategory": "sub-category",
+  "subCategories": "sub-categories",
+  "uncategorisedType": "Uncategorised type",
+  "store": " • Store",
+  "global": " • Global",
+  "customer": "Customer",
+  "unlimited": "Unlimited",
+  "basePrice": "Base Price",
+  "untitledSection": "Untitled section",
+  "firstOrderOnly2": " · first order only",
+  "pickup": "Pickup",
+  "delivery": "Delivery",
+  "items4": "Items",
+  "offer": "offer",
+  "offers": "offers",
+  "thisAddress": "this address",
+  "thisStore": "this store",
+  "packed": " · packed",
+  "order": "Order #{order}",
+  "@order": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "company2": "Company: {order}",
+  "@company2": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "total": "Total: ₹{order}",
+  "@total": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "copyId": "Copy {label} ID",
+  "@copyId": {
+    "description": "",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "idCopiedToClipboard": "{label} ID copied to clipboard: {id}",
+  "@idCopiedToClipboard": {
+    "description": "",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "id": "ID: {id}",
+  "@id": {
+    "description": "",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "msg3": "{user}: {user2} ({user3}/3)",
+  "@msg3": {
+    "description": "",
+    "placeholders": {
+      "user": {
+        "type": "String"
+      },
+      "user2": {
+        "type": "String"
+      },
+      "user3": {
+        "type": "String"
+      }
+    }
+  },
+  "priority": "{b} · priority {b2}",
+  "@priority": {
+    "description": "",
+    "placeholders": {
+      "b": {
+        "type": "String"
+      },
+      "b2": {
+        "type": "String"
+      }
+    }
+  },
+  "aCategoryNamedAlreadyExistsInThisCompany": "A category named \"{trimmedname}\" already exists in this company.",
+  "@aCategoryNamedAlreadyExistsInThisCompany": {
+    "description": "",
+    "placeholders": {
+      "trimmedname": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryUpdatedSuccessfully": "Category \"{category}\" updated successfully!",
+  "@categoryUpdatedSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveCategory": "Failed to save category: {e}",
+  "@failedToSaveCategory": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "assignAnExistingParentCategoryInTheSameCompanyForNestingSelfAndDescendantCategoriesAreAutomaticallyBlockedToPreventHierarchyCycles": "Assign an existing parent category in the same company for nesting. Self and descendant categories are automatically blocked to prevent hierarchy cycles.",
+  "noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent": "Note: {invalidparentids} categories (this category and its descendants) are blocked from being chosen as parent.",
+  "@noteCategoriesThisCategoryAndItsDescendantsAreBlockedFromBeingChosenAsParent": {
+    "description": "",
+    "placeholders": {
+      "invalidparentids": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotSaveTheNewOrder": "Could not save the new order: {e}",
+  "@couldNotSaveTheNewOrder": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "backfillFailed": "Backfill failed: {e}",
+  "@backfillFailed": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "delete2": "Delete \"{category}\"?",
+  "@delete2": {
+    "description": "",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "to": "to \"{parentname}\"",
+  "@to": {
+    "description": "",
+    "placeholders": {
+      "parentname": {
+        "type": "String"
+      }
+    }
+  },
+  "willMove2": "• {plural} will move {parentname}",
+  "@willMove2": {
+    "description": "",
+    "placeholders": {
+      "plural": {
+        "type": "String"
+      },
+      "parentname": {
+        "type": "String"
+      }
+    }
+  },
+  "willMoveUpOneLevel": "• {plural} will move up one level",
+  "@willMoveUpOneLevel": {
+    "description": "",
+    "placeholders": {
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryDeleted": "Category \"{category}\" deleted.",
+  "@categoryDeleted": {
+    "description": "",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteCategory": "Failed to delete category: {e}",
+  "@failedToDeleteCategory": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "sub": " • {node} sub",
+  "@sub": {
+    "description": "",
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "str": "{node}{node2}{node3}",
+  "@str": {
+    "description": "",
+    "placeholders": {
+      "node": {
+        "type": "String"
+      },
+      "node2": {
+        "type": "String"
+      },
+      "node3": {
+        "type": "String"
+      }
+    }
+  },
+  "under": "Under: {pathlabel}",
+  "@under": {
+    "description": "",
+    "placeholders": {
+      "pathlabel": {
+        "type": "String"
+      }
+    }
+  },
+  "swipeRightOrTapOnAvailableProductsToAssignSwipeLeftOrTapToRemoveDragTheHandleInInThisCategoryToSetTheDisplayOrder": "Swipe right or tap + on available products to assign. Swipe left or tap – to remove. Drag the ≡ handle in \"In This Category\" to set the display order.",
+  "all": "All ({filteredavailable})",
+  "@all": {
+    "description": "",
+    "placeholders": {
+      "filteredavailable": {
+        "type": "String"
+      }
+    }
+  },
+  "inCategory": "In Category ({filteredassigned})",
+  "@inCategory": {
+    "description": "",
+    "placeholders": {
+      "filteredassigned": {
+        "type": "String"
+      }
+    }
+  },
+  "countOutOfTotal": "{count} of {totalcount}",
+  "@countOutOfTotal": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "totalcount": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryChargeUpdatedFor": "Delivery charge updated for {pincode}",
+  "@deliveryChargeUpdatedFor": {
+    "description": "",
+    "placeholders": {
+      "pincode": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveDeliveryCharge": "Failed to save delivery charge: {e}",
+  "@failedToSaveDeliveryCharge": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "importedPincodesSuccessfully": "Imported {charges} pincodes successfully",
+  "@importedPincodesSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "charges": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouSureYouWantToRemoveDeliveryMappingForPincode": "Are you sure you want to remove delivery mapping for pincode \"{charge}\"?",
+  "@areYouSureYouWantToRemoveDeliveryMappingForPincode": {
+    "description": "",
+    "placeholders": {
+      "charge": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryChargeForDeleted": "Delivery charge for \"{charge}\" deleted.",
+  "@deliveryChargeForDeleted": {
+    "description": "",
+    "placeholders": {
+      "charge": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteDeliveryCharge": "Failed to delete delivery charge: {e}",
+  "@failedToDeleteDeliveryCharge": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "pincode2": "Pincode: {charge}",
+  "@pincode2": {
+    "description": "",
+    "placeholders": {
+      "charge": {
+        "type": "String"
+      }
+    }
+  },
+  "charge": "Charge: {formatcurrency}",
+  "@charge": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "freeOn": "• Free on > {formatcurrency}",
+  "@freeOn": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "minOrder": "• Min order: {formatcurrency}",
+  "@minOrder": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "eta": "• ETA: {charge}",
+  "@eta": {
+    "description": "",
+    "placeholders": {
+      "charge": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeUpdatedSuccessfully": "Employee \"{emp}\" updated successfully!",
+  "@employeeUpdatedSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "emp": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveEmployee": "Failed to save employee: {e}",
+  "@failedToSaveEmployee": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouSureYouWantToRemoveFromTheCompany": "Are you sure you want to remove \"{emp}\" ({emp2}) from the company?",
+  "@areYouSureYouWantToRemoveFromTheCompany": {
+    "description": "",
+    "placeholders": {
+      "emp": {
+        "type": "String"
+      },
+      "emp2": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeDeleted": "Employee \"{emp}\" deleted.",
+  "@employeeDeleted": {
+    "description": "",
+    "placeholders": {
+      "emp": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteEmployee": "Failed to delete employee: {e}",
+  "@failedToDeleteEmployee": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "itemS2": "{order} item(s) · {order2}{order3}",
+  "@itemS2": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "order2": {
+        "type": "String"
+      },
+      "order3": {
+        "type": "String"
+      }
+    }
+  },
+  "str2": "{order}{order2}{order3}",
+  "@str2": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "order2": {
+        "type": "String"
+      },
+      "order3": {
+        "type": "String"
+      }
+    }
+  },
+  "mark": "Mark {orderstatuslabel}",
+  "@mark": {
+    "description": "",
+    "placeholders": {
+      "orderstatuslabel": {
+        "type": "String"
+      }
+    }
+  },
+  "order2": "Order {order} → {orderstatuslabel}",
+  "@order2": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "orderstatuslabel": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotUpdateOrder": "Could not update order: {e}",
+  "@couldNotUpdateOrder": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled": "Order {order} will be cancelled and the customer will see it under \"Cancelled\".",
+  "@orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotCancelOrder": "Could not cancel order: {e}",
+  "@couldNotCancelOrder": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "quantity12510": "Quantity (1 {currentunit}, 2 {currentunit2}, 5 {currentunit3}, 10 {currentunit4})",
+  "@quantity12510": {
+    "description": "",
+    "placeholders": {
+      "currentunit": {
+        "type": "String"
+      },
+      "currentunit2": {
+        "type": "String"
+      },
+      "currentunit3": {
+        "type": "String"
+      },
+      "currentunit4": {
+        "type": "String"
+      }
+    }
+  },
+  "quantity246": "Quantity (2 {currentunit}, 4 {currentunit2}, 6 {currentunit3})",
+  "@quantity246": {
+    "description": "",
+    "placeholders": {
+      "currentunit": {
+        "type": "String"
+      },
+      "currentunit2": {
+        "type": "String"
+      },
+      "currentunit3": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions": "Please complete the required product details above ({missingbasefields}) before configuring options.",
+  "@pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions": {
+    "description": "",
+    "placeholders": {
+      "missingbasefields": {
+        "type": "String"
+      }
+    }
+  },
+  "unitOptionsStrictlySynchronizedWith": "Unit options strictly synchronized with \"{currentunit}\"",
+  "@unitOptionsStrictlySynchronizedWith": {
+    "description": "",
+    "placeholders": {
+      "currentunit": {
+        "type": "String"
+      }
+    }
+  },
+  "eG125": "e.g. 1 {currentunit}, 2 {currentunit2}, 5 {currentunit3}",
+  "@eG125": {
+    "description": "",
+    "placeholders": {
+      "currentunit": {
+        "type": "String"
+      },
+      "currentunit2": {
+        "type": "String"
+      },
+      "currentunit3": {
+        "type": "String"
+      }
+    }
+  },
+  "quickTemplatesStrictlyFor": "Quick Templates (Strictly for {currentunit}):",
+  "@quickTemplatesStrictlyFor": {
+    "description": "",
+    "placeholders": {
+      "currentunit": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor": "Cannot add \"{optname}\" option. The product unit is locked to \"{currentunit}\". Please use Quantity or Size/Color.",
+  "@cannotAddOptionTheProductUnitIsLockedToPleaseUseQuantityOrSizeColor": {
+    "description": "",
+    "placeholders": {
+      "optname": {
+        "type": "String"
+      },
+      "currentunit": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix": "Please complete the required product details above ({missingbasefields}) before generating matrix.",
+  "@pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix": {
+    "description": "",
+    "placeholders": {
+      "missingbasefields": {
+        "type": "String"
+      }
+    }
+  },
+  "generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices": "Generated {variants} variant combinations with locked \"{baseunittype}\" unit & auto-calculated prices!",
+  "@generatedVariantCombinationsWithLockedUnitAutoCalculatedPrices": {
+    "description": "",
+    "placeholders": {
+      "variants": {
+        "type": "String"
+      },
+      "baseunittype": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants": "Please complete the required product details above ({missingbasefields}) before adding variants.",
+  "@pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants": {
+    "description": "",
+    "placeholders": {
+      "missingbasefields": {
+        "type": "String"
+      }
+    }
+  },
+  "unitTypeLockedFromBaseProduct": "Unit Type: {lockedunittype} (Locked from Base Product)",
+  "@unitTypeLockedFromBaseProduct": {
+    "description": "",
+    "placeholders": {
+      "lockedunittype": {
+        "type": "String"
+      }
+    }
+  },
+  "eGLarge500PackOf2": "e.g. Large / 500{lockedunittype} / Pack of 2",
+  "@eGLarge500PackOf2": {
+    "description": "",
+    "placeholders": {
+      "lockedunittype": {
+        "type": "String"
+      }
+    }
+  },
+  "auto": "Auto: ₹{calculatedautoprice}",
+  "@auto": {
+    "description": "",
+    "placeholders": {
+      "calculatedautoprice": {
+        "type": "String"
+      }
+    }
+  },
+  "blankAutoCalculatesToBasedOnBasePrice": "Blank auto-calculates to ₹{calculatedautoprice} based on base price",
+  "@blankAutoCalculatesToBasedOnBasePrice": {
+    "description": "",
+    "placeholders": {
+      "calculatedautoprice": {
+        "type": "String"
+      }
+    }
+  },
+  "editVariant": "Edit Variant ({v})",
+  "@editVariant": {
+    "description": "",
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "productUpdatedSuccessfully": "Product \"{product}\" updated successfully!",
+  "@productUpdatedSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveProduct": "Failed to save product: {e}",
+  "@failedToSaveProduct": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "added": "{images} added",
+  "@added": {
+    "description": "",
+    "placeholders": {
+      "images": {
+        "type": "String"
+      }
+    }
+  },
+  "off": "{discountpercent}% OFF",
+  "@off": {
+    "description": "",
+    "placeholders": {
+      "discountpercent": {
+        "type": "String"
+      }
+    }
+  },
+  "variantCombinations": "{variants} Variant Combinations:",
+  "@variantCombinations": {
+    "description": "",
+    "placeholders": {
+      "variants": {
+        "type": "String"
+      }
+    }
+  },
+  "price2": "Price: ₹{variants}",
+  "@price2": {
+    "description": "",
+    "placeholders": {
+      "variants": {
+        "type": "String"
+      }
+    }
+  },
+  "unitStock": "Unit: {variants} {variants2} • Stock: {variants3} • {variants4}{variants5}",
+  "@unitStock": {
+    "description": "",
+    "placeholders": {
+      "variants": {
+        "type": "String"
+      },
+      "variants2": {
+        "type": "String"
+      },
+      "variants3": {
+        "type": "String"
+      },
+      "variants4": {
+        "type": "String"
+      },
+      "variants5": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouSureYouWantToDelete": "Are you sure you want to delete \"{product}\"?",
+  "@areYouSureYouWantToDelete": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "productDeleted": "Product \"{product}\" deleted.",
+  "@productDeleted": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDeleteProduct": "Failed to delete product: {e}",
+  "@failedToDeleteProduct": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "msgVar": "{product} var",
+  "@msgVar": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "variants": "• {product} variants",
+  "@variants": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteItsContentWillBeLost": "Delete \"{section}\"? Its content will be lost.",
+  "@deleteItsContentWillBeLost": {
+    "description": "",
+    "placeholders": {
+      "section": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionsShownUnderAllDetailsOnTheProductPageSimpleTextParagraphsOrTitleValueTables": "Sections shown under \"All Details\" on the product page — Simple Text paragraphs or Title & Value tables.",
+  "orders2": "Orders: {orders}",
+  "@orders2": {
+    "description": "",
+    "placeholders": {
+      "orders": {
+        "type": "String"
+      }
+    }
+  },
+  "revenue": "Revenue: ₹{revenue}",
+  "@revenue": {
+    "description": "",
+    "placeholders": {
+      "revenue": {
+        "type": "String"
+      }
+    }
+  },
+  "willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount": "\"{voucher}\" will be removed. Shoppers who saved this code will no longer get the discount.",
+  "@willBeRemovedShoppersWhoSavedThisCodeWillNoLongerGetTheDiscount": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherDeleted": "Voucher {voucher} deleted.",
+  "@voucherDeleted": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotDeleteVoucher": "Could not delete voucher: {e}",
+  "@couldNotDeleteVoucher": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "minOrder4": "Min order ₹{voucher} · {voucher2}{voucher3}{voucher4}",
+  "@minOrder4": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      },
+      "voucher2": {
+        "type": "String"
+      },
+      "voucher3": {
+        "type": "String"
+      },
+      "voucher4": {
+        "type": "String"
+      }
+    }
+  },
+  "perShopperExpires": "{usage} · {voucher} per shopper{voucher2} · expires {fmt}",
+  "@perShopperExpires": {
+    "description": "",
+    "placeholders": {
+      "usage": {
+        "type": "String"
+      },
+      "voucher": {
+        "type": "String"
+      },
+      "voucher2": {
+        "type": "String"
+      },
+      "fmt": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherUpdated": "Voucher {voucher} updated.",
+  "@voucherUpdated": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotSaveVoucher": "Could not save voucher: {e}",
+  "@couldNotSaveVoucher": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "companyNotFound": "Company \"{companyname}\" not found.",
+  "@companyNotFound": {
+    "description": "",
+    "placeholders": {
+      "companyname": {
+        "type": "String"
+      }
+    }
+  },
+  "company3": "Company: {widget}",
+  "@company3": {
+    "description": "",
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCreatingAdmin": "Error creating admin: {e}",
+  "@errorCreatingAdmin": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "otpSentTo": "OTP sent to {mobile}",
+  "@otpSentTo": {
+    "description": "",
+    "placeholders": {
+      "mobile": {
+        "type": "String"
+      }
+    }
+  },
+  "error": "Error: {e}",
+  "@error": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "otpResentTo": "OTP resent to {mobile}",
+  "@otpResentTo": {
+    "description": "",
+    "placeholders": {
+      "mobile": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationFailed": "Verification failed: {e}",
+  "@verificationFailed": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationError": "Verification error: {e}",
+  "@verificationError": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "youSave": "You save {formatcurrency}",
+  "@youSave": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "total2": "Total: {item}",
+  "@total2": {
+    "description": "",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "removedFromCart": "{removed} removed from cart",
+  "@removedFromCart": {
+    "description": "",
+    "placeholders": {
+      "removed": {
+        "type": "String"
+      }
+    }
+  },
+  "savedToYourWishlist": "{removed} saved to your wishlist",
+  "@savedToYourWishlist": {
+    "description": "",
+    "placeholders": {
+      "removed": {
+        "type": "String"
+      }
+    }
+  },
+  "placeDirectOrder": "Place Direct Order · {formatcurrency}",
+  "@placeDirectOrder": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "orderWillBeCancelledThisCannotBeUndone": "Order {order} will be cancelled. This cannot be undone.",
+  "@orderWillBeCancelledThisCannotBeUndone": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "order3": "Order {order}",
+  "@order3": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "items": "{order} items · {formatdate}",
+  "@items": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "formatdate": {
+        "type": "String"
+      }
+    }
+  },
+  "msgOn": " on {formatdate}",
+  "@msgOn": {
+    "description": "",
+    "placeholders": {
+      "formatdate": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelled2": "Cancelled{order}",
+  "@cancelled2": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "more": "+{remaining} more",
+  "@more": {
+    "description": "",
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToCartNoLongerAvailable": "{added, plural, =1{1 item} other{{added} items}} added to cart · {missing} no longer available",
+  "@addedToCartNoLongerAvailable": {
+    "description": "",
+    "placeholders": {
+      "added": {
+        "type": "num"
+      },
+      "missing": {
+        "type": "String"
+      }
+    }
+  },
+  "minimumOrderForDelivery": "Minimum Order for Delivery ({currency})",
+  "@minimumOrderForDelivery": {
+    "description": "",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "companyRegisteredSuccessfully": "Company \"{companyname}\" registered successfully!",
+  "@companyRegisteredSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "companyname": {
+        "type": "String"
+      }
+    }
+  },
+  "queue": "{l10n} Queue",
+  "@queue": {
+    "description": "",
+    "placeholders": {
+      "l10n": {
+        "type": "String"
+      }
+    }
+  },
+  "items5": "{o} items · {o2}{o3}",
+  "@items5": {
+    "description": "",
+    "placeholders": {
+      "o": {
+        "type": "String"
+      },
+      "o2": {
+        "type": "String"
+      },
+      "o3": {
+        "type": "String"
+      }
+    }
+  },
+  "manifest": "{l10n} Manifest",
+  "@manifest": {
+    "description": "",
+    "placeholders": {
+      "l10n": {
+        "type": "String"
+      }
+    }
+  },
+  "qtySkuScan": "Qty: {item} · SKU scan",
+  "@qtySkuScan": {
+    "description": "",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails": "Your ticket ID is #{ticketid}.\nAn email has been triggered to ayush123@gmail.com with your attached account details.",
+  "@yourTicketIdIsAnEmailHasBeenTriggeredToAyush123GmailComWithYourAttachedAccountDetails": {
+    "description": "",
+    "placeholders": {
+      "ticketid": {
+        "type": "String"
+      }
+    }
+  },
+  "ticket": "Ticket #{ticketid}",
+  "@ticket": {
+    "description": "",
+    "placeholders": {
+      "ticketid": {
+        "type": "String"
+      }
+    }
+  },
+  "items3": "{filteredlist} items",
+  "@items3": {
+    "description": "",
+    "placeholders": {
+      "filteredlist": {
+        "type": "String"
+      }
+    }
+  },
+  "all2": "All {widget}",
+  "@all2": {
+    "description": "",
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "productCount": "{count, plural, =1{1 product} other{{count} products}}",
+  "@productCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "noProductsFound2": "No {categoryname} products found",
+  "@noProductsFound2": {
+    "description": "",
+    "placeholders": {
+      "categoryname": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToCart": "{product} added to cart",
+  "@addedToCart": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherCopiedToClipboard": "Voucher \"{code}\" copied to clipboard!",
+  "@voucherCopiedToClipboard": {
+    "description": "",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "msgIn": "in {company}",
+  "@msgIn": {
+    "description": "",
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "allProducts": "All Products ({filtered})",
+  "@allProducts": {
+    "description": "",
+    "placeholders": {
+      "filtered": {
+        "type": "String"
+      }
+    }
+  },
+  "scrollForMoreLeft": "Scroll for more ({filtered} left)",
+  "@scrollForMoreLeft": {
+    "description": "",
+    "placeholders": {
+      "filtered": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsCount": " ({stats, plural, =1{1 review} other{{stats} reviews}})",
+  "@reviewsCount": {
+    "description": "",
+    "placeholders": {
+      "stats": {
+        "type": "num"
+      }
+    }
+  },
+  "vouchersPlural11LiveOfferOtherLiveOffers": "{sub} · {vouchers, plural, =1{1 live offer} other{{vouchers} live offers}}",
+  "@vouchersPlural11LiveOfferOtherLiveOffers": {
+    "description": "",
+    "placeholders": {
+      "sub": {
+        "type": "String"
+      },
+      "vouchers": {
+        "type": "num"
+      }
+    }
+  },
+  "useCode": "Use Code: {top}",
+  "@useCode": {
+    "description": "",
+    "placeholders": {
+      "top": {
+        "type": "String"
+      }
+    }
+  },
+  "minOrder3": "Min order ₹{v}",
+  "@minOrder3": {
+    "description": "",
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "couponCopiedApplyAtCheckout": "Coupon {v} copied! Apply at checkout",
+  "@couponCopiedApplyAtCheckout": {
+    "description": "",
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryLocationSetTo": "Delivery location set to: {detected} ({detected2})",
+  "@deliveryLocationSetTo": {
+    "description": "",
+    "placeholders": {
+      "detected": {
+        "type": "String"
+      },
+      "detected2": {
+        "type": "String"
+      }
+    }
+  },
+  "pincode3": "Pincode {cleanpin}",
+  "@pincode3": {
+    "description": "",
+    "placeholders": {
+      "cleanpin": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryLocationUpdatedTo": "Delivery location updated to {finalcity} ({cleanpin})",
+  "@deliveryLocationUpdatedTo": {
+    "description": "",
+    "placeholders": {
+      "finalcity": {
+        "type": "String"
+      },
+      "cleanpin": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouSureYouWantToDelete2": "Are you sure you want to delete \"{addr}: {addr2}\"?",
+  "@areYouSureYouWantToDelete2": {
+    "description": "",
+    "placeholders": {
+      "addr": {
+        "type": "String"
+      },
+      "addr2": {
+        "type": "String"
+      }
+    }
+  },
+  "saveHomeWorkOrOtherAddressSaved3": "Save home, work or other address (saved: {addresses}/3)",
+  "@saveHomeWorkOrOtherAddressSaved3": {
+    "description": "",
+    "placeholders": {
+      "addresses": {
+        "type": "String"
+      }
+    }
+  },
+  "of3Added": "{addresses} of 3 added",
+  "@of3Added": {
+    "description": "",
+    "placeholders": {
+      "addresses": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryAvailableTo": "Delivery available to {addr}",
+  "@deliveryAvailableTo": {
+    "description": "",
+    "placeholders": {
+      "addr": {
+        "type": "String"
+      }
+    }
+  },
+  "off2": "-{discountpercent}% OFF",
+  "@off2": {
+    "description": "",
+    "placeholders": {
+      "discountpercent": {
+        "type": "String"
+      }
+    }
+  },
+  "save2": "Save {formatcurrency}",
+  "@save2": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "sku3": "SKU: {skuof}",
+  "@sku3": {
+    "description": "",
+    "placeholders": {
+      "skuof": {
+        "type": "String"
+      }
+    }
+  },
+  "viewAllDetailsMore": "View all details ({hidden} more)",
+  "@viewAllDetailsMore": {
+    "description": "",
+    "placeholders": {
+      "hidden": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToCart2": "{p}{variantlabel} added to cart",
+  "@addedToCart2": {
+    "description": "",
+    "placeholders": {
+      "p": {
+        "type": "String"
+      },
+      "variantlabel": {
+        "type": "String"
+      }
+    }
+  },
+  "off3": "{percent}% OFF",
+  "@off3": {
+    "description": "",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "searchIn": "Search in {widget}",
+  "@searchIn": {
+    "description": "",
+    "placeholders": {
+      "widget": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCount": "{resultcount, plural, =1{1 item} other{{resultcount} items}}",
+  "@itemCount": {
+    "description": "",
+    "placeholders": {
+      "resultcount": {
+        "type": "num"
+      }
+    }
+  },
+  "noProductsFoundFor": "No products found for \"{query}\"",
+  "@noProductsFoundFor": {
+    "description": "",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "reviews2": "{count} reviews",
+  "@reviews2": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotSignInWithProvidedCredentials": "Could not sign in with provided credentials.",
+  "noAdminProfileFoundForAccount": "No admin profile found for account \"{email}\".",
+  "@noAdminProfileFoundForAccount": {
+    "description": "",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "adminAccountIsAssignedToNot": "Admin account is assigned to \"{registeredname}\", not \"{companyname}\".",
+  "@adminAccountIsAssignedToNot": {
+    "description": "",
+    "placeholders": {
+      "registeredname": {
+        "type": "String"
+      },
+      "companyname": {
+        "type": "String"
+      }
+    }
+  },
+  "noEmployeeProfileFoundForAccount": "No employee profile found for account \"{email}\".",
+  "@noEmployeeProfileFoundForAccount": {
+    "description": "",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "lowStock": "Low stock",
+  "relevance": "Relevance",
+  "nameAZ": "Name (A–Z)",
+  "nameZA": "Name (Z–A)",
+  "priceLowToHigh": "Price (low to high)",
+  "priceHighToLow": "Price (high to low)",
+  "ratingTopPicksFirst": "Rating (top picks first)",
+  "readyForPickupBy": "Ready for pickup by {fmt}",
+  "@readyForPickupBy": {
+    "description": "",
+    "placeholders": {
+      "fmt": {
+        "type": "String"
+      }
+    }
+  },
+  "arrivingBy": "Arriving by {fmt}",
+  "@arrivingBy": {
+    "description": "",
+    "placeholders": {
+      "fmt": {
+        "type": "String"
+      }
+    }
+  },
+  "pm": "PM",
+  "am": "AM",
+  "today": "{time} today",
+  "@today": {
+    "description": "",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tomorrow": "{time} tomorrow",
+  "@tomorrow": {
+    "description": "",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "mon": "Mon",
+  "tue": "Tue",
+  "wed": "Wed",
+  "thu": "Thu",
+  "fri": "Fri",
+  "sat": "Sat",
+  "sun": "Sun",
+  "msgLate": " (late)",
+  "openNow2": "Open Now",
+  "openNowCloses": "Open Now · Closes {close}{closesuffix}",
+  "@openNowCloses": {
+    "description": "",
+    "placeholders": {
+      "close": {
+        "type": "String"
+      },
+      "closesuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "closedOpens": "Closed · Opens {time}{day}",
+  "@closedOpens": {
+    "description": "",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "msgNew": "New",
+  "msg1Follower": "1 follower",
+  "followers": "{followercount} followers",
+  "@followers": {
+    "description": "",
+    "placeholders": {
+      "followercount": {
+        "type": "String"
+      }
+    }
+  },
+  "productTitleIsRequired": "Product title is required.",
+  "useAtLeast2Characters": "Use at least 2 characters.",
+  "mrpMustBeGreaterThan0": "MRP must be greater than 0.",
+  "sellingPriceCannotBeNegative": "Selling price cannot be negative.",
+  "sellingPriceMustBeLowerThanTheMrpOrLeftAt0": "Selling price must be lower than the MRP (or left at 0).",
+  "stockCannotBeNegative": "Stock cannot be negative.",
+  "unitMustBeGreaterThan0": "Unit must be greater than 0.",
+  "pickACategoryForThisProduct": "Pick a category for this product.",
+  "weightBasedProductsNeedAUnitKgG": "Weight based products need a unit (kg, g, ...).",
+  "categoryNameIsRequired": "Category name is required.",
+  "aCategoryWithThisNameAlreadyExists": "A category with this name already exists.",
+  "aCategoryCannotBeItsOwnParent": "A category cannot be its own parent.",
+  "voucherCodeIsRequired": "Voucher code is required.",
+  "useAtLeastCharacters": "Use at least {codeminlength} characters.",
+  "@useAtLeastCharacters": {
+    "description": "",
+    "placeholders": {
+      "codeminlength": {
+        "type": "String"
+      }
+    }
+  },
+  "useAtMostCharacters": "Use at most {codemaxlength} characters.",
+  "@useAtMostCharacters": {
+    "description": "",
+    "placeholders": {
+      "codemaxlength": {
+        "type": "String"
+      }
+    }
+  },
+  "onlyLettersAndNumbersAreAllowed": "Only letters and numbers are allowed.",
+  "thisCodeAlreadyExistsForThisStore": "This code already exists for this store.",
+  "enterAPercentageGreaterThan0": "Enter a percentage greater than 0.",
+  "percentageCannotExceed100": "Percentage cannot exceed 100.",
+  "enterAnAmountGreaterThan0": "Enter an amount greater than 0.",
+  "minimumOrderCannotBeNegative": "Minimum order cannot be negative.",
+  "perUserLimitMustBeAtLeast1": "Per-user limit must be at least 1.",
+  "totalUsageLimitMustBeAtLeast1": "Total usage limit must be at least 1.",
+  "totalLimitCannotBeLowerThanThePerUserLimit": "Total limit cannot be lower than the per-user limit.",
+  "expiryDateMustBeInTheFuture": "Expiry date must be in the future.",
+  "selectAtLeastOneProduct": "Select at least one product.",
+  "selectAtLeastOneCategory": "Select at least one category.",
+  "voucherApplied2": "Voucher applied.",
+  "thatCodeIsNotValidForThisStore": "That code is not valid for this store.",
+  "thisVoucherIsCurrentlyDisabled": "This voucher is currently disabled.",
+  "thisVoucherHasExpired": "This voucher has expired.",
+  "addAFewMoreItemsToUseThisVoucher": "Add a few more items to use this voucher.",
+  "thisVoucherDoesNotApplyToTheItemsInYourCart": "This voucher does not apply to the items in your cart.",
+  "youHaveAlreadyUsedThisVoucherTheMaximumNumberOfTimes": "You have already used this voucher the maximum number of times.",
+  "thisVoucherHasReachedItsRedemptionLimit": "This voucher has reached its redemption limit.",
+  "thisVoucherIsForFirstTimeOrdersOnly": "This voucher is for first-time orders only.",
+  "voucherCannotBeApplied": "Voucher cannot be applied.",
+  "onlyLeft": "Only {left} left",
+  "@onlyLeft": {
+    "description": "",
+    "placeholders": {
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "near": "Near {landmark}",
+  "@near": {
+    "description": "",
+    "placeholders": {
+      "landmark": {
+        "type": "String"
+      }
+    }
+  },
+  "weightBased": "Weight based",
+  "quantityBased": "Quantity based",
+  "size": "Size",
+  "color": "Color",
+  "percentage": "Percentage",
+  "fixedAmount": "Fixed amount",
+  "freeShipping": "Free shipping",
+  "specificCategories": "Specific categories",
+  "specificProducts": "Specific products",
+  "allCategories": "All categories",
+  "off4": "₹{trim} OFF",
+  "@off4": {
+    "description": "",
+    "placeholders": {
+      "trim": {
+        "type": "String"
+      }
+    }
+  },
+  "aNewVersionIsAvailablePleaseUpdate": "A new version is available. Please update.",
+  "aNewVersionIsAvailable": "A new version is available.",
+  "id2": "ID",
+  "onTheWay2": "On the way",
+  "guestCustomer": "Guest Customer",
+  "signInToSyncYourCartAndOrders": "Sign in to sync your cart and orders",
+  "vouchers": "Vouchers",
+  "saved": "Saved",
+  "myActivity": "My Activity",
+  "portalsAdmin": "Portals & Admin",
+  "accountSettings": "Account Settings",
+  "editAddress": "Edit Address",
+  "enterName": "Enter name",
+  "enterPhone": "Enter phone",
+  "msg10DigitsRequired": "10 digits required",
+  "enterPincode": "Enter pincode",
+  "msg6Digits": "6 digits",
+  "enterCity": "Enter city",
+  "enterHouseFlatNumber": "Enter house/flat number",
+  "work": "Work",
+  "updateAddress": "Update Address",
+  "saveDeliverHere": "Save & Deliver Here",
+  "ordersPipeline": "Orders Pipeline",
+  "employees": "Employees",
+  "admins": "Admins",
+  "deliveryCharges": "Delivery Charges",
+  "banners": "Banners",
+  "recommendations": "Recommendations",
+  "reports": "Reports",
+  "qrCodes": "QR Codes",
+  "categoryId": "Category ID",
+  "url": "URL",
+  "grocery": "Grocery",
+  "electronics": "Electronics",
+  "fashionApparel": "Fashion & Apparel",
+  "healthBeauty": "Health & Beauty",
+  "homeKitchen": "Home & Kitchen",
+  "bakeryDairy": "Bakery & Dairy",
+  "personalCare": "Personal Care",
+  "sportsOutdoors": "Sports & Outdoors",
+  "toysGames": "Toys & Games",
+  "addNewCategory": "Add New Category",
+  "categoryDetails": "Category Details",
+  "categoryNameIsRequired2": "Category name is required",
+  "classificationTypeIsRequired": "Classification type is required",
+  "saveChanges": "Save Changes",
+  "createCategory": "Create Category",
+  "companyScope": "Company Scope",
+  "globalScope": "Global Scope",
+  "doneReordering": "Done reordering",
+  "reorder": "Reorder",
+  "topLevel": "Top level",
+  "assignedProducts2": "Assigned products",
+  "expand": "Expand",
+  "collapse": "Collapse",
+  "reorderingTopLevel": "Reordering: top level",
+  "dragToReorder": "Drag to reorder",
+  "allProducts2": "All Products",
+  "inThisCategory": "In This Category",
+  "noAssignedProductsMatchSearch": "No assigned products match search",
+  "noProductsAssignedYet": "No products assigned yet",
+  "noAvailableProductsMatchSearch": "No available products match search",
+  "allProductsAreAssigned": "All products are assigned!",
+  "msg6DigitAreaCodeForDeliveryService": "6-digit area code for delivery service",
+  "enterA6DigitPincode": "Enter a 6-digit pincode",
+  "pincodeMustBeExactly6Digits": "Pincode must be exactly 6 digits",
+  "ordersCanBeDeliveredToThisPincode": "Orders can be delivered to this pincode",
+  "deliveryTemporarilySuspendedToThisPincode": "Delivery temporarily suspended to this pincode",
+  "enterDeliveryCharge": "Enter delivery charge",
+  "enterAValidAmount": "Enter a valid amount",
+  "customersGet0DeliveryFeeWhenOrderSubtotalMeetsThisAmount": "Customers get ₹0 delivery fee when order subtotal meets this amount",
+  "displayedToCustomersOnCheckoutProductPages": "Displayed to customers on checkout & product pages",
+  "saving": "Saving...",
+  "updateDeliveryCharge": "Update Delivery Charge",
+  "saveDeliveryCharge": "Save Delivery Charge",
+  "serviceable": "Serviceable",
+  "suspended": "Suspended",
+  "manufacturer": "Manufacturer",
+  "manager": "Manager",
+  "dispatcher": "Dispatcher",
+  "cashier": "Cashier",
+  "supervisor": "Supervisor",
+  "qualityInspector": "Quality Inspector",
+  "employeeProfile": "Employee Profile",
+  "staffProvisioning": "Staff Provisioning",
+  "fullNameIsRequired": "Full name is required",
+  "emailIsRequired": "Email is required",
+  "enterAValidEmail": "Enter a valid email",
+  "passwordMustBeAtLeast6Characters": "Password must be at least 6 characters",
+  "selectDateOfBirth": "Select Date of Birth",
+  "provisionEmployeeAccount": "Provision Employee Account",
+  "activeShift": "Active Shift",
+  "offShift": "Off Shift",
+  "dispatch": "Dispatch",
+  "inventory": "Inventory",
+  "noOrdersYet2": "No orders yet",
+  "ordersFromYourStoreWillAppearHereInstantly": "Orders from your store will appear here instantly.",
+  "noOrdersMatchTheseFilters": "No orders match these filters",
+  "clearTheSearchBoxOrPickAnotherStatus": "Clear the search box or pick another status.",
+  "all3": "All",
+  "openOrders": "Open orders",
+  "allOrders": "All orders",
+  "revenue2": "Revenue",
+  "ddMmmHhMmA": "dd MMM, hh:mm a",
+  "paymentDoneReceived": "Payment: Done (Received)",
+  "paymentPendingManualOffline": "Payment: Pending (Manual / Offline)",
+  "paymentConfirmedByStore": "Payment confirmed by store",
+  "customerWillPayOfflineToggleToMarkAsDone": "Customer will pay offline. Toggle to mark as Done.",
+  "payable": "Payable",
+  "productTitle2": "Product Title",
+  "baseMrpPrice": "Base MRP / Price",
+  "baseUnitValue": "Base Unit Value",
+  "baseSku": "Base SKU",
+  "description": "Description",
+  "weight": "Weight",
+  "sMLXlXxl": "S, M, L, XL, XXL",
+  "msg1kg2kg5kg10kg": "1kg, 2kg, 5kg, 10kg",
+  "msg500g1kg2kg5kg": "500g, 1kg, 2kg, 5kg",
+  "msg250g500g1kg": "250g, 500g, 1kg",
+  "msg50mg100mg250mg500mg": "50mg, 100mg, 250mg, 500mg",
+  "msg1lb2lb5lb10lb": "1lb, 2lb, 5lb, 10lb",
+  "box": "Box",
+  "msg1Box2Boxes5Boxes10Boxes": "1 box, 2 boxes, 5 boxes, 10 boxes",
+  "msg1Pack2Packs5Packs10Packs": "1 pack, 2 packs, 5 packs, 10 packs",
+  "bottle": "Bottle",
+  "msg1Bottle2Bottles4Bottles6Bottles": "1 bottle, 2 bottles, 4 bottles, 6 bottles",
+  "redBlueBlackWhiteGreen": "Red, Blue, Black, White, Green",
+  "navyCrimsonOliveGold": "Navy, Crimson, Olive, Gold",
+  "metricTon": "metric ton",
+  "halfDozen": "half dozen",
+  "msg1Dozen": "1 dozen",
+  "msg1Pair": "1 pair",
+  "volume": "Volume",
+  "customPriceOverrideApplied": "Custom price override applied",
+  "unit": "Unit",
+  "option": "Option",
+  "addNewProduct": "Add New Product",
+  "updateCatalogItemDetailsPricingImagesVariantsAndSpecifications": "Update catalog item details, pricing, images, variants, and specifications.",
+  "createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls": "Create new catalog items with dynamic variants, custom options, gallery, and inventory controls.",
+  "productTitleIsRequired2": "Product title is required",
+  "enterPrice": "Enter price",
+  "validNumber": "Valid number",
+  "msgRequired": "Required",
+  "enterInventoryCount": "Enter inventory count",
+  "validInteger": "Valid integer",
+  "count": "Count",
+  "specificCount": "Specific Count",
+  "unlimitedStock": "Unlimited Stock",
+  "outOfStock2": "Out of Stock",
+  "finishedOutOfStock": "Finished / Out of Stock",
+  "quantityBased2": "Quantity Based",
+  "weightBased2": "Weight Based",
+  "updateProduct": "Update Product",
+  "createProduct": "Create Product",
+  "soldOut": "Sold out",
+  "uncategorised": "Uncategorised",
+  "stockUnlimited": "Stock: Unlimited",
+  "sectionTitleIsRequired": "Section title is required",
+  "textIsRequired": "Text is required",
+  "colored": "Colored",
+  "logo": "Logo",
+  "noPinnedProduct": "(no pinned product)",
+  "monthly": "Monthly",
+  "yearly": "Yearly",
+  "noVouchersYet": "No vouchers yet",
+  "createYourFirstCouponCodeToRunAPromotionForThisStore": "Create your first coupon code to run a promotion for this store.",
+  "createVoucher2": "Create Voucher",
+  "noVouchersMatchTheseFilters": "No vouchers match these filters",
+  "tryClearingTheSearchBoxOrChoosingAll": "Try clearing the search box or choosing \"All\".",
+  "paused": "Paused",
+  "expired": "Expired",
+  "live2": "Live",
+  "limitReached": "Limit reached",
+  "acceptingRedemptions": "Accepting redemptions",
+  "ddMmmYyyy": "dd MMM yyyy",
+  "voucherExpiry": "Voucher expiry",
+  "editVoucher2": "Edit Voucher",
+  "lettersAndNumbersOnly": "Letters and numbers only",
+  "discount3": "Discount % *",
+  "discountAmount": "Discount amount (₹) *",
+  "saveChanges2": "Save changes",
+  "accessDeniedByServerPleaseCheckYourInternetConnectionAndTryAgain": "Access denied by server. Please check your internet connection and try again.",
+  "invalidEmailPasswordOrCompanyCredentials": "Invalid email, password, or company credentials.",
+  "authenticationFailed": "Authentication failed.",
+  "invalidAdminEmailOrPassword": "Invalid admin email or password.",
+  "thisAdminAccountHasBeenDisabled": "This admin account has been disabled.",
+  "tooManyAttemptsPleaseWaitAMomentAndTryAgain": "Too many attempts. Please wait a moment and try again.",
+  "invalidEmployeeEmailPasswordOrCompanyName": "Invalid employee email, password, or company name.",
+  "invalidEmployeeEmailOrPassword": "Invalid employee email or password.",
+  "thisEmployeeAccountHasBeenDisabled": "This employee account has been disabled.",
+  "shopper": "Shopper",
+  "enter10DigitNumber": "Enter 10-digit number",
+  "enterThe6DigitCodeSentViaSms": "Enter the 6-digit code sent via SMS",
+  "signingUp": "Signing up...",
+  "signUpWithGoogle": "Sign up with Google",
+  "couldNotResendOtpTryAgain": "Could not resend OTP. Try again.",
+  "signingIn": "Signing in...",
+  "signInWithGoogle": "Sign in with Google",
+  "enter10DigitIndianMobileNumber": "Enter 10-digit Indian mobile number",
+  "enterAValid10DigitMobileNumber": "Enter a valid 10-digit mobile number",
+  "houseFlatNumberIsRequired": "House / Flat number is required",
+  "streetOrAreaIsRequired": "Street or Area is required",
+  "pincodeIsRequired": "Pincode is required",
+  "enterAValid6DigitPincode": "Enter a valid 6-digit pincode",
+  "store2": "Store",
+  "moveToWishlist2": "MOVE TO WISHLIST",
+  "enterAVoucherCode": "Enter a voucher code.",
+  "pleaseSelectADeliveryAddress": "Please select a delivery address.",
+  "noOrderItemsAreAvailable": "No order items are available.",
+  "storeTotal": "Store total",
+  "mobile": "Mobile",
+  "loadingOrderDetails": "Loading order details...",
+  "paid": "Paid",
+  "paymentOnDelivery": "Payment on delivery",
+  "payOnDelivery": "Pay on delivery",
+  "viewCart": "VIEW CART",
+  "usd": "$ USD",
+  "thisEmailIsAlreadyRegisteredButThePasswordProvidedDoesNotMatchPleaseEnterYourExistingPasswordSignInViaAdminLoginOrUseADifferentEmail": "This email is already registered, but the password provided does not match. Please enter your existing password, sign in via Admin Login, or use a different email.",
+  "failedToObtainAuthenticatedUserId": "Failed to obtain authenticated user ID.",
+  "authenticationErrorOccurred": "Authentication error occurred.",
+  "passwordIsTooWeakPleaseUseAtLeast6Characters": "Password is too weak. Please use at least 6 characters.",
+  "thatEmailIsAlreadyRegisteredPleaseSignInViaAdminLoginOrUseADifferentEmail": "That email is already registered. Please sign in via Admin Login or use a different email.",
+  "pleaseEnterAValidEmailAddress": "Please enter a valid email address.",
+  "invalidCredentialsIfYouAlreadyHaveAnAccountEnterItsExistingPasswordOrSignInViaAdminLogin": "Invalid credentials. If you already have an account, enter its existing password or sign in via Admin Login.",
+  "sentToAdmin": "Sent to Admin",
+  "packingDone": "Packing Done",
+  "orderIssueTracking": "Order Issue & Tracking",
+  "deliveryDelayScheduling": "Delivery Delay & Scheduling",
+  "paymentRefundInquiries": "Payment & Refund Inquiries",
+  "damagedWrongItemReceived": "Damaged / Wrong Item Received",
+  "productDetailsAvailability": "Product Details & Availability",
+  "accountLoginAssistance": "Account & Login Assistance",
+  "generalFeedbackSuggestions": "General Feedback & Suggestions",
+  "otherInquiries": "Other Inquiries",
+  "orderIdOptional": "Order ID (Optional)",
+  "eGOrd10294OrPasteOrderId": "e.g. ORD-10294 or paste order ID",
+  "yourName": "Your Name *",
+  "enterYourName": "Enter your name",
+  "nameIsRequired": "Name is required",
+  "msg10DigitPhone": "10-digit phone",
+  "phoneIsRequired": "Phone is required",
+  "yourEmailAddressFrom": "Your Email Address (From) *",
+  "eGUserExampleCom": "e.g. user@example.com",
+  "deliveryContactAddress": "Delivery / Contact Address",
+  "enterYourAddressToAttachWithQuery": "Enter your address to attach with query",
+  "subjectQuerySummary": "Subject / Query Summary *",
+  "briefSummaryOfTheIssue": "Brief summary of the issue",
+  "pleaseEnterASummary": "Please enter a summary",
+  "detailedQueryMessage": "Detailed Query / Message *",
+  "explainYourIssueQuestionsOrFeedbackInDetailSoWeCanAssistYouQuickly": "Explain your issue, questions or feedback in detail so we can assist you quickly...",
+  "pleaseDescribeYourQueryInAtLeast10Characters": "Please describe your query in at least 10 characters",
+  "ordersTracking": "Orders & Tracking",
+  "deliveryShipping": "Delivery & Shipping",
+  "paymentsRefunds": "Payments & Refunds",
+  "returnsExchanges": "Returns & Exchanges",
+  "accountSecurity": "Account & Security",
+  "discountsOffers": "Discounts & Offers",
+  "howDoITrackMyOrderStatusInRealTime": "How do I track my order status in real time?",
+  "youCanTrackYourLiveOrderProgressByNavigatingToAccountMyOrdersAndSelectingYourActiveOrder": "You can track your live order progress by navigating to \"Account > My Orders\" and selecting your active order. ",
+  "youWillSeeStepByStepUpdatesFromOrderPlacedConfirmedPackedOutForDeliveryToDeliveredWithLiveStatusTimelines": "You will see step-by-step updates from Order Placed, Confirmed, Packed, Out for Delivery, to Delivered with live status timelines.",
+  "canICancelOrModifyAnOrderAfterPlacingIt": "Can I cancel or modify an order after placing it?",
+  "youCanCancelYourOrderFromTheOrderDetailsScreenBeforeItEntersThePackedOrOutForDeliveryState": "You can cancel your order from the Order Details screen before it enters the \"Packed\" or \"Out for Delivery\" state. ",
+  "onceAnOrderIsPackedOrDispatchedByTheMerchantCancellationRequestsMustBeHandledByContactingCustomerSupport": "Once an order is packed or dispatched by the merchant, cancellation requests must be handled by contacting customer support.",
+  "howIsTheDeliveryChargeCalculatedForMyLocation": "How is the delivery charge calculated for my location?",
+  "deliveryChargesAreComputedDynamicallyBasedOnTheMerchantSDeliveryZoneRatesForYourPinCodeOrDistance": "Delivery charges are computed dynamically based on the merchant's delivery zone rates for your PIN code or distance. ",
+  "whenYouSelectOrEnterYourDeliveryAddressAtCheckoutAnyApplicableDeliveryFeeIsTransparentlyShownInTheBillSummary": "When you select or enter your delivery address at checkout, any applicable delivery fee is transparently shown in the bill summary.",
+  "whatAreTheEstimatedDeliveryTimelines": "What are the estimated delivery timelines?",
+  "standardLocalDeliveriesTypicallyArriveWithinTheMerchantSDesignatedDeliveryWindowUsually3090MinutesForQuickCommerceItemsOr12BusinessDaysForStandardItems": "Standard local deliveries typically arrive within the merchant's designated delivery window (usually 30–90 minutes for quick-commerce items or 1–2 business days for standard items). ",
+  "estimatedDeliveryTimesAreDisplayedOnTheProductPageAndCheckoutScreen": "Estimated delivery times are displayed on the product page and checkout screen.",
+  "whatPaymentMethodsAreSupported": "What payment methods are supported?",
+  "weSupportManualCashOnDeliveryCodAndPhysicalPaymentUponDelivery": "We support Manual / Cash on Delivery (COD) and physical payment upon delivery. ",
+  "theDeliveryPartnerOrMerchantUpdatesThePaymentStatusDirectlyOnceThePaymentIsCompleted": "The delivery partner or merchant updates the payment status directly once the payment is completed.",
+  "howDoRefundsWorkForCancelledOrders": "How do refunds work for cancelled orders?",
+  "ifAnOrderWasPrepaidOrCancelledBeforeFulfillmentYourRefundIsInitiatedImmediatelyByTheMerchant": "If an order was prepaid or cancelled before fulfillment, your refund is initiated immediately by the merchant. ",
+  "refundsTypicallyReflectInYourOriginalPaymentSourceWithin35BusinessDays": "Refunds typically reflect in your original payment source within 3–5 business days.",
+  "whatIsTheReturnAndReplacementPolicy": "What is the return and replacement policy?",
+  "eligibleItemsCanBeReturnedOrReplacedWithin7DaysOfDeliveryIfTheyAreDamagedDefectiveOrDifferentFromDescribed": "Eligible items can be returned or replaced within 7 days of delivery if they are damaged, defective, or different from described. ",
+  "toRequestAReturnGoToYourOrderDetailsOrSubmitAQueryUsingTheContactSupportFormWithPhotosOfTheDamagedItem": "To request a return, go to your order details or submit a query using the Contact Support form with photos of the damaged item.",
+  "howDoIAddOrManageMultipleDeliveryAddresses": "How do I add or manage multiple delivery addresses?",
+  "goToAccountSavedAddressesToAddUpTo3SavedDeliveryLocationsHomeWorkOther": "Go to \"Account > Saved Addresses\" to add up to 3 saved delivery locations (Home, Work, Other). ",
+  "youCanAlsoSelectOrSwitchYourActiveDeliveryAddressDirectlyFromTheTopBarOnTheHomeScreen": "You can also select or switch your active delivery address directly from the top bar on the Home Screen.",
+  "howDoIApplyADiscountVoucherOrCouponCode": "How do I apply a discount voucher or coupon code?",
+  "duringCheckoutTapTheApplyVoucherSectionUnderOrderSummary": "During checkout, tap the \"Apply Voucher\" section under Order Summary. ",
+  "selectAnAvailablePromoCodeOrTypeYourVoucherCodeToInstantlyReceiveADiscountOnEligibleCartItems": "Select an available promo code or type your voucher code to instantly receive a discount on eligible cart items.",
+  "howIsMyPersonalDataAndAccountInformationSecured": "How is my personal data and account information secured?",
+  "weEmployIndustryStandardEncryptionProtocolsAndSecureAuthenticationTokensToProtectYourPersonalInformationDeliveryAddressesAndOrderHistory": "We employ industry-standard encryption protocols and secure authentication tokens to protect your personal information, delivery addresses, and order history.",
+  "shopByCategory": "Shop by Category",
+  "exploreAllShopsStores": "Explore All Shops & Stores",
+  "deliveryPickup": "Delivery & pickup",
+  "noProductsInThisCategory": "No products in this category",
+  "viewCart2": "View Cart",
+  "rating": "Rating",
+  "inStock3": "In-Stock",
+  "price3": "Price ↓",
+  "price4": "Price ↑",
+  "price5": "Price",
+  "selfPickupOnly": "Self-Pickup only",
+  "homeDeliveryAvailableNoMinOrder": "Home Delivery available • No min order",
+  "storefrontService": "Storefront service",
+  "freeDeliveryOnYourOrder": "Free Delivery on your order",
+  "storeExclusiveDeal": "Store exclusive deal",
+  "freeDel": "FREE DEL",
+  "noMinOrder": "No min. order",
+  "deliverTo2": "Deliver to",
+  "specialMarketplaceOffer": "Special Marketplace Offer",
+  "exploreCategories": "Explore Categories",
+  "storeVouchersDeals": "Store Vouchers & Deals",
+  "onAllOrders": "On all orders",
+  "copied": "COPIED",
+  "copy": "COPY",
+  "shopsNearYou": "Shops near you",
+  "trendingNow2": "Trending Now 🔥",
+  "enterYour10DigitIndianMobileNumber": "Enter your 10-digit Indian mobile number",
+  "useCurrentLocation": "Use Current Location",
+  "detectingYourCurrentLocation": "Detecting your current location...",
+  "autoDetectViaGpsDeviceNetwork": "Auto-detect via GPS / Device network",
+  "maximum3AddressesSaved": "Maximum 3 addresses saved",
+  "deliveryNotAvailableToThisPincode": "Delivery not available to this pincode",
+  "highlights": "Highlights",
+  "details": "Details",
+  "specifications": "Specifications",
+  "deliveryPolicies": "Delivery & Policies",
+  "allStoreProducts": "All Store Products",
+  "browseAllProducts": "Browse All Products",
+  "categoryCreatedSuccessfully": "Category \"{category}\" created successfully!",
+  "@categoryCreatedSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "reorderingInside": "Reordering inside \"{parentname}\"",
+  "@reorderingInside": {
+    "description": "",
+    "placeholders": {
+      "parentname": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryChargeCreatedFor": "Delivery charge created for {pincode}",
+  "@deliveryChargeCreatedFor": {
+    "description": "",
+    "placeholders": {
+      "pincode": {
+        "type": "String"
+      }
+    }
+  },
+  "freeOn2": "Free on > {formatcurrency}",
+  "@freeOn2": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "min": "Min: {formatcurrency}",
+  "@min": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "employeeProvisionedSuccessfully": "Employee \"{emp}\" provisioned successfully!",
+  "@employeeProvisionedSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "emp": {
+        "type": "String"
+      }
+    }
+  },
+  "discount2": "Discount{order}",
+  "@discount2": {
+    "description": "",
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "productCreatedSuccessfully": "Product \"{product}\" created successfully!",
+  "@productCreatedSuccessfully": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "stock": "Stock: {product} {product2}",
+  "@stock": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "product2": {
+        "type": "String"
+      }
+    }
+  },
+  "orderReport": "{period} Order Report",
+  "@orderReport": {
+    "description": "",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "uses": "{voucher}/{voucher2} uses",
+  "@uses": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      },
+      "voucher2": {
+        "type": "String"
+      }
+    }
+  },
+  "usesUnlimited": "{voucher} uses (unlimited)",
+  "@usesUnlimited": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherCreated": "Voucher {voucher} created.",
+  "@voucherCreated": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotVerifyCompanyPleaseTryAgain": "Could not verify company. Please try again.\n{e}",
+  "@couldNotVerifyCompanyPleaseTryAgain": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "isUnavailable": "{item} is unavailable",
+  "@isUnavailable": {
+    "description": "",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "isUnavailable2": "{item} ({item2}) is unavailable",
+  "@isUnavailable2": {
+    "description": "",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "item2": {
+        "type": "String"
+      }
+    }
+  },
+  "isOutOfStock": "{item} is out of stock",
+  "@isOutOfStock": {
+    "description": "",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "quantityReducedToStock": "{item}: quantity reduced to {qty} (stock)",
+  "@quantityReducedToStock": {
+    "description": "",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "String"
+      }
+    }
+  },
+  "priceUpdatedFor": "Price updated for {item}",
+  "@priceUpdatedFor": {
+    "description": "",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotPlaceTheOrder": "Could not place the order: {e}",
+  "@couldNotPlaceTheOrder": {
+    "description": "",
+    "placeholders": {
+      "e": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPlaceOrder": "Confirm & Place Order · {formatcurrency}",
+  "@confirmPlaceOrder": {
+    "description": "",
+    "placeholders": {
+      "formatcurrency": {
+        "type": "String"
+      }
+    }
+  },
+  "selfPickupOnlyMinOrder": "Self-Pickup only • Min order {minorderformatted}",
+  "@selfPickupOnlyMinOrder": {
+    "description": "",
+    "placeholders": {
+      "minorderformatted": {
+        "type": "String"
+      }
+    }
+  },
+  "homeDeliveryAvailableMinOrder": "Home Delivery available • Min order {minorderformatted}",
+  "@homeDeliveryAvailableMinOrder": {
+    "description": "",
+    "placeholders": {
+      "minorderformatted": {
+        "type": "String"
+      }
+    }
+  },
+  "flatOff": "Flat {top}% OFF",
+  "@flatOff": {
+    "description": "",
+    "placeholders": {
+      "top": {
+        "type": "String"
+      }
+    }
+  },
+  "flatOff2": "Flat ₹{top} OFF",
+  "@flatOff2": {
+    "description": "",
+    "placeholders": {
+      "top": {
+        "type": "String"
+      }
+    }
+  },
+  "validOnOrdersOver": "Valid on orders over ₹{top}",
+  "@validOnOrdersOver": {
+    "description": "",
+    "placeholders": {
+      "top": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersOver": "Orders over ₹{voucher}",
+  "@ordersOver": {
+    "description": "",
+    "placeholders": {
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "deliverTo": "Deliver to {activeaddress}",
+  "@deliverTo": {
+    "description": "",
+    "placeholders": {
+      "activeaddress": {
+        "type": "String"
+      }
+    }
+  },
+  "itemsAddedToCart": "{added, plural, =1{1 item added to cart} other{{added} items added to cart}}",
+  "@itemsAddedToCart": {
+    "description": "",
+    "placeholders": {
+      "added": {
+        "type": "num"
+      }
+    }
+  },
+  "productsSelected": "{n, plural, =1{1 product selected} other{{n} products selected}}",
+  "@productsSelected": {
+    "description": "",
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  }
 }

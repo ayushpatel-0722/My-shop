@@ -24,6 +24,7 @@ import '../domain/category_tree.dart';
 import '../domain/order_status.dart';
 import '../repositories/app_repository.dart';
 import '../services/secure_session_cache.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Firestore / Auth / RTDB implementation of [AppRepository].
 ///
@@ -280,7 +281,7 @@ class FirebaseAppRepository implements AppRepository {
     if (result.user == null) {
       throw FirebaseAuthException(
         code: 'user-not-found',
-        message: 'Could not sign in with provided credentials.',
+        message: L10n.current.couldNotSignInWithProvidedCredentials,
       );
     }
 
@@ -378,7 +379,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (adminData == null) {
-      throw Exception('No admin profile found for account "$email".');
+      throw Exception(L10n.current.noAdminProfileFoundForAccount(email));
     }
 
     // Ensure companyDoc is loaded
@@ -390,7 +391,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (companyDoc == null || !companyDoc.exists) {
-      throw Exception('Company "$companyName" not found.');
+      throw Exception(L10n.current.companyNotFound(companyName));
     }
 
     final companyData = companyDoc.data() ?? {};
@@ -403,7 +404,7 @@ class FirebaseAppRepository implements AppRepository {
 
     // 4. Verify company password
     if (registeredPass != companyPassword.trim()) {
-      throw Exception('Incorrect company password.');
+      throw Exception(L10n.current.incorrectCompanyPassword);
     }
 
     // 5. Verify company association
@@ -414,7 +415,7 @@ class FirebaseAppRepository implements AppRepository {
         matchedCompanyId.isNotEmpty &&
         matchedCompanyId != companyDoc.id) {
       throw Exception(
-        'Admin account is assigned to "$registeredName", not "$companyName".',
+        L10n.current.adminAccountIsAssignedToNot(registeredName, companyName),
       );
     }
 
@@ -459,7 +460,7 @@ class FirebaseAppRepository implements AppRepository {
     if (result.user == null) {
       throw FirebaseAuthException(
         code: 'user-not-found',
-        message: 'Could not sign in with provided credentials.',
+        message: L10n.current.couldNotSignInWithProvidedCredentials,
       );
     }
 
@@ -527,7 +528,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (empData == null) {
-      throw Exception('No employee profile found for account "$email".');
+      throw Exception(L10n.current.noEmployeeProfileFoundForAccount(email));
     }
 
     if (companyDoc == null && matchedCompanyId.isNotEmpty) {
@@ -538,7 +539,7 @@ class FirebaseAppRepository implements AppRepository {
     }
 
     if (companyDoc == null || !companyDoc.exists) {
-      throw Exception('Company "$companyName" not found.');
+      throw Exception(L10n.current.companyNotFound(companyName));
     }
 
     // Auto-migrate to subcollection if not present
@@ -1488,84 +1489,110 @@ class FirebaseAppRepository implements AppRepository {
 
   @override
   Future<Order> placeOrder(Order order) async {
-    if (order.companyId.isEmpty) {
-      throw ArgumentError('An order must belong to a company.');
-    }
-    if (order.items.isEmpty) {
-      throw ArgumentError('Cannot place an order with no items.');
+    final saved = await placeOrders([order]);
+    return saved.first;
+  }
+
+  @override
+  Future<List<Order>> placeOrders(List<Order> orders) async {
+    if (orders.isEmpty) return const <Order>[];
+    for (final order in orders) {
+      if (order.companyId.isEmpty) {
+        throw ArgumentError('An order must belong to a company.');
+      }
+      if (order.items.isEmpty) {
+        throw ArgumentError('Cannot place an order with no items.');
+      }
     }
 
     final now = DateTime.now();
-    final ref = _ordersCol(order.companyId).doc();
-    final subtotal = Order.itemsTotalOf(order.items);
-    final payable = order.totalAmount > 0
-        ? order.totalAmount
-        : (order.subtotal > 0 ? order.subtotal : subtotal) -
-              order.discountAmount +
-              order.deliveryCharge;
 
-    final orderMap = <String, dynamic>{
-      'id': ref.id,
-      'userId': order.userId,
-      'customerName': order.customerName,
-      'customerEmail': order.customerEmail,
-      'customerPhone': order.customerPhone,
-      'companyId': order.companyId,
-      'companyName': order.companyName,
-      // Full bill: the receipt must survive later catalogue edits.
-      'subtotal': order.subtotal > 0 ? order.subtotal : subtotal,
-      'discountAmount': order.discountAmount,
-      'deliveryCharge': order.deliveryCharge,
-      'totalAmount': payable,
-      'address': order.address,
-      'pincode': order.pincode,
-      'voucherId': order.voucherId,
-      'voucherCode': order.voucherCode,
-      'paymentStatus': PaymentStatus.pending,
-      'orderStatus': OrderStatus.pending,
-      'deliveryType': order.deliveryType,
-      'employeePackingDone': false,
-      'createdAt': now.toIso8601String(),
-      'updatedAt': now.toIso8601String(),
-    };
-
+    // One WriteBatch for every shop's order — a multi-shop checkout is never
+    // half-saved.
     final batch = _db.batch();
-    batch.set(ref, orderMap);
-    for (final item in order.items) {
-      batch.set(ref.collection('items').doc(), item.toMap());
+    final built = <Order>[];
+
+    for (final order in orders) {
+      final ref = _ordersCol(order.companyId).doc();
+      final subtotal = Order.itemsTotalOf(order.items);
+      final payable = order.totalAmount > 0
+          ? order.totalAmount
+          : (order.subtotal > 0 ? order.subtotal : subtotal) -
+                order.discountAmount +
+                order.deliveryCharge;
+      final frozenSubtotal = order.subtotal > 0 ? order.subtotal : subtotal;
+
+      final orderMap = <String, dynamic>{
+        'id': ref.id,
+        'userId': order.userId,
+        'customerName': order.customerName,
+        'customerEmail': order.customerEmail,
+        'customerPhone': order.customerPhone,
+        'companyId': order.companyId,
+        'companyName': order.companyName,
+        // Full bill: the receipt must survive later catalogue edits.
+        'subtotal': frozenSubtotal,
+        'discountAmount': order.discountAmount,
+        'deliveryCharge': order.deliveryCharge,
+        'totalAmount': payable,
+        'address': order.address,
+        'pincode': order.pincode,
+        if (order.pickupShop != null) 'pickupShop': order.pickupShop!.toMap(),
+        'voucherId': order.voucherId,
+        'voucherCode': order.voucherCode,
+        'paymentStatus': PaymentStatus.pending,
+        'orderStatus': OrderStatus.pending,
+        'deliveryType': order.deliveryType,
+        'employeePackingDone': false,
+        'createdAt': now.toIso8601String(),
+        'updatedAt': now.toIso8601String(),
+      };
+
+      batch.set(ref, orderMap);
+      for (final item in order.items) {
+        batch.set(ref.collection('items').doc(), item.toMap());
+      }
+
+      // Stock + voucher counters are part of the same logical write.
+      await _decrementStock(batch, order);
+
+      built.add(
+        Order(
+          id: ref.id,
+          userId: order.userId,
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          customerPhone: order.customerPhone,
+          companyId: order.companyId,
+          companyName: order.companyName,
+          items: order.items,
+          subtotal: frozenSubtotal,
+          discountAmount: order.discountAmount,
+          deliveryCharge: order.deliveryCharge,
+          totalAmount: payable,
+          address: order.address,
+          pincode: order.pincode,
+          pickupShop: order.pickupShop,
+          voucherId: order.voucherId,
+          voucherCode: order.voucherCode,
+          paymentStatus: PaymentStatus.pending,
+          orderStatus: OrderStatus.pending,
+          deliveryType: order.deliveryType,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
     }
 
-    // Stock + voucher counters are part of the same logical write.
-    await _decrementStock(batch, order);
     await batch.commit();
 
-    if (order.voucherId != null && order.voucherId!.isNotEmpty) {
-      await _recordVoucherUsage(order.copyWith(id: ref.id));
+    for (final order in built) {
+      if (order.voucherId != null && order.voucherId!.isNotEmpty) {
+        await _recordVoucherUsage(order);
+      }
     }
 
-    return Order(
-      id: ref.id,
-      userId: order.userId,
-      customerName: order.customerName,
-      customerEmail: order.customerEmail,
-      customerPhone: order.customerPhone,
-      companyId: order.companyId,
-      companyName: order.companyName,
-      items: order.items,
-      subtotal: order.subtotal > 0 ? order.subtotal : subtotal,
-      discountAmount: order.discountAmount,
-      deliveryCharge: order.deliveryCharge,
-      totalAmount: payable,
-      address: order.address,
-      pincode: order.pincode,
-      voucherId: order.voucherId,
-      voucherCode: order.voucherCode,
-      paymentStatus: PaymentStatus.pending,
-      orderStatus: OrderStatus.pending,
-      deliveryType: order.deliveryType,
-      createdAt: now,
-      updatedAt: now,
-    );
+    return built;
   }
 
   /// Subtracts the ordered quantities inside [batch] (skips unlimited stock).
@@ -1836,8 +1863,18 @@ class FirebaseAppRepository implements AppRepository {
 
   @override
   Future<void> saveCategory(Category category) async {
-    final id = category.id.isEmpty ? _uuid.v4() : category.id;
-    final saved = category.copyWith(id: id);
+    final isNew = category.id.isEmpty;
+    final id = isNew ? _uuid.v4() : category.id;
+    var saved = category.copyWith(id: id);
+
+    // Existing document — needed to detect parent moves.
+    Map<String, dynamic>? existingMap;
+    if (!isNew) {
+      final snap = saved.companyId.isNotEmpty
+          ? await _categoriesCol(saved.companyId).doc(id).get()
+          : await _db.collection('categories').doc(id).get();
+      if (snap.exists) existingMap = _asMap(snap.data());
+    }
 
     // Guard the hierarchy *before* writing: a cycle would hang every
     // category list in the app.
@@ -1854,12 +1891,89 @@ class FirebaseAppRepository implements AppRepository {
       }
     }
 
+    final parentKey = saved.parentId ?? '';
+    final oldParent = existingMap == null
+        ? null
+        : (existingMap['parentId']?.toString() ?? '');
+    final parentChanged = existingMap != null && oldParent != parentKey;
+
+    // New categories (and moves to another parent) go to the END of their
+    // sibling list; plain edits keep their manual position.
+    if (existingMap == null || parentChanged) {
+      final siblings = await _loadCategories(saved.companyId);
+      var maxOrder = -1;
+      for (final c in siblings) {
+        if (c.id == id) continue;
+        if ((c.parentId ?? '') == parentKey && c.sortOrder > maxOrder) {
+          maxOrder = c.sortOrder;
+        }
+      }
+      saved = saved.copyWith(sortOrder: maxOrder + 1);
+    }
+    if (saved.createdAt == null) {
+      saved = saved.copyWith(createdAt: DateTime.now());
+    }
+
     final payload = <String, dynamic>{...saved.toMap(), 'id': id};
     if (saved.companyId.isNotEmpty) {
       await _categoriesCol(saved.companyId).doc(id).set(payload);
     } else {
       await _db.collection('categories').doc(id).set(payload);
     }
+  }
+
+  @override
+  Future<void> reorderCategories(List<Category> orderedSiblings) async {
+    final batch = _db.batch();
+    var writes = 0;
+    for (var i = 0; i < orderedSiblings.length; i++) {
+      final cat = orderedSiblings[i];
+      if (cat.sortOrder == i) continue;
+      final ref = cat.companyId.isNotEmpty
+          ? _categoriesCol(cat.companyId).doc(cat.id)
+          : _db.collection('categories').doc(cat.id);
+      batch.update(ref, {'sortOrder': i});
+      writes++;
+    }
+    if (writes > 0) await batch.commit();
+  }
+
+  @override
+  Future<void> backfillCategorySortOrder({String companyId = ''}) async {
+    final categories = await _loadCategories(companyId);
+    final byParent = <String, List<Category>>{};
+    for (final c in categories) {
+      byParent.putIfAbsent(c.parentId ?? '', () => []).add(c);
+    }
+
+    final batch = _db.batch();
+    var writes = 0;
+
+    for (final entry in byParent.entries) {
+      final siblings = entry.value;
+      // Only groups with colliding values (legacy data has no sortOrder) are
+      // migrated — a second run can never clobber a manual arrangement.
+      final distinct = siblings.map((c) => c.sortOrder).toSet().length;
+      if (siblings.length < 2 || distinct == siblings.length) continue;
+      siblings.sort((a, b) {
+        final ca = a.createdAt;
+        final cb = b.createdAt;
+        if (ca != null && cb != null && !ca.isAtSameMomentAs(cb)) {
+          return ca.compareTo(cb);
+        }
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
+      for (var i = 0; i < siblings.length; i++) {
+        final cat = siblings[i];
+        if (cat.sortOrder == i) continue;
+        final ref = cat.companyId.isNotEmpty
+            ? _categoriesCol(cat.companyId).doc(cat.id)
+            : _db.collection('categories').doc(cat.id);
+        batch.update(ref, {'sortOrder': i});
+        writes++;
+      }
+    }
+    if (writes > 0) await batch.commit();
   }
 
   /// All categories of a company (global + tenant scoped).

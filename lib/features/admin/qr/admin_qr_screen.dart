@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../admin_shell.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// QR generation centre (Section 15.1): Product / Category / Company QR codes
 /// with style options and export.
@@ -24,15 +25,15 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'QR Codes',
+      title: AppLocalizations.of(context).qrCodes,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'product', label: Text('Product')),
-              ButtonSegment(value: 'category', label: Text('Category')),
-              ButtonSegment(value: 'company', label: Text('Company')),
+            segments: [
+              ButtonSegment(value: 'product', label: Text(AppLocalizations.of(context).product)),
+              ButtonSegment(value: 'category', label: Text(AppLocalizations.of(context).category)),
+              ButtonSegment(value: 'company', label: Text(AppLocalizations.of(context).company)),
             ],
             selected: {_type},
             onSelectionChanged: (s) {
@@ -84,8 +85,8 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _styleButton(0, 'B&W', Icons.contrast),
-              _styleButton(1, 'Colored', Icons.palette),
-              _styleButton(2, 'Logo', Icons.image),
+              _styleButton(1, AppLocalizations.of(context).colored, Icons.palette),
+              _styleButton(2, AppLocalizations.of(context).logo, Icons.image),
             ],
           ),
           const SizedBox(height: 24),
@@ -95,7 +96,7 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.copy),
-                  label: const Text('Copy link'),
+                  label: Text(AppLocalizations.of(context).copyLink),
                 ),
               ),
               const SizedBox(width: 12),
@@ -103,7 +104,7 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
                 child: FilledButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.download),
-                  label: const Text('PNG'),
+                  label: Text(AppLocalizations.of(context).png),
                 ),
               ),
             ],
@@ -112,7 +113,7 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
           OutlinedButton.icon(
             onPressed: () {},
             icon: const Icon(Icons.print),
-            label: const Text('Send to printer'),
+            label: Text(AppLocalizations.of(context).sendToPrinter),
           ),
         ],
       ),

@@ -45,7 +45,7 @@ class NotificationsScreen extends StatelessWidget {
               }
               final list = snap.data ?? const <AppNotification>[];
               if (list.isEmpty) {
-                return const Center(child: Text('No notifications'));
+                return Center(child: Text(AppLocalizations.of(context).noNotifications));
               }
               return ListView.builder(
                 padding: const EdgeInsets.all(8),

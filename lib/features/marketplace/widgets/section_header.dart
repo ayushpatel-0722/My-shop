@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Reusable section title with an optional "view all" action.
 class SectionHeader extends StatelessWidget {
@@ -53,13 +54,13 @@ class SectionHeader extends StatelessWidget {
             InkWell(
               onTap: onViewAll,
               borderRadius: BorderRadius.circular(8),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'See All',
+                      AppLocalizations.of(context).seeAll,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,

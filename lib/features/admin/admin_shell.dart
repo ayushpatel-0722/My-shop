@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../app/routes/app_router.dart';
 import '../../core/services/auth_session.dart';
@@ -76,8 +77,8 @@ class AdminShell extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Admin Console',
+                        Text(
+                          AppLocalizations.of(context).adminConsole,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -97,83 +98,83 @@ class AdminShell extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _item(context, Icons.dashboard, 'Dashboard', AppRoutes.admin),
+                  _item(context, Icons.dashboard, AppLocalizations.of(context).dashboard, AppRoutes.admin),
                   _item(
                     context,
                     Icons.view_kanban,
-                    'Orders Pipeline',
+                    AppLocalizations.of(context).ordersPipeline,
                     AppRoutes.adminOrders,
                   ),
                   _item(
                     context,
                     Icons.inventory_2,
-                    'Products',
+                    AppLocalizations.of(context).products,
                     AppRoutes.adminProducts,
                   ),
                   _item(
                     context,
                     Icons.category,
-                    'Categories',
+                    AppLocalizations.of(context).categories,
                     AppRoutes.adminCategories,
                   ),
                   _item(
                     context,
                     Icons.local_offer,
-                    'Vouchers',
+                    AppLocalizations.of(context).vouchers,
                     AppRoutes.adminVouchers,
                   ),
                   _item(
                     context,
                     Icons.badge,
-                    'Employees',
+                    AppLocalizations.of(context).employees,
                     AppRoutes.adminEmployees,
                   ),
                   _item(
                     context,
                     Icons.admin_panel_settings,
-                    'Admins',
+                    AppLocalizations.of(context).admins,
                     AppRoutes.adminAdmins,
                   ),
                   _item(
                     context,
                     Icons.local_shipping,
-                    'Delivery Charges',
+                    AppLocalizations.of(context).deliveryCharges,
                     AppRoutes.adminDelivery,
                   ),
                   _item(
                     context,
                     Icons.image,
-                    'Banners',
+                    AppLocalizations.of(context).banners,
                     AppRoutes.adminBanners,
                   ),
-                  _item(context, Icons.star, 'Reviews', AppRoutes.adminReviews),
+                  _item(context, Icons.star, AppLocalizations.of(context).reviews, AppRoutes.adminReviews),
                   _item(
                     context,
                     Icons.recommend,
-                    'Recommendations',
+                    AppLocalizations.of(context).recommendations,
                     AppRoutes.adminRecommendations,
                   ),
                   _item(
                     context,
                     Icons.bar_chart,
-                    'Reports',
+                    AppLocalizations.of(context).reports,
                     AppRoutes.adminReports,
                   ),
                   _item(
                     context,
                     Icons.qr_code_2,
-                    'QR Codes',
+                    AppLocalizations.of(context).qrCodes,
                     AppRoutes.adminQr,
                   ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.storefront),
-                    title: const Text('Shopper App'),
+                    title: Text(AppLocalizations.of(context).shopperApp),
                     onTap: () => context.go(AppRoutes.home),
                   ),
                   ListTile(
                     leading: const Icon(Icons.logout),
-                    title: const Text('Logout'),
+                    title: Text(AppLocalizations.of(context).logout),
                     onTap: () async {
                       await context.read<AuthCubit>().signOut();
                       if (context.mounted) context.go(AppRoutes.role);
@@ -184,7 +185,7 @@ class AdminShell extends StatelessWidget {
             ),
           ),
           body: blocking
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -195,7 +196,7 @@ class AdminShell extends StatelessWidget {
                       ),
                       SizedBox(height: 16),
                       Text(
-                        'Restoring session...',
+                        AppLocalizations.of(context).restoringSession,
                         style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ],

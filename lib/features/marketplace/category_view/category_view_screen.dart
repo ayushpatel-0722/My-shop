@@ -10,10 +10,12 @@ import '../../../core/models/category.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/product_card.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Category explorer screen.
 ///
@@ -70,7 +72,9 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
           },
         ),
         title: Text(
-          widget.categoryName.isNotEmpty ? widget.categoryName : 'Category',
+          widget.categoryName.isNotEmpty
+              ? widget.categoryName
+              : AppLocalizations.of(context).category,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
@@ -80,7 +84,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search_rounded, color: Color(0xFF1E2229)),
-            tooltip: 'Search products',
+            tooltip: AppLocalizations.of(context).searchProducts,
             onPressed: () {
               if (widget.companyId.isNotEmpty) {
                 context.push(
@@ -111,7 +115,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                     color: Color(0xFF1E2229),
                   ),
                 ),
-                tooltip: 'Cart',
+                tooltip: AppLocalizations.of(context).cart,
                 onPressed: () async {
                   if (AuthSession.currentUser == null) {
                     final ok = await AuthBottomSheet.show(context);
@@ -163,14 +167,32 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
             ],
           };
 
-          // 3. Child subcategories for chip filter bar
-          final subCategories = activeCat != null
-              ? categories.where((c) => c.parentId == activeCat!.id).toList()
-              : <Category>[];
+          // 3. Child subcategories for chip filter bar (admin-defined order)
+          final subCategories =
+              (activeCat != null
+                      ? categories
+                            .where((c) => c.parentId == activeCat!.id)
+                            .toList()
+                      : <Category>[])
+                  .toList()
+                ..sort(CategoryHierarchy.compareByOrder);
 
           final effectiveFilterIds = _selectedSubCatId != null
               ? {_selectedSubCatId!}
               : targetIds;
+
+          // Curated product order: the deepest selected category's productList.
+          Category? selectedSubCat;
+          if (_selectedSubCatId != null) {
+            for (final c in categories) {
+              if (c.id == _selectedSubCatId) {
+                selectedSubCat = c;
+                break;
+              }
+            }
+          }
+          final productOrder =
+              (selectedSubCat ?? activeCat)?.productList ?? const <String>[];
 
           return StreamBuilder<List<Product>>(
             stream: widget.companyId.isNotEmpty
@@ -193,6 +215,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                   categories: categories,
                   sort: _sort,
                   inStockOnly: _inStockOnly,
+                  productOrder: productOrder,
                 ),
               );
 
@@ -213,8 +236,11 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                           if (idx == 0) {
                             final isSel = _selectedSubCatId == null;
                             return _SubCategoryPill(
-                              label:
-                                  'All ${widget.categoryName.isNotEmpty ? widget.categoryName : 'Items'}',
+                              label: AppLocalizations.of(context).all2(
+                                widget.categoryName.isNotEmpty
+                                    ? widget.categoryName
+                                    : AppLocalizations.of(context).items4,
+                              ),
                               isSelected: isSel,
                               onTap: () =>
                                   setState(() => _selectedSubCatId = null),
@@ -263,17 +289,18 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                           )
                         : LayoutBuilder(
                             builder: (context, constraints) {
-                              final width = constraints.maxWidth;
-                              final crossAxisCount = width >= 1000
-                                  ? 4
-                                  : width >= 700
-                                  ? 3
-                                  : 2;
-                              final childAspectRatio = width >= 1000
-                                  ? 0.68
-                                  : width >= 700
-                                  ? 0.65
-                                  : 0.62;
+                              final width = constraints.maxWidth - 32;
+                              final crossAxisCount =
+                                  ResponsiveGrid.calculateCrossAxisCount(
+                                    width,
+                                    maxCardWidth: 250,
+                                  );
+                              final childAspectRatio =
+                                  ResponsiveGrid.calculateProductAspectRatio(
+                                    width,
+                                    crossAxisCount,
+                                    showBrand: true,
+                                  );
                               return GridView.builder(
                                 padding: const EdgeInsets.all(16),
                                 physics: const BouncingScrollPhysics(),
@@ -384,7 +411,7 @@ class _Toolbar extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '$count product${count == 1 ? '' : 's'}',
+            AppLocalizations.of(context).productCount(count),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -395,8 +422,8 @@ class _Toolbar extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'In stock',
+              Text(
+                AppLocalizations.of(context).inStock2,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -477,8 +504,8 @@ class _EmptyCategory extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               categoryName.isNotEmpty
-                  ? 'No $categoryName products found'
-                  : 'No products in this category',
+                  ? AppLocalizations.of(context).noProductsFound2(categoryName)
+                  : AppLocalizations.of(context).noProductsInThisCategory,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 17,
@@ -487,8 +514,10 @@ class _EmptyCategory extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Products assigned to this category (or its sub-categories) will show up here.',
+            Text(
+              AppLocalizations.of(
+                context,
+              ).productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
             ),
@@ -503,7 +532,7 @@ class _EmptyCategory extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Show out-of-stock items'),
+                label: Text(AppLocalizations.of(context).showOutOfStockItems),
                 onPressed: onClearStockFilter,
               ),
             ],

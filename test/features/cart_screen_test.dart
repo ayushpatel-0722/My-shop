@@ -55,16 +55,17 @@ void main() {
     );
 
     // One 500 g step at qty 1 …
-    expect(find.byKey(const Key('stepper-label-500 g')), findsOneWidget);
+    expect(find.byKey(const Key('stepper-qty-p_tomato')), findsOneWidget);
+    expect(find.text('× 500 g'), findsOneWidget);
 
-    // … and "1 kg" after a single increment.
+    // … and "Total: 1 kg" after a single increment (2 × 500 g).
     await tester.tap(
       find.descendant(of: rowOf('Fresh Tomatoes'), matching: find.byIcon(Icons.add)),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('stepper-label-1 kg')), findsOneWidget);
-    expect(find.byKey(const Key('stepper-label-500 g')), findsNothing);
+    expect(find.text('Total: 1 kg'), findsOneWidget);
+    expect(find.text('× 500 g'), findsOneWidget);
   });
 
   testWidgets('quantity-based lines step in plain counts', (tester) async {
@@ -81,10 +82,11 @@ void main() {
     expect(
       find.descendant(
         of: rowOf('Organic Cow Milk'),
-        matching: find.byKey(const Key('stepper-label-1')),
+        matching: find.byKey(const Key('stepper-qty-p_milk')),
       ),
       findsOneWidget,
     );
+    expect(find.byKey(const Key('stepper-unit-p_milk')), findsNothing);
   });
 
   testWidgets('the line subtotal updates live with the stepper', (tester) async {
@@ -97,8 +99,8 @@ void main() {
       wishlistCubit: wishlist,
     );
 
-    // Tomatoes: ₹48 per 500 g step.
-    expect(find.text('₹48 per 500 g'), findsOneWidget);
+    // Tomatoes: ₹48 / 500 g step (from the pack snapshot).
+    expect(find.text('₹48 / 500 g'), findsOneWidget);
     expect(find.text('₹48'), findsOneWidget);
 
     await tester.tap(

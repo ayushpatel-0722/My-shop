@@ -65,7 +65,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
             TextField(
               controller: _messageCtrl,
               maxLines: 3,
-              decoration: const InputDecoration(hintText: 'Write a short message'),
+              decoration: InputDecoration(hintText: AppLocalizations.of(context).writeAShortMessage),
             ),
             const SizedBox(height: 24),
             FilledButton(
@@ -84,7 +84,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
       id: '',
       orderId: widget.orderId,
       userId: user?.id ?? 'guest',
-      userName: user?.name ?? 'Customer',
+      userName: user?.name ?? AppLocalizations.of(context).customer,
       companyId: widget.orderCompanyId,
       rating: _rating,
       message: _messageCtrl.text.trim(),

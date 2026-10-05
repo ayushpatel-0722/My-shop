@@ -84,10 +84,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         return _buildEmptyOrdersView(context, l10n);
                       }
                       if (list.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Padding(
                             padding: EdgeInsets.all(32),
-                            child: Text('No orders with this status'),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).noOrdersWithThisStatus,
+                            ),
                           ),
                         );
                       }
@@ -127,8 +131,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Sign In to View Orders',
+            Text(
+              AppLocalizations.of(context).signInToViewOrders,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -136,8 +140,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Keep track of your active deliveries and past purchases.',
+            Text(
+              AppLocalizations.of(
+                context,
+              ).keepTrackOfYourActiveDeliveriesAndPastPurchases,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
@@ -157,8 +163,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
               onPressed: () => AuthBottomSheet.show(context),
               icon: const Icon(Icons.login),
-              label: const Text(
-                'Continue with Google',
+              label: Text(
+                AppLocalizations.of(context).continueWithGoogle,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
@@ -188,8 +194,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'No Orders Yet',
+            Text(
+              AppLocalizations.of(context).noOrdersYet,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -197,8 +203,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Explore products and place your first order today!',
+            Text(
+              AppLocalizations.of(
+                context,
+              ).exploreProductsAndPlaceYourFirstOrderToday,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
@@ -217,8 +225,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 elevation: 0,
               ),
               onPressed: () => context.go(AppRoutes.home),
-              child: const Text(
-                'Start Shopping',
+              child: Text(
+                AppLocalizations.of(context).startShopping,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ),
@@ -270,7 +278,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       Expanded(
                         child: Text(
                           order.companyName.isEmpty
-                              ? 'Store'
+                              ? AppLocalizations.of(context).store2
                               : order.companyName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -298,7 +306,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       Row(
                         children: [
                           Text(
-                            'Order ${order.reference}',
+                            AppLocalizations.of(
+                              context,
+                            ).order3(order.reference),
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
@@ -417,7 +427,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           if (order.isOpen)
             TextButton.icon(
               icon: const Icon(Icons.info_outline, size: 16),
-              label: const Text('Track order'),
+              label: Text(AppLocalizations.of(context).trackOrder),
               onPressed: () => context.push(AppRoutes.orderPath(order.id)),
             ),
           const Spacer(),
@@ -509,7 +519,9 @@ class _PaymentIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: paid ? 'Paid' : 'Payment on delivery',
+      message: paid
+          ? AppLocalizations.of(context).paid
+          : AppLocalizations.of(context).paymentOnDelivery,
       child: Icon(
         paid ? Icons.check_circle : Icons.account_balance_wallet_outlined,
         size: 16,
@@ -536,7 +548,9 @@ class _PaymentChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        paid ? 'Paid' : 'Pay on delivery',
+        paid
+            ? AppLocalizations.of(context).paid
+            : AppLocalizations.of(context).payOnDelivery,
         style: TextStyle(
           fontSize: 10.5,
           fontWeight: FontWeight.bold,
@@ -577,7 +591,7 @@ class _ItemPreview extends StatelessWidget {
               ),
             ),
             child: Text(
-              '+$remaining more',
+              AppLocalizations.of(context).more('$remaining'),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -626,7 +640,7 @@ class _ReorderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Reorder',
+      message: AppLocalizations.of(context).reorder,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => _reorder(context),
@@ -674,21 +688,25 @@ class _ReorderButton extends StatelessWidget {
         SnackBar(
           content: Text(
             missing > 0
-                ? '$added item${added == 1 ? '' : 's'} added to cart · $missing no longer available'
-                : '$added item${added == 1 ? '' : 's'} added to cart',
+                ? AppLocalizations.of(
+                    context,
+                  ).addedToCartNoLongerAvailable(added, '$missing')
+                : AppLocalizations.of(context).itemsAddedToCart(added),
           ),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
-            label: 'VIEW CART',
+            label: AppLocalizations.of(context).viewCart,
             onPressed: () => context.push(AppRoutes.cart),
           ),
         ),
       );
     } else {
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('These products are no longer available'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).theseProductsAreNoLongerAvailable,
+          ),
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -723,7 +741,12 @@ class _StatusChips extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             children: [
-              _chip(context, 'All', orders.length, 'all'),
+              _chip(
+                context,
+                AppLocalizations.of(context).all3,
+                orders.length,
+                'all',
+              ),
               for (final status in OrderStatusRules.openStatuses)
                 _chip(
                   context,

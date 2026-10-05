@@ -117,6 +117,10 @@ abstract class AppRepository {
   /// Throws [ArgumentError] when the order has no company or no items.
   Future<Order> placeOrder(Order order);
 
+  /// Persists one order PER shop in a single batch write (a multi-shop
+  /// checkout is never half-saved) and returns the created orders.
+  Future<List<Order>> placeOrders(List<Order> orders);
+
   /// Moves an order to [status]. Throws [ArgumentError] on an illegal
   /// transition (see `OrderStatusRules`).
   Future<void> updateOrderStatus(String orderId, String status);
@@ -143,6 +147,17 @@ abstract class AppRepository {
 
   /// Creates or updates a category, refusing to build a hierarchy cycle.
   Future<void> saveCategory(Category category);
+
+  /// Persists the manual ordering of a sibling list in one batch write.
+  ///
+  /// [orderedSiblings] is the list in its new visual order; `sortOrder` is
+  /// recomputed as 0, 1, 2, … and only documents whose value changed are
+  /// written.
+  Future<void> reorderCategories(List<Category> orderedSiblings);
+
+  /// One-time backfill: gives every category without a meaningful
+  /// `sortOrder` a stable value (per parent, by createdAt then name).
+  Future<void> backfillCategorySortOrder({String companyId = ''});
 
   /// Deletes a category, re-parenting its children and its products.
   Future<void> deleteCategory(String categoryId, {String companyId = ''});

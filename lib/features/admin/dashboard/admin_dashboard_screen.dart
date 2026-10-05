@@ -15,18 +15,18 @@ class AdminDashboardScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final modules = [
-      (Icons.view_kanban, 'Orders Pipeline', AppRoutes.adminOrders),
-      (Icons.inventory_2, 'Products', AppRoutes.adminProducts),
-      (Icons.category, 'Categories', AppRoutes.adminCategories),
-      (Icons.local_offer, 'Vouchers', AppRoutes.adminVouchers),
-      (Icons.badge, 'Employees', AppRoutes.adminEmployees),
-      (Icons.admin_panel_settings, 'Admins', AppRoutes.adminAdmins),
-      (Icons.local_shipping, 'Delivery Charges', AppRoutes.adminDelivery),
-      (Icons.image, 'Banners', AppRoutes.adminBanners),
-      (Icons.star, 'Reviews', AppRoutes.adminReviews),
-      (Icons.recommend, 'Recommendations', AppRoutes.adminRecommendations),
-      (Icons.bar_chart, 'Reports', AppRoutes.adminReports),
-      (Icons.qr_code_2, 'QR Codes', AppRoutes.adminQr),
+      (Icons.view_kanban, AppLocalizations.of(context).ordersPipeline, AppRoutes.adminOrders),
+      (Icons.inventory_2, AppLocalizations.of(context).products, AppRoutes.adminProducts),
+      (Icons.category, AppLocalizations.of(context).categories, AppRoutes.adminCategories),
+      (Icons.local_offer, AppLocalizations.of(context).vouchers, AppRoutes.adminVouchers),
+      (Icons.badge, AppLocalizations.of(context).employees, AppRoutes.adminEmployees),
+      (Icons.admin_panel_settings, AppLocalizations.of(context).admins, AppRoutes.adminAdmins),
+      (Icons.local_shipping, AppLocalizations.of(context).deliveryCharges, AppRoutes.adminDelivery),
+      (Icons.image, AppLocalizations.of(context).banners, AppRoutes.adminBanners),
+      (Icons.star, AppLocalizations.of(context).reviews, AppRoutes.adminReviews),
+      (Icons.recommend, AppLocalizations.of(context).recommendations, AppRoutes.adminRecommendations),
+      (Icons.bar_chart, AppLocalizations.of(context).reports, AppRoutes.adminReports),
+      (Icons.qr_code_2, AppLocalizations.of(context).qrCodes, AppRoutes.adminQr),
     ];
     return AdminShell(
       title: l10n.dashboard,

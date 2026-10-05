@@ -7,6 +7,7 @@ import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/models/banner.dart';
+import '../../../core/domain/category_tree.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
@@ -14,6 +15,7 @@ import '../../../core/models/review.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
@@ -145,10 +147,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final activeAddress = AuthSession.activeAddress;
     final deliverToTitle =
         activeAddress != null && activeAddress.name.isNotEmpty
-        ? 'Deliver to ${activeAddress.name}'
+        ? AppLocalizations.of(context).deliverTo(activeAddress.name)
         : activeAddress != null && activeAddress.label.isNotEmpty
-        ? 'Deliver to ${activeAddress.label}'
-        : 'Deliver to';
+        ? AppLocalizations.of(context).deliverTo(activeAddress.label)
+        : AppLocalizations.of(context).deliverTo2;
     final deliverToAddress = activeAddress != null
         ? (activeAddress.shortLocation.isNotEmpty
               ? activeAddress.shortLocation
@@ -322,7 +324,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Search products, categories, or stores...',
+                          AppLocalizations.of(
+                            context,
+                          ).searchProductsCategoriesOrStores,
                           style: const TextStyle(
                             color: Color(0xFF9CA3AF),
                             fontSize: 14,
@@ -462,8 +466,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: const Color(0xFFFFD700),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          'LIMITED TIME OFFER',
+                        child: Text(
+                          AppLocalizations.of(context).limitedTimeOffer,
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.w900,
@@ -473,8 +477,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Grand Festive Mega Sale',
+                      Text(
+                        AppLocalizations.of(context).grandFestiveMegaSale,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -482,8 +486,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      const Text(
-                        'Flat 50% Off + Free Delivery',
+                      Text(
+                        AppLocalizations.of(context).flat50OffFreeDelivery,
                         style: TextStyle(
                           color: Color(0xFFFFEBEA),
                           fontSize: 12,
@@ -497,9 +501,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             const ClipboardData(text: 'FESTIVE50'),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                'Promo Code FESTIVE50 copied to clipboard!',
+                                AppLocalizations.of(
+                                  context,
+                                ).promoCodeFestive50CopiedToClipboard,
                               ),
                               backgroundColor: Color(0xFF1E8F66),
                               duration: Duration(seconds: 2),
@@ -516,11 +522,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(color: Colors.white38),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Code: FESTIVE50',
+                                AppLocalizations.of(context).codeFestive50,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
@@ -551,8 +557,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     elevation: 0,
                   ),
                   onPressed: () => context.push(AppRoutes.search),
-                  child: const Text(
-                    'Shop Now',
+                  child: Text(
+                    AppLocalizations.of(context).shopNow,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
@@ -611,7 +617,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               ad.actionTarget.isNotEmpty
                   ? ad.actionTarget
-                  : 'Special Marketplace Offer',
+                  : AppLocalizations.of(context).specialMarketplaceOffer,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -634,7 +640,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return StreamBuilder<List<Category>>(
       stream: categories,
       builder: (context, snap) {
-        final list = snap.data ?? const <Category>[];
+        // Admin-defined category order (Category.sortOrder per level).
+        final list = CategoryHierarchy.sortedByOrder(
+          snap.data ?? const <Category>[],
+        );
         if (list.isEmpty) return const SizedBox.shrink();
 
         return Column(
@@ -643,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> {
               key: _categoryKey,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SectionHeader(
-                title: 'Explore Categories',
+                title: AppLocalizations.of(context).exploreCategories,
                 onViewAll: () => context.go(AppRoutes.categories),
               ),
             ),
@@ -775,7 +784,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SectionHeader(
-                title: 'Store Vouchers & Deals',
+                title: AppLocalizations.of(context).storeVouchersDeals,
                 onViewAll: () => _showAllVouchersSheet(context, vouchers),
               ),
             ),
@@ -903,10 +912,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 3),
                 Text(
                   v.minOrderAmt > 0
-                      ? 'Min order ₹${v.minOrderAmt.toStringAsFixed(0)}'
+                      ? AppLocalizations.of(
+                          context,
+                        ).minOrder3(v.minOrderAmt.toStringAsFixed(0))
                       : (v.firstTimeOnly
-                            ? 'First order only'
-                            : 'On all orders'),
+                            ? AppLocalizations.of(context).firstOrderOnly
+                            : AppLocalizations.of(context).onAllOrders),
                   style: const TextStyle(
                     fontSize: 10,
                     color: Color(0xFF6B7280),
@@ -936,7 +947,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         size: 18,
                       ),
                       const SizedBox(width: 8),
-                      Text('Coupon ${v.code} copied! Apply at checkout'),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).couponCopiedApplyAtCheckout(v.code),
+                      ),
                     ],
                   ),
                   backgroundColor: const Color(0xFF1E8F66),
@@ -970,7 +985,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    isClaimed ? 'COPIED' : 'COPY',
+                    isClaimed
+                        ? AppLocalizations.of(context).copied
+                        : AppLocalizations.of(context).copy,
                     style: TextStyle(
                       color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
                       fontSize: 10,
@@ -1003,8 +1020,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SectionHeader(
-                title: 'Shops near you',
-                subtitle: 'Verified local merchants',
+                title: AppLocalizations.of(context).shopsNearYou,
+                subtitle: AppLocalizations.of(context).verifiedLocalMerchants,
                 onViewAll: () => _showAllShopsSheet(context, list),
               ),
             ),
@@ -1219,7 +1236,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SectionHeader(
-                title: 'Trending Now 🔥',
+                title: AppLocalizations.of(context).trendingNow2,
                 onViewAll: () => context.push(AppRoutes.search),
               ),
             ),
@@ -1295,20 +1312,34 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProductGridView(List<Product> products) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.63,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemCount: products.length,
-        itemBuilder: (context, i) => ProductCard(
-          product: products[i],
-          onTap: () => context.push(AppRoutes.productPath(products[i].id)),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final crossAxisCount = ResponsiveGrid.calculateCrossAxisCount(
+            width,
+            maxCardWidth: 250,
+          );
+          final childAspectRatio = ResponsiveGrid.calculateProductAspectRatio(
+            width,
+            crossAxisCount,
+            showBrand: true,
+          );
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: childAspectRatio,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: products.length,
+            itemBuilder: (context, i) => ProductCard(
+              product: products[i],
+              onTap: () => context.push(AppRoutes.productPath(products[i].id)),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1357,8 +1388,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'All Active Coupons',
+                  Text(
+                    AppLocalizations.of(context).allActiveCoupons,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -1381,9 +1412,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         .where((v) => v.isLiveAt(now) && !v.isExhausted)
                         .toList();
                     if (list.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          'No vouchers available right now.',
+                          AppLocalizations.of(
+                            context,
+                          ).noVouchersAvailableRightNow,
                           style: TextStyle(color: Color(0xFF6B7280)),
                         ),
                       );
@@ -1436,11 +1469,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'All Shops & Stores',
+                        AppLocalizations.of(context).allShopsStores,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -1448,7 +1481,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       SizedBox(height: 2),
                       Text(
-                        'Verified local merchants',
+                        AppLocalizations.of(context).verifiedLocalMerchants,
                         style: TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
@@ -1475,7 +1508,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                         .toList();
                     if (list.isEmpty) {
-                      return const Center(child: Text('No shops available'));
+                      return Center(
+                        child: Text(
+                          AppLocalizations.of(context).noShopsAvailable,
+                        ),
+                      );
                     }
                     return ListView.separated(
                       controller: scrollController,
@@ -1566,7 +1603,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      isOpen ? 'Open Now' : 'Closed',
+                                      isOpen
+                                          ? AppLocalizations.of(
+                                              context,
+                                            ).openNow2
+                                          : AppLocalizations.of(context).closed,
                                       style: TextStyle(
                                         fontSize: 11.5,
                                         color: isOpen
@@ -1667,18 +1708,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              'Add Mobile Number',
-                              style: TextStyle(
+                              AppLocalizations.of(context).addMobileNumber,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
-                              'For instant order updates & delivery SMS',
-                              style: TextStyle(
+                              AppLocalizations.of(
+                                context,
+                              ).forInstantOrderUpdatesDeliverySms,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: Colors.black54,
                               ),
@@ -1694,11 +1737,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     keyboardType: TextInputType.phone,
                     autofocus: true,
                     decoration: InputDecoration(
-                      labelText: 'Mobile Number',
+                      labelText: AppLocalizations.of(context).mobileNumber,
                       hintText: '9876543210',
                       prefixText: '+91  ',
                       prefixIcon: const Icon(Icons.phone),
-                      helperText: 'Enter your 10-digit Indian mobile number',
+                      helperText: AppLocalizations.of(
+                        context,
+                      ).enterYour10DigitIndianMobileNumber,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -1716,7 +1761,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? raw.substring(1)
                           : raw;
                       if (!RegExp(r'^[6-9]\d{9}$').hasMatch(digits)) {
-                        return 'Enter a valid 10-digit mobile number';
+                        return AppLocalizations.of(
+                          context,
+                        ).enterAValid10DigitMobileNumber;
                       }
                       return null;
                     },
@@ -1743,6 +1790,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             final scaffoldMessenger = ScaffoldMessenger.of(
                               context,
                             );
+                            final l10n = AppLocalizations.of(context);
                             final navigator = Navigator.of(sheetContext);
                             final ok = await authCubit.updateUserMobile(raw);
                             if (navigator.canPop()) {
@@ -1750,9 +1798,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             }
                             if (ok) {
                               scaffoldMessenger.showSnackBar(
-                                const SnackBar(
+                                SnackBar(
                                   content: Text(
-                                    'Mobile number saved successfully!',
+                                    l10n.mobileNumberSavedSuccessfully,
                                   ),
                                   backgroundColor: Colors.green,
                                 ),
@@ -1768,8 +1816,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Save Mobile Number',
+                        : Text(
+                            AppLocalizations.of(context).saveMobileNumber,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -1783,8 +1831,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.of(sheetContext).pop();
                       }
                     },
-                    child: const Text(
-                      'Maybe Later',
+                    child: Text(
+                      AppLocalizations.of(context).maybeLater,
                       style: TextStyle(color: Colors.black54),
                     ),
                   ),

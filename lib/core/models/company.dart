@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../app/l10n/l10n_service.dart';
 
 /// Tenant / Company model (Firestore: /companies).
 class Company {
@@ -9,6 +10,7 @@ class Company {
   final String status; // active | suspended | inactive
   final String details;
   final String address;
+  final String phone; // contact number shown on pickup cards
   final String location; // maps link
   final String logoUrl;
   final String bannerUrl;
@@ -44,6 +46,7 @@ class Company {
     this.status = 'active',
     this.details = '',
     this.address = '',
+    this.phone = '',
     this.location = '',
     this.logoUrl = '',
     this.bannerUrl = '',
@@ -70,6 +73,7 @@ class Company {
     status: map['status'] ?? 'active',
     details: map['details'] ?? '',
     address: map['address'] ?? '',
+    phone: map['phone']?.toString() ?? '',
     location: map['location'] ?? '',
     logoUrl: map['logoUrl'] ?? map['logo'] ?? '',
     bannerUrl: map['bannerUrl'] ?? map['banner'] ?? '',
@@ -111,6 +115,7 @@ class Company {
     'status': status,
     'details': details,
     'address': address,
+    'phone': phone,
     'location': location,
     'logoUrl': logoUrl,
     'bannerUrl': bannerUrl,
@@ -137,6 +142,7 @@ class Company {
     String? status,
     String? details,
     String? address,
+    String? phone,
     String? location,
     String? logoUrl,
     String? bannerUrl,
@@ -161,6 +167,7 @@ class Company {
     status: status ?? this.status,
     details: details ?? this.details,
     address: address ?? this.address,
+    phone: phone ?? this.phone,
     location: location ?? this.location,
     logoUrl: logoUrl ?? this.logoUrl,
     bannerUrl: bannerUrl ?? this.bannerUrl,
@@ -260,14 +267,14 @@ class WeeklyHours {
   };
 
   static List<WeeklyHours> defaultWeek() => [
-    const WeeklyHours(day: 'Mon', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Tue', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Wed', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Thu', openTime: '09:00', closeTime: '21:00'),
-    const WeeklyHours(day: 'Fri', openTime: '09:00', closeTime: '22:00'),
-    const WeeklyHours(day: 'Sat', openTime: '10:00', closeTime: '22:00'),
-    const WeeklyHours(
-      day: 'Sun',
+    WeeklyHours(day: L10n.current.mon, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.tue, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.wed, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.thu, openTime: '09:00', closeTime: '21:00'),
+    WeeklyHours(day: L10n.current.fri, openTime: '09:00', closeTime: '22:00'),
+    WeeklyHours(day: L10n.current.sat, openTime: '10:00', closeTime: '22:00'),
+    WeeklyHours(
+      day: L10n.current.sun,
       openTime: '00:00',
       closeTime: '00:00',
       isClosed: true,

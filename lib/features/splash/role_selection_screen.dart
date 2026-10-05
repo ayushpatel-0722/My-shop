@@ -16,68 +16,78 @@ class RoleSelectionScreen extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: scheme.primary,
-                  borderRadius: BorderRadius.circular(20),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: scheme.primary,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.storefront,
+                          size: 40,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.continueAs,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.selectRole,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 24),
+                      _roleCard(
+                        context,
+                        icon: Icons.admin_panel_settings,
+                        label: l10n.iAmAdmin,
+                        onTap: () => context.go(AppRoutes.adminLogin),
+                      ),
+                      const SizedBox(height: 12),
+                      _roleCard(
+                        context,
+                        icon: Icons.inventory_2_outlined,
+                        label: l10n.iAmEmployee,
+                        onTap: () => context.go(AppRoutes.employeeLogin),
+                      ),
+                      const SizedBox(height: 12),
+                      _roleCard(
+                        context,
+                        icon: Icons.shopping_bag_outlined,
+                        label: l10n.iAmShopper,
+                        onTap: () => context.go(AppRoutes.home),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () => context.go(AppRoutes.companyOnboarding),
+                        icon: const Icon(Icons.add_business),
+                        label: Text(l10n.createNewCompany),
+                      ),
+                      const Spacer(),
+                      const SizedBox(height: 16),
+                      const LanguageSelector(),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
                 ),
-                child: const Icon(
-                  Icons.storefront,
-                  size: 40,
-                  color: Colors.white,
-                ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.continueAs,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.selectRole,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const Spacer(),
-              _roleCard(
-                context,
-                icon: Icons.admin_panel_settings,
-                label: l10n.iAmAdmin,
-                onTap: () => context.go(AppRoutes.adminLogin),
-              ),
-              const SizedBox(height: 12),
-              _roleCard(
-                context,
-                icon: Icons.inventory_2_outlined,
-                label: l10n.iAmEmployee,
-                onTap: () => context.go(AppRoutes.employeeLogin),
-              ),
-              const SizedBox(height: 12),
-              _roleCard(
-                context,
-                icon: Icons.shopping_bag_outlined,
-                label: l10n.iAmShopper,
-                onTap: () => context.go(AppRoutes.home),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => context.go(AppRoutes.companyOnboarding),
-                icon: const Icon(Icons.add_business),
-                label: Text(l10n.createNewCompany),
-              ),
-              const Spacer(),
-              const LanguageSelector(),
-              const SizedBox(height: 8),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

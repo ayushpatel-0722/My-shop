@@ -10,6 +10,7 @@ import '../../checkout/cart/cart_cubit.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
 import '../../../core/utils/formatters.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Product card styled to match the Vibrant Marketplace design system.
 ///
@@ -122,7 +123,9 @@ class ProductCard extends StatelessWidget {
                           ],
                         ),
                         child: Text(
-                          '-${_discountPercent()}% OFF',
+                          AppLocalizations.of(
+                            context,
+                          ).off2('${_discountPercent()}'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -149,8 +152,8 @@ class ProductCard extends StatelessWidget {
                             color: const Color(0xFFB3261E),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
-                            'Out of stock',
+                          child: Text(
+                            AppLocalizations.of(context).outOfStock,
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w800,
@@ -322,7 +325,12 @@ class ProductCard extends StatelessWidget {
                   if (product.isDiscounted) ...[
                     const SizedBox(height: 2),
                     Text(
-                      'Save ${formatCurrency(product.amount - product.price, symbol: symbol)}',
+                      AppLocalizations.of(context).save2(
+                        formatCurrency(
+                          product.amount - product.price,
+                          symbol: symbol,
+                        ),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -355,10 +363,10 @@ class ProductCard extends StatelessWidget {
     context.read<CartCubit>().add(product, company: company);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${product.name} added to cart'),
+        content: Text(AppLocalizations.of(context).addedToCart(product.name)),
         duration: const Duration(seconds: 2),
         action: SnackBarAction(
-          label: 'View Cart',
+          label: AppLocalizations.of(context).viewCart2,
           onPressed: () => context.go(AppRoutes.cart),
         ),
         behavior: SnackBarBehavior.floating,
@@ -404,8 +412,8 @@ class ProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: const Color(0xFFECEEF1)),
               ),
-              child: const Text(
-                'Marketplace',
+              child: Text(
+                AppLocalizations.of(context).marketplace,
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w600,

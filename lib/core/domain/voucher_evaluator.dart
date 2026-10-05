@@ -1,5 +1,6 @@
 import '../models/cart_item.dart';
 import '../models/voucher.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Why a voucher could not be applied to the current cart.
 ///
@@ -36,19 +37,21 @@ enum VoucherRejection {
 }
 
 /// Default, user facing copy for every [VoucherRejection].
-const Map<VoucherRejection, String> voucherRejectionMessages = {
-  VoucherRejection.none: 'Voucher applied.',
-  VoucherRejection.notFound: 'That code is not valid for this store.',
-  VoucherRejection.inactive: 'This voucher is currently disabled.',
-  VoucherRejection.expired: 'This voucher has expired.',
-  VoucherRejection.minOrderNotMet: 'Add a few more items to use this voucher.',
+/// Localized rejection/success messages per reason; re-read per call so it
+/// follows the active language.
+Map<VoucherRejection, String> get voucherRejectionMessages => {
+  VoucherRejection.none: L10n.current.voucherApplied2,
+  VoucherRejection.notFound: L10n.current.thatCodeIsNotValidForThisStore,
+  VoucherRejection.inactive: L10n.current.thisVoucherIsCurrentlyDisabled,
+  VoucherRejection.expired: L10n.current.thisVoucherHasExpired,
+  VoucherRejection.minOrderNotMet: L10n.current.addAFewMoreItemsToUseThisVoucher,
   VoucherRejection.scopeMismatch:
-      'This voucher does not apply to the items in your cart.',
+      L10n.current.thisVoucherDoesNotApplyToTheItemsInYourCart,
   VoucherRejection.perUserLimitReached:
-      'You have already used this voucher the maximum number of times.',
+      L10n.current.youHaveAlreadyUsedThisVoucherTheMaximumNumberOfTimes,
   VoucherRejection.usageLimitReached:
-      'This voucher has reached its redemption limit.',
-  VoucherRejection.firstTimeOnly: 'This voucher is for first-time orders only.',
+      L10n.current.thisVoucherHasReachedItsRedemptionLimit,
+  VoucherRejection.firstTimeOnly: L10n.current.thisVoucherIsForFirstTimeOrdersOnly,
 };
 
 /// Outcome of validating one voucher against one cart.
@@ -91,7 +94,7 @@ class VoucherEvaluation {
 
   /// Stable, user facing message for the result.
   String get message =>
-      voucherRejectionMessages[reason] ?? 'Voucher cannot be applied.';
+      voucherRejectionMessages[reason] ?? L10n.current.voucherCannotBeApplied;
 
   @override
   String toString() =>

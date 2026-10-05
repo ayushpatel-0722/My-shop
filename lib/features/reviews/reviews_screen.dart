@@ -43,13 +43,15 @@ class ReviewsScreen extends StatelessWidget {
               .where((r) => r.isVisible)
               .toList();
           if (list.isEmpty) {
-            return const Center(child: Text('No reviews yet'));
+            return Center(
+              child: Text(AppLocalizations.of(context).noReviewsYet),
+            );
           }
           final avg = list.fold(0, (s, r) => s + r.rating) / list.length;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _averageCard(avg, list.length),
+              _averageCard(context, avg, list.length),
               const SizedBox(height: 12),
               for (final r in list) _reviewCard(r),
             ],
@@ -59,7 +61,7 @@ class ReviewsScreen extends StatelessWidget {
     );
   }
 
-  Widget _averageCard(double avg, int count) {
+  Widget _averageCard(BuildContext context, double avg, int count) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -83,7 +85,7 @@ class ReviewsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text('$count reviews'),
+                Text(AppLocalizations.of(context).reviews2('$count')),
               ],
             ),
           ],

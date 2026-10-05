@@ -68,7 +68,7 @@ class _AppState extends State<App> {
         bloc: widget.localeCubit,
         builder: (context, locale) {
           final app = MaterialApp.router(
-            title: 'Bazaar',
+            onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),

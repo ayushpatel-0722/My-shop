@@ -1,5 +1,6 @@
 import '../models/company.dart';
 import '../models/review.dart';
+import '../../app/l10n/l10n_service.dart';
 
 /// Weekly-opening-hours maths for the store front.
 ///
@@ -14,14 +15,14 @@ import '../models/review.dart';
 class StoreHours {
   const StoreHours._();
 
-  static const List<String> _dayNames = [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
+  static List<String> get _dayNames => [
+    L10n.current.mon,
+    L10n.current.tue,
+    L10n.current.wed,
+    L10n.current.thu,
+    L10n.current.fri,
+    L10n.current.sat,
+    L10n.current.sun,
   ];
 
   /// "21:00" -> 1260 minutes. 0 for unparseable input.
@@ -40,10 +41,12 @@ class StoreHours {
     if (minutes < 0) return hhmm;
     final h24 = minutes ~/ 60;
     final m = minutes % 60;
-    final suffix = h24 >= 12 ? 'PM' : 'AM';
+    final suffix = h24 >= 12 ? L10n.current.pm : L10n.current.am;
     var h12 = h24 % 12;
     if (h12 == 0) h12 = 12;
-    return m == 0 ? '$h12 $suffix' : '$h12:${m.toString().padLeft(2, '0')} $suffix';
+    return m == 0
+        ? '$h12 $suffix'
+        : '$h12:${m.toString().padLeft(2, '0')} $suffix';
   }
 
   static WeeklyHours? _hoursFor(Company company, int weekday) {
@@ -112,7 +115,9 @@ class StoreHours {
         if (yesterday != null) {
           final yOpen = toMinutes(yesterday.openTime);
           final yClose = toMinutes(yesterday.closeTime);
-          if (yClose <= yOpen && !(yOpen == 0 && yClose == 0) && minutes < yClose) {
+          if (yClose <= yOpen &&
+              !(yOpen == 0 && yClose == 0) &&
+              minutes < yClose) {
             return yesterday;
           }
         }
@@ -131,7 +136,13 @@ class StoreHours {
       if (row == null || row.isClosed) continue;
       final open = toMinutes(row.openTime);
       if (open < 0) continue;
-      final opensAt = DateTime(day.year, day.month, day.day, open ~/ 60, open % 60);
+      final opensAt = DateTime(
+        day.year,
+        day.month,
+        day.day,
+        open ~/ 60,
+        open % 60,
+      );
       if (opensAt.isAfter(now)) return opensAt;
     }
     return null;
@@ -141,26 +152,28 @@ class StoreHours {
   static String openLabel(Company company, DateTime now) {
     final hours = activeHours(company, now);
     final close = hours == null ? '' : prettyTime(hours.closeTime);
-    final closeSuffix = hours != null &&
+    final closeSuffix =
+        hours != null &&
             toMinutes(hours.closeTime) <= toMinutes(hours.openTime) &&
             !(toMinutes(hours.openTime) == 0 && toMinutes(hours.closeTime) == 0)
-        ? ' (late)'
+        ? L10n.current.msgLate
         : '';
-    return close.isEmpty ? 'Open Now' : 'Open Now · Closes $close$closeSuffix';
+    return close.isEmpty
+        ? L10n.current.openNow2
+        : L10n.current.openNowCloses(close, closeSuffix);
   }
 
   /// Red pill label while closed: `"Closed · Opens 9 AM Mon"`.
   static String closedLabel(Company company, DateTime now) {
     final next = nextOpening(company, now);
-    if (next == null) return 'Closed';
+    if (next == null) return L10n.current.closed;
     final time = prettyTime(
       '${next.hour.toString().padLeft(2, '0')}:${next.minute.toString().padLeft(2, '0')}',
     );
-    final sameDay = next.year == now.year &&
-        next.month == now.month &&
-        next.day == now.day;
+    final sameDay =
+        next.year == now.year && next.month == now.month && next.day == now.day;
     final day = sameDay ? '' : ' ${_dayNames[next.weekday - 1]}';
-    return 'Closed · Opens $time$day';
+    return L10n.current.closedOpens(time, day);
   }
 }
 
@@ -195,9 +208,10 @@ class StoreStats {
 
   /// "4.6" / "New" — never fabricates a rating for an unreviewsed shop.
   String get ratingLabel =>
-      reviewCount == 0 ? 'New' : averageRating.toStringAsFixed(1);
+      reviewCount == 0 ? L10n.current.msgNew : averageRating.toStringAsFixed(1);
 
   /// "128 followers" / "1 follower".
-  String get followerLabel =>
-      followerCount == 1 ? '1 follower' : '$followerCount followers';
+  String get followerLabel => followerCount == 1
+      ? L10n.current.msg1Follower
+      : L10n.current.followers('$followerCount');
 }

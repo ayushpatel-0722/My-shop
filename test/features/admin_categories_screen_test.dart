@@ -200,7 +200,7 @@ void main() {
 
     expect(find.text('Delete Category'), findsOneWidget);
     expect(
-      find.textContaining('1 assigned product(s) will move to "Root"'),
+      find.textContaining('1 assigned product will move to "Root"'),
       findsOneWidget,
     );
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Small monospace chip showing a document id; tapping copies it.
 ///
@@ -10,15 +11,19 @@ class CopyableIdBadge extends StatelessWidget {
   final String id;
 
   /// Noun used in the tooltip and snack bar, e.g. `Product`.
-  final String label;
+  ///
+  /// Defaults to the localized `ID` label (resolved in [build] because
+  /// default parameter values must be compile-time constants).
+  final String? label;
 
-  const CopyableIdBadge({super.key, required this.id, this.label = 'ID'});
+  const CopyableIdBadge({super.key, required this.id, this.label});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final label = this.label ?? AppLocalizations.of(context).id2;
     return Tooltip(
-      message: 'Copy $label ID',
+      message: AppLocalizations.of(context).copyId(label),
       child: InkWell(
         borderRadius: BorderRadius.circular(4),
         onTap: () {
@@ -26,7 +31,9 @@ class CopyableIdBadge extends StatelessWidget {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('$label ID copied to clipboard: $id'),
+              content: Text(
+                AppLocalizations.of(context).idCopiedToClipboard(label, id),
+              ),
               duration: const Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
             ),
@@ -49,7 +56,7 @@ class CopyableIdBadge extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  'ID: $id',
+                  AppLocalizations.of(context).id(id),
                   style: TextStyle(
                     fontSize: 11,
                     fontFamily: 'monospace',

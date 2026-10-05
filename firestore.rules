@@ -90,9 +90,18 @@ service cloud.firestore {
       }
 
       // ---- /companies/{companyId}/categories/{categoryId} --------------------
+      // Ordering is admin-managed: sortOrder drives the customer-facing
+      // category order and productIds holds the curated "In Category" product
+      // order. Only a company admin can create/update/delete categories, and
+      // the ordering fields are explicitly admin-gated on update as well.
       match /categories/{categoryId} {
         allow read: if true;
-        allow write: if isCompanyAdmin(companyId);
+        allow create: if isCompanyAdmin(companyId);
+        allow update: if isCompanyAdmin(companyId)
+          && (!request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(['sortOrder', 'productIds'])
+              || isCompanyAdmin(companyId));
+        allow delete: if isCompanyAdmin(companyId);
       }
 
       // ---- /companies/{companyId}/products/{productId} ----------------------

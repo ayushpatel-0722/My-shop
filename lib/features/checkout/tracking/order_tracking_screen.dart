@@ -43,12 +43,16 @@ class OrderTrackingScreen extends StatelessWidget {
 
           if (order == null) {
             if (snap.connectionState == ConnectionState.waiting) {
-              return const M3CenterLoader(message: 'Loading order details...');
+              return M3CenterLoader(
+                message: AppLocalizations.of(context).loadingOrderDetails,
+              );
             }
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(28),
-                child: Text('This order is no longer available.'),
+                child: Text(
+                  AppLocalizations.of(context).thisOrderIsNoLongerAvailable,
+                ),
               ),
             );
           }
@@ -79,7 +83,7 @@ class OrderTrackingScreen extends StatelessWidget {
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.person_outline),
-                    title: const Text('Customer details'),
+                    title: Text(AppLocalizations.of(context).customerDetails2),
                     subtitle: Text(
                       '${order.customerName}${order.customerPhone.isNotEmpty ? " · ${order.customerPhone}" : ""}${order.customerEmail.isNotEmpty ? " (${order.customerEmail})" : ""}',
                     ),
@@ -91,7 +95,7 @@ class OrderTrackingScreen extends StatelessWidget {
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.location_on_outlined),
-                    title: const Text('Delivery address'),
+                    title: Text(AppLocalizations.of(context).deliveryAddress2),
                     subtitle: Text(order.address),
                   ),
                 ),
@@ -179,9 +183,11 @@ class OrderTrackingScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel this order?'),
+        title: Text(AppLocalizations.of(context).cancelThisOrder),
         content: Text(
-          'Order ${order.reference} will be cancelled. This cannot be undone.',
+          AppLocalizations.of(
+            context,
+          ).orderWillBeCancelledThisCannotBeUndone(order.reference),
         ),
         actions: [
           TextButton(
@@ -193,7 +199,7 @@ class OrderTrackingScreen extends StatelessWidget {
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Yes, cancel'),
+            child: Text(AppLocalizations.of(context).yesCancel),
           ),
         ],
       ),
@@ -204,9 +210,11 @@ class OrderTrackingScreen extends StatelessWidget {
       await repo.cancelOrder(order.id);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not cancel order: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotCancelOrder('$e')),
+        ),
+      );
     }
   }
 
@@ -214,13 +222,17 @@ class OrderTrackingScreen extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Order ${order.reference}',
+          AppLocalizations.of(context).order3(order.reference),
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
-        Text('${order.itemCount} items · ${formatDate(order.createdAt)}'),
+        Text(
+          AppLocalizations.of(
+            context,
+          ).items('${order.itemCount}', formatDate(order.createdAt)),
+        ),
         const SizedBox(height: 10),
         OrderStatusBadge(status: order.orderStatus),
       ],
@@ -239,7 +251,13 @@ class OrderTrackingScreen extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Cancelled${order.cancelledAt == null ? '' : ' on ${formatDate(order.cancelledAt)}'}',
+              AppLocalizations.of(context).cancelled2(
+                order.cancelledAt == null
+                    ? ''
+                    : AppLocalizations.of(
+                        context,
+                      ).msgOn(formatDate(order.cancelledAt)),
+              ),
               style: const TextStyle(
                 color: Color(0xFFDC2626),
                 fontWeight: FontWeight.bold,

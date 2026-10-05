@@ -78,12 +78,45 @@ abstract class TestHarness {
     role: 'admin',
   );
 
-  /// Regular shopper.
+  /// Regular shopper (no saved addresses — checkout must ask for one).
   static const AppUser shopper = AppUser(
     id: 'u_1',
     name: 'Asha Shopper',
     mobileNumber: '9876543210',
     role: 'user',
+  );
+
+  /// Saved home address used by the checkout tests (pincode 380001 -> ₹30).
+  static const AddressEntry homeAddress = AddressEntry(
+    id: 'addr_home',
+    name: 'Asha Shopper',
+    phone: '9876543210',
+    houseNo: '12',
+    address: 'Market Street',
+    city: 'Ahmedabad',
+    state: 'Gujarat',
+    pincode: '380001',
+    isDefault: true,
+    label: 'Home',
+  );
+
+  /// Second saved address (non-default) for selection tests.
+  static const AddressEntry workAddress = AddressEntry(
+    id: 'addr_work',
+    name: 'Asha Shopper',
+    phone: '9876543210',
+    houseNo: '4',
+    address: 'Trade Road',
+    city: 'Ahmedabad',
+    state: 'Gujarat',
+    pincode: '380009',
+    label: 'Work',
+  );
+
+  /// The shopper with saved addresses, as the checkout reads them from the
+  /// profile (`AppUser.addresses`, max 3).
+  static final AppUser shopperWithAddresses = shopper.copyWith(
+    addresses: const [homeAddress, workAddress],
   );
 
   static const AppUser employee = AppUser(

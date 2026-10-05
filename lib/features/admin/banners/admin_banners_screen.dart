@@ -1,3 +1,5 @@
+import 'package:myshop/app/l10n/app_localizations.dart';
+
 import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,7 +20,7 @@ class AdminBannersScreen extends StatelessWidget {
     return AdminShell(
       showBack: true,
       backRoute: AppRoutes.admin,
-      title: 'Banners',
+      title: AppLocalizations.of(context).banners,
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
@@ -30,7 +32,9 @@ class AdminBannersScreen extends StatelessWidget {
         builder: (context, snap) {
           final list = snap.data ?? const <OfferBanner>[];
           if (list.isEmpty) {
-            return const Center(child: Text('No offer banners'));
+            return Center(
+              child: Text(AppLocalizations.of(context).noOfferBanners),
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -43,7 +47,9 @@ class AdminBannersScreen extends StatelessWidget {
                   leading: const Icon(Icons.image),
                   title: Text(b.id),
                   subtitle: Text(
-                    '${b.actionType.name} · priority ${b.priority}',
+                    AppLocalizations.of(
+                      context,
+                    ).priority(b.actionType.name, '${b.priority}'),
                   ),
                   trailing: const Icon(Icons.drag_handle),
                 ),
@@ -97,25 +103,35 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Create Offer Banner',
+          Text(
+            AppLocalizations.of(context).createOfferBanner,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _imageUrlCtrl,
-            decoration: const InputDecoration(labelText: 'Image URL'),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).imageUrl,
+            ),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _actionType,
-            decoration: const InputDecoration(labelText: 'Tap action'),
-            items: const [
-              DropdownMenuItem(value: 'product', child: Text('Product')),
-              DropdownMenuItem(value: 'category', child: Text('Category')),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).tapAction,
+            ),
+            items: [
+              DropdownMenuItem(
+                value: 'product',
+                child: Text(AppLocalizations.of(context).product),
+              ),
+              DropdownMenuItem(
+                value: 'category',
+                child: Text(AppLocalizations.of(context).category),
+              ),
               DropdownMenuItem(
                 value: 'external_url',
-                child: Text('External URL'),
+                child: Text(AppLocalizations.of(context).externalUrl),
               ),
             ],
             onChanged: (v) => setState(() => _actionType = v ?? 'product'),
@@ -124,10 +140,10 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
           TextField(
             decoration: InputDecoration(
               labelText: _actionType == 'category'
-                  ? 'Category ID'
+                  ? AppLocalizations.of(context).categoryId
                   : _actionType == 'product'
-                  ? 'Product ID'
-                  : 'URL',
+                  ? AppLocalizations.of(context).productId
+                  : AppLocalizations.of(context).url,
             ),
             onChanged: (v) => setState(() {
               if (_actionType == 'category') {
@@ -156,7 +172,7 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
               );
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context).save),
           ),
         ],
       ),
