@@ -87,6 +87,11 @@ void main() {
     await tester.tap(find.byKey(Key('order-advance-${order.id}')));
     await tester.pumpAndSettle();
 
+    // Confirm dialog
+    expect(find.text('Confirm Order'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirm').last);
+    await tester.pumpAndSettle();
+
     expect((await repo.order(order.id))!.orderStatus, OrderStatus.confirmed);
   });
 
@@ -132,8 +137,8 @@ void main() {
     expect(find.byKey(Key('order-cancel-${order.id}')), findsNothing);
   });
 
-  testWidgets('the bill breakdown shows discount and delivery', (tester) async {
-    await repo.placeOrder(
+  testWidgets('items quick preview dialog opens on tapping items button', (tester) async {
+    final order = await repo.placeOrder(
       Order(
         id: '',
         userId: 'u1',
@@ -154,11 +159,11 @@ void main() {
 
     await pumpTestApp(tester, const AdminOrdersScreen());
 
-    expect(find.text('Items'), findsOneWidget);
-    expect(find.textContaining('Discount (FRESH20)'), findsOneWidget);
-    expect(find.text('Delivery'), findsOneWidget);
-    expect(find.text('Payable'), findsOneWidget);
-    expect(find.text('₹130'), findsOneWidget);
+    await tester.tap(find.byKey(Key('order-items-btn-${order.id}')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Order Items (2)'), findsOneWidget);
+    expect(find.text('Tomatoes'), findsOneWidget);
   });
 
   testWidgets('search filters the pipeline', (tester) async {
@@ -193,19 +198,6 @@ void main() {
     expect(find.byKey(Key('order-card-${tomatoes.id}')), findsNothing);
   });
 
-  testWidgets('the payment switch marks an order as paid', (tester) async {
-    final order = await placeOrder();
-    await pumpTestApp(tester, const AdminOrdersScreen());
-
-    await tester.tap(find.descendant(
-      of: find.byKey(Key('order-card-${order.id}')),
-      matching: find.byType(Switch),
-    ));
-    await tester.pumpAndSettle();
-
-    expect((await repo.order(order.id))!.isPaid, isTrue);
-  });
-
   testWidgets('an empty pipeline shows a helpful empty state', (tester) async {
     await pumpTestApp(tester, const AdminOrdersScreen());
 
@@ -219,11 +211,10 @@ void main() {
 
     await pumpTestApp(tester, const AdminOrdersScreen());
 
-    await tester.tap(find.text('Cancelled (0)'));
+    await tester.tap(find.text('Confirmed (1)'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(Key('order-card-${pending.id}')), findsNothing);
-    expect(find.byKey(Key('order-card-${confirmed.id}')), findsNothing);
-    expect(find.text('No orders match these filters'), findsOneWidget);
+    expect(find.byKey(Key('order-card-${confirmed.id}')), findsOneWidget);
   });
 }

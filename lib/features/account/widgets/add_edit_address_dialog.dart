@@ -4,17 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../core/models/customer.dart';
+import '../../../core/services/auth_session.dart';
+import '../../../core/services/service_locator.dart';
 import '../../auth/auth_cubit.dart';
 
 /// Modal bottom sheet for adding or editing a delivery address (up to 3 addresses).
 class AddEditAddressSheet extends StatefulWidget {
   final AddressEntry? initialAddress;
   final bool isFirstAddress;
+  final AuthCubit? authCubit;
 
   const AddEditAddressSheet({
     super.key,
     this.initialAddress,
     this.isFirstAddress = false,
+    this.authCubit,
   });
 
   static Future<AddressEntry?> show(
@@ -22,14 +26,29 @@ class AddEditAddressSheet extends StatefulWidget {
     AddressEntry? initialAddress,
     bool isFirstAddress = false,
   }) {
+    AuthCubit? cubit;
+    try {
+      cubit = context.read<AuthCubit>();
+    } catch (_) {}
+
     return showModalBottomSheet<AddressEntry>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => AddEditAddressSheet(
-        initialAddress: initialAddress,
-        isFirstAddress: isFirstAddress,
-      ),
+      builder: (ctx) {
+        final sheet = AddEditAddressSheet(
+          initialAddress: initialAddress,
+          isFirstAddress: isFirstAddress,
+          authCubit: cubit,
+        );
+        if (cubit != null) {
+          return BlocProvider<AuthCubit>.value(
+            value: cubit,
+            child: sheet,
+          );
+        }
+        return sheet;
+      },
     );
   }
 
@@ -53,11 +72,20 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
   late bool _isDefault;
   bool _busy = false;
 
+  AuthCubit? get _effectiveAuthCubit {
+    if (widget.authCubit != null) return widget.authCubit;
+    try {
+      return context.read<AuthCubit>();
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     final init = widget.initialAddress;
-    final user = context.read<AuthCubit>().currentUser;
+    final user = _effectiveAuthCubit?.currentUser ?? AuthSession.currentUser;
 
     _nameCtrl = TextEditingController(text: init?.name ?? user?.name ?? '');
     _phoneCtrl = TextEditingController(
@@ -70,8 +98,21 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
     _cityCtrl = TextEditingController(text: init?.city ?? 'Ahmedabad');
     _stateCtrl = TextEditingController(text: init?.state ?? 'Gujarat');
 
-    _label = init?.label.isNotEmpty == true ? init!.label : AppLocalizations.of(context).home;
+    _label = init?.label.isNotEmpty == true ? init!.label : '';
     _isDefault = init?.isDefault ?? widget.isFirstAddress;
+  }
+
+  bool _initializedLabel = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initializedLabel) {
+      _initializedLabel = true;
+      if (_label.isEmpty) {
+        _label = AppLocalizations.of(context).home;
+      }
+    }
   }
 
   @override
@@ -105,7 +146,11 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
       isDefault: _isDefault,
     );
 
-    final ok = await context.read<AuthCubit>().saveUserAddress(entry);
+    final cubit = _effectiveAuthCubit;
+    final ok = cubit != null
+        ? await cubit.saveUserAddress(entry)
+        : await _fallbackSaveAddress(entry);
+
     if (!mounted) return;
     setState(() => _busy = false);
 
@@ -121,21 +166,55 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
     }
   }
 
+  Future<bool> _fallbackSaveAddress(AddressEntry entry) async {
+    final current = AuthSession.currentUser;
+    if (current == null) {
+      AuthSession.setActiveAddress(entry);
+      return true;
+    }
+    try {
+      final id = entry.id.isEmpty
+          ? 'addr_${DateTime.now().millisecondsSinceEpoch}'
+          : entry.id;
+      final savedEntry = entry.copyWith(id: id);
+      await repo.saveUserAddress(current.id, savedEntry);
+      final updatedList = List<AddressEntry>.from(current.addresses);
+      if (savedEntry.isDefault || updatedList.isEmpty) {
+        for (var i = 0; i < updatedList.length; i++) {
+          updatedList[i] = updatedList[i].copyWith(isDefault: false);
+        }
+      }
+      final idx = updatedList.indexWhere((a) => a.id == id);
+      if (idx >= 0) {
+        updatedList[idx] = savedEntry;
+      } else {
+        updatedList.add(savedEntry);
+      }
+      final updatedUser = current.copyWith(addresses: updatedList);
+      AuthSession.set(updatedUser);
+      if (savedEntry.isDefault) {
+        AuthSession.setActiveAddress(savedEntry);
+      }
+      return true;
+    } catch (e) {
+      debugPrint('[AddEditAddressSheet] fallback save address error: $e');
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.initialAddress != null;
     final viewInsets = MediaQuery.of(context).viewInsets.bottom;
-
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.9,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + viewInsets),
-      child: Form(
+    return Material(
+      color: Colors.white,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
+        padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + viewInsets),
+        child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -507,6 +586,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

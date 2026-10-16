@@ -263,6 +263,7 @@ class ProductVariant {
   final String id;
   final String sku;
   final String title;
+  String get displayTitle => title.isNotEmpty ? title : label;
   final Map<String, String> attributes;
   final int stockQty;
   final bool isUnlimitedStock;
@@ -520,7 +521,7 @@ class Product {
   const Product({
     required this.id,
     required this.companyId,
-    required this.categoryId,
+    this.categoryId = '',
     required this.name,
     this.details = '',
     this.type = 'quantity_based',
@@ -701,7 +702,7 @@ class Product {
 
   Map<String, dynamic> toMap() => {
     'companyId': companyId,
-    'categoryId': categoryId,
+    if (categoryId.isNotEmpty) 'categoryId': categoryId,
     'name': name,
     'details': details,
     'type': type,

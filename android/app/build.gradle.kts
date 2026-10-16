@@ -28,6 +28,28 @@ android {
         versionName = flutter.versionName
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
+    // ── Flavor configuration ───────────────────────────────────────────
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("uat") {
+            dimension = "environment"
+            // The applicationId stays as "com.example.myshop" to match the
+            // existing Firebase project registration. When you register
+            // "com.example.myshop.uat" in the Firebase Console, uncomment:
+            // applicationIdSuffix = ".uat"
+            resValue("string", "app_name", "Bazaar UAT")
+        }
+        create("prod") {
+            dimension = "environment"
+            resValue("string", "app_name", "Bazaar")
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

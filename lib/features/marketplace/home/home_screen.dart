@@ -667,7 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _categoryRailContent(List<Category> list) {
     return SizedBox(
-      height: 116,
+      height: 126,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -678,46 +678,61 @@ class _HomeScreenState extends State<HomeScreen> {
           final cat = list[i];
           final bgColor = _pastelColors[i % _pastelColors.length];
 
-          return InkWell(
-            onTap: () => context.push(
-              '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
-            ),
-            borderRadius: BorderRadius.circular(18),
-            child: SizedBox(
-              width: 72,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 66,
-                    height: 66,
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.white, width: 1.5),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.05),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => context.push(
+                '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
+              ),
+              borderRadius: BorderRadius.circular(20),
+              splashColor: Theme.of(context).primaryColor.withValues(alpha: 0.12),
+              highlightColor: Theme.of(context).primaryColor.withValues(alpha: 0.06),
+              child: SizedBox(
+                width: 80,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          width: 1.5,
                         ),
-                      ],
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color.fromRGBO(0, 0, 0, 0.05),
+                            blurRadius: 10,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Center(child: _buildCategoryIcon(cat)),
                     ),
-                    child: Center(child: _buildCategoryIcon(cat)),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    cat.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E2229),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 32,
+                      child: Center(
+                        child: Text(
+                          cat.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.1,
+                            color: Color(0xFF1E2229),
+                            height: 1.15,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -729,12 +744,27 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCategoryIcon(Category cat) {
     if (cat.iconUrl.startsWith('http://') ||
         cat.iconUrl.startsWith('https://')) {
-      return Image.network(
-        cat.iconUrl,
-        width: 32,
-        height: 32,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) => _fallbackCategoryIcon(cat),
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.network(
+          cat.iconUrl,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => _fallbackCategoryIcon(cat),
+        ),
+      );
+    }
+    if (cat.iconUrl.startsWith('assets/')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.asset(
+          cat.iconUrl,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => _fallbackCategoryIcon(cat),
+        ),
       );
     }
     return _fallbackCategoryIcon(cat);
@@ -748,21 +778,31 @@ class _HomeScreenState extends State<HomeScreen> {
     if (name.contains('cloth') ||
         name.contains('fashion') ||
         name.contains('wear')) {
-      return const Icon(Icons.checkroom, color: Color(0xFFFF5247), size: 28);
+      return const Icon(Icons.checkroom_rounded, color: Color(0xFFFF5247), size: 30);
+    } else if (name.contains('coffee') ||
+        name.contains('cafe') ||
+        name.contains('tea') ||
+        name.contains('beverag')) {
+      return const Icon(Icons.local_cafe_rounded, color: Color(0xFF795548), size: 30);
+    } else if (name.contains('spice') ||
+        name.contains('masala') ||
+        name.contains('herb') ||
+        name.contains('seasoning')) {
+      return const Icon(Icons.eco_rounded, color: Color(0xFFE65100), size: 30);
     } else if (name.contains('sweet') ||
         name.contains('cake') ||
         name.contains('dessert')) {
-      return const Icon(Icons.cake, color: Color(0xFFFF9800), size: 28);
+      return const Icon(Icons.cake_rounded, color: Color(0xFFFF9800), size: 30);
     } else if (name.contains('food') ||
         name.contains('snack') ||
         name.contains('grocery')) {
-      return const Icon(Icons.fastfood, color: Color(0xFF4CAF50), size: 28);
+      return const Icon(Icons.fastfood_rounded, color: Color(0xFF4CAF50), size: 30);
     } else if (name.contains('electr') ||
         name.contains('gadget') ||
         name.contains('phone')) {
-      return const Icon(Icons.devices, color: Color(0xFF2196F3), size: 28);
+      return const Icon(Icons.devices_rounded, color: Color(0xFF2196F3), size: 30);
     }
-    return const Icon(Icons.category, color: Color(0xFFFF5247), size: 28);
+    return const Icon(Icons.category_rounded, color: Color(0xFFFF5247), size: 30);
   }
 
   // ---------------------------------------------------------------------------

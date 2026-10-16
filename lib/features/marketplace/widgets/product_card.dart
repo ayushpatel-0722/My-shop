@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/features/auth/widgets/auth_bottom_sheet.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-
-import '../../../app/routes/app_router.dart';
 import '../../checkout/cart/cart_cubit.dart';
 
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
+import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 
@@ -361,17 +359,7 @@ class ProductCard extends StatelessWidget {
 
   void _doAddToCart(BuildContext context) {
     context.read<CartCubit>().add(product, company: company);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).addedToCart(product.name)),
-        duration: const Duration(seconds: 2),
-        action: SnackBarAction(
-          label: AppLocalizations.of(context).viewCart2,
-          onPressed: () => context.go(AppRoutes.cart),
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showAddToCartNotification(context, productName: product.name);
   }
 
   /// High-quality aesthetic fallback when an image URL is missing or fails to load.

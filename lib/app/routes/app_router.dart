@@ -16,6 +16,7 @@ import '../../features/admin/delivery_charges/admin_add_delivery_charge_screen.d
 import '../../features/admin/delivery_charges/admin_delivery_charges_screen.dart';
 import '../../features/admin/employees/admin_add_employee_screen.dart';
 import '../../features/admin/employees/admin_employees_screen.dart';
+import '../../features/admin/orders/admin_order_details_screen.dart';
 import '../../features/admin/orders/admin_orders_screen.dart';
 import '../../features/admin/products/admin_add_product_screen.dart';
 import '../../features/admin/products/admin_products_screen.dart';
@@ -81,6 +82,7 @@ class AppRoutes {
 
   static const admin = '/admin';
   static const adminOrders = '/admin/orders';
+  static const adminOrderDetails = '/admin/orders/:id';
   static const adminProducts = '/admin/products';
   static const adminAddProduct = '/admin/products/add';
   static const adminEditProduct = '/admin/products/edit/:id';
@@ -116,6 +118,7 @@ class AppRoutes {
   static String adminEditDeliveryPath(String pincode) =>
       '/admin/delivery-charges/edit/$pincode';
   static String orderPath(String id) => '/order/$id';
+  static String adminOrderDetailsPath(String id) => '/admin/orders/$id';
 }
 
 /// Handles global routing guards, role protection, and browser reload policies:
@@ -344,6 +347,12 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.adminOrders,
       builder: (_, s) => const AdminOrdersScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.adminOrderDetails,
+      builder: (_, state) => AdminOrderDetailsScreen(
+        orderId: state.pathParameters['id'] ?? '',
+      ),
     ),
     GoRoute(
       path: AppRoutes.adminProducts,

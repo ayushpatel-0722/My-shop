@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
-import 'package:myshop/app/routes/app_router.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/features/auth/admin_login/admin_login_screen.dart';
 import 'package:myshop/features/auth/auth_cubit.dart';
@@ -32,7 +30,9 @@ void main() {
   }
 
   group('AdminLoginScreen Validation Tests', () {
-    testWidgets('Step 1 shows error when Next is clicked with empty inputs', (tester) async {
+    testWidgets('Step 1 shows error when Next is clicked with empty inputs', (
+      tester,
+    ) async {
       await tester.pumpWidget(wrapWithApp(const AdminLoginScreen()));
       await tester.pumpAndSettle();
 
@@ -44,7 +44,10 @@ void main() {
 
       // Verify SnackBar and inline error texts appear
       expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.text('Please enter company name and company password.'), findsWidgets);
+      expect(
+        find.text('Please enter company name and company password.'),
+        findsWidgets,
+      );
       await tester.pump(const Duration(seconds: 4));
     });
 
@@ -81,7 +84,10 @@ void main() {
 
       // Verify SnackBar or inline errors appear
       expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.text('Company name and password are required.'), findsOneWidget);
+      expect(
+        find.text('Company name and password are required.'),
+        findsOneWidget,
+      );
       await tester.pump(const Duration(seconds: 4));
     });
 
@@ -101,7 +107,9 @@ void main() {
       await tester.pump(const Duration(seconds: 4));
     });
 
-    testWidgets('Shows error when password is less than 6 characters', (tester) async {
+    testWidgets('Shows error when password is less than 6 characters', (
+      tester,
+    ) async {
       await tester.pumpWidget(wrapWithApp(const EmployeeLoginScreen()));
       await tester.pumpAndSettle();
 
@@ -113,7 +121,10 @@ void main() {
       await tester.tap(find.widgetWithText(ElevatedButton, 'Login'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Admin password must be at least 6 characters.'), findsWidgets);
+      expect(
+        find.text('Admin password must be at least 6 characters.'),
+        findsWidgets,
+      );
       await tester.pump(const Duration(seconds: 4));
     });
   });
@@ -132,7 +143,9 @@ void main() {
       await tester.pump(const Duration(seconds: 4));
     });
 
-    testWidgets('Shows error on invalid 10-digit mobile number', (tester) async {
+    testWidgets('Shows error on invalid 10-digit mobile number', (
+      tester,
+    ) async {
       await tester.pumpWidget(wrapWithApp(const UserLoginScreen()));
       await tester.pumpAndSettle();
 
@@ -142,7 +155,12 @@ void main() {
       await tester.tap(find.widgetWithText(ElevatedButton, 'Send OTP'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Enter a valid 10-digit Indian mobile number (e.g. 9876543210)'), findsWidgets);
+      expect(
+        find.text(
+          'Enter a valid 10-digit Indian mobile number (e.g. 9876543210)',
+        ),
+        findsWidgets,
+      );
       await tester.pump(const Duration(seconds: 4));
     });
   });

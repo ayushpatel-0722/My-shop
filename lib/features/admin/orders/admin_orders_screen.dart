@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/routes/app_router.dart';
@@ -11,6 +12,7 @@ import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'widgets/order_items_dialog.dart';
 
 /// Master order pipeline for the signed-in store.
 ///
@@ -115,6 +117,13 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                     itemCount: 4,
                     itemBuilder: (_, _) => const M3OrderCardSkeleton(),
+                  );
+                }
+                if (snap.hasError && all.isEmpty) {
+                  return _CenteredMessage(
+                    icon: Icons.error_outline,
+                    message: 'Error loading orders',
+                    detail: '${snap.error}',
                   );
                 }
                 if (all.isEmpty) {
@@ -338,190 +347,257 @@ class _PipelineColumn extends StatelessWidget {
   }
 }
 
-class _OrderCard extends StatelessWidget {
+class _OrderCard extends StatefulWidget {
   final Order order;
 
   const _OrderCard({super.key, required this.order});
+
+  @override
+  State<_OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<_OrderCard> {
+  bool _isLoading = false;
+
+  Order get order => widget.order;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final next = OrderStatusRules.nextStage(order.orderStatus);
     final cancellable = OrderStatusRules.isCancellable(order.orderStatus);
+    final dateStr = order.createdAt != null
+        ? DateFormat('dd MMM, hh:mm a').format(order.createdAt!)
+        : '';
 
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.7),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Top row: Primary text is Customer Name + Total Amount
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  order.reference,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                OrderStatusBadge(status: order.orderStatus),
-                const Spacer(),
-                Text(
-                  formatCurrency(order.totalAmount),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              AppLocalizations.of(context).itemS2(
-                '${order.itemCount}',
-                order.isSelfPickup
-                    ? AppLocalizations.of(context).selfPickup
-                    : AppLocalizations.of(context).homeDelivery2,
-                order.pincode.isNotEmpty ? ' · ${order.pincode}' : '',
-              ),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            if (order.createdAt != null)
-              Text(
-                DateFormat(
-                  AppLocalizations.of(context).ddMmmHhMmA,
-                ).format(order.createdAt!),
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            if (order.customerName.isNotEmpty ||
-                order.customerPhone.isNotEmpty ||
-                order.customerEmail.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.4,
-                  ),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.person_outline,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.of(context).str2(
-                          order.customerName.isNotEmpty
-                              ? order.customerName
-                              : AppLocalizations.of(context).customer,
-                          order.customerPhone.isNotEmpty
-                              ? " · ${order.customerPhone}"
-                              : "",
-                          order.customerEmail.isNotEmpty
-                              ? " (${order.customerEmail})"
-                              : "",
-                        ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.customerName.isNotEmpty
+                            ? order.customerName
+                            : (order.customerPhone.isNotEmpty
+                                ? order.customerPhone
+                                : 'Guest Customer'),
                         style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            if (order.address.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                order.address,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
-            const SizedBox(height: 8),
-            _BillBreakdown(order: order),
-            const Divider(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: order.isPaid
-                    ? Colors.green.withValues(alpha: 0.08)
-                    : Colors.orange.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: order.isPaid
-                      ? Colors.green.withValues(alpha: 0.3)
-                      : Colors.orange.withValues(alpha: 0.3),
-                ),
-              ),
-              child: SwitchListTile(
-                dense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                title: Text(
-                  order.isPaid
-                      ? AppLocalizations.of(context).paymentDoneReceived
-                      : AppLocalizations.of(
-                          context,
-                        ).paymentPendingManualOffline,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: order.isPaid
-                        ? Colors.green.shade800
-                        : Colors.orange.shade900,
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Text(
+                            order.reference,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          if (dateStr.isNotEmpty) ...[
+                            Text(
+                              ' · $dateStr',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                subtitle: Text(
-                  order.isPaid
-                      ? AppLocalizations.of(context).paymentConfirmedByStore
-                      : AppLocalizations.of(
-                          context,
-                        ).customerWillPayOfflineToggleToMarkAsDone,
-                  style: const TextStyle(fontSize: 11),
+                const SizedBox(width: 8),
+                Text(
+                  formatCurrency(order.totalAmount),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
-                value: order.isPaid,
-                onChanged: (_) => repo.togglePaymentStatus(order.id),
-              ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+
+            // Middle row: Status badges & Fulfillment info
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                OrderStatusBadge(status: order.orderStatus),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: order.isPaid
+                        ? Colors.green.withValues(alpha: 0.12)
+                        : Colors.orange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    order.isPaid ? 'PAID' : 'PAYMENT PENDING',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                      color: order.isPaid
+                          ? Colors.green.shade800
+                          : Colors.orange.shade900,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 2.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: order.isSelfPickup
+                        ? Colors.blue.withValues(alpha: 0.1)
+                        : Colors.teal.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        order.isSelfPickup
+                            ? Icons.storefront_outlined
+                            : Icons.local_shipping_outlined,
+                        size: 12,
+                        color: order.isSelfPickup
+                            ? Colors.blue.shade800
+                            : Colors.teal.shade800,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        order.isSelfPickup ? 'Self Pickup' : 'Delivery',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: order.isSelfPickup
+                              ? Colors.blue.shade800
+                              : Colors.teal.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            if (_isLoading) ...[
+              const SizedBox(height: 10),
+              const LinearProgressIndicator(),
+            ],
+
+            const Divider(height: 20),
+
+            // Bottom action row: Items button, View Details, Confirm/Advance, Cancel
             Row(
               children: [
-                if (next != null)
-                  Expanded(
-                    child: FilledButton.tonal(
-                      key: Key('order-advance-${order.id}'),
-                      onPressed: () => _advance(context, next),
-                      child: Text(
-                        AppLocalizations.of(
-                          context,
-                        ).mark(orderStatusLabel(context, next)),
-                      ),
+                // Quick items dialog button
+                IconButton.outlined(
+                  key: Key('order-items-btn-${order.id}'),
+                  icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'View ordered items (${order.itemCount})',
+                  onPressed: () => OrderItemsPreviewDialog.show(context, order),
+                ),
+                const SizedBox(width: 8),
+
+                // View Details Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    key: Key('order-details-btn-${order.id}'),
+                    icon: const Icon(Icons.visibility_outlined, size: 16),
+                    label: const Text(
+                      'View Details',
+                      style: TextStyle(fontSize: 12.5),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    onPressed: () => context.push(
+                      AppRoutes.adminOrderDetailsPath(order.id),
                     ),
                   ),
-                if (next != null && cancellable) const SizedBox(width: 8),
-                if (cancellable)
-                  Expanded(
-                    child: OutlinedButton(
-                      key: Key('order-cancel-${order.id}'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.error,
-                      ),
-                      onPressed: () => _confirmCancel(context),
-                      child: Text(AppLocalizations.of(context).cancelOrder),
+                ),
+                const SizedBox(width: 8),
+
+                // Main forward action: Mark Confirmed or next stage
+                if (order.orderStatus == OrderStatus.pending) ...[
+                  FilledButton(
+                    key: Key('order-advance-${order.id}'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.green.shade700,
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    onPressed: _isLoading ? null : () => _confirmOrder(context),
+                    child: const Text(
+                      'Confirm',
+                      style: TextStyle(fontSize: 12.5),
                     ),
                   ),
+                ] else if (next != null) ...[
+                  FilledButton.tonal(
+                    key: Key('order-advance-${order.id}'),
+                    style: FilledButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    onPressed: _isLoading
+                        ? null
+                        : () => _advance(context, next),
+                    child: Text(
+                      orderStatusLabel(context, next),
+                      style: const TextStyle(fontSize: 12.5),
+                    ),
+                  ),
+                ],
+
+                // Cancel button
+                if (cancellable) ...[
+                  const SizedBox(width: 6),
+                  IconButton(
+                    key: Key('order-cancel-${order.id}'),
+                    icon: Icon(
+                      Icons.cancel_outlined,
+                      size: 20,
+                      color: theme.colorScheme.error,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Cancel Order',
+                    onPressed: _isLoading ? null : () => _confirmCancel(context),
+                  ),
+                ],
               ],
             ),
           ],
@@ -530,9 +606,65 @@ class _OrderCard extends StatelessWidget {
     );
   }
 
-  Future<void> _advance(BuildContext context, String next) async {
+  Future<void> _confirmOrder(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Order'),
+        content: Text(
+          'Mark order ${order.reference} as Confirmed? The customer will see the order as Confirmed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.green.shade700),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isLoading = true);
     try {
-      await repo.updateOrderStatus(order.id, next);
+      await repo.updateOrderStatus(
+        order.id,
+        OrderStatus.confirmed,
+        companyId: order.companyId,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Order ${order.reference} marked as Confirmed!'),
+          backgroundColor: Colors.green.shade800,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotUpdateOrder('$e')),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _advance(BuildContext context, String next) async {
+    setState(() => _isLoading = true);
+    try {
+      await repo.updateOrderStatus(
+        order.id,
+        next,
+        companyId: order.companyId,
+      );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -548,124 +680,93 @@ class _OrderCard extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).couldNotUpdateOrder('$e')),
+          backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _confirmCancel(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final reasonCtrl = TextEditingController();
+    final reason = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context).cancelThisOrder),
-        content: Text(
-          AppLocalizations.of(
-            context,
-          ).orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(
-            order.reference,
-          ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(
+                context,
+              ).orderWillBeCancelledAndTheCustomerWillSeeItUnderCancelled(
+                order.reference,
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: reasonCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Cancellation Reason',
+                hintText: 'e.g. Out of stock, customer requested',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              maxLines: 2,
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx, null),
             child: Text(AppLocalizations.of(context).keep),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () {
+              final r = reasonCtrl.text.trim();
+              Navigator.pop(ctx, r.isEmpty ? 'Cancelled by admin' : r);
+            },
             child: Text(AppLocalizations.of(context).cancelOrder),
           ),
         ],
       ),
     );
-    if (confirmed != true) return;
 
+    if (reason == null) return;
+
+    setState(() => _isLoading = true);
     try {
-      await repo.cancelOrder(order.id);
+      await repo.cancelOrder(
+        order.id,
+        companyId: order.companyId,
+        reason: reason,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Order ${order.reference} cancelled.'),
+          backgroundColor: Colors.orange.shade800,
+        ),
+      );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).couldNotCancelOrder('$e')),
+          backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }
 
-/// Itemised money block so the admin sees the same bill as the customer.
-class _BillBreakdown extends StatelessWidget {
-  final Order order;
-
-  const _BillBreakdown({required this.order});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          _row(
-            AppLocalizations.of(context).items4,
-            formatCurrency(order.subtotal),
-          ),
-          if (order.discountAmount > 0)
-            _row(
-              AppLocalizations.of(context).discount2(
-                order.voucherCode.isNotEmpty ? ' (${order.voucherCode})' : '',
-              ),
-              '− ${formatCurrency(order.discountAmount)}',
-              color: Colors.green.shade700,
-            ),
-          _row(
-            AppLocalizations.of(context).delivery,
-            formatCurrency(order.deliveryCharge),
-          ),
-          const Divider(height: 12),
-          _row(
-            AppLocalizations.of(context).payable,
-            formatCurrency(order.totalAmount),
-            bold: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _row(String label, String value, {bool bold = false, Color? color}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _CenteredMessage extends StatelessWidget {
   final IconData icon;

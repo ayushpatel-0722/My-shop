@@ -25,14 +25,28 @@ class AuthBottomSheet extends StatefulWidget {
     VoidCallback? onAuthenticated,
     bool requireAddress = false,
   }) async {
+    AuthCubit? authCubit;
+    try {
+      authCubit = context.read<AuthCubit>();
+    } catch (_) {}
+
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => AuthBottomSheet(
-        onAuthenticated: onAuthenticated,
-        requireAddress: requireAddress,
-      ),
+      builder: (ctx) {
+        final sheet = AuthBottomSheet(
+          onAuthenticated: onAuthenticated,
+          requireAddress: requireAddress,
+        );
+        if (authCubit != null) {
+          return BlocProvider<AuthCubit>.value(
+            value: authCubit,
+            child: sheet,
+          );
+        }
+        return sheet;
+      },
     );
     return result ?? false;
   }

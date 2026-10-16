@@ -526,12 +526,18 @@ class MockAppRepository implements AppRepository {
       );
 
   @override
-  Future<Order?> order(String orderId) async =>
-      _orders.firstWhereOrNull((o) => o.id == orderId);
+  Future<Order?> order(String orderId, {String companyId = ''}) async =>
+      _orders.firstWhereOrNull(
+        (o) =>
+            o.id == orderId &&
+            (companyId.isEmpty || o.companyId == companyId),
+      );
 
   @override
-  Stream<Order?> watchOrder(String orderId) =>
-      orders().map((list) => list.firstWhereOrNull((o) => o.id == orderId));
+  Stream<Order?> watchOrder(String orderId, {String companyId = ''}) =>
+      orders(companyId: companyId).map(
+        (list) => list.firstWhereOrNull((o) => o.id == orderId),
+      );
 
   @override
   Stream<List<Review>> reviews(String companyId) => _live(
@@ -595,7 +601,12 @@ class MockAppRepository implements AppRepository {
   // ---- Writes ----
 
   /// Validates the move, then applies it together with the audit timestamps.
-  Order _applyStatus(Order order, String status, {DateTime? now}) {
+  Order _applyStatus(
+    Order order,
+    String status, {
+    DateTime? now,
+    String? cancellationReason,
+  }) {
     OrderStatusRules.ensureValidStatus(status);
     OrderStatusRules.ensureTransition(order.orderStatus, status);
     final timestamp = now ?? DateTime.now();
@@ -604,6 +615,9 @@ class MockAppRepository implements AppRepository {
       updatedAt: timestamp,
       cancelledAt: status == OrderStatus.cancelled ? timestamp : null,
       clearCancelledAt: status != OrderStatus.cancelled,
+      cancellationReason: status == OrderStatus.cancelled
+          ? (cancellationReason ?? order.cancellationReason)
+          : null,
     );
   }
 
@@ -702,27 +716,63 @@ class MockAppRepository implements AppRepository {
   }
 
   @override
-  Future<void> updateOrderStatus(String orderId, String status) async {
-    final i = _orders.indexWhere((o) => o.id == orderId);
+  Future<void> updateOrderStatus(
+    String orderId,
+    String status, {
+    String companyId = '',
+    String? cancellationReason,
+  }) async {
+    final i = _orders.indexWhere(
+      (o) =>
+          o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
+    );
     if (i == -1) return;
-    _orders[i] = _applyStatus(_orders[i], status);
+    _orders[i] = _applyStatus(
+      _orders[i],
+      status,
+      cancellationReason: cancellationReason,
+    );
     _pushOrders();
   }
 
   @override
-  Future<void> cancelOrder(String orderId) =>
-      updateOrderStatus(orderId, OrderStatus.cancelled);
+  Future<void> cancelOrder(
+    String orderId, {
+    String companyId = '',
+    String? reason,
+  }) =>
+      updateOrderStatus(
+        orderId,
+        OrderStatus.cancelled,
+        companyId: companyId,
+        cancellationReason: reason,
+      );
 
   @override
-  Future<void> togglePaymentStatus(String orderId) async {
-    final i = _orders.indexWhere((o) => o.id == orderId);
+  Future<void> togglePaymentStatus(
+    String orderId, {
+    String companyId = '',
+    String? status,
+  }) async {
+    final i = _orders.indexWhere(
+      (o) =>
+          o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
+    );
     if (i == -1) return;
     final o = _orders[i];
+    final newStatus =
+        status ??
+        (o.paymentStatus == PaymentStatus.pending
+            ? PaymentStatus.done
+            : PaymentStatus.pending);
+    final now = DateTime.now();
     _orders[i] = o.copyWith(
-      paymentStatus: o.paymentStatus == PaymentStatus.pending
-          ? PaymentStatus.done
-          : PaymentStatus.pending,
-      updatedAt: DateTime.now(),
+      paymentStatus: newStatus,
+      paidAt: newStatus == PaymentStatus.done ? now : o.paidAt,
+      amountPaid: newStatus == PaymentStatus.done
+          ? (o.amountPaid ?? o.totalAmount)
+          : o.amountPaid,
+      updatedAt: now,
     );
     _pushOrders();
   }
@@ -1125,6 +1175,15 @@ class MockAppRepository implements AppRepository {
     } else {
       _adBanners[i] = banner;
     }
+    _pushBanners();
+  }
+
+  @override
+  Future<void> deleteBanner(String id, {String companyId = ''}) async {
+    _offerBanners.removeWhere(
+      (b) => b.id == id && (companyId.isEmpty || b.companyId == companyId),
+    );
+    _adBanners.removeWhere((b) => b.id == id);
     _pushBanners();
   }
 

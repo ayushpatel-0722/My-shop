@@ -83,8 +83,8 @@ void main() {
       expect(validator.validate(base(stock: 0, unlimited: true)).isValid, isTrue);
     });
 
-    test('requires a category and a positive unit', () {
-      expect(validator.validate(base(categoryId: '')).errorFor('categoryId'), isNotNull);
+    test('category is optional and requires a positive unit', () {
+      expect(validator.validate(base(categoryId: '')).errorFor('categoryId'), isNull);
       expect(validator.validate(base(unit: 0)).errorFor('unit'), isNotNull);
     });
 

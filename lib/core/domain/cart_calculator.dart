@@ -127,8 +127,9 @@ class CartCalculator {
 
   static String _normalizeUnit(String unitType) {
     final t = unitType.trim().toLowerCase();
-    if (t == 'gram' || t == 'grams' || t == 'gm') return 'g';
-    if (t == 'kgs' || t == 'kilogram') return 'kg';
+    if (t == 'gram' || t == 'grams' || t == 'gm' || t == 'g' || t == 'kg' || t == 'kgs' || t == 'kilogram') {
+      return 'g';
+    }
     if (t == 'ml' || t == 'millilitre' || t == 'milliliters') return 'ml';
     if (t == 'l' || t == 'litre' || t == 'liters') return 'l';
     return t;

@@ -205,6 +205,7 @@ class CartItem {
     'companyName': companyName,
     'productName': product.name,
     'image': product.imageUrl,
+    'product': product.toMap(),
     'variant': variant?.toMap(),
     'quantity': qty,
     'itemTotal': lineTotal,

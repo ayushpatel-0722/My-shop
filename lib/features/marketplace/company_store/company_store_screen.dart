@@ -20,6 +20,7 @@ import '../../../core/models/review.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
@@ -112,19 +113,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   void _handleAddToCart(BuildContext context, Product product) {
     void doAdd() {
       context.read<CartCubit>().add(product, company: _company);
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).addedToCart(product.name)),
-          duration: const Duration(seconds: 2),
-          action: SnackBarAction(
-            label: AppLocalizations.of(context).viewCart2,
-            textColor: Colors.white,
-            onPressed: () => context.go(AppRoutes.cart),
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAddToCartNotification(context, productName: product.name);
     }
 
     if (AuthSession.currentUser == null) {

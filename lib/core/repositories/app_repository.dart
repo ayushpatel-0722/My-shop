@@ -92,11 +92,11 @@ abstract class AppRepository {
   Stream<List<Order>> orders({String userId = '', String companyId = ''});
 
   /// A single order, or null when it does not exist.
-  Future<Order?> order(String orderId);
+  Future<Order?> order(String orderId, {String companyId = ''});
 
   /// Live view of one order (used by tracking / packing screens) so they never
   /// subscribe to every order of every company.
-  Stream<Order?> watchOrder(String orderId);
+  Stream<Order?> watchOrder(String orderId, {String companyId = ''});
   Stream<List<Review>> reviews(String companyId);
   Stream<List<AppNotification>> notifications(String recipientId);
   Stream<List<Employee>> employees(String companyId);
@@ -123,12 +123,25 @@ abstract class AppRepository {
 
   /// Moves an order to [status]. Throws [ArgumentError] on an illegal
   /// transition (see `OrderStatusRules`).
-  Future<void> updateOrderStatus(String orderId, String status);
+  Future<void> updateOrderStatus(
+    String orderId,
+    String status, {
+    String companyId = '',
+    String? cancellationReason,
+  });
 
   /// Cancels an order when its current status still allows it.
-  Future<void> cancelOrder(String orderId);
+  Future<void> cancelOrder(
+    String orderId, {
+    String companyId = '',
+    String? reason,
+  });
 
-  Future<void> togglePaymentStatus(String orderId);
+  Future<void> togglePaymentStatus(
+    String orderId, {
+    String companyId = '',
+    String? status,
+  });
   Future<void> setEmployeePackingDone(String orderId, bool done);
   Future<void> assignEmployee(String orderId, String employeeId);
   Future<void> submitReview(Review review);
@@ -170,6 +183,7 @@ abstract class AppRepository {
   Future<void> saveRecommendation(Recommendation rec);
   Future<void> saveBanner(OfferBanner banner);
   Future<void> saveAdBanner(AdBanner banner);
+  Future<void> deleteBanner(String id, {String companyId = ''});
 
   /// Registers an FCM push token against a customer.
   Future<void> registerFcmToken(String userId, String token);

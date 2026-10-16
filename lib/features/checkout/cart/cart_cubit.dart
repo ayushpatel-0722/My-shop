@@ -3,11 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
+import '../../../core/services/cart_storage.dart';
 
 class CartState {
   final List<CartItem> items;
+  final bool isLoading;
 
-  const CartState({this.items = const []});
+  const CartState({this.items = const [], this.isLoading = false});
 
   int get totalItems => items.fold(0, (sum, e) => sum + e.qty);
   double get totalAmount => items.fold(0.0, (sum, e) => sum + e.lineTotal);
@@ -29,17 +31,40 @@ class CartState {
       .where((e) => e.companyId == companyId)
       .fold(0.0, (sum, e) => sum + e.lineTotal);
 
-  CartState copyWith({List<CartItem>? items}) =>
-      CartState(items: items ?? this.items);
+  CartState copyWith({List<CartItem>? items, bool? isLoading}) =>
+      CartState(
+        items: items ?? this.items,
+        isLoading: isLoading ?? this.isLoading,
+      );
 }
 
-/// In-memory cart keyed by `productId_variantId`.
+/// Cart state backed by local database (SharedPreferences via [CartStorage]).
 ///
 /// The same product + variant merges into one row (quantity increases), while
 /// two variants of one product are two rows. Quantities are always capped by
 /// the variant's stock snapshot.
 class CartCubit extends Cubit<CartState> {
-  CartCubit() : super(const CartState());
+  final CartStorage _storage;
+
+  CartCubit([CartStorage? storage])
+      : _storage = storage ?? CartStorage(),
+        super(const CartState()) {
+    loadFromStorage();
+  }
+
+  /// Restores cart lines saved in local persistent storage.
+  Future<void> loadFromStorage() async {
+    try {
+      final saved = await _storage.loadCart();
+      if (saved.isNotEmpty && state.items.isEmpty) {
+        emit(state.copyWith(items: saved));
+      }
+    } catch (_) {}
+  }
+
+  void _persist(List<CartItem> items) {
+    _storage.saveCart(items);
+  }
 
   void add(
     Product product, {
@@ -74,6 +99,7 @@ class CartCubit extends Cubit<CartState> {
       final maxQty = line.maxQty;
       items.add(line.copyWith(qty: qty > maxQty ? maxQty : qty));
     }
+    _persist(items);
     emit(state.copyWith(items: items));
   }
 
@@ -97,6 +123,7 @@ class CartCubit extends Cubit<CartState> {
               : e,
         )
         .toList();
+    _persist(items);
     emit(state.copyWith(items: items));
   }
 
@@ -109,15 +136,15 @@ class CartCubit extends Cubit<CartState> {
               : e,
         )
         .toList();
+    _persist(items);
     emit(state.copyWith(items: items));
   }
 
   void removeByCartKey(String cartKey) {
-    emit(
-      state.copyWith(
-        items: state.items.where((e) => e.cartKey != cartKey).toList(),
-      ),
-    );
+    final remaining =
+        state.items.where((e) => e.cartKey != cartKey).toList();
+    _persist(remaining);
+    emit(state.copyWith(items: remaining));
   }
 
   /// Replaces one line with [updated] (same cart key) — used by the checkout
@@ -126,6 +153,7 @@ class CartCubit extends Cubit<CartState> {
     final items = state.items
         .map((e) => e.cartKey == updated.cartKey ? updated : e)
         .toList();
+    _persist(items);
     emit(state.copyWith(items: items));
   }
 
@@ -160,16 +188,14 @@ class CartCubit extends Cubit<CartState> {
       removeByCartKey(key);
     } else {
       // Fallback: remove every row of that product in the company.
-      emit(
-        state.copyWith(
-          items: state.items
-              .where(
-                (e) =>
-                    !(e.companyId == companyId && e.product.id == productId),
-              )
-              .toList(),
-        ),
-      );
+      final remaining = state.items
+          .where(
+            (e) =>
+                !(e.companyId == companyId && e.product.id == productId),
+          )
+          .toList();
+      _persist(remaining);
+      emit(state.copyWith(items: remaining));
     }
   }
 
@@ -192,5 +218,8 @@ class CartCubit extends Cubit<CartState> {
     return null;
   }
 
-  void clear() => emit(const CartState());
+  void clear() {
+    _storage.clearCart();
+    emit(const CartState());
+  }
 }

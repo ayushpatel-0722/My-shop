@@ -262,6 +262,11 @@ class Order {
   final String paymentStatus;
   final String orderStatus;
   final String deliveryType;
+  final String paymentMethod;
+  final String? cancellationReason;
+  final double? amountPaid;
+  final String? transactionRef;
+  final DateTime? paidAt;
   final String? assignedEmployeeId;
   final bool employeePackingDone;
   final String? reviewId;
@@ -290,6 +295,11 @@ class Order {
     this.paymentStatus = PaymentStatus.pending,
     this.orderStatus = OrderStatus.pending,
     this.deliveryType = DeliveryType.homeDelivery,
+    this.paymentMethod = '',
+    this.cancellationReason,
+    this.amountPaid,
+    this.transactionRef,
+    this.paidAt,
     this.assignedEmployeeId,
     this.employeePackingDone = false,
     this.reviewId,
@@ -377,6 +387,15 @@ class Order {
       deliveryType: DeliveryType.all.contains(map['deliveryType'])
           ? asString(map['deliveryType'])
           : DeliveryType.homeDelivery,
+      paymentMethod: asString(map['paymentMethod']),
+      cancellationReason: map['cancellationReason'] != null
+          ? asString(map['cancellationReason'])
+          : null,
+      amountPaid: map['amountPaid'] != null ? asDouble(map['amountPaid']) : null,
+      transactionRef: map['transactionRef'] != null
+          ? asString(map['transactionRef'])
+          : null,
+      paidAt: asDateTime(map['paidAt']),
       assignedEmployeeId: map['assignedEmployeeId'] == null
           ? null
           : asString(map['assignedEmployeeId']).isNotEmpty
@@ -415,6 +434,11 @@ class Order {
     'paymentStatus': paymentStatus,
     'orderStatus': orderStatus,
     'deliveryType': deliveryType,
+    'paymentMethod': paymentMethod,
+    'cancellationReason': cancellationReason,
+    'amountPaid': amountPaid,
+    'transactionRef': transactionRef,
+    'paidAt': paidAt?.toIso8601String(),
     'assignedEmployeeId': assignedEmployeeId,
     'employeePackingDone': employeePackingDone,
     'reviewId': reviewId,
@@ -432,6 +456,12 @@ class Order {
     String? customerPhone,
     String? orderStatus,
     String? paymentStatus,
+    String? deliveryType,
+    String? paymentMethod,
+    String? cancellationReason,
+    double? amountPaid,
+    String? transactionRef,
+    DateTime? paidAt,
     String? assignedEmployeeId,
     bool clearAssignedEmployee = false,
     bool? employeePackingDone,
@@ -468,7 +498,12 @@ class Order {
     voucherCode: voucherCode ?? this.voucherCode,
     paymentStatus: paymentStatus ?? this.paymentStatus,
     orderStatus: orderStatus ?? this.orderStatus,
-    deliveryType: deliveryType,
+    deliveryType: deliveryType ?? this.deliveryType,
+    paymentMethod: paymentMethod ?? this.paymentMethod,
+    cancellationReason: cancellationReason ?? this.cancellationReason,
+    amountPaid: amountPaid ?? this.amountPaid,
+    transactionRef: transactionRef ?? this.transactionRef,
+    paidAt: paidAt ?? this.paidAt,
     assignedEmployeeId: clearAssignedEmployee
         ? null
         : (assignedEmployeeId ?? this.assignedEmployeeId),
@@ -500,6 +535,11 @@ class Order {
     paymentStatus: paymentStatus,
     orderStatus: orderStatus,
     deliveryType: deliveryType,
+    paymentMethod: paymentMethod,
+    cancellationReason: cancellationReason,
+    amountPaid: amountPaid,
+    transactionRef: transactionRef,
+    paidAt: paidAt,
     assignedEmployeeId: assignedEmployeeId,
     employeePackingDone: employeePackingDone,
     reviewId: reviewId,
@@ -509,16 +549,17 @@ class Order {
   );
 
   /// Applies a status change and stamps the audit timestamps.
-  Order withStatus(String status, {DateTime? now, bool? paid}) {
+  Order withStatus(String status, {DateTime? now, bool? paid, String? reason}) {
     final timestamp = now ?? DateTime.now();
     return copyWith(
       orderStatus: status,
       updatedAt: timestamp,
       cancelledAt: status == OrderStatus.cancelled ? timestamp : null,
       clearCancelledAt: status != OrderStatus.cancelled,
-      paymentStatus: status == OrderStatus.cancelled
-          ? PaymentStatus.pending
-          : (paid == true ? PaymentStatus.done : PaymentStatus.pending),
+      cancellationReason: status == OrderStatus.cancelled ? (reason ?? cancellationReason) : null,
+      paymentStatus: paid != null
+          ? (paid ? PaymentStatus.done : PaymentStatus.pending)
+          : paymentStatus,
     );
   }
 

@@ -13,7 +13,7 @@ import 'core/services/service_locator.dart';
 import 'features/auth/auth_cubit.dart';
 import 'features/checkout/cart/cart_cubit.dart';
 import 'features/checkout/cart/wishlist_cubit.dart';
-import 'firebase_options.dart';
+import 'core/config/environment.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +26,7 @@ Future<void> main() async {
     try {
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
+          options: EnvironmentConfig.firebaseOptions,
         );
       }
     } catch (initErr) {
@@ -38,6 +38,7 @@ Future<void> main() async {
       }
     }
     firebaseReady = true;
+    debugPrint('\u2705 Firebase initialized for ${EnvironmentConfig.current.name.toUpperCase()} environment.');
 
     // App Check (blocks non-genuine clients). Skip on web (needs reCAPTCHA).
     try {

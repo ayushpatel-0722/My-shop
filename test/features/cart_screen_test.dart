@@ -191,10 +191,12 @@ void main() {
     // Reveal the background without completing the dismiss gesture.
     final rect = tester.getRect(rowOf('Organic Cow Milk'));
     final gesture = await tester.startGesture(
-      Offset(rect.left + 40, rect.center.dy),
+      Offset(rect.right - 40, rect.center.dy),
     );
-    await gesture.moveBy(const Offset(-200, 0));
-    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(-30, 0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-170, 0));
+    await tester.pump();
 
     expect(find.text('Remove'), findsOneWidget);
     expect(find.text('Move to Wishlist?'), findsOneWidget);

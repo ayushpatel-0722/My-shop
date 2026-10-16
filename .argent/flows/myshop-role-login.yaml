@@ -1,0 +1,3 @@
+steps: []
+executionPrerequisite: Flutter web app (Bazaar) served at http://127.0.0.1:8080
+  and loaded in Chrome on the Role Selection screen (#/role); user signed out

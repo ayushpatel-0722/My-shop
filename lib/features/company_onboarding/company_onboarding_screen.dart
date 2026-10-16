@@ -43,8 +43,35 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
   // First admin fields
   final _adminNameCtrl = TextEditingController();
   final _adminEmailCtrl = TextEditingController();
+  final _adminMobileCtrl = TextEditingController();
   final _adminPassCtrl = TextEditingController();
   final _adminPassConfirmCtrl = TextEditingController();
+
+  // Validation error states - Step 0
+  String? _nameError;
+  String? _categoryError;
+  String? _detailsError;
+  String? _addressError;
+
+  // Validation error states - Step 2
+  String? _passwordError;
+  String? _logoUrlError;
+  String? _bannerUrlError;
+  String? _profileImageUrlError;
+  String? _adminNameError;
+  String? _adminEmailError;
+  String? _adminMobileError;
+  String? _adminPassError;
+  String? _adminPassConfirmError;
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$').hasMatch(email.trim());
+  }
+
+  bool _isValidMobile(String mobile) {
+    final clean = mobile.replaceAll(RegExp(r'[^0-9]'), '');
+    return clean.length == 10;
+  }
 
   @override
   void dispose() {
@@ -59,6 +86,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     _minOrderCtrl.dispose();
     _adminNameCtrl.dispose();
     _adminEmailCtrl.dispose();
+    _adminMobileCtrl.dispose();
     _adminPassCtrl.dispose();
     _adminPassConfirmCtrl.dispose();
     super.dispose();
@@ -88,6 +116,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
+                    key: Key(_step < 2 ? 'onboarding_next_button' : 'onboarding_save_button'),
                     onPressed: _step < 2 ? _next : (_busy ? null : _finish),
                     child: _busy
                         ? const SizedBox(
@@ -112,45 +141,65 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
         return ListView(
           children: [
             TextField(
+              key: const Key('company_name_field'),
               controller: _nameCtrl,
+              onChanged: (v) {
+                if (_nameError != null) setState(() => _nameError = null);
+              },
               decoration: InputDecoration(
-                labelText: l10n.companyName,
+                labelText: '${l10n.companyName} *',
                 hintText: AppLocalizations.of(context).eGOmMartExpress,
                 prefixIcon: const Icon(Icons.business),
+                errorText: _nameError,
               ),
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('store_category_field'),
               controller: _categoryCtrl,
+              onChanged: (v) {
+                if (_categoryError != null) setState(() => _categoryError = null);
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).storeCategory,
+                labelText: '${AppLocalizations.of(context).storeCategory} *',
                 hintText: AppLocalizations.of(
                   context,
                 ).eGGroceryStaplesSupermarketElectronics,
-                prefixIcon: Icon(Icons.category_outlined),
+                prefixIcon: const Icon(Icons.category_outlined),
+                errorText: _categoryError,
               ),
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('app_subtitle_field'),
               controller: _detailsCtrl,
               maxLines: 2,
+              onChanged: (v) {
+                if (_detailsError != null) setState(() => _detailsError = null);
+              },
               decoration: InputDecoration(
-                labelText: l10n.appSubtitle,
+                labelText: '${l10n.appSubtitle} *',
                 hintText: AppLocalizations.of(
                   context,
                 ).eGFreshOrganicGroceriesDeliveredDaily,
                 prefixIcon: const Icon(Icons.description_outlined),
+                errorText: _detailsError,
               ),
             ),
             const SizedBox(height: 16),
             TextField(
+              key: const Key('store_address_field'),
               controller: _addressCtrl,
+              onChanged: (v) {
+                if (_addressError != null) setState(() => _addressError = null);
+              },
               decoration: InputDecoration(
-                labelText: l10n.address,
+                labelText: '${l10n.address} *',
                 hintText: AppLocalizations.of(
                   context,
                 ).eG12MarketStreetAhmedabad,
                 prefixIcon: const Icon(Icons.location_on_outlined),
+                errorText: _addressError,
               ),
             ),
           ],
@@ -249,11 +298,13 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             Text(AppLocalizations.of(context).deliveryTypes),
             const SizedBox(height: 8),
             CheckboxListTile(
+              key: const Key('delivery_self_pickup_tile'),
               value: _deliveryTypes.contains('self_pickup'),
               onChanged: (v) => _toggleDelivery('self_pickup', v),
               title: Text(AppLocalizations.of(context).selfPickup2),
             ),
             CheckboxListTile(
+              key: const Key('delivery_home_delivery_tile'),
               value: _deliveryTypes.contains('home_delivery'),
               onChanged: (v) => _toggleDelivery('home_delivery', v),
               title: Text(AppLocalizations.of(context).homeDelivery),
@@ -261,6 +312,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             if (_deliveryTypes.contains('home_delivery')) ...[
               const SizedBox(height: 12),
               TextField(
+                key: const Key('min_order_field'),
                 controller: _minOrderCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -274,14 +326,18 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             ],
             const SizedBox(height: 24),
             TextField(
+              key: const Key('company_password_field'),
               controller: _passwordCtrl,
               obscureText: true,
+              onChanged: (v) {
+                if (_passwordError != null) setState(() => _passwordError = null);
+              },
               decoration: InputDecoration(
-                labelText: l10n.companyPassword,
+                labelText: '${l10n.companyPassword} *',
                 prefixIcon: const Icon(Icons.lock_outline),
+                errorText: _passwordError,
               ),
             ),
-            const SizedBox(height: 24),
             const SizedBox(height: 24),
             Text(
               AppLocalizations.of(context).companyBrandingImages,
@@ -289,38 +345,55 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const Key('company_logo_url_field'),
               controller: _logoUrlCtrl,
               keyboardType: TextInputType.url,
+              onChanged: (v) {
+                if (_logoUrlError != null) setState(() => _logoUrlError = null);
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).companyLogoUrl,
+                labelText: '${AppLocalizations.of(context).companyLogoUrl} *',
                 hintText: AppLocalizations.of(context).httpsExampleComLogoPng,
-                prefixIcon: Icon(Icons.photo_size_select_actual_outlined),
+                prefixIcon: const Icon(Icons.photo_size_select_actual_outlined),
+                errorText: _logoUrlError,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const Key('company_banner_url_field'),
               controller: _bannerUrlCtrl,
               keyboardType: TextInputType.url,
+              onChanged: (v) {
+                if (_bannerUrlError != null) setState(() => _bannerUrlError = null);
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).companyBannerUrl,
+                labelText: '${AppLocalizations.of(context).companyBannerUrl} *',
                 hintText: AppLocalizations.of(
                   context,
                 ).httpsExampleComStoreBannerJpg,
-                prefixIcon: Icon(Icons.panorama_outlined),
+                prefixIcon: const Icon(Icons.panorama_outlined),
+                errorText: _bannerUrlError,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const Key('company_profile_image_url_field'),
               controller: _profileImageUrlCtrl,
               keyboardType: TextInputType.url,
+              onChanged: (v) {
+                if (_profileImageUrlError != null) {
+                  setState(() => _profileImageUrlError = null);
+                }
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(
+                labelText: '${AppLocalizations.of(
                   context,
-                ).companyStorefrontProfileImageUrl,
+                ).companyStorefrontProfileImageUrl} *',
                 hintText: AppLocalizations.of(
                   context,
                 ).httpsExampleComStorefrontPhotoJpg,
-                prefixIcon: Icon(Icons.storefront_outlined),
+                prefixIcon: const Icon(Icons.storefront_outlined),
+                errorText: _profileImageUrlError,
               ),
             ),
             const SizedBox(height: 24),
@@ -332,37 +405,76 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const Key('admin_name_field'),
               controller: _adminNameCtrl,
+              onChanged: (v) {
+                if (_adminNameError != null) setState(() => _adminNameError = null);
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).adminName,
-                prefixIcon: Icon(Icons.person),
+                labelText: '${AppLocalizations.of(context).adminName} *',
+                prefixIcon: const Icon(Icons.person),
+                errorText: _adminNameError,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const Key('admin_email_field'),
               controller: _adminEmailCtrl,
               keyboardType: TextInputType.emailAddress,
+              onChanged: (v) {
+                if (_adminEmailError != null) setState(() => _adminEmailError = null);
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).adminEmail,
-                prefixIcon: Icon(Icons.mail_outline),
+                labelText: '${AppLocalizations.of(context).adminEmail} *',
+                prefixIcon: const Icon(Icons.mail_outline),
+                errorText: _adminEmailError,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const Key('admin_mobile_field'),
+              controller: _adminMobileCtrl,
+              keyboardType: TextInputType.phone,
+              onChanged: (v) {
+                if (_adminMobileError != null) {
+                  setState(() => _adminMobileError = null);
+                }
+              },
+              decoration: InputDecoration(
+                labelText: '${l10n.mobileNumber} *',
+                hintText: 'e.g. 9876543210',
+                prefixIcon: const Icon(Icons.phone_outlined),
+                errorText: _adminMobileError,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('admin_password_field'),
               controller: _adminPassCtrl,
               obscureText: true,
+              onChanged: (v) {
+                if (_adminPassError != null) setState(() => _adminPassError = null);
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).password,
-                prefixIcon: Icon(Icons.lock_outline),
+                labelText: '${AppLocalizations.of(context).password} *',
+                prefixIcon: const Icon(Icons.lock_outline),
+                errorText: _adminPassError,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
+              key: const Key('admin_password_confirm_field'),
               controller: _adminPassConfirmCtrl,
               obscureText: true,
+              onChanged: (v) {
+                if (_adminPassConfirmError != null) {
+                  setState(() => _adminPassConfirmError = null);
+                }
+              },
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).confirmPassword,
-                prefixIcon: Icon(Icons.lock_outline),
+                labelText: '${AppLocalizations.of(context).confirmPassword} *',
+                prefixIcon: const Icon(Icons.lock_outline),
+                errorText: _adminPassConfirmError,
               ),
             ),
           ],
@@ -380,53 +492,176 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     });
   }
 
-  void _next() => setState(() => _step++);
+  void _next() {
+    if (_step == 0) {
+      final name = _nameCtrl.text.trim();
+      final category = _categoryCtrl.text.trim();
+      final details = _detailsCtrl.text.trim();
+      final address = _addressCtrl.text.trim();
+
+      bool hasError = false;
+      setState(() {
+        if (name.isEmpty) {
+          _nameError = 'Company name is required';
+          hasError = true;
+        } else {
+          _nameError = null;
+        }
+
+        if (category.isEmpty) {
+          _categoryError = 'Store category is required';
+          hasError = true;
+        } else {
+          _categoryError = null;
+        }
+
+        if (details.isEmpty) {
+          _detailsError = 'Company subtitle/details are required';
+          hasError = true;
+        } else {
+          _detailsError = null;
+        }
+
+        if (address.isEmpty) {
+          _addressError = 'Address is required';
+          hasError = true;
+        } else {
+          _addressError = null;
+        }
+      });
+
+      if (hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please fill in all required company fields'),
+          ),
+        );
+        return;
+      }
+    }
+
+    setState(() => _step++);
+  }
 
   // Image upload removed — image URL field is used instead.
 
   Future<void> _finish() async {
+    if (_deliveryTypes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one delivery option'),
+        ),
+      );
+      return;
+    }
+
     final companyName = _nameCtrl.text.trim();
     final companyPass = _passwordCtrl.text;
+    final logoUrl = _logoUrlCtrl.text.trim();
+    final bannerUrl = _bannerUrlCtrl.text.trim();
+    final profileImageUrl = _profileImageUrlCtrl.text.trim();
+
     final adminName = _adminNameCtrl.text.trim();
     final adminEmail = _adminEmailCtrl.text.trim();
+    final adminMobile = _adminMobileCtrl.text.trim();
     final adminPass = _adminPassCtrl.text;
     final adminPassConfirm = _adminPassConfirmCtrl.text;
 
-    // Basic validation
-    if (companyName.isEmpty || companyPass.isEmpty) {
+    // Validate all Step 2 fields (Company security, branding, and Admin account)
+    bool hasError = false;
+    setState(() {
+      if (companyPass.isEmpty) {
+        _passwordError = 'Company password is required';
+        hasError = true;
+      } else if (companyPass.length < 6) {
+        _passwordError = 'Company password must be at least 6 characters';
+        hasError = true;
+      } else {
+        _passwordError = null;
+      }
+
+      if (logoUrl.isEmpty) {
+        _logoUrlError = 'Company logo URL is required';
+        hasError = true;
+      } else if (!logoUrl.startsWith('http://') && !logoUrl.startsWith('https://')) {
+        _logoUrlError = 'Please enter a valid HTTP or HTTPS URL';
+        hasError = true;
+      } else {
+        _logoUrlError = null;
+      }
+
+      if (bannerUrl.isEmpty) {
+        _bannerUrlError = 'Company banner URL is required';
+        hasError = true;
+      } else if (!bannerUrl.startsWith('http://') && !bannerUrl.startsWith('https://')) {
+        _bannerUrlError = 'Please enter a valid HTTP or HTTPS URL';
+        hasError = true;
+      } else {
+        _bannerUrlError = null;
+      }
+
+      if (profileImageUrl.isEmpty) {
+        _profileImageUrlError = 'Storefront profile image URL is required';
+        hasError = true;
+      } else if (!profileImageUrl.startsWith('http://') && !profileImageUrl.startsWith('https://')) {
+        _profileImageUrlError = 'Please enter a valid HTTP or HTTPS URL';
+        hasError = true;
+      } else {
+        _profileImageUrlError = null;
+      }
+
+      if (adminName.isEmpty) {
+        _adminNameError = 'Admin name is required';
+        hasError = true;
+      } else {
+        _adminNameError = null;
+      }
+
+      if (adminEmail.isEmpty) {
+        _adminEmailError = 'Admin email is required';
+        hasError = true;
+      } else if (!_isValidEmail(adminEmail)) {
+        _adminEmailError = 'Please enter a valid email address';
+        hasError = true;
+      } else {
+        _adminEmailError = null;
+      }
+
+      if (adminMobile.isEmpty) {
+        _adminMobileError = 'Admin mobile number is required';
+        hasError = true;
+      } else if (!_isValidMobile(adminMobile)) {
+        _adminMobileError = 'Please enter a valid 10-digit mobile number';
+        hasError = true;
+      } else {
+        _adminMobileError = null;
+      }
+
+      if (adminPass.isEmpty) {
+        _adminPassError = 'Admin password is required';
+        hasError = true;
+      } else if (adminPass.length < 6) {
+        _adminPassError = 'Admin password must be at least 6 characters';
+        hasError = true;
+      } else {
+        _adminPassError = null;
+      }
+
+      if (adminPassConfirm.isEmpty) {
+        _adminPassConfirmError = 'Please confirm your password';
+        hasError = true;
+      } else if (adminPass != adminPassConfirm) {
+        _adminPassConfirmError = 'Passwords do not match';
+        hasError = true;
+      } else {
+        _adminPassConfirmError = null;
+      }
+    });
+
+    if (hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).companyNameAndPasswordAreRequired,
-          ),
-        ),
-      );
-      return;
-    }
-    if (adminName.isEmpty || adminEmail.isEmpty || adminPass.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).adminNameEmailAndPasswordAreRequired,
-          ),
-        ),
-      );
-      return;
-    }
-    if (adminPass != adminPassConfirm) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).adminPasswordsDoNotMatch),
-        ),
-      );
-      return;
-    }
-    if (adminPass.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).adminPasswordMustBeAtLeast6Characters,
-          ),
+        const SnackBar(
+          content: Text('Please fill in all required fields correctly'),
         ),
       );
       return;
@@ -514,7 +749,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
         companyId: companyId,
         name: adminName,
         email: adminEmail,
-        mobileNumber: '',
+        mobileNumber: adminMobile,
         address: _addressCtrl.text.trim(),
       );
 
@@ -535,6 +770,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
         'companyId': companyId,
         'email': adminEmail,
         'name': adminName,
+        'mobileNumber': adminMobile,
       }, SetOptions(merge: true));
 
       // Save to Realtime Database
@@ -568,8 +804,10 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       final appUser = AppUser(
         id: uid,
         companyId: companyId,
+        companyName: companyName,
         name: adminName,
         email: adminEmail,
+        mobileNumber: adminMobile,
         role: 'admin',
       );
 

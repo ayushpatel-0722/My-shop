@@ -55,58 +55,128 @@ class _OrdersScreenState extends State<OrdersScreen> {
       ),
       body: !isLoggedIn
           ? _buildGuestView(context)
-          : Column(
-              children: [
-                _StatusChips(
-                  selected: _statusFilter,
-                  onChanged: (value) => setState(() => _statusFilter = value),
-                ),
-                Expanded(
-                  child: StreamBuilder<List<Order>>(
-                    stream: repo.orders(userId: user.id),
-                    builder: (context, snap) {
-                      if (snap.connectionState == ConnectionState.waiting &&
-                          (snap.data?.isEmpty ?? true)) {
-                        return ListView.builder(
+          : StreamBuilder<List<Order>>(
+              stream: repo.orders(userId: user.id),
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting &&
+                    (snap.data?.isEmpty ?? true)) {
+                  return Column(
+                    children: [
+                      _StatusChips(
+                        selected: _statusFilter,
+                        onChanged: (value) =>
+                            setState(() => _statusFilter = value),
+                        orders: const [],
+                      ),
+                      Expanded(
+                        child: ListView.builder(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                           itemCount: 4,
                           itemBuilder: (_, _) => const M3OrderCardSkeleton(),
-                        );
-                      }
-                      final all = snap.data ?? const <Order>[];
-                      final list = _statusFilter == 'all'
-                          ? all
-                          : all
-                                .where((o) => o.orderStatus == _statusFilter)
-                                .toList();
+                        ),
+                      ),
+                    ],
+                  );
+                }
 
-                      if (all.isEmpty) {
-                        return _buildEmptyOrdersView(context, l10n);
-                      }
-                      if (list.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32),
-                            child: Text(
-                              AppLocalizations.of(
-                                context,
-                              ).noOrdersWithThisStatus,
+                if (snap.hasError && (snap.data?.isEmpty ?? true)) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Color(0xFFDC2626),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Unable to load orders',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
                           ),
-                        );
-                      }
-                      return ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                        itemCount: list.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (context, i) =>
-                            _orderCard(context, list[i], l10n),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                          const SizedBox(height: 8),
+                          Text(
+                            '${snap.error}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF5247),
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () => setState(() {}),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Try Again'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                final all = snap.data ?? const <Order>[];
+                final list = _statusFilter == 'all'
+                    ? all
+                    : all
+                          .where((o) => o.orderStatus == _statusFilter)
+                          .toList();
+
+                return Column(
+                  children: [
+                    _StatusChips(
+                      selected: _statusFilter,
+                      onChanged: (value) =>
+                          setState(() => _statusFilter = value),
+                      orders: all,
+                    ),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          setState(() {});
+                        },
+                        child: all.isEmpty
+                            ? _buildEmptyOrdersView(context, l10n)
+                            : list.isEmpty
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(32),
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        ).noOrdersWithThisStatus,
+                                      ),
+                                    ),
+                                  )
+                                : ListView.separated(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      4,
+                                      16,
+                                      16,
+                                    ),
+                                    itemCount: list.length,
+                                    separatorBuilder: (_, _) =>
+                                        const SizedBox(height: 12),
+                                    itemBuilder: (context, i) =>
+                                        _orderCard(context, list[i], l10n),
+                                  ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
+
       bottomNavigationBar: const MarketplaceBottomNav(currentIndex: 2),
     );
   }
@@ -719,57 +789,52 @@ class _ReorderButton extends StatelessWidget {
 class _StatusChips extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onChanged;
+  final List<Order> orders;
 
-  const _StatusChips({required this.selected, required this.onChanged});
+  const _StatusChips({
+    required this.selected,
+    required this.onChanged,
+    required this.orders,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.watch<AuthCubit>().currentUser?.id ?? '';
+    int countOf(String status) =>
+        orders.where((o) => o.orderStatus == status).length;
 
-    return StreamBuilder<List<Order>>(
-      stream: userId.isEmpty
-          ? Stream<List<Order>>.empty()
-          : repo.orders(userId: userId),
-      builder: (context, snap) {
-        final orders = snap.data ?? const <Order>[];
-        int countOf(String status) =>
-            orders.where((o) => o.orderStatus == status).length;
-
-        return SizedBox(
-          height: 46,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            children: [
-              _chip(
-                context,
-                AppLocalizations.of(context).all3,
-                orders.length,
-                'all',
-              ),
-              for (final status in OrderStatusRules.openStatuses)
-                _chip(
-                  context,
-                  orderStatusLabel(context, status),
-                  countOf(status),
-                  status,
-                ),
-              _chip(
-                context,
-                orderStatusLabel(context, OrderStatus.cancelled),
-                countOf(OrderStatus.cancelled),
-                OrderStatus.cancelled,
-              ),
-              _chip(
-                context,
-                orderStatusLabel(context, OrderStatus.completed),
-                countOf(OrderStatus.completed),
-                OrderStatus.completed,
-              ),
-            ],
+    return SizedBox(
+      height: 46,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        children: [
+          _chip(
+            context,
+            AppLocalizations.of(context).all3,
+            orders.length,
+            'all',
           ),
-        );
-      },
+          for (final status in OrderStatusRules.openStatuses)
+            _chip(
+              context,
+              orderStatusLabel(context, status),
+              countOf(status),
+              status,
+            ),
+          _chip(
+            context,
+            orderStatusLabel(context, OrderStatus.cancelled),
+            countOf(OrderStatus.cancelled),
+            OrderStatus.cancelled,
+          ),
+          _chip(
+            context,
+            orderStatusLabel(context, OrderStatus.completed),
+            countOf(OrderStatus.completed),
+            OrderStatus.completed,
+          ),
+        ],
+      ),
     );
   }
 
@@ -784,3 +849,4 @@ class _StatusChips extends StatelessWidget {
     );
   }
 }
+

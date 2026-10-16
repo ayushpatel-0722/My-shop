@@ -40,9 +40,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
   final _nameCtrl = TextEditingController();
   final _detailsCtrl = TextEditingController();
-  late final _typeCtrl = TextEditingController(
-    text: AppLocalizations.of(context).grocery,
-  );
+  final _typeCtrl = TextEditingController();
   final _iconCtrl = TextEditingController(text: '🛍️');
 
   String _companyId = '';
@@ -85,18 +83,21 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     '🎮',
   ];
 
-  late final List<String> _suggestedTypes = [
-    AppLocalizations.of(context).grocery,
-    AppLocalizations.of(context).electronics,
-    AppLocalizations.of(context).fashionApparel,
-    AppLocalizations.of(context).healthBeauty,
-    AppLocalizations.of(context).homeKitchen,
-    AppLocalizations.of(context).bakeryDairy,
-    'Beverages',
-    AppLocalizations.of(context).personalCare,
-    AppLocalizations.of(context).sportsOutdoors,
-    AppLocalizations.of(context).toysGames,
-  ];
+  List<String> _getSuggestedTypes(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      l10n.grocery,
+      l10n.electronics,
+      l10n.fashionApparel,
+      l10n.healthBeauty,
+      l10n.homeKitchen,
+      l10n.bakeryDairy,
+      'Beverages',
+      l10n.personalCare,
+      l10n.sportsOutdoors,
+      l10n.toysGames,
+    ];
+  }
 
   bool get isEditMode => widget.category != null || widget.categoryId != null;
 
@@ -123,6 +124,20 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     }
   }
 
+  bool _initializedDefaults = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initializedDefaults) {
+      _initializedDefaults = true;
+      if (!isEditMode && _typeCtrl.text.isEmpty) {
+        _typeCtrl.text = AppLocalizations.of(context).grocery;
+        _baseline = _snapshot();
+      }
+    }
+  }
+
   Future<void> _loadCompanyName(String cid) async {
     try {
       final comp = await repo.company(cid);
@@ -136,9 +151,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     _loadedCategoryId = cat.id;
     _nameCtrl.text = cat.name;
     _detailsCtrl.text = cat.details;
-    _typeCtrl.text = cat.type.isNotEmpty
-        ? cat.type
-        : AppLocalizations.of(context).grocery;
+    _typeCtrl.text = cat.type.isNotEmpty ? cat.type : 'Grocery';
     _iconCtrl.text = cat.iconUrl.isNotEmpty ? cat.iconUrl : '🛍️';
     _selectedParentId = cat.parentId?.isNotEmpty == true ? cat.parentId : null;
     _selectedProductIds = List<String>.from(cat.productList);
@@ -598,7 +611,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                             Wrap(
                               spacing: 8,
                               runSpacing: 6,
-                              children: _suggestedTypes.map((type) {
+                              children: _getSuggestedTypes(context).map((type) {
                                 final isSelected =
                                     _typeCtrl.text.trim() == type;
                                 return ChoiceChip(

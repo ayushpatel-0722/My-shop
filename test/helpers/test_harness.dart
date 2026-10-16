@@ -15,6 +15,7 @@ import 'package:myshop/core/services/service_locator.dart';
 import 'package:myshop/features/auth/auth_cubit.dart';
 import 'package:myshop/features/checkout/cart/cart_cubit.dart';
 import 'package:myshop/features/checkout/cart/wishlist_cubit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Shared wiring for the widget tests.
 ///
@@ -45,10 +46,38 @@ abstract class TestHarness {
   /// Without this, `connectivity_plus` throws `MissingPluginException`.
   static void setupPlatformChannels() {
     TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
           const MethodChannel('dev.fluttercommunity.plus/connectivity'),
           (call) async => <String>['wifi'],
+        );
+    final secureStorageData = <String, String>{};
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+          (call) async {
+            if (call.method == 'write') {
+              final args = call.arguments as Map?;
+              final key = args?['key'] as String?;
+              final val = args?['value'] as String?;
+              if (key != null && val != null) secureStorageData[key] = val;
+              return null;
+            } else if (call.method == 'read') {
+              final args = call.arguments as Map?;
+              final key = args?['key'] as String?;
+              return key != null ? secureStorageData[key] : null;
+            } else if (call.method == 'delete') {
+              final args = call.arguments as Map?;
+              final key = args?['key'] as String?;
+              if (key != null) secureStorageData.remove(key);
+              return null;
+            } else if (call.method == 'deleteAll') {
+              secureStorageData.clear();
+              return null;
+            }
+            return null;
+          },
         );
   }
 

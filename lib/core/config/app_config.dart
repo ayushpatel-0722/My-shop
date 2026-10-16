@@ -1,3 +1,5 @@
+import 'environment.dart';
+
 /// Global build/configuration flags.
 class AppConfig {
   AppConfig._();
@@ -18,5 +20,16 @@ class AppConfig {
   /// iOS App Check debug token (same idea as above). Leave empty in release.
   static const String appCheckDebugTokenApple = '';
 
-  static const String appName = 'Bazaar';
+  /// Application display name. Derived from the active environment so UAT
+  /// builds are clearly distinguishable from production.
+  static String get appName => EnvironmentConfig.appName;
+
+  /// The active environment.
+  static AppEnvironment get environment => EnvironmentConfig.current;
+
+  /// Whether the app is running in the UAT environment.
+  static bool get isUat => EnvironmentConfig.isUat;
+
+  /// Whether the app is running in the PROD environment.
+  static bool get isProd => EnvironmentConfig.isProd;
 }

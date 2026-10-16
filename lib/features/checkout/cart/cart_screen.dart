@@ -305,44 +305,44 @@ class _CartLineCard extends StatelessWidget {
 
     void removeLine() => cubit.removeByCartKey(item.cartKey);
 
+    final dismissBg = Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDC2626),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Icon(Icons.bookmark_add_outlined, color: Colors.white70, size: 16),
+          SizedBox(height: 2),
+          Text(
+            'Move to Wishlist?',
+            style: TextStyle(color: Colors.white70, fontSize: 10),
+          ),
+          SizedBox(height: 6),
+          Icon(Icons.delete_outline, color: Colors.white, size: 26),
+          SizedBox(height: 2),
+          Text(
+            'Remove',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Dismissible(
       key: Key('cart-line-${item.cartKey}'),
       direction: DismissDirection.endToStart,
-      // Red "Remove" action revealed by the left swipe; the wishlist hint sits
-      // above it because a swipe is fast and the alternative must be visible
-      // before the finger lifts.
-      background: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: const Color(0xFFDC2626),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Icon(Icons.bookmark_add_outlined, color: Colors.white70, size: 16),
-            SizedBox(height: 2),
-            Text(
-              AppLocalizations.of(context).moveToWishlist,
-              style: TextStyle(color: Colors.white70, fontSize: 10),
-            ),
-            SizedBox(height: 6),
-            Icon(Icons.delete_outline, color: Colors.white, size: 26),
-            SizedBox(height: 2),
-            Text(
-              AppLocalizations.of(context).remove,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+      background: dismissBg,
+      secondaryBackground: dismissBg,
       onDismissed: (_) => _removeWithOffers(context, removeLine),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
@@ -576,32 +576,29 @@ class _CartLineCard extends StatelessWidget {
 
   /// Removes the line and immediately offers the way to keep the product.
   void _removeWithOffers(BuildContext context, VoidCallback removeLine) {
+    final messenger = ScaffoldMessenger.of(context);
     final wishlist = context.read<WishlistCubit>();
     final removed = item;
     removeLine();
 
     // "Move to Wishlist" is the alternative to deleting the item outright.
-    ScaffoldMessenger.of(context)
+    messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(
-            AppLocalizations.of(context).removedFromCart(removed.product.name),
-          ),
+          content: Text('${removed.product.name} removed from cart'),
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
-            label: AppLocalizations.of(context).moveToWishlist2,
+            label: 'MOVE TO WISHLIST',
             onPressed: () {
               wishlist.addFromCart(removed);
-              ScaffoldMessenger.of(context)
+              messenger
                 ..hideCurrentSnackBar()
                 ..showSnackBar(
                   SnackBar(
                     content: Text(
-                      AppLocalizations.of(
-                        context,
-                      ).savedToYourWishlist(removed.product.name),
+                      '${removed.product.name} saved to your wishlist',
                     ),
                     duration: const Duration(seconds: 2),
                     behavior: SnackBarBehavior.floating,

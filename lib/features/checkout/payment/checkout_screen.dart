@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -168,9 +169,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _loadOrderHistory(String userId) async {
     if (userId.isEmpty) return;
-    final previous = await repo.orders(userId: userId).first;
-    if (!mounted) return;
-    setState(() => _previousOrderCount = previous.length);
+    try {
+      final previous = await repo.orders(userId: userId).first;
+      if (!mounted) return;
+      setState(() => _previousOrderCount = previous.length);
+    } catch (e) {
+      debugPrint('[CheckoutScreen] Failed to load order history: $e');
+    }
   }
 
   AddressEntry? _selectedAddress() =>
@@ -381,9 +386,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (state.items.isEmpty || _placing) return;
 
     final profile = _profile;
+    final address = _selectedAddress();
 
     // 1. Customer name & mobile are mandatory for every order.
-    if (profile.name.trim().isEmpty || profile.mobile.trim().isEmpty) {
+    // Fall back to the selected delivery address if profile mobile/name is not yet populated.
+    final effectiveName = profile.name.trim().isNotEmpty
+        ? profile.name.trim()
+        : (address?.name.trim() ?? '');
+    final effectiveMobile = profile.mobile.trim().isNotEmpty
+        ? profile.mobile.trim()
+        : (address?.phone.trim() ?? '');
+
+    if (effectiveName.isEmpty || effectiveMobile.isEmpty) {
       _snack(
         AppLocalizations.of(
           context,
@@ -392,11 +406,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    if (profile.mobile.trim().isEmpty && effectiveMobile.isNotEmpty && profile.id.isNotEmpty) {
+      unawaited(repo.updateUserMobile(profile.id, effectiveMobile));
+    }
+
     // 2. Address is required only for shops with Home Delivery.
     final needsAddress = state.byCompany.keys.any(
       (companyId) => _deliveryTypes[companyId] == DeliveryType.homeDelivery,
     );
-    final address = _selectedAddress();
     if (needsAddress && address == null) {
       _snack(AppLocalizations.of(context).pleaseSelectADeliveryAddress);
       return;
@@ -425,6 +442,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       final bills = _bills(CartState(items: latestItems));
       final placed = <Order>[];
+
+      // Validate minimum order value for delivery per shop before placing orders
+      for (final entry in CartState(items: latestItems).byCompany.entries) {
+        final companyId = entry.key;
+        final bill = bills[companyId];
+        if (bill == null || bill.lines.isEmpty) continue;
+
+        final company = await repo.company(companyId) ?? _companies[companyId];
+        var deliveryType =
+            _deliveryTypes[companyId] ?? DeliveryType.homeDelivery;
+        if (deliveryType == DeliveryType.homeDelivery &&
+            company != null &&
+            !company.allowsHomeDelivery) {
+          deliveryType = DeliveryType.selfPickup;
+        }
+
+        if (deliveryType == DeliveryType.homeDelivery &&
+            company != null &&
+            company.minOrderAmount > 0 &&
+            bill.subtotal < company.minOrderAmount) {
+          setState(() => _placing = false);
+          _snack(
+            'Minimum order value for delivery is ₹${company.minOrderAmount.toInt()}. Please add more products to continue.',
+          );
+          return;
+        }
+      }
 
       for (final entry in CartState(items: latestItems).byCompany.entries) {
         final companyId = entry.key;
@@ -456,9 +500,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         final order = Order(
           id: '',
           userId: profile.id,
-          customerName: profile.name,
+          customerName: effectiveName,
           customerEmail: profile.email,
-          customerPhone: profile.mobile,
+          customerPhone: effectiveMobile,
           companyId: companyId,
           companyName: bill.companyName,
           items: bill.lines
@@ -504,8 +548,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // One write for every shop's order — never a half-saved checkout.
       final saved = await repo.placeOrders(placed);
       for (final savedOrder in saved) {
-        // Send / trigger order placed email notification.
-        EmailService.sendOrderPlacedEmail(order: savedOrder);
+        // Send / trigger order placed email notification (non-blocking).
+        unawaited(EmailService.sendOrderPlacedEmail(order: savedOrder));
       }
 
       if (!mounted) return;
@@ -888,6 +932,40 @@ class _StoreCheckoutCard extends StatelessWidget {
               value: deliveryType,
               onChanged: onDeliveryTypeChanged,
             ),
+            if (isHome &&
+                company != null &&
+                company!.minOrderAmount > 0 &&
+                resolvedBill != null &&
+                resolvedBill.subtotal < company!.minOrderAmount) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Minimum order value for delivery is ₹${company!.minOrderAmount.toInt()}. Please add more products to continue.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
 
             // Self pickup: no address needed — where to collect instead.

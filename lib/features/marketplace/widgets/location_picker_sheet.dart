@@ -19,11 +19,25 @@ class LocationPickerSheet extends StatefulWidget {
   const LocationPickerSheet({super.key, this.company});
 
   static Future<AddressEntry?> show(BuildContext context, {Company? company}) {
+    AuthCubit? authCubit;
+    try {
+      authCubit = context.read<AuthCubit>();
+    } catch (_) {}
+
     return showModalBottomSheet<AddressEntry>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => LocationPickerSheet(company: company),
+      builder: (ctx) {
+        final sheet = LocationPickerSheet(company: company);
+        if (authCubit != null) {
+          return BlocProvider<AuthCubit>.value(
+            value: authCubit,
+            child: sheet,
+          );
+        }
+        return sheet;
+      },
     );
   }
 
@@ -369,6 +383,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
 
                 // 2. Add New Address Action
                 _buildActionCard(
+                  key: const Key('location-picker-add-address'),
                   icon: Icons.add_location_alt_outlined,
                   iconColor: const Color(0xFF3D38D9),
                   bgColor: const Color(0xFFECEBFF),
@@ -440,6 +455,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
   }
 
   Widget _buildActionCard({
+    Key? key,
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
@@ -450,6 +466,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
     VoidCallback? onTap,
   }) {
     return InkWell(
+      key: key,
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(

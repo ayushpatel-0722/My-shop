@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show FirebaseFirestore;
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../models/admin.dart';
 import '../models/order.dart';
+import 'service_locator.dart';
 
 class EmailService {
   static const String supportTargetEmail = 'ayush123@gmail.com';
@@ -15,6 +18,51 @@ class EmailService {
               '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
         )
         .join('&');
+  }
+
+  /// Resolves the specific shop's verified admin email address.
+  ///
+  /// Priority:
+  /// 1. Company admins subcollection `/companies/{companyId}/admins`
+  /// 2. Company document data (adminEmail / email)
+  /// 3. Default support email fallback
+  static Future<String> resolveShopAdminEmail(String companyId) async {
+    if (companyId.isEmpty) return supportTargetEmail;
+    try {
+      final adminList = await repo.admins(companyId).first.timeout(
+        const Duration(seconds: 4),
+        onTimeout: () => const <Admin>[],
+      );
+      for (final admin in adminList) {
+        if (admin.email.trim().isNotEmpty) {
+          return admin.email.trim();
+        }
+      }
+
+      final comp = await repo.company(companyId).timeout(
+        const Duration(seconds: 4),
+        onTimeout: () => null,
+      );
+      if (comp != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(companyId)
+            .get();
+        if (doc.exists) {
+          final data = doc.data();
+          final adminEmail =
+              data?['adminEmail'] as String? ?? data?['email'] as String?;
+          if (adminEmail != null && adminEmail.trim().isNotEmpty) {
+            return adminEmail.trim();
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint(
+        '⚠️ [EmailService] Error resolving admin email for shop $companyId: $e',
+      );
+    }
+    return supportTargetEmail;
   }
 
   /// Sends a customer support query email to [supportTargetEmail]
@@ -67,7 +115,6 @@ class EmailService {
         mode: LaunchMode.externalApplication,
       );
       if (!launched) {
-        // Fallback without externalApplication mode
         return await launchUrl(uri);
       }
       return launched;
@@ -81,73 +128,76 @@ class EmailService {
     }
   }
 
-  /// Sends an order placed confirmation/notification email to [supportTargetEmail]
-  /// and the store admin with the full order breakdown and customer details.
+  /// Sends an order placed notification email directly to that specific shop's
+  /// store admin with the full item breakdown, totals, and customer details.
   static Future<bool> sendOrderPlacedEmail({
     required Order order,
-    String recipientEmail = supportTargetEmail,
+    String? recipientEmail,
   }) async {
-    final orderShortId = order.id.length > 8
-        ? order.id.substring(0, 8).toUpperCase()
-        : (order.id.isNotEmpty ? order.id.toUpperCase() : 'NEW');
-    final emailSubject =
-        '[New Order Placed] #$orderShortId - ${order.companyName}';
-
-    final emailBody = StringBuffer();
-    emailBody.writeln('NEW ORDER NOTIFICATION');
-    emailBody.writeln('Order ID: #${order.id}');
-    final placedAt = (order.createdAt ?? DateTime.now()).toLocal();
-    emailBody.writeln('Placed At: $placedAt');
-    emailBody.writeln('Store: ${order.companyName} (ID: ${order.companyId})');
-    emailBody.writeln('Status: ${order.orderStatus.toUpperCase()}');
-    emailBody.writeln(
-      'Payment Status: ${order.paymentStatus.toUpperCase()} (Manual / Offline)',
-    );
-    emailBody.writeln();
-    emailBody.writeln('ITEMS ORDERED:');
-    for (final item in order.items) {
-      final variant = item.variantTitle.isNotEmpty
-          ? ' (${item.variantTitle})'
-          : '';
-      final itemTotal = (item.unitPrice * item.qty).toStringAsFixed(2);
-      emailBody.writeln(
-        '• ${item.name}$variant x${item.qty} @ ₹${item.unitPrice.toStringAsFixed(2)} = ₹$itemTotal',
-      );
-    }
-    emailBody.writeln();
-    emailBody.writeln('BILL SUMMARY:');
-    emailBody.writeln('• Subtotal: ₹${order.subtotal.toStringAsFixed(2)}');
-    emailBody.writeln(
-      '• Delivery Charge: ₹${order.deliveryCharge.toStringAsFixed(2)}',
-    );
-    emailBody.writeln(
-      '• Discount: ₹${order.discountAmount.toStringAsFixed(2)}',
-    );
-    emailBody.writeln(
-      '• Total Amount: ₹${order.totalAmount.toStringAsFixed(2)}',
-    );
-    emailBody.writeln();
-    emailBody.writeln('----------------------------------------');
-    emailBody.writeln('CUSTOMER & DELIVERY DETAILS:');
-    emailBody.writeln('• Customer Name: ${order.customerName}');
-    emailBody.writeln('• Email: ${order.customerEmail}');
-    emailBody.writeln('• Mobile Number: ${order.customerPhone}');
-    emailBody.writeln('• Delivery Address: ${order.address}');
-    if (order.pincode.isNotEmpty) {
-      emailBody.writeln('• PIN Code: ${order.pincode}');
-    }
-    emailBody.writeln('========================================');
-
-    final uri = Uri(
-      scheme: 'mailto',
-      path: recipientEmail,
-      query: _encodeQueryParameters({
-        'subject': emailSubject,
-        'body': emailBody.toString(),
-      }),
-    );
-
     try {
+      final targetEmail = (recipientEmail != null && recipientEmail.trim().isNotEmpty)
+          ? recipientEmail.trim()
+          : await resolveShopAdminEmail(order.companyId);
+
+      final orderShortId = order.id.length > 8
+          ? order.id.substring(0, 8).toUpperCase()
+          : (order.id.isNotEmpty ? order.id.toUpperCase() : 'NEW');
+      final emailSubject =
+          'New Order Received – Order #$orderShortId – ${order.companyName}';
+
+      final emailBody = StringBuffer();
+      emailBody.writeln('NEW ORDER NOTIFICATION');
+      emailBody.writeln('Shop: ${order.companyName} (ID: ${order.companyId})');
+      emailBody.writeln('Order ID: #${order.id}');
+      final placedAt = (order.createdAt ?? DateTime.now()).toLocal();
+      emailBody.writeln('Order Date / Time: $placedAt');
+      emailBody.writeln('Order Status: ${order.orderStatus.toUpperCase()}');
+      emailBody.writeln(
+        'Payment Status: ${order.paymentStatus.toUpperCase()} (Cash on Delivery / Manual)',
+      );
+      emailBody.writeln();
+      emailBody.writeln('CUSTOMER & DELIVERY DETAILS:');
+      emailBody.writeln('• Customer Name: ${order.customerName}');
+      emailBody.writeln('• Email: ${order.customerEmail}');
+      emailBody.writeln('• Mobile Number: ${order.customerPhone}');
+      emailBody.writeln('• Delivery Address: ${order.address}');
+      if (order.pincode.isNotEmpty) {
+        emailBody.writeln('• PIN Code: ${order.pincode}');
+      }
+      emailBody.writeln();
+      emailBody.writeln('ITEMS ORDERED:');
+      for (final item in order.items) {
+        final variant = item.variantTitle.isNotEmpty
+            ? ' (${item.variantTitle})'
+            : (item.variantLabel.isNotEmpty ? ' (${item.variantLabel})' : '');
+        final itemTotal = (item.unitPrice * item.qty).toStringAsFixed(2);
+        emailBody.writeln(
+          '• ${item.name}$variant | Qty: ${item.qty} | Unit: ₹${item.unitPrice.toStringAsFixed(2)} | Total: ₹$itemTotal',
+        );
+      }
+      emailBody.writeln();
+      emailBody.writeln('BILL SUMMARY:');
+      emailBody.writeln('• Subtotal: ₹${order.subtotal.toStringAsFixed(2)}');
+      emailBody.writeln(
+        '• Delivery Charge: ₹${order.deliveryCharge.toStringAsFixed(2)}',
+      );
+      emailBody.writeln(
+        '• Discount: ₹${order.discountAmount.toStringAsFixed(2)}',
+      );
+      emailBody.writeln(
+        '• Total Amount: ₹${order.totalAmount.toStringAsFixed(2)}',
+      );
+      emailBody.writeln('========================================');
+
+      final uri = Uri(
+        scheme: 'mailto',
+        path: targetEmail,
+        query: _encodeQueryParameters({
+          'subject': emailSubject,
+          'body': emailBody.toString(),
+        }),
+      );
+
       final launched = await launchUrl(
         uri,
         mode: LaunchMode.externalApplication,
@@ -157,12 +207,9 @@ class EmailService {
       }
       return launched;
     } catch (e) {
-      debugPrint('EmailService.sendOrderPlacedEmail launch error: $e');
-      try {
-        return await launchUrl(uri);
-      } catch (_) {
-        return false;
-      }
+      debugPrint('⚠️ [EmailService] sendOrderPlacedEmail non-fatal error: $e');
+      return false;
     }
   }
 }
+

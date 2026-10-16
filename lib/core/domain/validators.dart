@@ -60,10 +60,6 @@ class ProductValidator {
       errors['unit'] = L10n.current.unitMustBeGreaterThan0;
     }
 
-    if (product.categoryId.isEmpty) {
-      errors['categoryId'] = L10n.current.pickACategoryForThisProduct;
-    }
-
     if (product.type == ProductType.weightBased && product.unitType.isEmpty) {
       errors['unitType'] = L10n.current.weightBasedProductsNeedAUnitKgG;
     }

@@ -15,9 +15,11 @@ import '../helpers/test_harness.dart';
 ///
 /// CustomerDetailsCard (read-only profile), AddressSelector (saved addresses,
 /// max 3), DeliveryTypeSelector (per shop, from the shop model) and
-/// PickupShopCard (self-pickup details), plus the shared address form.
 void main() {
-  setUp(TestHarness.setupPlatformChannels);
+  setUp(() {
+    TestHarness.setupPlatformChannels();
+    TestHarness.useMockRepository();
+  });
 
   Widget shell(Widget child) => MaterialApp(
     supportedLocales: AppLocalizations.supportedLocales,
@@ -315,6 +317,8 @@ void main() {
       expect(find.text('Add New Address'), findsOneWidget);
       expect(find.text('Save & Deliver Here'), findsOneWidget);
 
+      await tester.enterText(find.widgetWithText(TextFormField, 'Full Name *'), '');
+      await tester.enterText(find.widgetWithText(TextFormField, 'Mobile Number *'), '');
       await tester.tap(find.text('Save & Deliver Here'));
       await tester.pumpAndSettle();
 

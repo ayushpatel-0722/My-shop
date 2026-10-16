@@ -14,7 +14,7 @@ import 'package:myshop/app/l10n/app_localizations.dart';
 /// Full-screen form for creating and editing a Product with Dynamic Variant Generation.
 ///
 /// Features:
-/// - Step 1: Basic Information (Title, Dynamic Category Dropdown, Rich Bullet Description)
+/// - Step 1: Basic Information (Title, Rich Bullet Description)
 /// - Step 2: Media Upload (URL gallery, Hero/Main image badge, reordering, deletion)
 /// - Step 3: Pricing & Base Inventory (MRP, Selling Price with live % OFF pill, Base SKU, Stock Count / Unlimited / Finished)
 /// - Step 4: Dynamic Variants Architecture (Custom Option Types, Cartesian Product Matrix Generator)
@@ -68,7 +68,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   // Form State
   String _companyId = '';
   String _companyName = '';
-  String? _selectedCategoryId;
   String _measurementType =
       'quantity_based'; // 'quantity_based' | 'weight_based'
   bool _isRecommended = false;
@@ -250,7 +249,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
     _measurementType = p.type.isNotEmpty ? p.type : 'quantity_based';
     _isRecommended = p.isRecommended;
-    _selectedCategoryId = p.categoryId.isNotEmpty ? p.categoryId : null;
     _policyCtrl.text = p.policy;
     if (p.companyId.isNotEmpty) {
       _companyId = p.companyId;
@@ -1903,7 +1901,6 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       final product = Product(
         id: resolvedId,
         companyId: _companyId,
-        categoryId: _selectedCategoryId ?? '',
         name: _nameCtrl.text.trim(),
         // Legacy fields kept in sync until the data migration is confirmed.
         details: _legacyDescription(allDetails),

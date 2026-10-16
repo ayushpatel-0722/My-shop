@@ -10,6 +10,7 @@ import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/collapsible_section.dart';
 import '../../../core/widgets/modern_shimmer.dart';
@@ -673,23 +674,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             qty: _qty,
                           );
                           final label = currentVariant?.label ?? '';
-                          final variantLabel = label.isNotEmpty
-                              ? ' ($label)'
-                              : '';
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                AppLocalizations.of(
-                                  context,
-                                ).addedToCart2(p.name, variantLabel),
-                              ),
-                              duration: const Duration(seconds: 2),
-                              action: SnackBarAction(
-                                label: AppLocalizations.of(context).viewCart2,
-                                onPressed: () => context.go(AppRoutes.cart),
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                            ),
+                          showAddToCartNotification(
+                            context,
+                            productName: p.name,
+                            variantLabel: label,
                           );
                         }
 

@@ -218,8 +218,8 @@ class MockData {
       stockQty: 25,
       isRecommended: true,
       variants: [
-        ProductVariant(color: 'Black', sku: 'NOVA-X5-BLK', stockQty: 15),
-        ProductVariant(color: 'Silver', sku: 'NOVA-X5-SLV', stockQty: 10),
+        ProductVariant(title: 'Black', color: 'Black', sku: 'NOVA-X5-BLK', stockQty: 15),
+        ProductVariant(title: 'Silver', color: 'Silver', sku: 'NOVA-X5-SLV', stockQty: 10),
       ],
     ),
     const Product(
