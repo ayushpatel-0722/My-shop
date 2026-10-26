@@ -9,6 +9,5 @@ class ConnectivityService {
     return !results.contains(ConnectivityResult.none);
   }
 
-  Stream<List<ConnectivityResult>> get onChanged =>
-      _conn.onConnectivityChanged;
+  Stream<List<ConnectivityResult>> get onChanged => _conn.onConnectivityChanged;
 }

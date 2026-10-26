@@ -18,20 +18,19 @@ void main() {
       double unit = 1,
       String type = ProductType.quantityBased,
       String unitType = 'pieces',
-    }) =>
-        Product(
-          id: 'p1',
-          companyId: 'c1',
-          categoryId: categoryId,
-          name: name,
-          amount: amount,
-          discountAmt: discount,
-          stockQty: stock,
-          isUnlimitedStock: unlimited,
-          unit: unit,
-          type: type,
-          unitType: unitType,
-        );
+    }) => Product(
+      id: 'p1',
+      companyId: 'c1',
+      categoryId: categoryId,
+      name: name,
+      amount: amount,
+      discountAmt: discount,
+      stockQty: stock,
+      isUnlimitedStock: unlimited,
+      unit: unit,
+      type: type,
+      unitType: unitType,
+    );
 
     test('accepts a valid product', () {
       expect(validator.validate(base()).isValid, isTrue);
@@ -49,16 +48,23 @@ void main() {
 
     test('requires a positive MRP', () {
       expect(validator.validate(base(amount: 0)).errorFor('amount'), isNotNull);
-      expect(validator.validate(base(amount: -5)).errorFor('amount'), isNotNull);
+      expect(
+        validator.validate(base(amount: -5)).errorFor('amount'),
+        isNotNull,
+      );
     });
 
     test('selling price must stay below the MRP', () {
       expect(
-        validator.validate(base(amount: 100, discount: 100)).errorFor('discountAmt'),
+        validator
+            .validate(base(amount: 100, discount: 100))
+            .errorFor('discountAmt'),
         isNotNull,
       );
       expect(
-        validator.validate(base(amount: 100, discount: 120)).errorFor('discountAmt'),
+        validator
+            .validate(base(amount: 100, discount: 120))
+            .errorFor('discountAmt'),
         isNotNull,
       );
       expect(
@@ -80,11 +86,17 @@ void main() {
     });
 
     test('unlimited stock may report zero on hand', () {
-      expect(validator.validate(base(stock: 0, unlimited: true)).isValid, isTrue);
+      expect(
+        validator.validate(base(stock: 0, unlimited: true)).isValid,
+        isTrue,
+      );
     });
 
     test('category is optional and requires a positive unit', () {
-      expect(validator.validate(base(categoryId: '')).errorFor('categoryId'), isNull);
+      expect(
+        validator.validate(base(categoryId: '')).errorFor('categoryId'),
+        isNull,
+      );
       expect(validator.validate(base(unit: 0)).errorFor('unit'), isNotNull);
     });
 
@@ -108,7 +120,11 @@ void main() {
     test('accepts a fresh name', () {
       expect(
         validator
-            .validate(name: 'Fresh Produce', existing: existing, companyId: 'comp_1')
+            .validate(
+              name: 'Fresh Produce',
+              existing: existing,
+              companyId: 'comp_1',
+            )
             .isValid,
         isTrue,
       );
@@ -124,13 +140,21 @@ void main() {
     test('rejects a duplicate name inside the same company', () {
       expect(
         validator
-            .validate(name: 'groceries', existing: existing, companyId: 'comp_1')
+            .validate(
+              name: 'groceries',
+              existing: existing,
+              companyId: 'comp_1',
+            )
             .errorFor('name'),
         isNotNull,
       );
       expect(
         validator
-            .validate(name: '  GROCERIES  ', existing: existing, companyId: 'comp_1')
+            .validate(
+              name: '  GROCERIES  ',
+              existing: existing,
+              companyId: 'comp_1',
+            )
             .errorFor('name'),
         isNotNull,
       );
@@ -139,7 +163,11 @@ void main() {
     test('allows the same name in a different company', () {
       expect(
         validator
-            .validate(name: 'Groceries', existing: existing, companyId: 'comp_9')
+            .validate(
+              name: 'Groceries',
+              existing: existing,
+              companyId: 'comp_9',
+            )
             .isValid,
         isTrue,
       );
@@ -188,21 +216,20 @@ void main() {
       List<String> categoryIds = const [],
       List<String> existing = const [],
       DateTime? expiry,
-    }) =>
-        validator.validate(
-          code: code,
-          discountType: type,
-          discountValue: value,
-          minOrderAmt: minOrder,
-          perUserLimit: perUser,
-          maxUses: maxUses,
-          appliesTo: scope,
-          productIds: productIds,
-          categoryIds: categoryIds,
-          existingCodes: existing,
-          expiryDate: expiry,
-          now: now,
-        );
+    }) => validator.validate(
+      code: code,
+      discountType: type,
+      discountValue: value,
+      minOrderAmt: minOrder,
+      perUserLimit: perUser,
+      maxUses: maxUses,
+      appliesTo: scope,
+      productIds: productIds,
+      categoryIds: categoryIds,
+      existingCodes: existing,
+      expiryDate: expiry,
+      now: now,
+    );
 
     test('accepts a sensible voucher', () {
       expect(check().isValid, isTrue);
@@ -212,7 +239,10 @@ void main() {
       expect(check(code: '').errorFor('code'), isNotNull);
       expect(check(code: 'AB').errorFor('code'), isNotNull);
       expect(check(code: 'SAVE-20!').errorFor('code'), isNotNull);
-      expect(check(code: 'save20', existing: ['SAVE20']).errorFor('code'), isNotNull);
+      expect(
+        check(code: 'save20', existing: ['SAVE20']).errorFor('code'),
+        isNotNull,
+      );
       expect(check(code: ' save 20 ').isValid, isTrue, reason: 'normalised');
     });
 
@@ -224,7 +254,10 @@ void main() {
 
     test('fixed amount must be positive', () {
       expect(
-        check(type: VoucherType.fixedAmount, value: 0).errorFor('discountValue'),
+        check(
+          type: VoucherType.fixedAmount,
+          value: 0,
+        ).errorFor('discountValue'),
         isNotNull,
       );
     });
@@ -236,8 +269,11 @@ void main() {
     test('minimum order cannot be negative or pointless', () {
       expect(check(minOrder: -1).errorFor('minOrderAmt'), isNotNull);
       expect(
-        check(type: VoucherType.fixedAmount, value: 100, minOrder: 50)
-            .errorFor('minOrderAmt'),
+        check(
+          type: VoucherType.fixedAmount,
+          value: 100,
+          minOrder: 50,
+        ).errorFor('minOrderAmt'),
         isNotNull,
         reason: 'a 100 off on a 50 minimum would zero the order',
       );
@@ -250,9 +286,16 @@ void main() {
     });
 
     test('expiry must be in the future', () {
-      expect(check(expiry: DateTime(2020, 1, 1)).errorFor('expiryDate'), isNotNull);
+      expect(
+        check(expiry: DateTime(2020, 1, 1)).errorFor('expiryDate'),
+        isNotNull,
+      );
       expect(check(expiry: future).isValid, isTrue);
-      expect(check(expiry: null).isValid, isTrue, reason: 'no expiry is allowed');
+      expect(
+        check(expiry: null).isValid,
+        isTrue,
+        reason: 'no expiry is allowed',
+      );
     });
 
     test('scoped vouchers must pick at least one target', () {
@@ -265,10 +308,7 @@ void main() {
         isNotNull,
       );
       expect(
-        check(
-          scope: VoucherScope.specificProduct,
-          productIds: ['p1'],
-        ).isValid,
+        check(scope: VoucherScope.specificProduct, productIds: ['p1']).isValid,
         isTrue,
       );
       expect(

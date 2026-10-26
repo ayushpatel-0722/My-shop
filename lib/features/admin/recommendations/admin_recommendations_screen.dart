@@ -35,7 +35,9 @@ class AdminRecommendationsScreen extends StatelessWidget {
                   leading: Icon(Icons.auto_awesome),
                   title: Text(AppLocalizations.of(context).fallbackStrategy),
                   subtitle: Text(
-                    AppLocalizations.of(context).topSellersTrendingCuratedCrossSell,
+                    AppLocalizations.of(
+                      context,
+                    ).topSellersTrendingCuratedCrossSell,
                   ),
                 ),
               ),
@@ -45,7 +47,9 @@ class AdminRecommendationsScreen extends StatelessWidget {
                   padding: EdgeInsets.all(24),
                   child: Center(
                     child: Text(
-                      AppLocalizations.of(context).noPinnedRecommendationsUsingBestSellers,
+                      AppLocalizations.of(
+                        context,
+                      ).noPinnedRecommendationsUsingBestSellers,
                     ),
                   ),
                 ),
@@ -53,7 +57,10 @@ class AdminRecommendationsScreen extends StatelessWidget {
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.push_pin),
-                    title: Text(r.pinnedProductId ?? AppLocalizations.of(context).noPinnedProduct),
+                    title: Text(
+                      r.pinnedProductId ??
+                          AppLocalizations.of(context).noPinnedProduct,
+                    ),
                     subtitle: Text(r.strategy),
                   ),
                 ),
@@ -110,20 +117,33 @@ class _PinProductSheetState extends State<_PinProductSheet> {
           const SizedBox(height: 16),
           TextField(
             controller: _productIdCtrl,
-            decoration: InputDecoration(labelText: AppLocalizations.of(context).productId),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).productId,
+            ),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _strategy,
-            decoration: InputDecoration(labelText: AppLocalizations.of(context).strategy),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).strategy,
+            ),
             items: [
-              DropdownMenuItem(value: 'curated', child: Text(AppLocalizations.of(context).curated)),
+              DropdownMenuItem(
+                value: 'curated',
+                child: Text(AppLocalizations.of(context).curated),
+              ),
               DropdownMenuItem(
                 value: 'top_sellers',
                 child: Text(AppLocalizations.of(context).topSellers),
               ),
-              DropdownMenuItem(value: 'trending', child: Text(AppLocalizations.of(context).trending)),
-              DropdownMenuItem(value: 'cross_sell', child: Text(AppLocalizations.of(context).crossSell)),
+              DropdownMenuItem(
+                value: 'trending',
+                child: Text(AppLocalizations.of(context).trending),
+              ),
+              DropdownMenuItem(
+                value: 'cross_sell',
+                child: Text(AppLocalizations.of(context).crossSell),
+              ),
             ],
             onChanged: (v) => setState(() => _strategy = v ?? 'curated'),
           ),

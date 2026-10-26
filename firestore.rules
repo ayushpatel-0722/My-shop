@@ -60,6 +60,43 @@ service cloud.firestore {
       return isCompanyAdmin(cId) || isCompanyEmployee(cId);
     }
 
+    function isValidHomeExploreCategory(data) {
+      return data.shopId is string && data.shopId.size() > 0 && data.shopId.size() <= 128
+        && data.categoryId is string && data.categoryId.size() > 0 && data.categoryId.size() <= 128
+        && data.isActive is bool
+        && (data.displayOrder is int || data.displayOrder is float)
+        && (!('shopName' in data) || data.shopName == null || (data.shopName is string && data.shopName.size() <= 200))
+        && (!('categoryName' in data) || data.categoryName == null || (data.categoryName is string && data.categoryName.size() <= 200))
+        && (!('createdBy' in data) || data.createdBy == null || (data.createdBy is string && data.createdBy.size() <= 128));
+    }
+
+    function isValidHomeTrendingItem(data) {
+      return data.shopId is string && data.shopId.size() > 0 && data.shopId.size() <= 128
+        && data.itemType in ['product', 'category']
+        && data.isActive is bool
+        && (data.displayOrder is int || data.displayOrder is float)
+        && (!('productId' in data) || data.productId == null || (data.productId is string && data.productId.size() <= 128))
+        && (!('categoryId' in data) || data.categoryId == null || (data.categoryId is string && data.categoryId.size() <= 128))
+        && (!('shopName' in data) || data.shopName == null || (data.shopName is string && data.shopName.size() <= 200))
+        && (!('productName' in data) || data.productName == null || (data.productName is string && data.productName.size() <= 200))
+        && (!('categoryName' in data) || data.categoryName == null || (data.categoryName is string && data.categoryName.size() <= 200))
+        && (!('createdBy' in data) || data.createdBy == null || (data.createdBy is string && data.createdBy.size() <= 128));
+    }
+
+    function isValidOrderCancellation(data) {
+      return data.orderStatus == 'cancelled'
+        && (!('cancellationReason' in data) || data.cancellationReason == null || (data.cancellationReason is string && data.cancellationReason.size() <= 500))
+        && (!('cancelledAt' in data) || data.cancelledAt == null || (data.cancelledAt is string && data.cancelledAt.size() <= 64))
+        && (!('updatedAt' in data) || data.updatedAt == null || (data.updatedAt is string && data.updatedAt.size() <= 64))
+        && (!('stockRestored' in data) || data.stockRestored == null || data.stockRestored is bool)
+        && (!('statusHistory' in data) || data.statusHistory == null || (data.statusHistory is list && data.statusHistory.size() <= 50));
+    }
+
+    function isValidOrderPaymentVerification(data) {
+      return (!('paymentVerifiedBy' in data) || data.paymentVerifiedBy == null || (data.paymentVerifiedBy is string && data.paymentVerifiedBy.size() <= 200))
+        && (!('paymentVerifiedAt' in data) || data.paymentVerifiedAt == null || (data.paymentVerifiedAt is string && data.paymentVerifiedAt.size() <= 64) || data.paymentVerifiedAt is timestamp);
+    }
+
     // =========================================================================
     // 1. COMPANIES (Root collection & Hierarchical Tree)
     // =========================================================================
@@ -114,8 +151,36 @@ service cloud.firestore {
       match /orders/{orderId} {
         allow read: if isSignedIn() &&
           (resource.data.userId == request.auth.uid || isCompanyStaff(companyId));
-        allow create: if isSignedIn();
-        allow update: if isCompanyStaff(companyId) || (isSignedIn() && resource.data.userId == request.auth.uid);
+        allow create: if isSignedIn()
+          && (isCompanyStaff(companyId) || (
+            (!('paymentVerifiedBy' in request.resource.data) || request.resource.data.paymentVerifiedBy == null)
+            && (!('paymentVerifiedAt' in request.resource.data) || request.resource.data.paymentVerifiedAt == null)
+            && (!('paymentStatus' in request.resource.data) || request.resource.data.paymentStatus != 'done')
+          ))
+          && isValidOrderPaymentVerification(request.resource.data);
+        allow update: if (isCompanyStaff(companyId) && isValidOrderPaymentVerification(request.resource.data)) || (
+          isSignedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && resource.data.orderStatus == 'pending'
+          && request.resource.data.orderStatus == 'cancelled'
+          && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny([
+                'userId', 'companyId', 'totalAmount', 'subtotal',
+                'discountAmount', 'deliveryCharge', 'paymentStatus',
+                'paymentMethod', 'amountPaid', 'transactionRef', 'paidAt',
+                'paymentVerifiedBy', 'paymentVerifiedAt',
+                'items', 'address', 'pincode', 'pickupShop',
+                'voucherId', 'voucherCode', 'createdAt',
+                'assignedEmployeeId', 'employeePackingDone'
+              ])
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly([
+                'orderStatus', 'cancellationReason', 'cancelledAt',
+                'statusHistory', 'stockRestored', 'updatedAt'
+              ])
+          && isValidOrderCancellation(request.resource.data)
+        );
         allow delete: if false;
 
         match /items/{itemId} {
@@ -185,6 +250,34 @@ service cloud.firestore {
     match /media_links/{mediaId} {
       allow read: if true;
       allow write: if isSignedIn();
+    }
+
+    // Home screen: Explore Categories
+    match /home_explore_categories/{entryId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && isCompanyAdmin(request.resource.data.shopId)
+        && isValidHomeExploreCategory(request.resource.data);
+      allow update: if isSignedIn()
+        && isCompanyAdmin(resource.data.shopId)
+        && isCompanyAdmin(request.resource.data.shopId)
+        && isValidHomeExploreCategory(request.resource.data);
+      allow delete: if isSignedIn()
+        && isCompanyAdmin(resource.data.shopId);
+    }
+
+    // Home screen: Trending Now
+    match /home_trending_now/{itemId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && isCompanyAdmin(request.resource.data.shopId)
+        && isValidHomeTrendingItem(request.resource.data);
+      allow update: if isSignedIn()
+        && isCompanyAdmin(resource.data.shopId)
+        && isCompanyAdmin(request.resource.data.shopId)
+        && isValidHomeTrendingItem(request.resource.data);
+      allow delete: if isSignedIn()
+        && isCompanyAdmin(resource.data.shopId);
     }
 
     // =========================================================================

@@ -17,10 +17,12 @@ class RemoteConfigService {
       _keyForceUpdate: false,
       _keyUpdateMessage: L10n.current.aNewVersionIsAvailablePleaseUpdate,
     });
-    await _rc.setConfigSettings(RemoteConfigSettings(
-      fetchTimeout: const Duration(seconds: 10),
-      minimumFetchInterval: const Duration(minutes: 5),
-    ));
+    await _rc.setConfigSettings(
+      RemoteConfigSettings(
+        fetchTimeout: const Duration(seconds: 10),
+        minimumFetchInterval: const Duration(minutes: 5),
+      ),
+    );
     await _rc.fetchAndActivate();
   }
 

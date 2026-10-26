@@ -85,23 +85,33 @@ void main() {
   testWidgets('search filters the catalogue', (tester) async {
     await pumpTestApp(tester, const AdminProductsScreen());
 
-    await tester.enterText(find.byKey(const Key('product-search-field')), 'tomato');
+    await tester.enterText(
+      find.byKey(const Key('product-search-field')),
+      'tomato',
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Fresh Tomatoes'), findsOneWidget);
     expect(find.text('Himalayan Apples'), findsNothing);
   });
 
-  testWidgets('an unmatched search shows the empty filter state', (tester) async {
+  testWidgets('an unmatched search shows the empty filter state', (
+    tester,
+  ) async {
     await pumpTestApp(tester, const AdminProductsScreen());
 
-    await tester.enterText(find.byKey(const Key('product-search-field')), 'zzzz');
+    await tester.enterText(
+      find.byKey(const Key('product-search-field')),
+      'zzzz',
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('No products match these filters'), findsOneWidget);
   });
 
-  testWidgets('the sold out filter isolates out-of-stock items', (tester) async {
+  testWidgets('the sold out filter isolates out-of-stock items', (
+    tester,
+  ) async {
     await repo.saveProduct(
       const Product(
         id: 'p_soldout',
@@ -123,7 +133,11 @@ void main() {
 
   testWidgets('shows the category a product belongs to', (tester) async {
     await repo.saveCategory(
-      const Category(id: 'cat_honey', name: 'Honey & Spreads', companyId: 'c_organic'),
+      const Category(
+        id: 'cat_honey',
+        name: 'Honey & Spreads',
+        companyId: 'c_organic',
+      ),
     );
     await repo.saveProduct(
       const Product(
@@ -139,8 +153,9 @@ void main() {
     expect(find.text('Honey & Spreads'), findsOneWidget);
   });
 
-  testWidgets('deleting asks for confirmation and removes the product',
-      (tester) async {
+  testWidgets('deleting asks for confirmation and removes the product', (
+    tester,
+  ) async {
     await repo.saveProduct(
       const Product(
         id: 'p_gone',
@@ -152,10 +167,12 @@ void main() {
     );
     await pumpTestApp(tester, const AdminProductsScreen());
 
-    await tester.tap(find.descendant(
-      of: find.byKey(const Key('product-tile-p_gone')),
-      matching: find.byIcon(Icons.delete_outline),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('product-tile-p_gone')),
+        matching: find.byIcon(Icons.delete_outline),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Delete Product'), findsOneWidget);
@@ -164,10 +181,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(await repo.product('p_gone'), isNotNull);
 
-    await tester.tap(find.descendant(
-      of: find.byKey(const Key('product-tile-p_gone')),
-      matching: find.byIcon(Icons.delete_outline),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('product-tile-p_gone')),
+        matching: find.byIcon(Icons.delete_outline),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();

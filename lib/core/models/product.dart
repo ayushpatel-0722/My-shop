@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../utils/type_utils.dart';
 import '../../app/l10n/l10n_service.dart';
 
@@ -11,8 +12,9 @@ class ProductType {
 
   static const values = <String>[weightBased, quantityBased];
 
-  static String label(String type) =>
-      type == weightBased ? L10n.current.weightBased : L10n.current.quantityBased;
+  static String label(String type) => type == weightBased
+      ? L10n.current.weightBased
+      : L10n.current.quantityBased;
 }
 
 /// Product option definition (e.g. Option name: "Weight", values: ["250g", "500g", "1kg"]).
@@ -74,8 +76,7 @@ class HighlightItem {
   /// A row someone started (title typed) but did not finish (no value).
   bool get isHalfWritten => title.trim().isNotEmpty && value.trim().isEmpty;
 
-  bool get isComplete =>
-      title.trim().isNotEmpty && value.trim().isNotEmpty;
+  bool get isComplete => title.trim().isNotEmpty && value.trim().isNotEmpty;
 
   factory HighlightItem.fromMap(Map<String, dynamic> map) => HighlightItem(
     id: asString(map['id']),
@@ -135,8 +136,7 @@ class DetailItem {
   });
 
   bool get isEmpty => title.trim().isEmpty && value.trim().isEmpty;
-  bool get isComplete =>
-      title.trim().isNotEmpty && value.trim().isNotEmpty;
+  bool get isComplete => title.trim().isNotEmpty && value.trim().isNotEmpty;
 
   factory DetailItem.fromMap(Map<String, dynamic> map) => DetailItem(
     id: asString(map['id']),
@@ -152,17 +152,13 @@ class DetailItem {
     'order': order,
   };
 
-  DetailItem copyWith({
-    String? id,
-    String? title,
-    String? value,
-    int? order,
-  }) => DetailItem(
-    id: id ?? this.id,
-    title: title ?? this.title,
-    value: value ?? this.value,
-    order: order ?? this.order,
-  );
+  DetailItem copyWith({String? id, String? title, String? value, int? order}) =>
+      DetailItem(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        value: value ?? this.value,
+        order: order ?? this.order,
+      );
 
   @override
   String toString() => 'DetailItem($title: $value)';
@@ -196,9 +192,8 @@ class DetailSection {
   bool get isKeyValue => type == DetailSectionType.keyValue;
 
   /// True when the section carries nothing worth showing.
-  bool get isEmptyContent => isText
-      ? text.trim().isEmpty
-      : items.every((e) => e.isEmpty);
+  bool get isEmptyContent =>
+      isText ? text.trim().isEmpty : items.every((e) => e.isEmpty);
 
   /// Sorted copy of [items] by their `order` field.
   List<DetailItem> get sortedItems {
@@ -228,8 +223,7 @@ class DetailSection {
       'title': title,
       'type': type,
       if (isText) 'text': text,
-      if (isKeyValue)
-        'items': items.map((e) => e.toMap()).toList(),
+      if (isKeyValue) 'items': items.map((e) => e.toMap()).toList(),
       'order': order,
     };
   }
@@ -355,7 +349,8 @@ class ProductVariant {
         : <String, String>{};
 
     final rawSize = map['size']?.toString() ?? attrs[L10n.current.size] ?? '';
-    final rawColor = map['color']?.toString() ?? attrs[L10n.current.color] ?? '';
+    final rawColor =
+        map['color']?.toString() ?? attrs[L10n.current.color] ?? '';
     final rawTitle = map['title']?.toString() ?? '';
 
     return ProductVariant(
@@ -421,7 +416,10 @@ class CartUnit {
     if (unit == 'kgs' || unit == 'kilogram' || unit == 'kilograms') {
       unit = 'kg';
     }
-    if (unit == 'litre' || unit == 'litres' || unit == 'liter' || unit == 'liters') {
+    if (unit == 'litre' ||
+        unit == 'litres' ||
+        unit == 'liter' ||
+        unit == 'liters') {
       unit = 'l';
     }
     // Normalise to the smallest sensible unit so maths never mixes kg and g.
@@ -566,6 +564,8 @@ class Product {
   String get searchIndex => <String>[
     name,
     sku,
+    categoryId,
+    categoryId.replaceAll('cat_', '').replaceAll('_', ' ').replaceAll('-', ' '),
     details,
     subDetails,
     unitType,
@@ -666,6 +666,46 @@ class Product {
         unitType: 'pieces',
       );
 
+  static List<String> _parseProductImages(Map<String, dynamic> map) {
+    final list = <String>[];
+    void add(dynamic val) {
+      if (val == null) return;
+      if (val is Iterable) {
+        for (final item in val) {
+          add(item);
+        }
+      } else if (val is String) {
+        final trimmed = val.trim();
+        if (trimmed.isEmpty) return;
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          try {
+            final decoded = jsonDecode(trimmed);
+            if (decoded is Iterable) {
+              for (final d in decoded) {
+                add(d);
+              }
+              return;
+            }
+          } catch (_) {}
+        }
+        if (!list.contains(trimmed)) {
+          list.add(trimmed);
+        }
+      }
+    }
+
+    add(map['images']);
+    add(map['imageUrls']);
+    add(map['imageUrl']);
+    add(map['image']);
+    add(map['productImage']);
+    add(map['photoUrl']);
+    add(map['thumbnailUrl']);
+    add(map['picture']);
+
+    return List<String>.unmodifiable(list);
+  }
+
   factory Product.fromMap(String id, Map<String, dynamic> map) => Product(
     id: id,
     companyId: asString(map['companyId']),
@@ -680,7 +720,7 @@ class Product {
     amount: asDouble(map['amount']),
     discountAmt: asDouble(map['discountAmt']),
     subDetails: asString(map['subDetails']),
-    images: asStringList(map['images']),
+    images: _parseProductImages(map),
     variants: asMapList(map['variants']).map(ProductVariant.fromMap).toList(),
     options: asMapList(map['options']).map(ProductOption.fromMap).toList(),
     specifications: asMapList(

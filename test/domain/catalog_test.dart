@@ -13,23 +13,27 @@ Product p(
   int stock = 50,
   bool unlimited = false,
   String details = '',
-}) =>
-    Product(
-      id: id,
-      companyId: companyId,
-      categoryId: categoryId,
-      name: name,
-      sku: sku,
-      details: details,
-      amount: amount,
-      discountAmt: discount,
-      stockQty: stock,
-      isUnlimitedStock: unlimited,
-    );
+}) => Product(
+  id: id,
+  companyId: companyId,
+  categoryId: categoryId,
+  name: name,
+  sku: sku,
+  details: details,
+  amount: amount,
+  discountAmt: discount,
+  stockQty: stock,
+  isUnlimitedStock: unlimited,
+);
 
 void main() {
   group('Catalog — search', () {
-    final tomato = p('p1', name: 'Fresh Tomatoes', sku: 'TOM-500', details: 'Vine ripened');
+    final tomato = p(
+      'p1',
+      name: 'Fresh Tomatoes',
+      sku: 'TOM-500',
+      details: 'Vine ripened',
+    );
 
     test('matches on name, case-insensitively', () {
       expect(Catalog.matchesSearch(tomato, 'TOMATO'), isTrue);
@@ -98,12 +102,18 @@ void main() {
     });
 
     test('filters by category', () {
-      final result = Catalog.apply(products, CatalogQuery(categoryIds: {'cat_veg2'}));
+      final result = Catalog.apply(
+        products,
+        CatalogQuery(categoryIds: {'cat_veg2'}),
+      );
       expect(result.single.id, 'p3');
     });
 
     test('filters to discounted items only', () {
-      final result = Catalog.apply(products, CatalogQuery(discountedOnly: true));
+      final result = Catalog.apply(
+        products,
+        CatalogQuery(discountedOnly: true),
+      );
       expect(result.single.id, 'p2');
     });
 
@@ -114,14 +124,17 @@ void main() {
 
     test('sorts by name and by price', () {
       expect(
-        Catalog.apply(products, CatalogQuery(sort: ProductSort.nameAsc))
-            .map((e) => e.name)
-            .toList()
-            .sublist(0, 4),
+        Catalog.apply(
+          products,
+          CatalogQuery(sort: ProductSort.nameAsc),
+        ).map((e) => e.name).toList().sublist(0, 4),
         ['Apple', 'Banana', 'Carrot', 'Zucchini'],
       );
       expect(
-        Catalog.apply(products, CatalogQuery(sort: ProductSort.priceDesc)).first.name,
+        Catalog.apply(
+          products,
+          CatalogQuery(sort: ProductSort.priceDesc),
+        ).first.name,
         'Zucchini',
       );
       final cheapestFirst = Catalog.apply(
@@ -145,18 +158,21 @@ void main() {
 
     test('the input list is never mutated', () {
       final source = <Product>[p('a', name: 'Zzz'), p('b', name: 'Aaa')];
-      final sorted = Catalog.apply(source, CatalogQuery(sort: ProductSort.nameAsc));
+      final sorted = Catalog.apply(
+        source,
+        CatalogQuery(sort: ProductSort.nameAsc),
+      );
       expect(sorted.first.name, 'Aaa');
       expect(source.first.name, 'Zzz');
     });
 
     test('an identity query keeps everything', () {
       expect(CatalogQuery().isIdentity, isTrue);
+      expect(CatalogQuery(search: 'x').isIdentity, isFalse);
       expect(
-        CatalogQuery(search: 'x').isIdentity,
-        isFalse,
+        Catalog.apply(products, const CatalogQuery()).length,
+        products.length,
       );
-      expect(Catalog.apply(products, const CatalogQuery()).length, products.length);
     });
   });
 

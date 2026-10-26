@@ -14,6 +14,8 @@ import '../models/category.dart';
 import '../models/company.dart';
 import '../models/delivery_charge.dart';
 import '../models/employee.dart';
+import '../models/home_explore_category.dart';
+import '../models/home_trending_item.dart';
 import '../models/notification.dart';
 import '../models/order.dart';
 import '../models/product.dart';
@@ -23,7 +25,9 @@ import '../models/voucher.dart';
 import '../domain/category_tree.dart';
 import '../domain/order_status.dart';
 import '../repositories/app_repository.dart';
+import '../services/auth_session.dart';
 import '../services/secure_session_cache.dart';
+import '../utils/type_utils.dart';
 import '../../app/l10n/l10n_service.dart';
 
 /// Firestore / Auth / RTDB implementation of [AppRepository].
@@ -98,6 +102,13 @@ class FirebaseAppRepository implements AppRepository {
   CollectionReference<Map<String, dynamic>> _recommendationsCol(
     String companyId,
   ) => _companyDoc(companyId).collection('recommendations');
+
+  // Top-level collections for user home screen configurations
+  CollectionReference<Map<String, dynamic>> _homeExploreCol() =>
+      _db.collection('home_explore_categories');
+
+  CollectionReference<Map<String, dynamic>> _homeTrendingCol() =>
+      _db.collection('home_trending_now');
 
   // Phone-auth state, held between sendOtp() and verifyOtp().
   String? _verificationId;
@@ -1255,29 +1266,33 @@ class FirebaseAppRepository implements AppRepository {
         Query<Map<String, dynamic>> q = _db.collectionGroup('orders');
         if (userId.isNotEmpty) q = q.where('userId', isEqualTo: userId);
 
-        sub = q.snapshots().asyncMap((s) async {
-          final orders = <Order>[];
-          for (final doc in s.docs) {
-            orders.add(await _orderFromDoc(doc));
-          }
-          orders.sort(
-            (a, b) => (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
-                .compareTo(
-                  a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0),
-                ),
-          );
-          return orders;
-        }).listen(
-          (data) {
-            if (!controller.isClosed) controller.add(data);
-          },
-          onError: (err) {
-            debugPrint(
-              '⚠️ [FirebaseAppRepo] collectionGroup orders error: $err. Falling back to active companies.',
+        sub = q
+            .snapshots()
+            .asyncMap((s) async {
+              final orders = <Order>[];
+              for (final doc in s.docs) {
+                orders.add(await _orderFromDoc(doc));
+              }
+              orders.sort(
+                (a, b) =>
+                    (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+                        .compareTo(
+                          a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+                        ),
+              );
+              return orders;
+            })
+            .listen(
+              (data) {
+                if (!controller.isClosed) controller.add(data);
+              },
+              onError: (err) {
+                debugPrint(
+                  '⚠️ [FirebaseAppRepo] collectionGroup orders error: $err. Falling back to active companies.',
+                );
+                _fallbackCustomerOrders(controller, userId);
+              },
             );
-            _fallbackCustomerOrders(controller, userId);
-          },
-        );
       } catch (e) {
         debugPrint(
           '⚠️ [FirebaseAppRepo] collectionGroup orders init error: $e. Using fallback.',
@@ -1529,14 +1544,17 @@ class FirebaseAppRepository implements AppRepository {
         if (prodSnap.docs.isNotEmpty) {
           return prodSnap.docs.map((d) {
             final map = _asMap(d.data());
-            if (map['companyId'] == null || (map['companyId'] as String).isEmpty) {
+            if (map['companyId'] == null ||
+                (map['companyId'] as String).isEmpty) {
               map['companyId'] = companyId;
             }
             return Product.fromMap(d.id, map);
           }).toList();
         }
       } catch (e) {
-        debugPrint('⚠️ [FirebaseAppRepo] company isRecommended query error: $e');
+        debugPrint(
+          '⚠️ [FirebaseAppRepo] company isRecommended query error: $e',
+        );
       }
     } else {
       try {
@@ -1572,7 +1590,8 @@ class FirebaseAppRepository implements AppRepository {
         final pSnap = await _productsCol(cd.id).limit(10).get();
         for (final pd in pSnap.docs) {
           final map = _asMap(pd.data());
-          if (map['companyId'] == null || (map['companyId'] as String).isEmpty) {
+          if (map['companyId'] == null ||
+              (map['companyId'] as String).isEmpty) {
             map['companyId'] = cd.id;
           }
           final p = Product.fromMap(pd.id, map);
@@ -1605,6 +1624,25 @@ class FirebaseAppRepository implements AppRepository {
   Future<DocumentReference<Map<String, dynamic>>?> _findOrderRef(
     String orderId,
   ) async {
+    final currentUid = _auth.currentUser?.uid;
+    if (currentUid != null && currentUid.isNotEmpty) {
+      try {
+        final snap = await _db
+            .collectionGroup('orders')
+            .where('userId', isEqualTo: currentUid)
+            .get();
+        for (final doc in snap.docs) {
+          if (doc.id == orderId || doc.data()['id'] == orderId) {
+            return doc.reference;
+          }
+        }
+      } catch (e) {
+        debugPrint(
+          '⚠️ [FirebaseAppRepo] user collectionGroup _findOrderRef error: $e',
+        );
+      }
+    }
+
     try {
       final snap = await _db
           .collectionGroup('orders')
@@ -1613,16 +1651,22 @@ class FirebaseAppRepository implements AppRepository {
           .get();
       if (snap.docs.isNotEmpty) return snap.docs.first.reference;
     } catch (e) {
-      debugPrint('⚠️ [FirebaseAppRepo] collectionGroup _findOrderRef error: $e');
+      debugPrint(
+        '⚠️ [FirebaseAppRepo] collectionGroup _findOrderRef error: $e',
+      );
     }
 
-    // Direct company subcollection scan fallback.
+    // Direct company subcollection scan fallback with per-company try/catch.
     try {
       final compSnap = await _companiesCol().get();
       for (final c in compSnap.docs) {
-        final ref = _ordersCol(c.id).doc(orderId);
-        final snap = await ref.get();
-        if (snap.exists) return ref;
+        try {
+          final ref = _ordersCol(c.id).doc(orderId);
+          final snap = await ref.get();
+          if (snap.exists) return ref;
+        } catch (_) {
+          // Continue scanning remaining companies even if one throws permission error
+        }
       }
     } catch (e) {
       debugPrint('⚠️ [FirebaseAppRepo] company scan _findOrderRef error: $e');
@@ -1691,10 +1735,23 @@ class FirebaseAppRepository implements AppRepository {
         if (order.pickupShop != null) 'pickupShop': order.pickupShop!.toMap(),
         'voucherId': order.voucherId,
         'voucherCode': order.voucherCode,
-        'paymentStatus': PaymentStatus.pending,
+        'paymentMethod': order.paymentMethod,
+        'paymentStatus': order.paymentStatus.isNotEmpty
+            ? order.paymentStatus
+            : PaymentStatus.pending,
+        if (order.transactionRef != null && order.transactionRef!.isNotEmpty)
+          'transactionRef': order.transactionRef,
         'orderStatus': OrderStatus.pending,
         'deliveryType': order.deliveryType,
         'employeePackingDone': false,
+        'statusHistory': [
+          {
+            'status': OrderStatus.pending,
+            'note': 'Order placed',
+            'timestamp': now.toIso8601String(),
+          },
+        ],
+        'stockRestored': false,
         'createdAt': now.toIso8601String(),
         'updatedAt': now.toIso8601String(),
       };
@@ -1723,9 +1780,21 @@ class FirebaseAppRepository implements AppRepository {
           pickupShop: order.pickupShop,
           voucherId: order.voucherId,
           voucherCode: order.voucherCode,
-          paymentStatus: PaymentStatus.pending,
+          paymentMethod: order.paymentMethod,
+          paymentStatus: order.paymentStatus.isNotEmpty
+              ? order.paymentStatus
+              : PaymentStatus.pending,
+          transactionRef: order.transactionRef,
           orderStatus: OrderStatus.pending,
           deliveryType: order.deliveryType,
+          statusHistory: [
+            OrderStatusHistoryEntry(
+              status: OrderStatus.pending,
+              note: 'Order placed',
+              timestamp: now,
+            ),
+          ],
+          stockRestored: false,
           createdAt: now,
           updatedAt: now,
         ),
@@ -1744,14 +1813,18 @@ class FirebaseAppRepository implements AppRepository {
       try {
         await _decrementStock(order);
       } catch (e) {
-        debugPrint('[FirebaseAppRepo] Non-fatal: Stock decrement restricted or skipped: $e');
+        debugPrint(
+          '[FirebaseAppRepo] Non-fatal: Stock decrement restricted or skipped: $e',
+        );
       }
 
       if (order.voucherId != null && order.voucherId!.isNotEmpty) {
         try {
           await _recordVoucherUsage(order);
         } catch (e) {
-          debugPrint('[FirebaseAppRepo] Non-fatal: Voucher usage recording skipped: $e');
+          debugPrint(
+            '[FirebaseAppRepo] Non-fatal: Voucher usage recording skipped: $e',
+          );
         }
       }
     }
@@ -1793,31 +1866,77 @@ class FirebaseAppRepository implements AppRepository {
     );
   }
 
+  /// Restores quantities previously deducted for an order (skips unlimited stock).
+  Future<void> _restoreStock(Order order) async {
+    for (final item in order.items) {
+      if (item.productId.isEmpty) continue;
+      final productRef = _productsCol(order.companyId).doc(item.productId);
+      final snap = await productRef.get();
+      if (!snap.exists) continue;
+      final data = _asMap(snap.data());
+      if (data['isUnlimitedStock'] == true) continue;
+
+      final current = (data['stockQty'] as num?)?.toInt() ?? 0;
+      final restored = current + (item.qty < 0 ? 0 : item.qty);
+      await productRef.update({'stockQty': restored});
+    }
+  }
+
+  /// Reverses voucher usage when an order is cancelled.
+  Future<void> _releaseVoucherUsage(Order order) async {
+    final voucherId = order.voucherId;
+    if (voucherId == null || voucherId.isEmpty) return;
+
+    final ref = _vouchersCol(order.companyId).doc(voucherId);
+    final snap = await ref.get();
+    if (!snap.exists) return;
+
+    final voucher = Voucher.fromMap(snap.id, _asMap(snap.data()));
+    if (!voucher.usedOrderIds.contains(order.id)) return;
+
+    await ref.set(
+      voucher.releaseUsage(orderId: order.id, userId: order.userId).toMap(),
+      SetOptions(merge: false),
+    );
+  }
+
   @override
   Future<void> updateOrderStatus(
     String orderId,
     String status, {
     String companyId = '',
     String? cancellationReason,
+    String? note,
   }) async {
     OrderStatusRules.ensureValidStatus(status);
 
     final target = companyId.isNotEmpty
         ? _ordersCol(companyId).doc(orderId)
-        : (await _findOrderRef(orderId) ?? _db.collection('orders').doc(orderId));
+        : (await _findOrderRef(orderId) ??
+              _db.collection('orders').doc(orderId));
     final current = await target.get();
+    Map<String, dynamic> data = const {};
     if (current.exists) {
-      final existing =
-          _asMap(current.data())['orderStatus']?.toString() ??
-          OrderStatus.pending;
+      data = _asMap(current.data());
+      final existing = data['orderStatus']?.toString() ?? OrderStatus.pending;
       OrderStatusRules.ensureTransition(existing, status);
     }
 
     final now = DateTime.now().toIso8601String();
+    final existingHistory = asMapList(data['statusHistory']);
+    final entryNote =
+        note ??
+        (status == OrderStatus.cancelled
+            ? (cancellationReason ?? 'Cancelled')
+            : 'Status changed to $status');
+    final newHistory = List<Map<String, dynamic>>.from(existingHistory)
+      ..add({'status': status, 'note': entryNote, 'timestamp': now});
+
     final updates = <String, dynamic>{
       'orderStatus': status,
       'updatedAt': now,
       'cancelledAt': status == OrderStatus.cancelled ? now : null,
+      'statusHistory': newHistory,
     };
     if (status == OrderStatus.cancelled &&
         cancellationReason != null &&
@@ -1832,37 +1951,189 @@ class FirebaseAppRepository implements AppRepository {
     String orderId, {
     String companyId = '',
     String? reason,
-  }) =>
-      updateOrderStatus(
-        orderId,
-        OrderStatus.cancelled,
-        companyId: companyId,
-        cancellationReason: reason,
-      );
+    String? userId,
+  }) async {
+    final target = companyId.isNotEmpty
+        ? _ordersCol(companyId).doc(orderId)
+        : (await _findOrderRef(orderId) ??
+              _db.collection('orders').doc(orderId));
+    final snap = await target.get();
+    if (!snap.exists) {
+      throw Exception('Order not found');
+    }
+
+    final data = _asMap(snap.data());
+    final currentStatus =
+        data['orderStatus']?.toString() ?? OrderStatus.pending;
+    final orderUserId = data['userId']?.toString() ?? '';
+
+    // If customer cancellation (userId provided):
+    if (userId != null && userId.isNotEmpty) {
+      if (orderUserId != userId) {
+        throw StateError('You are not authorized to cancel this order.');
+      }
+      if (!OrderStatusRules.isCustomerCancellable(currentStatus)) {
+        final ineligibleMsg =
+            OrderStatusRules.customerCancellationIneligibleReason(
+              currentStatus,
+            );
+        throw StateError(
+          ineligibleMsg ?? 'This order can no longer be cancelled.',
+        );
+      }
+    } else {
+      OrderStatusRules.ensureTransition(currentStatus, OrderStatus.cancelled);
+    }
+
+    final nowIso = DateTime.now().toIso8601String();
+    final cancellationReason =
+        reason ??
+        (userId != null ? 'Cancelled by customer' : 'Cancelled by admin');
+
+    final existingHistory = asMapList(data['statusHistory']);
+    final newHistory = List<Map<String, dynamic>>.from(existingHistory)
+      ..add({
+        'status': OrderStatus.cancelled,
+        'note': cancellationReason,
+        'timestamp': nowIso,
+      });
+
+    final wasStockRestored = data['stockRestored'] == true;
+
+    final updates = <String, dynamic>{
+      'orderStatus': OrderStatus.cancelled,
+      'updatedAt': nowIso,
+      'cancelledAt': nowIso,
+      'cancellationReason': cancellationReason,
+      'statusHistory': newHistory,
+      'stockRestored': true,
+    };
+    await target.update(updates);
+
+    // If stock hasn't been restored yet, restore it once and release voucher
+    if (!wasStockRestored) {
+      final itemsSnap = await target.collection('items').get();
+      final items = itemsSnap.docs
+          .map((d) => OrderItem.fromMap(_asMap(d.data())))
+          .toList();
+      final resolvedOrder = Order.fromMap(target.id, {
+        ...data,
+        'items': items.map((e) => e.toMap()).toList(),
+      });
+
+      try {
+        await _restoreStock(resolvedOrder);
+      } catch (e) {
+        debugPrint('[FirebaseAppRepo] Non-fatal: Stock restore error: $e');
+      }
+
+      if (resolvedOrder.voucherId != null &&
+          resolvedOrder.voucherId!.isNotEmpty) {
+        try {
+          await _releaseVoucherUsage(resolvedOrder);
+        } catch (e) {
+          debugPrint('[FirebaseAppRepo] Non-fatal: Voucher release error: $e');
+        }
+      }
+    }
+  }
 
   @override
   Future<void> togglePaymentStatus(
     String orderId, {
     String companyId = '',
     String? status,
+    String? verifiedBy,
+    String? transactionRef,
+    double? amountPaid,
+  }) async {
+    await verifyPayment(
+      orderId: orderId,
+      companyId: companyId,
+      paymentStatus: status ?? PaymentStatus.done,
+      verifiedBy: verifiedBy,
+      transactionRef: transactionRef,
+      amountPaid: amountPaid,
+    );
+  }
+
+  @override
+  Future<void> verifyPayment({
+    required String orderId,
+    required String companyId,
+    required String paymentStatus,
+    String? paymentMethod,
+    String? verifiedBy,
+    String? transactionRef,
+    double? amountPaid,
+    String? note,
   }) async {
     final target = companyId.isNotEmpty
         ? _ordersCol(companyId).doc(orderId)
-        : (await _findOrderRef(orderId) ?? _db.collection('orders').doc(orderId));
+        : (await _findOrderRef(orderId) ??
+              _db.collection('orders').doc(orderId));
     final doc = await target.get();
-    final current = doc.data()?['paymentStatus'] ?? 'pending';
-    final newStatus = status ?? (current == 'pending' ? 'done' : 'pending');
-    final now = DateTime.now().toIso8601String();
+    if (!doc.exists) return;
+    final data = doc.data() ?? <String, dynamic>{};
+    final currentStatus = data['paymentStatus'] ?? PaymentStatus.pending;
+
+    // Idempotent guard: already paid and trying to mark paid again
+    if (currentStatus == PaymentStatus.done &&
+        paymentStatus == PaymentStatus.done) {
+      return;
+    }
+
+    final now = DateTime.now();
+    final nowIso = now.toIso8601String();
+    final totalAmount = data['totalAmount'] != null
+        ? asDouble(data['totalAmount'])
+        : 0.0;
+    final effectivePaid = amountPaid ?? data['amountPaid'] ?? totalAmount;
+    final effectiveVerifiedBy =
+        verifiedBy ??
+        AuthSession.currentUser?.email ??
+        AuthSession.currentUser?.id ??
+        'Admin';
+
     final updates = <String, dynamic>{
-      'paymentStatus': newStatus,
-      'updatedAt': now,
+      'paymentStatus': paymentStatus,
+      'updatedAt': nowIso,
     };
-    if (newStatus == 'done') {
-      updates['paidAt'] = now;
-      if (doc.data()?['amountPaid'] == null && doc.data()?['totalAmount'] != null) {
-        updates['amountPaid'] = doc.data()!['totalAmount'];
+
+    if (paymentMethod != null && paymentMethod.isNotEmpty) {
+      updates['paymentMethod'] = paymentMethod;
+    }
+
+    if (paymentStatus == PaymentStatus.done) {
+      updates['paidAt'] = nowIso;
+      updates['paymentVerifiedAt'] = nowIso;
+      updates['paymentVerifiedBy'] = effectiveVerifiedBy;
+      updates['amountPaid'] = effectivePaid;
+      if (transactionRef != null && transactionRef.isNotEmpty) {
+        updates['transactionRef'] = transactionRef;
       }
     }
+
+    // Append to statusHistory audit trail
+    final historyList = (data['statusHistory'] is List)
+        ? List<Map<String, dynamic>>.from(data['statusHistory'] as List)
+        : <Map<String, dynamic>>[];
+    final effectiveMethod = (paymentMethod != null && paymentMethod.isNotEmpty)
+        ? paymentMethod
+        : (data['paymentMethod']?.toString() ?? '');
+    final methodDisplay = PaymentMethod.displayName(effectiveMethod);
+    final historyNote =
+        note ??
+        (paymentStatus == PaymentStatus.done
+            ? 'Payment of ₹${effectivePaid.toStringAsFixed(0)} verified ($methodDisplay) by $effectiveVerifiedBy'
+            : 'Payment status changed to $paymentStatus');
+    historyList.add({
+      'status': data['orderStatus'] ?? 'pending',
+      'note': historyNote,
+      'timestamp': nowIso,
+    });
+    updates['statusHistory'] = historyList;
+
     await target.update(updates);
   }
 
@@ -1980,13 +2251,17 @@ class FirebaseAppRepository implements AppRepository {
     if (companyId.isEmpty) {
       throw ArgumentError('A product must belong to a company.');
     }
-    final id = product.id.isEmpty ? _uuid.v4() : product.id;
+    final isNew = product.id.isEmpty;
+    final id = isNew ? _uuid.v4() : product.id;
     final batch = _db.batch();
     batch.set(_productsCol(companyId).doc(id), <String, dynamic>{
       ...product.toMap(),
       'id': id,
       'companyId': companyId,
-    });
+      if (!isNew) 'imageUrl': FieldValue.delete(),
+      if (!isNew) 'imageUrls': FieldValue.delete(),
+      if (!isNew) 'thumbnailUrl': FieldValue.delete(),
+    }, SetOptions(merge: true));
 
     // Keep `category.productList` consistent with `product.categoryId`.
     final categoryId = product.categoryId.trim();
@@ -2011,11 +2286,16 @@ class FirebaseAppRepository implements AppRepository {
   @override
   Future<void> deleteProduct(String productId, {String companyId = ''}) async {
     final batch = _db.batch();
+    String targetCompanyId = companyId;
 
     if (companyId.isNotEmpty) {
       batch.delete(_productsCol(companyId).doc(productId));
       await _queueCategoryCleanup(batch, companyId, productId);
       await batch.commit();
+      await removeProductFromTrendingNow(
+        shopId: companyId,
+        productId: productId,
+      );
       return;
     }
 
@@ -2027,6 +2307,7 @@ class FirebaseAppRepository implements AppRepository {
     if (snap.docs.isNotEmpty) {
       final ref = snap.docs.first.reference;
       final parentCompanyId = ref.parent.parent?.id ?? '';
+      targetCompanyId = parentCompanyId;
       batch.delete(ref);
       if (parentCompanyId.isNotEmpty) {
         await _queueCategoryCleanup(batch, parentCompanyId, productId);
@@ -2034,6 +2315,13 @@ class FirebaseAppRepository implements AppRepository {
       await batch.commit();
     } else {
       await _db.collection('products').doc(productId).delete();
+    }
+
+    if (targetCompanyId.isNotEmpty) {
+      await removeProductFromTrendingNow(
+        shopId: targetCompanyId,
+        productId: productId,
+      );
     }
   }
 
@@ -2414,7 +2702,10 @@ class FirebaseAppRepository implements AppRepository {
       await adDoc.delete();
       return;
     }
-    final snap = await _db.collectionGroup('banners').where('id', isEqualTo: id).get();
+    final snap = await _db
+        .collectionGroup('banners')
+        .where('id', isEqualTo: id)
+        .get();
     for (final doc in snap.docs) {
       await doc.reference.delete();
     }
@@ -2428,6 +2719,207 @@ class FirebaseAppRepository implements AppRepository {
       existing.add(token);
       await _db.collection('users').doc(userId).update({'fcmTokens': existing});
     }
+  }
+
+  // ------------------------------------------ Home Dynamic Configurations --
+
+  @override
+  Stream<List<HomeExploreCategory>> homeExploreCategories({
+    String shopId = '',
+    bool activeOnly = false,
+  }) {
+    Query<Map<String, dynamic>> query = _homeExploreCol();
+    if (shopId.isNotEmpty) {
+      query = query.where('shopId', isEqualTo: shopId);
+    }
+    if (activeOnly) {
+      query = query.where('isActive', isEqualTo: true);
+    }
+    return query.snapshots().map((snap) {
+      final list = snap.docs
+          .map((doc) => HomeExploreCategory.fromMap(doc.data(), id: doc.id))
+          .toList();
+      list.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+      return list;
+    });
+  }
+
+  @override
+  Future<void> saveHomeExploreCategory(HomeExploreCategory entry) async {
+    final id = entry.id.isNotEmpty
+        ? entry.id
+        : (entry.shopId.isNotEmpty && entry.categoryId.isNotEmpty
+              ? '${entry.shopId}_${entry.categoryId}'
+              : _homeExploreCol().doc().id);
+
+    final now = DateTime.now();
+    final data = entry
+        .copyWith(id: id, createdAt: entry.createdAt ?? now, updatedAt: now)
+        .toMap();
+    await _homeExploreCol().doc(id).set(data, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> deleteHomeExploreCategory(String id) async {
+    await _homeExploreCol().doc(id).delete();
+  }
+
+  @override
+  Future<void> reorderHomeExploreCategories(
+    List<HomeExploreCategory> orderedEntries,
+  ) async {
+    final batch = _db.batch();
+    final now = DateTime.now();
+    for (var i = 0; i < orderedEntries.length; i++) {
+      final item = orderedEntries[i];
+      if (item.displayOrder != i) {
+        batch.update(_homeExploreCol().doc(item.id), {
+          'displayOrder': i,
+          'updatedAt': Timestamp.fromDate(now),
+        });
+      }
+    }
+    await batch.commit();
+  }
+
+  @override
+  Stream<List<HomeTrendingItem>> homeTrendingNow({
+    String shopId = '',
+    bool activeOnly = false,
+  }) {
+    Query<Map<String, dynamic>> query = _homeTrendingCol();
+    if (shopId.isNotEmpty) {
+      query = query.where('shopId', isEqualTo: shopId);
+    }
+    if (activeOnly) {
+      query = query.where('isActive', isEqualTo: true);
+    }
+    return query.snapshots().map((snap) {
+      final list = snap.docs
+          .map((doc) => HomeTrendingItem.fromMap(doc.data(), id: doc.id))
+          .toList();
+      list.sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+      return list;
+    });
+  }
+
+  @override
+  Future<void> saveHomeTrendingItem(HomeTrendingItem entry) async {
+    final itemRefId = entry.isProduct
+        ? (entry.productId ?? '')
+        : (entry.categoryId ?? '');
+    final id = entry.id.isNotEmpty
+        ? entry.id
+        : (entry.shopId.isNotEmpty && itemRefId.isNotEmpty
+              ? '${entry.shopId}_${entry.itemType}_$itemRefId'
+              : _homeTrendingCol().doc().id);
+
+    final now = DateTime.now();
+    final data = entry
+        .copyWith(id: id, createdAt: entry.createdAt ?? now, updatedAt: now)
+        .toMap();
+    await _homeTrendingCol().doc(id).set(data, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> deleteHomeTrendingItem(String id) async {
+    await _homeTrendingCol().doc(id).delete();
+  }
+
+  @override
+  Future<void> reorderHomeTrendingItems(
+    List<HomeTrendingItem> orderedEntries,
+  ) async {
+    final batch = _db.batch();
+    final now = DateTime.now();
+    for (var i = 0; i < orderedEntries.length; i++) {
+      final item = orderedEntries[i];
+      if (item.displayOrder != i) {
+        batch.update(_homeTrendingCol().doc(item.id), {
+          'displayOrder': i,
+          'updatedAt': Timestamp.fromDate(now),
+        });
+      }
+    }
+    await batch.commit();
+  }
+
+  @override
+  Future<int> removeProductFromTrendingNow({
+    required String shopId,
+    required String productId,
+  }) async {
+    final cleanShopId = shopId.trim();
+    final cleanProductId = productId.trim();
+    if (cleanShopId.isEmpty || cleanProductId.isEmpty) {
+      return 0;
+    }
+
+    final querySnap = await _homeTrendingCol()
+        .where('shopId', isEqualTo: cleanShopId)
+        .where('itemType', isEqualTo: 'product')
+        .where('productId', isEqualTo: cleanProductId)
+        .get();
+
+    final docRefs = <DocumentReference<Map<String, dynamic>>>[];
+    for (final doc in querySnap.docs) {
+      docRefs.add(doc.reference);
+    }
+
+    final deterministicId = '${cleanShopId}_product_$cleanProductId';
+    if (!docRefs.any((ref) => ref.id == deterministicId)) {
+      final directDoc = await _homeTrendingCol().doc(deterministicId).get();
+      if (directDoc.exists) {
+        final data = directDoc.data();
+        if (data != null &&
+            data['shopId'] == cleanShopId &&
+            data['itemType'] == 'product' &&
+            data['productId'] == cleanProductId) {
+          docRefs.add(directDoc.reference);
+        }
+      }
+    }
+
+    if (docRefs.isEmpty) {
+      return 0;
+    }
+
+    final batch = _db.batch();
+    for (final ref in docRefs) {
+      batch.delete(ref);
+    }
+    await batch.commit();
+    return docRefs.length;
+  }
+
+  @override
+  Future<bool> isProductInTrendingNow({
+    required String shopId,
+    required String productId,
+  }) async {
+    final cleanShopId = shopId.trim();
+    final cleanProductId = productId.trim();
+    if (cleanShopId.isEmpty || cleanProductId.isEmpty) return false;
+
+    final snap = await _homeTrendingCol()
+        .where('shopId', isEqualTo: cleanShopId)
+        .where('itemType', isEqualTo: 'product')
+        .where('productId', isEqualTo: cleanProductId)
+        .limit(1)
+        .get();
+    if (snap.docs.isNotEmpty) return true;
+
+    final directDoc = await _homeTrendingCol()
+        .doc('${cleanShopId}_product_$cleanProductId')
+        .get();
+    if (directDoc.exists) {
+      final d = directDoc.data();
+      return d != null &&
+          d['shopId'] == cleanShopId &&
+          d['itemType'] == 'product' &&
+          d['productId'] == cleanProductId;
+    }
+    return false;
   }
 
   // ---------------------------------------------------------------- Helpers --

@@ -21,7 +21,9 @@ class RoleSelectionScreen extends StatelessWidget {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 32,
+                ),
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
@@ -42,9 +44,8 @@ class RoleSelectionScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                         l10n.continueAs,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -74,7 +75,8 @@ class RoleSelectionScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
-                        onPressed: () => context.go(AppRoutes.companyOnboarding),
+                        onPressed: () =>
+                            context.go(AppRoutes.companyOnboarding),
                         icon: const Icon(Icons.add_business),
                         label: Text(l10n.createNewCompany),
                       ),

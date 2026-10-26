@@ -114,41 +114,40 @@ void main() {
   });
 
   group('AuthCubit Session Restoration Tests', () {
-    test('restores admin session from encrypted cache on startup without blank screen', () async {
-      const adminUser = AppUser(
-        id: 'admin_test_id',
-        name: 'Ayush Admin',
-        companyId: 'comp_test',
-        companyName: 'Bazaar Mart',
-        email: 'admin@bazaar.in',
-        role: 'admin',
-      );
+    test(
+      'restores admin session from encrypted cache on startup without blank screen',
+      () async {
+        const adminUser = AppUser(
+          id: 'admin_test_id',
+          name: 'Ayush Admin',
+          companyId: 'comp_test',
+          companyName: 'Bazaar Mart',
+          email: 'admin@bazaar.in',
+          role: 'admin',
+        );
 
-      // Pre-seed the encrypted cache as if admin was logged in before reload
-      await SecureSessionCache.instance.save(adminUser);
+        // Pre-seed the encrypted cache as if admin was logged in before reload
+        await SecureSessionCache.instance.save(adminUser);
 
-      // Create new AuthCubit (simulating app reload/restart)
-      final cubit = AuthCubit();
+        // Create new AuthCubit (simulating app reload/restart)
+        final cubit = AuthCubit();
 
-      // Wait for async _restoreSession to complete
-      await Future.delayed(const Duration(milliseconds: 100));
+        // Wait for async _restoreSession to complete
+        await Future.delayed(const Duration(milliseconds: 100));
 
-      expect(cubit.state.status, equals(AuthStatus.authenticated));
-      expect(cubit.state.user?.id, equals('admin_test_id'));
-      expect(cubit.state.user?.isAdmin, isTrue);
-      expect(AuthSession.isAdmin, isTrue);
-      expect(AuthSession.isRestoring, isFalse);
-      expect(AuthSession.currentUser?.companyName, equals('Bazaar Mart'));
+        expect(cubit.state.status, equals(AuthStatus.authenticated));
+        expect(cubit.state.user?.id, equals('admin_test_id'));
+        expect(cubit.state.user?.isAdmin, isTrue);
+        expect(AuthSession.isAdmin, isTrue);
+        expect(AuthSession.isRestoring, isFalse);
+        expect(AuthSession.currentUser?.companyName, equals('Bazaar Mart'));
 
-      await cubit.close();
-    });
+        await cubit.close();
+      },
+    );
 
     test('signOut clears both AuthSession and encrypted cache', () async {
-      const user = AppUser(
-        id: 'usr_1',
-        name: 'Shopper',
-        role: 'user',
-      );
+      const user = AppUser(id: 'usr_1', name: 'Shopper', role: 'user');
 
       await SecureSessionCache.instance.save(user);
       AuthSession.set(user, restoring: false);

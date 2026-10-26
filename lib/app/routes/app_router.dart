@@ -16,6 +16,8 @@ import '../../features/admin/delivery_charges/admin_add_delivery_charge_screen.d
 import '../../features/admin/delivery_charges/admin_delivery_charges_screen.dart';
 import '../../features/admin/employees/admin_add_employee_screen.dart';
 import '../../features/admin/employees/admin_employees_screen.dart';
+import '../../features/admin/home_config/admin_explore_categories_screen.dart';
+import '../../features/admin/home_config/admin_trending_now_screen.dart';
 import '../../features/admin/orders/admin_order_details_screen.dart';
 import '../../features/admin/orders/admin_orders_screen.dart';
 import '../../features/admin/products/admin_add_product_screen.dart';
@@ -102,12 +104,24 @@ class AppRoutes {
   static const adminRecommendations = '/admin/recommendations';
   static const adminReports = '/admin/reports';
   static const adminQr = '/admin/qr';
+  static const adminExploreCategories = '/admin/home-explore-categories';
+  static const adminTrendingNow = '/admin/home-trending-now';
 
   static const employeeHome = '/employee';
   static const packing = '/employee/packing/:orderId';
   static const qrScanner = '/qr-scanner';
 
-  // Deep-link helper builders (Section 15).
+  // Deep-link helper builders (Section 15 & QR System).
+  static const shop = '/shop/:shopId';
+  static const shopCategory = '/shop/:shopId/category/:categoryId';
+  static const shopProduct = '/shop/:shopId/product/:productId';
+
+  static String shopPath(String shopId) => '/shop/$shopId';
+  static String shopCategoryPath(String shopId, String categoryId) =>
+      '/shop/$shopId/category/$categoryId';
+  static String shopProductPath(String shopId, String productId) =>
+      '/shop/$shopId/product/$productId';
+
   static String companyPath(String slug) => '/company/$slug';
   static String productPath(String id) => '/product/$id';
   static String categoryPath(String id) => '/category/$id';
@@ -117,7 +131,8 @@ class AppRoutes {
   static String adminEditEmployeePath(String id) => '/admin/employees/edit/$id';
   static String adminEditDeliveryPath(String pincode) =>
       '/admin/delivery-charges/edit/$pincode';
-  static String orderPath(String id) => '/order/$id';
+  static String orderPath(String id, {String companyId = ''}) =>
+      companyId.isNotEmpty ? '/order/$id?companyId=$companyId' : '/order/$id';
   static String adminOrderDetailsPath(String id) => '/admin/orders/$id';
 }
 
@@ -154,6 +169,7 @@ String? appRouteRedirect(String loc) {
 
       final allowedPrefixes = [
         '/company/', // company store
+        '/shop/', // shop deep links
         '/product/',
         '/category/',
         '/reviews/',
@@ -256,7 +272,10 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.companyOnboarding,
       builder: (_, s) => const CompanyOnboardingScreen(),
     ),
-    GoRoute(path: AppRoutes.home, builder: (_, s) => const HomeScreen()),
+    GoRoute(
+      path: AppRoutes.home,
+      builder: (_, s) => HomeScreen(shopId: s.uri.queryParameters['shopId']),
+    ),
     GoRoute(
       path: AppRoutes.categories,
       builder: (_, s) => const CategoriesScreen(),
@@ -265,6 +284,26 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.companyStore,
       builder: (_, state) =>
           CompanyStoreScreen(slug: state.pathParameters['slug'] ?? ''),
+    ),
+    GoRoute(
+      path: AppRoutes.shop,
+      builder: (_, state) =>
+          CompanyStoreScreen(slug: state.pathParameters['shopId'] ?? ''),
+    ),
+    GoRoute(
+      path: AppRoutes.shopCategory,
+      builder: (_, state) => CategoryViewScreen(
+        categoryId: state.pathParameters['categoryId'] ?? '',
+        categoryName: state.uri.queryParameters['name'] ?? '',
+        companyId: state.pathParameters['shopId'] ?? '',
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.shopProduct,
+      builder: (_, state) => ProductDetailsScreen(
+        productId: state.pathParameters['productId'] ?? '',
+        shopId: state.pathParameters['shopId'],
+      ),
     ),
     GoRoute(
       path: AppRoutes.category,
@@ -284,6 +323,10 @@ final GoRouter appRouter = GoRouter(
       builder: (_, state) => SearchScreen(
         companyId: state.uri.queryParameters['companyId'] ?? '',
         companyName: state.uri.queryParameters['name'] ?? '',
+        initialQuery:
+            state.uri.queryParameters['q'] ??
+            state.uri.queryParameters['query'] ??
+            '',
       ),
     ),
     GoRoute(path: AppRoutes.cart, builder: (_, s) => const CartScreen()),
@@ -317,8 +360,10 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.orderTracking,
-      builder: (_, state) =>
-          OrderTrackingScreen(orderId: state.pathParameters['id'] ?? ''),
+      builder: (_, state) => OrderTrackingScreen(
+        orderId: state.pathParameters['id'] ?? '',
+        companyId: state.uri.queryParameters['companyId'],
+      ),
     ),
     GoRoute(
       path: AppRoutes.reviews,
@@ -350,9 +395,8 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.adminOrderDetails,
-      builder: (_, state) => AdminOrderDetailsScreen(
-        orderId: state.pathParameters['id'] ?? '',
-      ),
+      builder: (_, state) =>
+          AdminOrderDetailsScreen(orderId: state.pathParameters['id'] ?? ''),
     ),
     GoRoute(
       path: AppRoutes.adminProducts,
@@ -462,6 +506,14 @@ final GoRouter appRouter = GoRouter(
       builder: (_, s) => const AdminReportsScreen(),
     ),
     GoRoute(path: AppRoutes.adminQr, builder: (_, s) => const AdminQrScreen()),
+    GoRoute(
+      path: AppRoutes.adminExploreCategories,
+      builder: (_, s) => const AdminExploreCategoriesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.adminTrendingNow,
+      builder: (_, s) => const AdminTrendingNowScreen(),
+    ),
 
     // Employee
     GoRoute(

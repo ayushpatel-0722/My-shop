@@ -5,35 +5,38 @@ import 'package:myshop/core/models/cart_item.dart';
 import 'package:myshop/core/models/product.dart';
 import 'package:myshop/core/models/voucher.dart';
 
-CartItem line(String id, {double price = 100, int qty = 1, String categoryId = 'cat_veg'}) =>
-    CartItem(
-      companyId: 'c_organic',
-      companyName: 'GreenLeaf Organics',
-      product: Product(
-        id: id,
-        companyId: 'c_organic',
-        categoryId: categoryId,
-        name: 'Product $id',
-        amount: price,
-      ),
-      qty: qty,
-    );
+CartItem line(
+  String id, {
+  double price = 100,
+  int qty = 1,
+  String categoryId = 'cat_veg',
+}) => CartItem(
+  companyId: 'c_organic',
+  companyName: 'GreenLeaf Organics',
+  product: Product(
+    id: id,
+    companyId: 'c_organic',
+    categoryId: categoryId,
+    name: 'Product $id',
+    amount: price,
+  ),
+  qty: qty,
+);
 
 Voucher v({
   String type = VoucherType.percentage,
   double value = 10,
   double minOrder = 0,
   DateTime? expiry,
-}) =>
-    Voucher(
-      id: 'v_1',
-      companyId: 'c_organic',
-      code: 'SAVE10',
-      discountType: type,
-      discountValue: value,
-      expiryDate: expiry ?? DateTime(2030, 1, 1),
-      minOrderAmt: minOrder,
-    );
+}) => Voucher(
+  id: 'v_1',
+  companyId: 'c_organic',
+  code: 'SAVE10',
+  discountType: type,
+  discountValue: value,
+  expiryDate: expiry ?? DateTime(2030, 1, 1),
+  minOrderAmt: minOrder,
+);
 
 final context = VoucherContext(now: DateTime(2026, 6, 1), userId: 'u_1');
 
@@ -126,7 +129,11 @@ void main() {
         context: context,
       );
 
-      expect(bill.voucher, isNull, reason: 'rejected voucher must not be stored');
+      expect(
+        bill.voucher,
+        isNull,
+        reason: 'rejected voucher must not be stored',
+      );
       expect(bill.discount, 0);
       expect(bill.deliveryCharge, 20);
       expect(bill.total, 220);

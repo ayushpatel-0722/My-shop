@@ -148,4 +148,3 @@ class EncryptionHelper {
     return result == 0;
   }
 }
-

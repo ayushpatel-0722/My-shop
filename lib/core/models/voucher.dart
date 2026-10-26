@@ -272,6 +272,21 @@ class Voucher {
     return copyWith(usedOrderIds: nextOrders, usageByUser: nextByUser);
   }
 
+  /// Reverses a redemption count when an order using this voucher is cancelled.
+  Voucher releaseUsage({required String orderId, String userId = ''}) {
+    final nextOrders = List<String>.from(usedOrderIds)..remove(orderId);
+    final nextByUser = Map<String, int>.from(usageByUser);
+    if (userId.isNotEmpty && (nextByUser[userId] ?? 0) > 0) {
+      final updated = nextByUser[userId]! - 1;
+      if (updated <= 0) {
+        nextByUser.remove(userId);
+      } else {
+        nextByUser[userId] = updated;
+      }
+    }
+    return copyWith(usedOrderIds: nextOrders, usageByUser: nextByUser);
+  }
+
   Voucher copyWith({
     String? id,
     String? companyId,

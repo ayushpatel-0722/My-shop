@@ -52,9 +52,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                     state.error != 'invalid'
                 ? state.error!
                 : l10n.invalidCredentials;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(msg)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(msg)));
           }
         },
         builder: (context, state) {
@@ -114,7 +114,8 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                       ? const SizedBox(
                           height: 22,
                           width: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5))
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        )
                       : Text(l10n.login),
                 ),
               ],
@@ -157,16 +158,16 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
         _emailError = emailErr;
         _passError = passErr;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.invalidCredentials)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.invalidCredentials)));
       return;
     }
 
     context.read<AuthCubit>().employeeLogin(
-          companyName: company,
-          email: email,
-          password: pass,
-        );
+      companyName: company,
+      email: email,
+      password: pass,
+    );
   }
 }

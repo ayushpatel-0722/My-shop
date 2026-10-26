@@ -67,17 +67,17 @@ class Category {
   }
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-        'id': id,
-        'name': name,
-        'companyId': companyId,
-        'details': details,
-        'type': type,
-        'parentId': parentId,
-        'iconUrl': iconUrl,
-        'productList': productList,
-        'sortOrder': sortOrder,
-        if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'companyId': companyId,
+    'details': details,
+    'type': type,
+    'parentId': parentId,
+    'iconUrl': iconUrl,
+    'productList': productList,
+    'sortOrder': sortOrder,
+    if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+  };
 
   // --------------------------------------------------------------- Derived --
 
@@ -127,9 +127,10 @@ class Category {
 
   /// Removes [productId] from [productList].
   Category withoutProduct(String productId) => copyWith(
-        productList:
-            productList.where((e) => e != productId).toList(growable: false),
-      );
+    productList: productList
+        .where((e) => e != productId)
+        .toList(growable: false),
+  );
 
   @override
   bool operator ==(Object other) =>

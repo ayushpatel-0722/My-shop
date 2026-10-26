@@ -7,6 +7,7 @@ import '../../../app/theme/app_theme.dart';
 import '../../../core/domain/catalog.dart';
 import '../../../core/domain/category_tree.dart';
 import '../../../core/models/category.dart';
+import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
@@ -15,6 +16,7 @@ import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/product_card.dart';
+import '../widgets/web_header.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Category explorer screen.
@@ -49,284 +51,429 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
   ProductSort _sort = ProductSort.relevance;
   bool _inStockOnly = false;
   String? _selectedSubCatId;
+  Company? _company;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.companyId.isNotEmpty) {
+      repo.company(widget.companyId).then((comp) {
+        if (mounted && comp != null) {
+          setState(() => _company = comp);
+        }
+      });
+    }
+  }
+
+  Widget _buildDesktopBreadcrumbs(
+    BuildContext context, {
+    required VoidCallback onBack,
+  }) {
+    final catTitle = widget.categoryName.isNotEmpty
+        ? widget.categoryName
+        : AppLocalizations.of(context).category;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1)),
+      ),
+      child: Row(
+        children: [
+          InkWell(
+            onTap: onBack,
+            borderRadius: BorderRadius.circular(4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(
+                  Icons.arrow_back_rounded,
+                  size: 16,
+                  color: Color(0xFF64748B),
+                ),
+                SizedBox(width: 4),
+                Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text('•', style: TextStyle(color: Color(0xFFCBD5E1))),
+          ),
+          InkWell(
+            onTap: () => context.go(AppRoutes.home),
+            child: const Text(
+              'Home',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          if (widget.companyId.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(
+                Icons.chevron_right,
+                size: 15,
+                color: Color(0xFF94A3B8),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                final slug = _company?.slug.isNotEmpty == true
+                    ? _company!.slug
+                    : widget.companyId;
+                context.go(AppRoutes.companyPath(slug));
+              },
+              child: Text(
+                _company?.name ?? 'Store',
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 6),
+            child: Icon(
+              Icons.chevron_right,
+              size: 15,
+              color: Color(0xFF94A3B8),
+            ),
+          ),
+          Flexible(
+            child: Text(
+              catTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF1E293B),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0.5,
-        shadowColor: const Color.fromRGBO(0, 0, 0, 0.08),
-        leading: BackButton(
-          color: const Color(0xFF1E2229),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else if (widget.companyId.isNotEmpty) {
-              context.go(AppRoutes.companyPath(widget.companyId));
-            } else {
-              context.go(AppRoutes.home);
-            }
-          },
-        ),
-        title: Text(
-          widget.categoryName.isNotEmpty
-              ? widget.categoryName
-              : AppLocalizations.of(context).category,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1E2229),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search_rounded, color: Color(0xFF1E2229)),
-            tooltip: AppLocalizations.of(context).searchProducts,
-            onPressed: () {
-              if (widget.companyId.isNotEmpty) {
-                context.push(
-                  '${AppRoutes.search}?companyId=${widget.companyId}',
-                );
-              } else {
-                context.push(AppRoutes.search);
-              }
-            },
-          ),
-          BlocBuilder<CartCubit, CartState>(
-            builder: (context, state) {
-              final count = state.totalItems;
-              return IconButton(
-                icon: Badge(
-                  isLabelVisible: count > 0,
-                  label: Text(
-                    '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
-                  ),
-                  backgroundColor: const Color(0xFFFF5247),
-                  child: const Icon(
-                    Icons.shopping_cart_outlined,
+    void handleBack() {
+      if (context.canPop()) {
+        context.pop();
+      } else if (widget.companyId.isNotEmpty) {
+        context.go(AppRoutes.companyPath(widget.companyId));
+      } else {
+        context.go(AppRoutes.home);
+      }
+    }
+
+    return PopScope(
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          handleBack();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        appBar: context.isDesktop
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(64),
+                child: WebHeader(),
+              )
+            : AppBar(
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                elevation: 0.5,
+                shadowColor: const Color.fromRGBO(0, 0, 0, 0.08),
+                leading: BackButton(
+                  color: const Color(0xFF1E2229),
+                  onPressed: handleBack,
+                ),
+                title: Text(
+                  widget.categoryName.isNotEmpty
+                      ? widget.categoryName
+                      : AppLocalizations.of(context).category,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
                     color: Color(0xFF1E2229),
                   ),
                 ),
-                tooltip: AppLocalizations.of(context).cart,
-                onPressed: () async {
-                  if (AuthSession.currentUser == null) {
-                    final ok = await AuthBottomSheet.show(context);
-                    if (ok && context.mounted) context.push(AppRoutes.cart);
-                    return;
-                  }
-                  context.push(AppRoutes.cart);
-                },
-              );
-            },
-          ),
-          const SizedBox(width: 6),
-        ],
-      ),
-      body: StreamBuilder<List<Category>>(
-        stream: widget.companyId.isNotEmpty
-            ? repo.categories(companyId: widget.companyId)
-            : repo.categories(),
-        builder: (context, categorySnap) {
-          final categories = categorySnap.data ?? const <Category>[];
+                actions: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFF1E2229),
+                    ),
+                    tooltip: AppLocalizations.of(context).searchProducts,
+                    onPressed: () {
+                      if (widget.companyId.isNotEmpty) {
+                        context.push(
+                          '${AppRoutes.search}?companyId=${widget.companyId}',
+                        );
+                      } else {
+                        context.push(AppRoutes.search);
+                      }
+                    },
+                  ),
+                  BlocBuilder<CartCubit, CartState>(
+                    builder: (context, state) {
+                      final count = state.totalItems;
+                      return IconButton(
+                        icon: Badge(
+                          isLabelVisible: count > 0,
+                          label: Text(
+                            '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                          backgroundColor: const Color(0xFFFF5247),
+                          child: const Icon(
+                            Icons.shopping_cart_outlined,
+                            color: Color(0xFF1E2229),
+                          ),
+                        ),
+                        tooltip: AppLocalizations.of(context).cart,
+                        onPressed: () async {
+                          if (AuthSession.currentUser == null) {
+                            final ok = await AuthBottomSheet.show(context);
+                            if (ok && context.mounted) {
+                              context.push(AppRoutes.cart);
+                            }
+                            return;
+                          }
+                          context.push(AppRoutes.cart);
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                ],
+              ),
+        body: StreamBuilder<List<Category>>(
+          stream: widget.companyId.isNotEmpty
+              ? repo.categories(companyId: widget.companyId)
+              : repo.categories(),
+          builder: (context, categorySnap) {
+            final categories = categorySnap.data ?? const <Category>[];
 
-          // 1. Resolve active category
-          Category? activeCat;
-          final targetId = widget.categoryId.trim().toLowerCase();
-          final targetName = widget.categoryName.trim().toLowerCase();
-          for (final c in categories) {
-            if (c.id.toLowerCase() == targetId ||
-                c.id.replaceAll('_', '-').toLowerCase() == targetId ||
-                c.id.replaceAll('-', '_').toLowerCase() == targetId ||
-                c.name.toLowerCase() == targetId ||
-                (targetName.isNotEmpty && c.name.toLowerCase() == targetName)) {
-              activeCat = c;
-              break;
-            }
-          }
-
-          // 2. Collect all matching target IDs / names / descendant IDs
-          final descendantIds = activeCat != null
-              ? CategoryHierarchy.descendantIds(activeCat.id, categories)
-              : const <String>{};
-
-          final targetIds = <String>{
-            if (widget.categoryId.isNotEmpty) widget.categoryId,
-            if (widget.categoryName.isNotEmpty) widget.categoryName,
-            if (activeCat != null) ...[
-              activeCat.id,
-              activeCat.name,
-              ...descendantIds,
-            ],
-          };
-
-          // 3. Child subcategories for chip filter bar (admin-defined order)
-          final subCategories =
-              (activeCat != null
-                      ? categories
-                            .where((c) => c.parentId == activeCat!.id)
-                            .toList()
-                      : <Category>[])
-                  .toList()
-                ..sort(CategoryHierarchy.compareByOrder);
-
-          final effectiveFilterIds = _selectedSubCatId != null
-              ? {_selectedSubCatId!}
-              : targetIds;
-
-          // Curated product order: the deepest selected category's productList.
-          Category? selectedSubCat;
-          if (_selectedSubCatId != null) {
+            // 1. Resolve active category
+            Category? activeCat;
+            final targetId = widget.categoryId.trim().toLowerCase();
+            final targetName = widget.categoryName.trim().toLowerCase();
             for (final c in categories) {
-              if (c.id == _selectedSubCatId) {
-                selectedSubCat = c;
+              if (c.id.toLowerCase() == targetId ||
+                  c.id.replaceAll('_', '-').toLowerCase() == targetId ||
+                  c.id.replaceAll('-', '_').toLowerCase() == targetId ||
+                  c.name.toLowerCase() == targetId ||
+                  (targetName.isNotEmpty &&
+                      c.name.toLowerCase() == targetName)) {
+                activeCat = c;
                 break;
               }
             }
-          }
-          final productOrder =
-              (selectedSubCat ?? activeCat)?.productList ?? const <String>[];
 
-          return StreamBuilder<List<Product>>(
-            stream: widget.companyId.isNotEmpty
-                ? repo.products(companyId: widget.companyId)
-                : repo.products(),
-            builder: (context, productSnap) {
-              final loading =
-                  productSnap.connectionState == ConnectionState.waiting &&
-                  (productSnap.data?.isEmpty ?? true);
+            // 2. Collect all matching target IDs / names / descendant IDs
+            final descendantIds = activeCat != null
+                ? CategoryHierarchy.descendantIds(activeCat.id, categories)
+                : const <String>{};
 
-              final rawProducts = productSnap.data ?? const <Product>[];
+            final targetIds = <String>{
+              if (widget.categoryId.isNotEmpty) widget.categoryId,
+              if (widget.categoryName.isNotEmpty) widget.categoryName,
+              if (activeCat != null) ...[
+                activeCat.id,
+                activeCat.name,
+                ...descendantIds,
+              ],
+            };
 
-              final products = Catalog.apply(
-                rawProducts,
-                CatalogQuery(
-                  categoryIds: effectiveFilterIds,
-                  companyIds: widget.companyId.isNotEmpty
-                      ? {widget.companyId}
-                      : const <String>{},
-                  categories: categories,
-                  sort: _sort,
-                  inStockOnly: _inStockOnly,
-                  productOrder: productOrder,
-                ),
-              );
+            // 3. Child subcategories for chip filter bar (admin-defined order)
+            final subCategories =
+                (activeCat != null
+                        ? categories
+                              .where((c) => c.parentId == activeCat!.id)
+                              .toList()
+                        : <Category>[])
+                    .toList()
+                  ..sort(CategoryHierarchy.compareByOrder);
 
-              return Column(
-                children: [
-                  // Sub-category filter pills if parent has children
-                  if (subCategories.isNotEmpty) ...[
-                    Container(
-                      height: 44,
-                      margin: const EdgeInsets.only(top: 8, bottom: 4),
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: subCategories.length + 1,
-                        separatorBuilder: (_, _) => const SizedBox(width: 8),
-                        itemBuilder: (context, idx) {
-                          if (idx == 0) {
-                            final isSel = _selectedSubCatId == null;
-                            return _SubCategoryPill(
-                              label: AppLocalizations.of(context).all2(
-                                widget.categoryName.isNotEmpty
-                                    ? widget.categoryName
-                                    : AppLocalizations.of(context).items4,
-                              ),
-                              isSelected: isSel,
-                              onTap: () =>
-                                  setState(() => _selectedSubCatId = null),
-                            );
-                          }
-                          final sub = subCategories[idx - 1];
-                          final isSel = _selectedSubCatId == sub.id;
-                          return _SubCategoryPill(
-                            label: sub.name,
-                            isSelected: isSel,
-                            onTap: () => setState(() {
-                              _selectedSubCatId = isSel ? null : sub.id;
-                            }),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+            final effectiveFilterIds = _selectedSubCatId != null
+                ? {_selectedSubCatId!}
+                : targetIds;
 
-                  // Toolbar: count, in-stock switch, sort dropdown
-                  _Toolbar(
-                    count: products.length,
+            // Curated product order: the deepest selected category's productList.
+            Category? selectedSubCat;
+            if (_selectedSubCatId != null) {
+              for (final c in categories) {
+                if (c.id == _selectedSubCatId) {
+                  selectedSubCat = c;
+                  break;
+                }
+              }
+            }
+            final productOrder =
+                (selectedSubCat ?? activeCat)?.productList ?? const <String>[];
+
+            return StreamBuilder<List<Product>>(
+              stream: widget.companyId.isNotEmpty
+                  ? repo.products(companyId: widget.companyId)
+                  : repo.products(),
+              builder: (context, productSnap) {
+                final loading =
+                    productSnap.connectionState == ConnectionState.waiting &&
+                    (productSnap.data?.isEmpty ?? true);
+
+                final rawProducts = productSnap.data ?? const <Product>[];
+
+                final products = Catalog.apply(
+                  rawProducts,
+                  CatalogQuery(
+                    categoryIds: effectiveFilterIds,
+                    companyIds: widget.companyId.isNotEmpty
+                        ? {widget.companyId}
+                        : const <String>{},
+                    categories: categories,
                     sort: _sort,
                     inStockOnly: _inStockOnly,
-                    onSortChanged: (value) =>
-                        setState(() => _sort = value ?? ProductSort.relevance),
-                    onStockChanged: (value) =>
-                        setState(() => _inStockOnly = value),
+                    productOrder: productOrder,
                   ),
+                );
 
-                  // Products Grid / Empty state / Loading
-                  Expanded(
-                    child: loading
-                        ? const SingleChildScrollView(
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 12),
-                              child: M3ProductGridSkeleton(itemCount: 6),
-                            ),
-                          )
-                        : products.isEmpty
-                        ? _EmptyCategory(
-                            categoryName: widget.categoryName,
-                            hasStockFilter: _inStockOnly,
-                            onClearStockFilter: () =>
-                                setState(() => _inStockOnly = false),
-                          )
-                        : LayoutBuilder(
-                            builder: (context, constraints) {
-                              final width = constraints.maxWidth - 32;
-                              final crossAxisCount =
-                                  ResponsiveGrid.calculateCrossAxisCount(
-                                    width,
-                                    maxCardWidth: 250,
-                                  );
-                              final childAspectRatio =
-                                  ResponsiveGrid.calculateProductAspectRatio(
-                                    width,
-                                    crossAxisCount,
-                                    showBrand: true,
-                                  );
-                              return GridView.builder(
-                                padding: const EdgeInsets.all(16),
-                                physics: const BouncingScrollPhysics(),
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: crossAxisCount,
-                                      childAspectRatio: childAspectRatio,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
-                                    ),
-                                itemCount: products.length,
-                                itemBuilder: (context, i) => ProductCard(
-                                  product: products[i],
-                                  onTap: () => context.push(
-                                    AppRoutes.productPath(products[i].id),
-                                  ),
+                return Column(
+                  children: [
+                    if (context.isDesktop)
+                      _buildDesktopBreadcrumbs(context, onBack: handleBack),
+
+                    // Sub-category filter pills if parent has children
+                    if (subCategories.isNotEmpty) ...[
+                      Container(
+                        height: 44,
+                        margin: const EdgeInsets.only(top: 8, bottom: 4),
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: subCategories.length + 1,
+                          separatorBuilder: (_, _) => const SizedBox(width: 8),
+                          itemBuilder: (context, idx) {
+                            if (idx == 0) {
+                              final isSel = _selectedSubCatId == null;
+                              return _SubCategoryPill(
+                                label: AppLocalizations.of(context).all2(
+                                  widget.categoryName.isNotEmpty
+                                      ? widget.categoryName
+                                      : AppLocalizations.of(context).items4,
                                 ),
+                                isSelected: isSel,
+                                onTap: () =>
+                                    setState(() => _selectedSubCatId = null),
                               );
-                            },
-                          ),
-                  ),
-                ],
-              );
-            },
-          );
-        },
+                            }
+                            final sub = subCategories[idx - 1];
+                            final isSel = _selectedSubCatId == sub.id;
+                            return _SubCategoryPill(
+                              label: sub.name,
+                              isSelected: isSel,
+                              onTap: () => setState(() {
+                                _selectedSubCatId = isSel ? null : sub.id;
+                              }),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+
+                    // Toolbar: count, in-stock switch, sort dropdown
+                    _Toolbar(
+                      count: products.length,
+                      sort: _sort,
+                      inStockOnly: _inStockOnly,
+                      onSortChanged: (value) => setState(
+                        () => _sort = value ?? ProductSort.relevance,
+                      ),
+                      onStockChanged: (value) =>
+                          setState(() => _inStockOnly = value),
+                    ),
+
+                    // Products Grid / Empty state / Loading
+                    Expanded(
+                      child: loading
+                          ? const SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 12),
+                                child: M3ProductGridSkeleton(itemCount: 6),
+                              ),
+                            )
+                          : products.isEmpty
+                          ? _EmptyCategory(
+                              categoryName: widget.categoryName,
+                              hasStockFilter: _inStockOnly,
+                              onClearStockFilter: () =>
+                                  setState(() => _inStockOnly = false),
+                            )
+                          : LayoutBuilder(
+                              builder: (context, constraints) {
+                                final width = constraints.maxWidth - 32;
+                                final crossAxisCount =
+                                    ResponsiveGrid.calculateCrossAxisCount(
+                                      width,
+                                      maxCardWidth: 280,
+                                      maxCount: 5,
+                                    );
+                                final childAspectRatio =
+                                    ResponsiveGrid.calculateProductAspectRatio(
+                                      width,
+                                      crossAxisCount,
+                                      showBrand: true,
+                                    );
+                                return GridView.builder(
+                                  padding: const EdgeInsets.all(16),
+                                  physics: const BouncingScrollPhysics(),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: crossAxisCount,
+                                        childAspectRatio: childAspectRatio,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                      ),
+                                  itemCount: products.length,
+                                  itemBuilder: (context, i) => ProductCard(
+                                    product: products[i],
+                                    onTap: () => context.push(
+                                      AppRoutes.productPath(products[i].id),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -503,9 +650,7 @@ class _EmptyCategory extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              categoryName.isNotEmpty
-                  ? AppLocalizations.of(context).noProductsFound2(categoryName)
-                  : AppLocalizations.of(context).noProductsInThisCategory,
+              AppLocalizations.of(context).noProductsInThisCategory,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 17,

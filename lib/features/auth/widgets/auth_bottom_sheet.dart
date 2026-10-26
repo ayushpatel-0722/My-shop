@@ -13,17 +13,23 @@ import 'package:myshop/app/l10n/app_localizations.dart';
 class AuthBottomSheet extends StatefulWidget {
   final VoidCallback? onAuthenticated;
   final bool requireAddress;
+  final String? message;
+  final String? title;
 
   const AuthBottomSheet({
     super.key,
     this.onAuthenticated,
     this.requireAddress = false,
+    this.message,
+    this.title,
   });
 
   static Future<bool> show(
     BuildContext context, {
     VoidCallback? onAuthenticated,
     bool requireAddress = false,
+    String? message,
+    String? title,
   }) async {
     AuthCubit? authCubit;
     try {
@@ -38,12 +44,11 @@ class AuthBottomSheet extends StatefulWidget {
         final sheet = AuthBottomSheet(
           onAuthenticated: onAuthenticated,
           requireAddress: requireAddress,
+          message: message,
+          title: title,
         );
         if (authCubit != null) {
-          return BlocProvider<AuthCubit>.value(
-            value: authCubit,
-            child: sheet,
-          );
+          return BlocProvider<AuthCubit>.value(value: authCubit, child: sheet);
         }
         return sheet;
       },
@@ -276,7 +281,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context).welcomeToBazaar,
+                    widget.title ??
+                        AppLocalizations.of(context).welcomeToBazaar,
                     style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
@@ -285,9 +291,10 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    ).signInToPlaceOrdersSaveCartApplyVouchers,
+                    widget.message ??
+                        AppLocalizations.of(
+                          context,
+                        ).signInToPlaceOrdersSaveCartApplyVouchers,
                     style: const TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                 ],

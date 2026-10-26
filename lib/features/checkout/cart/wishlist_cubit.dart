@@ -13,8 +13,7 @@ class WishlistState {
 
   const WishlistState({this.items = const <Product>[]});
 
-  bool contains(String productId) =>
-      items.any((p) => p.id == productId);
+  bool contains(String productId) => items.any((p) => p.id == productId);
 
   int get count => items.length;
 

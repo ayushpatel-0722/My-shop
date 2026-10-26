@@ -44,143 +44,154 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         },
         builder: (context, state) {
           final isAuthenticating = state.status == AuthStatus.authenticating;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: _mobileCtrl,
-                  readOnly: _otpSent || _busy || isAuthenticating,
-                  keyboardType: TextInputType.phone,
-                  onChanged: (_) {
-                    if (_mobileError != null || _notFound) {
-                      setState(() {
-                        _mobileError = null;
-                        _notFound = false;
-                      });
-                    }
-                  },
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).mobileNumber,
-                    hintText: '9876543210',
-                    prefixIcon: const Icon(Icons.phone_iphone),
-                    prefixText: '+91  ',
-                    suffixIcon: _otpSent
-                        ? TextButton(
-                            onPressed: _busy || isAuthenticating
-                                ? null
-                                : _changeNumber,
-                            child: Text(AppLocalizations.of(context).change),
-                          )
-                        : null,
-                    errorText: _mobileError ??
-                        (_notFound && !_otpSent
-                            ? AppLocalizations.of(context).noAccountFound
-                            : null),
-                    helperText: _otpSent
-                        ? null
-                        : AppLocalizations.of(context).enter10DigitNumber,
-                  ),
-                ),
-                if (_otpSent) ...[
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _otpCtrl,
-                    keyboardType: TextInputType.number,
-                    maxLength: 6,
-                    enabled: !_busy && !isAuthenticating,
-                    onChanged: (_) {
-                      if (_otpError != null) {
-                        setState(() => _otpError = null);
-                      }
-                    },
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).otp,
-                      hintText: '------',
-                      prefixIcon: Icon(Icons.pin_outlined),
-                      errorText: _otpError,
-                      helperText: AppLocalizations.of(
-                        context,
-                      ).enterThe6DigitCodeSentViaSms,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: (_busy || isAuthenticating)
-                      ? null
-                      : (_otpSent ? _verify : _sendOtp),
-                  child: _busy
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
-                        )
-                      : Text(_otpSent ? l10n.verifyOtp : l10n.sendOtp),
-                ),
-                if (_otpSent)
-                  TextButton(
-                    onPressed: (_busy || isAuthenticating) ? null : _resend,
-                    child: Text(l10n.resendOtp),
-                  ),
-                const SizedBox(height: 20),
-                Row(
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        AppLocalizations.of(context).or,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    TextField(
+                      controller: _mobileCtrl,
+                      readOnly: _otpSent || _busy || isAuthenticating,
+                      keyboardType: TextInputType.phone,
+                      onChanged: (_) {
+                        if (_mobileError != null || _notFound) {
+                          setState(() {
+                            _mobileError = null;
+                            _notFound = false;
+                          });
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context).mobileNumber,
+                        hintText: '9876543210',
+                        prefixIcon: const Icon(Icons.phone_iphone),
+                        prefixText: '+91  ',
+                        suffixIcon: _otpSent
+                            ? TextButton(
+                                onPressed: _busy || isAuthenticating
+                                    ? null
+                                    : _changeNumber,
+                                child: Text(
+                                  AppLocalizations.of(context).change,
+                                ),
+                              )
+                            : null,
+                        errorText:
+                            _mobileError ??
+                            (_notFound && !_otpSent
+                                ? AppLocalizations.of(context).noAccountFound
+                                : null),
+                        helperText: _otpSent
+                            ? null
+                            : AppLocalizations.of(context).enter10DigitNumber,
                       ),
                     ),
-                    const Expanded(child: Divider()),
+                    if (_otpSent) ...[
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _otpCtrl,
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        enabled: !_busy && !isAuthenticating,
+                        onChanged: (_) {
+                          if (_otpError != null) {
+                            setState(() => _otpError = null);
+                          }
+                        },
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).otp,
+                          hintText: '------',
+                          prefixIcon: Icon(Icons.pin_outlined),
+                          errorText: _otpError,
+                          helperText: AppLocalizations.of(
+                            context,
+                          ).enterThe6DigitCodeSentViaSms,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: (_busy || isAuthenticating)
+                          ? null
+                          : (_otpSent ? _verify : _sendOtp),
+                      child: _busy
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : Text(_otpSent ? l10n.verifyOtp : l10n.sendOtp),
+                    ),
+                    if (_otpSent)
+                      TextButton(
+                        onPressed: (_busy || isAuthenticating) ? null : _resend,
+                        child: Text(l10n.resendOtp),
+                      ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        const Expanded(child: Divider()),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            AppLocalizations.of(context).or,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const Expanded(child: Divider()),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: isAuthenticating
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(
+                              Icons.g_mobiledata,
+                              size: 28,
+                              color: Colors.red,
+                            ),
+                      label: Text(
+                        isAuthenticating
+                            ? AppLocalizations.of(context).signingIn
+                            : AppLocalizations.of(context).signInWithGoogle,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      onPressed: (_busy || isAuthenticating)
+                          ? null
+                          : () => context.read<AuthCubit>().signInWithGoogle(
+                              context,
+                            ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () => context.go(AppRoutes.userSignup),
+                      child: Text(l10n.createAccountPrompt),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: Colors.grey.shade300),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: isAuthenticating
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(
-                          Icons.g_mobiledata,
-                          size: 28,
-                          color: Colors.red,
-                        ),
-                  label: Text(
-                    isAuthenticating
-                        ? AppLocalizations.of(context).signingIn
-                        : AppLocalizations.of(context).signInWithGoogle,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  onPressed: (_busy || isAuthenticating)
-                      ? null
-                      : () =>
-                            context.read<AuthCubit>().signInWithGoogle(context),
-                ),
-                const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () => context.go(AppRoutes.userSignup),
-                  child: Text(l10n.createAccountPrompt),
-                ),
-              ],
+              ),
             ),
           );
         },
@@ -218,8 +229,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
     final mobile = _mobileCtrl.text.trim();
     if (mobile.isEmpty) {
       setState(() {
-        _mobileError =
-            AppLocalizations.of(context).pleaseEnterYourMobileNumber;
+        _mobileError = AppLocalizations.of(context).pleaseEnterYourMobileNumber;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -232,10 +242,9 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
     }
     if (!_isValidMobile(mobile)) {
       setState(() {
-        _mobileError =
-            AppLocalizations.of(
-              context,
-            ).enterAValid10DigitIndianMobileNumberEG9876543210;
+        _mobileError = AppLocalizations.of(
+          context,
+        ).enterAValid10DigitIndianMobileNumberEG9876543210;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

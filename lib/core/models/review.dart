@@ -23,27 +23,27 @@ class Review {
   });
 
   factory Review.fromMap(String id, Map<String, dynamic> map) => Review(
-        id: id,
-        orderId: map['orderId'] ?? '',
-        userId: map['userId'] ?? '',
-        userName: map['userName'] ?? '',
-        companyId: map['companyId'] ?? '',
-        rating: map['rating'] ?? 5,
-        message: map['message'] ?? '',
-        isVisible: map['isVisible'] ?? true,
-        createdAt: map['createdAt'] != null
-            ? DateTime.tryParse(map['createdAt'].toString())
-            : null,
-      );
+    id: id,
+    orderId: map['orderId'] ?? '',
+    userId: map['userId'] ?? '',
+    userName: map['userName'] ?? '',
+    companyId: map['companyId'] ?? '',
+    rating: map['rating'] ?? 5,
+    message: map['message'] ?? '',
+    isVisible: map['isVisible'] ?? true,
+    createdAt: map['createdAt'] != null
+        ? DateTime.tryParse(map['createdAt'].toString())
+        : null,
+  );
 
   Map<String, dynamic> toMap() => {
-        'orderId': orderId,
-        'userId': userId,
-        'userName': userName,
-        'companyId': companyId,
-        'rating': rating,
-        'message': message,
-        'isVisible': isVisible,
-        'createdAt': createdAt?.toIso8601String(),
-      };
+    'orderId': orderId,
+    'userId': userId,
+    'userName': userName,
+    'companyId': companyId,
+    'rating': rating,
+    'message': message,
+    'isVisible': isVisible,
+    'createdAt': createdAt?.toIso8601String(),
+  };
 }

@@ -90,18 +90,22 @@ void main() {
     await pumpTestApp(tester, const AdminCategoriesScreen());
     expect(find.byKey(const Key('category-tile-cat_kid')), findsOneWidget);
 
-    await tester.tap(find.descendant(
-      of: find.byKey(const Key('category-tile-cat_root')),
-      matching: find.byIcon(Icons.keyboard_arrow_down),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('category-tile-cat_root')),
+        matching: find.byIcon(Icons.keyboard_arrow_down),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('category-tile-cat_kid')), findsNothing);
 
-    await tester.tap(find.descendant(
-      of: find.byKey(const Key('category-tile-cat_root')),
-      matching: find.byIcon(Icons.keyboard_arrow_right),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('category-tile-cat_root')),
+        matching: find.byIcon(Icons.keyboard_arrow_right),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('category-tile-cat_kid')), findsOneWidget);
@@ -139,7 +143,11 @@ void main() {
 
   testWidgets('hides categories belonging to another store', (tester) async {
     await repo.saveCategory(
-      const Category(id: 'cat_theirs', name: 'Theirs', companyId: 'c_techtronics'),
+      const Category(
+        id: 'cat_theirs',
+        name: 'Theirs',
+        companyId: 'c_techtronics',
+      ),
     );
     await pumpTestApp(tester, const AdminCategoriesScreen());
 
@@ -160,15 +168,19 @@ void main() {
     );
 
     await pumpTestApp(tester, const AdminCategoriesScreen());
-    await tester.enterText(find.byKey(const Key('category-search-field')), 'beta');
+    await tester.enterText(
+      find.byKey(const Key('category-search-field')),
+      'beta',
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('category-tile-cat_b')), findsOneWidget);
     expect(find.byKey(const Key('category-tile-cat_a')), findsNothing);
   });
 
-  testWidgets('deleting warns about children and re-parents them',
-      (tester) async {
+  testWidgets('deleting warns about children and re-parents them', (
+    tester,
+  ) async {
     await repo.saveCategory(
       const Category(id: 'cat_root', name: 'Root', companyId: 'c_organic'),
     );
@@ -192,10 +204,12 @@ void main() {
 
     await pumpTestApp(tester, const AdminCategoriesScreen());
 
-    await tester.tap(find.descendant(
-      of: find.byKey(const Key('category-tile-cat_kid')),
-      matching: find.byIcon(Icons.delete_outline),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('category-tile-cat_kid')),
+        matching: find.byIcon(Icons.delete_outline),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Delete Category'), findsOneWidget);
@@ -215,10 +229,15 @@ void main() {
     );
   });
 
-  testWidgets('an unmatched search shows the empty filter state', (tester) async {
+  testWidgets('an unmatched search shows the empty filter state', (
+    tester,
+  ) async {
     await pumpTestApp(tester, const AdminCategoriesScreen());
 
-    await tester.enterText(find.byKey(const Key('category-search-field')), 'zzzz');
+    await tester.enterText(
+      find.byKey(const Key('category-search-field')),
+      'zzzz',
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('No categories match this search'), findsOneWidget);

@@ -24,6 +24,29 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- Custom scheme deep link: ecommerce://... -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ecommerce" />
+            </intent-filter>
+
+            <!-- App Links (HTTP/HTTPS) for Firebase Hosting domain -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="myshop-8bd4d.web.app"
+                    android:pathPrefix="/shop" />
+                <data
+                    android:scheme="https"
+                    android:host="myshop-8bd4d.firebaseapp.com"
+                    android:pathPrefix="/shop" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

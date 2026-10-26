@@ -12,6 +12,8 @@ import '../models/category.dart';
 import '../models/company.dart';
 import '../models/delivery_charge.dart';
 import '../models/employee.dart';
+import '../models/home_explore_category.dart';
+import '../models/home_trending_item.dart';
 import '../models/notification.dart';
 import '../models/order.dart';
 import '../models/product.dart';
@@ -19,6 +21,7 @@ import '../models/recommendation.dart';
 import '../models/review.dart';
 import '../models/voucher.dart';
 import '../repositories/app_repository.dart';
+import '../services/auth_session.dart';
 import 'mock_data.dart';
 import '../../app/l10n/l10n_service.dart';
 
@@ -50,6 +53,9 @@ class MockAppRepository implements AppRepository {
   final List<Order> _orders = <Order>[];
   final List<AppNotification> _notifications = <AppNotification>[];
   final List<Recommendation> _recommendations = <Recommendation>[];
+  final List<HomeExploreCategory> _homeExploreCategories =
+      <HomeExploreCategory>[];
+  final List<HomeTrendingItem> _homeTrendingItems = <HomeTrendingItem>[];
   final Map<String, AppUser> _usersByMobile = <String, AppUser>{};
   final Map<String, AppUser> _admins = <String, AppUser>{};
   final Map<String, AppUser> _employees = <String, AppUser>{};
@@ -68,6 +74,10 @@ class MockAppRepository implements AppRepository {
   final _recommendationCtrl =
       StreamController<List<Recommendation>>.broadcast();
   final _employeesCtrl = StreamController<List<Employee>>.broadcast();
+  final _homeExploreCtrl =
+      StreamController<List<HomeExploreCategory>>.broadcast();
+  final _homeTrendingCtrl =
+      StreamController<List<HomeTrendingItem>>.broadcast();
 
   final List<Employee> _mockEmployees = <Employee>[];
   AppUser? _currentUser;
@@ -175,6 +185,13 @@ class MockAppRepository implements AppRepository {
   /// A plain broadcast controller silently drops the value pushed before the
   /// first listener subscribes, which makes `stream.first` hang.
   Stream<List<T>> _live<T>(
+    StreamController<List<T>> ctrl,
+    List<T> Function() read,
+  ) {
+    return _liveGenerator(ctrl, read).asBroadcastStream();
+  }
+
+  Stream<List<T>> _liveGenerator<T>(
     StreamController<List<T>> ctrl,
     List<T> Function() read,
   ) async* {
@@ -529,15 +546,13 @@ class MockAppRepository implements AppRepository {
   Future<Order?> order(String orderId, {String companyId = ''}) async =>
       _orders.firstWhereOrNull(
         (o) =>
-            o.id == orderId &&
-            (companyId.isEmpty || o.companyId == companyId),
+            o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
       );
 
   @override
-  Stream<Order?> watchOrder(String orderId, {String companyId = ''}) =>
-      orders(companyId: companyId).map(
-        (list) => list.firstWhereOrNull((o) => o.id == orderId),
-      );
+  Stream<Order?> watchOrder(String orderId, {String companyId = ''}) => orders(
+    companyId: companyId,
+  ).map((list) => list.firstWhereOrNull((o) => o.id == orderId));
 
   @override
   Stream<List<Review>> reviews(String companyId) => _live(
@@ -606,10 +621,23 @@ class MockAppRepository implements AppRepository {
     String status, {
     DateTime? now,
     String? cancellationReason,
+    String? note,
   }) {
     OrderStatusRules.ensureValidStatus(status);
     OrderStatusRules.ensureTransition(order.orderStatus, status);
     final timestamp = now ?? DateTime.now();
+    final newHistory = List<OrderStatusHistoryEntry>.from(order.statusHistory)
+      ..add(
+        OrderStatusHistoryEntry(
+          status: status,
+          note:
+              note ??
+              (status == OrderStatus.cancelled
+                  ? (cancellationReason ?? 'Cancelled')
+                  : 'Status changed to $status'),
+          timestamp: timestamp,
+        ),
+      );
     return order.copyWith(
       orderStatus: status,
       updatedAt: timestamp,
@@ -618,6 +646,7 @@ class MockAppRepository implements AppRepository {
       cancellationReason: status == OrderStatus.cancelled
           ? (cancellationReason ?? order.cancellationReason)
           : null,
+      statusHistory: newHistory,
     );
   }
 
@@ -669,9 +698,28 @@ class MockAppRepository implements AppRepository {
         pickupShop: order.pickupShop,
         voucherId: order.voucherId,
         voucherCode: order.voucherCode,
-        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+        paymentStatus: order.paymentStatus.isNotEmpty
+            ? order.paymentStatus
+            : PaymentStatus.pending,
+        transactionRef: order.transactionRef,
+        amountPaid: order.amountPaid,
+        paidAt: order.paidAt,
+        paymentVerifiedBy: order.paymentVerifiedBy,
+        paymentVerifiedAt: order.paymentVerifiedAt,
         orderStatus: order.orderStatus,
         deliveryType: order.deliveryType,
+        cancellationReason: order.cancellationReason,
+        cancelledAt: order.cancelledAt,
+        reviewId: order.reviewId,
+        statusHistory: [
+          OrderStatusHistoryEntry(
+            status: order.orderStatus,
+            note: 'Order placed',
+            timestamp: now,
+          ),
+        ],
+        stockRestored: false,
         createdAt: now,
         updatedAt: now,
       );
@@ -705,10 +753,32 @@ class MockAppRepository implements AppRepository {
     _pushProducts();
   }
 
+  void _restoreStock(Order order) {
+    for (final item in order.items) {
+      final i = _products.indexWhere((p) => p.id == item.productId);
+      if (i == -1) continue;
+      final p = _products[i];
+      if (p.isUnlimitedStock) continue;
+      final restored = p.stockQty + (item.qty < 0 ? 0 : item.qty);
+      _products[i] = p.copyWith(stockQty: restored);
+    }
+    _pushProducts();
+  }
+
   void _recordVoucherUsage(Order order) {
     final i = _vouchers.indexWhere((v) => v.id == order.voucherId);
     if (i == -1) return;
     _vouchers[i] = _vouchers[i].registerUsage(
+      orderId: order.id,
+      userId: order.userId,
+    );
+    _pushVouchers();
+  }
+
+  void _releaseVoucherUsage(Order order) {
+    final i = _vouchers.indexWhere((v) => v.id == order.voucherId);
+    if (i == -1) return;
+    _vouchers[i] = _vouchers[i].releaseUsage(
       orderId: order.id,
       userId: order.userId,
     );
@@ -723,8 +793,7 @@ class MockAppRepository implements AppRepository {
     String? cancellationReason,
   }) async {
     final i = _orders.indexWhere(
-      (o) =>
-          o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
+      (o) => o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
     );
     if (i == -1) return;
     _orders[i] = _applyStatus(
@@ -740,38 +809,138 @@ class MockAppRepository implements AppRepository {
     String orderId, {
     String companyId = '',
     String? reason,
-  }) =>
-      updateOrderStatus(
-        orderId,
+    String? userId,
+  }) async {
+    final i = _orders.indexWhere(
+      (o) => o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
+    );
+    if (i == -1) throw Exception('Order not found');
+
+    final order = _orders[i];
+    if (userId != null && userId.isNotEmpty) {
+      if (order.userId != userId) {
+        throw StateError('You are not authorized to cancel this order.');
+      }
+      if (!OrderStatusRules.isCustomerCancellable(order.orderStatus)) {
+        final ineligibleMsg =
+            OrderStatusRules.customerCancellationIneligibleReason(
+              order.orderStatus,
+            );
+        throw StateError(
+          ineligibleMsg ?? 'This order can no longer be cancelled.',
+        );
+      }
+    } else {
+      OrderStatusRules.ensureTransition(
+        order.orderStatus,
         OrderStatus.cancelled,
-        companyId: companyId,
-        cancellationReason: reason,
       );
+    }
+
+    final cancellationReason =
+        reason ??
+        (userId != null ? 'Cancelled by customer' : 'Cancelled by admin');
+    final updated = _applyStatus(
+      order,
+      OrderStatus.cancelled,
+      cancellationReason: cancellationReason,
+      note: cancellationReason,
+    );
+
+    final wasStockRestored = order.stockRestored;
+    _orders[i] = updated.copyWith(stockRestored: true);
+
+    if (!wasStockRestored) {
+      _restoreStock(order);
+      if (order.voucherId != null && order.voucherId!.isNotEmpty) {
+        _releaseVoucherUsage(order);
+      }
+    }
+
+    _pushOrders();
+  }
 
   @override
   Future<void> togglePaymentStatus(
     String orderId, {
     String companyId = '',
     String? status,
+    String? verifiedBy,
+    String? transactionRef,
+    double? amountPaid,
+  }) async {
+    await verifyPayment(
+      orderId: orderId,
+      companyId: companyId,
+      paymentStatus: status ?? PaymentStatus.done,
+      verifiedBy: verifiedBy,
+      transactionRef: transactionRef,
+      amountPaid: amountPaid,
+    );
+  }
+
+  @override
+  Future<void> verifyPayment({
+    required String orderId,
+    required String companyId,
+    required String paymentStatus,
+    String? paymentMethod,
+    String? verifiedBy,
+    String? transactionRef,
+    double? amountPaid,
+    String? note,
   }) async {
     final i = _orders.indexWhere(
-      (o) =>
-          o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
+      (o) => o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
     );
     if (i == -1) return;
     final o = _orders[i];
-    final newStatus =
-        status ??
-        (o.paymentStatus == PaymentStatus.pending
-            ? PaymentStatus.done
-            : PaymentStatus.pending);
+
+    // Idempotent guard: already paid and trying to mark paid again
+    if (o.isPaid && paymentStatus == PaymentStatus.done) {
+      return;
+    }
+
     final now = DateTime.now();
+    final effectivePaid = amountPaid ?? o.amountPaid ?? o.totalAmount;
+    final effectiveVerifiedBy =
+        verifiedBy ??
+        AuthSession.currentUser?.email ??
+        AuthSession.currentUser?.id ??
+        'Admin';
+    final effectiveMethod = (paymentMethod != null && paymentMethod.isNotEmpty)
+        ? paymentMethod
+        : o.paymentMethod;
+
+    final historyList = List<OrderStatusHistoryEntry>.from(o.statusHistory);
+    final historyNote =
+        note ??
+        (paymentStatus == PaymentStatus.done
+            ? 'Payment of ₹${effectivePaid.toStringAsFixed(0)} verified (${PaymentMethod.displayName(effectiveMethod)}) by $effectiveVerifiedBy'
+            : 'Payment status changed to $paymentStatus');
+    historyList.add(
+      OrderStatusHistoryEntry(
+        status: o.orderStatus,
+        note: historyNote,
+        timestamp: now,
+      ),
+    );
+
     _orders[i] = o.copyWith(
-      paymentStatus: newStatus,
-      paidAt: newStatus == PaymentStatus.done ? now : o.paidAt,
-      amountPaid: newStatus == PaymentStatus.done
-          ? (o.amountPaid ?? o.totalAmount)
+      paymentMethod: effectiveMethod,
+      paymentStatus: paymentStatus,
+      paidAt: paymentStatus == PaymentStatus.done ? now : o.paidAt,
+      paymentVerifiedAt: paymentStatus == PaymentStatus.done
+          ? now
+          : o.paymentVerifiedAt,
+      paymentVerifiedBy: paymentStatus == PaymentStatus.done
+          ? effectiveVerifiedBy
+          : o.paymentVerifiedBy,
+      amountPaid: paymentStatus == PaymentStatus.done
+          ? effectivePaid
           : o.amountPaid,
+      transactionRef: transactionRef ?? o.transactionRef,
+      statusHistory: historyList,
       updatedAt: now,
     );
     _pushOrders();
@@ -903,6 +1072,14 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<void> deleteProduct(String productId, {String companyId = ''}) async {
+    final targetShopId = companyId.isNotEmpty
+        ? companyId
+        : (_products
+                  .where((p) => p.id == productId)
+                  .map((p) => p.companyId)
+                  .firstOrNull ??
+              '');
+
     _products.removeWhere(
       (p) =>
           p.id == productId && (companyId.isEmpty || p.companyId == companyId),
@@ -918,6 +1095,13 @@ class MockAppRepository implements AppRepository {
     }
     _pushProducts();
     if (touched) _pushCategories();
+
+    if (targetShopId.isNotEmpty) {
+      await removeProductFromTrendingNow(
+        shopId: targetShopId,
+        productId: productId,
+      );
+    }
   }
 
   @override
@@ -941,8 +1125,7 @@ class MockAppRepository implements AppRepository {
     final i = _categories.indexWhere((c) => c.id == id);
     final existing = i == -1 ? null : _categories[i];
     final parentChanged =
-        existing != null &&
-        (existing.parentId ?? '') != (saved.parentId ?? '');
+        existing != null && (existing.parentId ?? '') != (saved.parentId ?? '');
 
     // New categories (and moves to another parent) go to the END of their
     // sibling list; plain edits keep their manual position.
@@ -1189,4 +1372,220 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<void> registerFcmToken(String userId, String token) async {}
+
+  void _pushHomeExplore() {
+    _homeExploreCtrl.add([..._homeExploreCategories]);
+  }
+
+  void _pushHomeTrending() {
+    _homeTrendingCtrl.add([..._homeTrendingItems]);
+  }
+
+  @override
+  Stream<List<HomeExploreCategory>> homeExploreCategories({
+    String shopId = '',
+    bool activeOnly = false,
+  }) {
+    Stream<List<HomeExploreCategory>> stream = _homeExploreCtrl.stream;
+    final initial = _filterHomeExplore(shopId: shopId, activeOnly: activeOnly);
+    return Stream<List<HomeExploreCategory>>.multi((controller) {
+      controller.add(initial);
+      final sub = stream.listen((all) {
+        controller.add(
+          _filterHomeExplore(shopId: shopId, activeOnly: activeOnly),
+        );
+      });
+      controller.onCancel = sub.cancel;
+    });
+  }
+
+  List<HomeExploreCategory> _filterHomeExplore({
+    required String shopId,
+    required bool activeOnly,
+  }) {
+    return _homeExploreCategories
+        .where(
+          (c) =>
+              (shopId.isEmpty || c.shopId == shopId) &&
+              (!activeOnly || c.isActive),
+        )
+        .sortedBy<num>((c) => c.displayOrder);
+  }
+
+  @override
+  Future<void> saveHomeExploreCategory(HomeExploreCategory entry) async {
+    final id = entry.id.isNotEmpty
+        ? entry.id
+        : (entry.shopId.isNotEmpty && entry.categoryId.isNotEmpty
+              ? '${entry.shopId}_${entry.categoryId}'
+              : _uuid.v4());
+
+    final now = DateTime.now();
+    final toSave = entry.copyWith(
+      id: id,
+      createdAt: entry.createdAt ?? now,
+      updatedAt: now,
+    );
+    final i = _homeExploreCategories.indexWhere((c) => c.id == id);
+    if (i == -1) {
+      _homeExploreCategories.add(toSave);
+    } else {
+      _homeExploreCategories[i] = toSave;
+    }
+    _pushHomeExplore();
+  }
+
+  @override
+  Future<void> deleteHomeExploreCategory(String id) async {
+    _homeExploreCategories.removeWhere((c) => c.id == id);
+    _pushHomeExplore();
+  }
+
+  @override
+  Future<void> reorderHomeExploreCategories(
+    List<HomeExploreCategory> orderedEntries,
+  ) async {
+    final now = DateTime.now();
+    for (var i = 0; i < orderedEntries.length; i++) {
+      final item = orderedEntries[i];
+      final idx = _homeExploreCategories.indexWhere((c) => c.id == item.id);
+      if (idx != -1) {
+        _homeExploreCategories[idx] = _homeExploreCategories[idx].copyWith(
+          displayOrder: i,
+          updatedAt: now,
+        );
+      }
+    }
+    _pushHomeExplore();
+  }
+
+  @override
+  Stream<List<HomeTrendingItem>> homeTrendingNow({
+    String shopId = '',
+    bool activeOnly = false,
+  }) {
+    Stream<List<HomeTrendingItem>> stream = _homeTrendingCtrl.stream;
+    final initial = _filterHomeTrending(shopId: shopId, activeOnly: activeOnly);
+    return Stream<List<HomeTrendingItem>>.multi((controller) {
+      controller.add(initial);
+      final sub = stream.listen((all) {
+        controller.add(
+          _filterHomeTrending(shopId: shopId, activeOnly: activeOnly),
+        );
+      });
+      controller.onCancel = sub.cancel;
+    });
+  }
+
+  List<HomeTrendingItem> _filterHomeTrending({
+    required String shopId,
+    required bool activeOnly,
+  }) {
+    return _homeTrendingItems
+        .where(
+          (t) =>
+              (shopId.isEmpty || t.shopId == shopId) &&
+              (!activeOnly || t.isActive),
+        )
+        .sortedBy<num>((t) => t.displayOrder);
+  }
+
+  @override
+  Future<void> saveHomeTrendingItem(HomeTrendingItem entry) async {
+    final itemRefId = entry.isProduct
+        ? (entry.productId ?? '')
+        : (entry.categoryId ?? '');
+    final id = entry.id.isNotEmpty
+        ? entry.id
+        : (entry.shopId.isNotEmpty && itemRefId.isNotEmpty
+              ? '${entry.shopId}_${entry.itemType}_$itemRefId'
+              : _uuid.v4());
+
+    final now = DateTime.now();
+    final toSave = entry.copyWith(
+      id: id,
+      createdAt: entry.createdAt ?? now,
+      updatedAt: now,
+    );
+    final i = _homeTrendingItems.indexWhere((t) => t.id == id);
+    if (i == -1) {
+      _homeTrendingItems.add(toSave);
+    } else {
+      _homeTrendingItems[i] = toSave;
+    }
+    _pushHomeTrending();
+  }
+
+  @override
+  Future<void> deleteHomeTrendingItem(String id) async {
+    _homeTrendingItems.removeWhere((t) => t.id == id);
+    _pushHomeTrending();
+  }
+
+  @override
+  Future<void> reorderHomeTrendingItems(
+    List<HomeTrendingItem> orderedEntries,
+  ) async {
+    final now = DateTime.now();
+    for (var i = 0; i < orderedEntries.length; i++) {
+      final item = orderedEntries[i];
+      final idx = _homeTrendingItems.indexWhere((t) => t.id == item.id);
+      if (idx != -1) {
+        _homeTrendingItems[idx] = _homeTrendingItems[idx].copyWith(
+          displayOrder: i,
+          updatedAt: now,
+        );
+      }
+    }
+    _pushHomeTrending();
+  }
+
+  @override
+  Future<int> removeProductFromTrendingNow({
+    required String shopId,
+    required String productId,
+  }) async {
+    final cleanShopId = shopId.trim();
+    final cleanProductId = productId.trim();
+    if (cleanShopId.isEmpty || cleanProductId.isEmpty) {
+      return 0;
+    }
+
+    final toRemove = _homeTrendingItems
+        .where(
+          (t) =>
+              t.shopId == cleanShopId &&
+              t.isProduct &&
+              t.productId == cleanProductId,
+        )
+        .toList();
+
+    if (toRemove.isEmpty) return 0;
+
+    _homeTrendingItems.removeWhere(
+      (t) =>
+          t.shopId == cleanShopId &&
+          t.isProduct &&
+          t.productId == cleanProductId,
+    );
+    _pushHomeTrending();
+    return toRemove.length;
+  }
+
+  @override
+  Future<bool> isProductInTrendingNow({
+    required String shopId,
+    required String productId,
+  }) async {
+    final cleanShopId = shopId.trim();
+    final cleanProductId = productId.trim();
+    if (cleanShopId.isEmpty || cleanProductId.isEmpty) return false;
+
+    return _homeTrendingItems.any(
+      (t) =>
+          t.shopId == cleanShopId &&
+          t.isProduct &&
+          t.productId == cleanProductId,
+    );
+  }
 }

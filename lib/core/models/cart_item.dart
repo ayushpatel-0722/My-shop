@@ -170,24 +170,33 @@ class CartItem {
 
   factory CartItem.fromMap(Map<String, dynamic> map) {
     final variantMap = map['variant'];
+    final topLevelImg =
+        (map['image'] ?? map['imageUrl'] ?? map['productImage'])
+            ?.toString()
+            .trim() ??
+        '';
+    Product product;
+    if (map['product'] is Map) {
+      product = Product.fromMap(
+        map['productId']?.toString() ?? '',
+        Map<String, dynamic>.from(map['product'] as Map),
+      );
+      if (product.images.isEmpty && topLevelImg.isNotEmpty) {
+        product = product.copyWith(images: [topLevelImg]);
+      }
+    } else {
+      product = Product(
+        id: map['productId']?.toString() ?? '',
+        companyId: map['companyId']?.toString() ?? '',
+        categoryId: '',
+        name: map['productName']?.toString() ?? '',
+        images: [if (topLevelImg.isNotEmpty) topLevelImg],
+      );
+    }
     return CartItem(
       companyId: map['companyId']?.toString() ?? '',
       companyName: map['companyName']?.toString() ?? '',
-      product: map['product'] is Map
-          ? Product.fromMap(
-              map['productId']?.toString() ?? '',
-              Map<String, dynamic>.from(map['product'] as Map),
-            )
-          : Product(
-              id: map['productId']?.toString() ?? '',
-              companyId: map['companyId']?.toString() ?? '',
-              categoryId: '',
-              name: map['productName']?.toString() ?? '',
-              images: [
-                if ((map['image']?.toString() ?? '').isNotEmpty)
-                  map['image'].toString(),
-              ],
-            ),
+      product: product,
       variant: variantMap is Map
           ? VariantSnapshot.fromMap(Map<String, dynamic>.from(variantMap))
           : null,

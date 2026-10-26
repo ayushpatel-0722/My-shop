@@ -23,30 +23,30 @@ void main() {
     String status = OrderStatus.pending,
     String userId = 'u1',
     List<OrderItem>? items,
-  }) =>
-      repo.placeOrder(
-        Order(
-          id: '',
-          userId: userId,
-          companyId: companyId,
-          companyName: companyName,
-          items: items ??
-              const [
-                OrderItem(
-                  productId: 'p_tomato',
-                  qty: 2,
-                  unitPrice: 60,
-                  name: 'Fresh Tomatoes',
-                ),
-              ],
-          subtotal: 120,
-          deliveryCharge: 30,
-          totalAmount: 150,
-          address: '12 Market Street',
-          pincode: '380001',
-          orderStatus: status,
-        ),
-      );
+  }) => repo.placeOrder(
+    Order(
+      id: '',
+      userId: userId,
+      companyId: companyId,
+      companyName: companyName,
+      items:
+          items ??
+          const [
+            OrderItem(
+              productId: 'p_tomato',
+              qty: 2,
+              unitPrice: 60,
+              name: 'Fresh Tomatoes',
+            ),
+          ],
+      subtotal: 120,
+      deliveryCharge: 30,
+      totalAmount: 150,
+      address: '12 Market Street',
+      pincode: '380001',
+      orderStatus: status,
+    ),
+  );
 
   testWidgets('shows only this store\'s orders', (tester) async {
     final mine = await placeOrder();
@@ -57,10 +57,7 @@ void main() {
 
     await pumpTestApp(tester, const AdminOrdersScreen());
 
-    expect(
-      find.byKey(Key('order-card-${mine.id}')),
-      findsOneWidget,
-    );
+    expect(find.byKey(Key('order-card-${mine.id}')), findsOneWidget);
     expect(
       find.byKey(Key('order-card-${theirs.id}')),
       findsNothing,
@@ -95,7 +92,9 @@ void main() {
     expect((await repo.order(order.id))!.orderStatus, OrderStatus.confirmed);
   });
 
-  testWidgets('cancelling asks for confirmation and then cancels', (tester) async {
+  testWidgets('cancelling asks for confirmation and then cancels', (
+    tester,
+  ) async {
     final order = await placeOrder();
 
     await pumpTestApp(tester, const AdminOrdersScreen());
@@ -118,8 +117,9 @@ void main() {
     expect(stored.cancelledAt, isNotNull);
   });
 
-  testWidgets('a completed order can neither advance nor be cancelled',
-      (tester) async {
+  testWidgets('a completed order can neither advance nor be cancelled', (
+    tester,
+  ) async {
     final order = await placeOrder();
     for (final status in [
       OrderStatus.confirmed,
@@ -137,7 +137,9 @@ void main() {
     expect(find.byKey(Key('order-cancel-${order.id}')), findsNothing);
   });
 
-  testWidgets('items quick preview dialog opens on tapping items button', (tester) async {
+  testWidgets('items quick preview dialog opens on tapping items button', (
+    tester,
+  ) async {
     final order = await repo.placeOrder(
       Order(
         id: '',
@@ -145,7 +147,12 @@ void main() {
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',
         items: const [
-          OrderItem(productId: 'p_tomato', qty: 2, unitPrice: 60, name: 'Tomatoes'),
+          OrderItem(
+            productId: 'p_tomato',
+            qty: 2,
+            unitPrice: 60,
+            name: 'Tomatoes',
+          ),
         ],
         subtotal: 120,
         discountAmount: 20,
@@ -175,7 +182,12 @@ void main() {
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',
         items: const [
-          OrderItem(productId: 'p_milk', qty: 1, unitPrice: 40, name: 'Organic Cow Milk'),
+          OrderItem(
+            productId: 'p_milk',
+            qty: 1,
+            unitPrice: 40,
+            name: 'Organic Cow Milk',
+          ),
         ],
         subtotal: 40,
         totalAmount: 40,
@@ -188,10 +200,7 @@ void main() {
     expect(find.byKey(Key('order-card-${tomatoes.id}')), findsOneWidget);
     expect(find.byKey(Key('order-card-${milk.id}')), findsOneWidget);
 
-    await tester.enterText(
-      find.byKey(const Key('order-search-field')),
-      'milk',
-    );
+    await tester.enterText(find.byKey(const Key('order-search-field')), 'milk');
     await tester.pumpAndSettle();
 
     expect(find.byKey(Key('order-card-${milk.id}')), findsOneWidget);

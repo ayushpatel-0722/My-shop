@@ -53,11 +53,26 @@ void main() {
 
       // c1 was dragged above c2 earlier and kept sort order 5.
       await repo.reorderCategories([
-        const Category(id: 'c2', companyId: 'c_organic', name: 'Two', sortOrder: 0),
-        const Category(id: 'c1', companyId: 'c_organic', name: 'One', sortOrder: 1),
+        const Category(
+          id: 'c2',
+          companyId: 'c_organic',
+          name: 'Two',
+          sortOrder: 0,
+        ),
+        const Category(
+          id: 'c1',
+          companyId: 'c_organic',
+          name: 'One',
+          sortOrder: 1,
+        ),
       ]);
       await repo.saveCategory(
-        const Category(id: 'c1', companyId: 'c_organic', name: 'One Renamed', sortOrder: 1),
+        const Category(
+          id: 'c1',
+          companyId: 'c_organic',
+          name: 'One Renamed',
+          sortOrder: 1,
+        ),
       );
 
       final renamed = await repo.category('c1', companyId: 'c_organic');
@@ -70,10 +85,20 @@ void main() {
         const Category(id: 'root', companyId: 'c_organic', name: 'Root'),
       );
       await repo.saveCategory(
-        const Category(id: 'kid1', companyId: 'c_organic', name: 'Kid 1', parentId: 'root'),
+        const Category(
+          id: 'kid1',
+          companyId: 'c_organic',
+          name: 'Kid 1',
+          parentId: 'root',
+        ),
       );
       await repo.saveCategory(
-        const Category(id: 'kid2', companyId: 'c_organic', name: 'Kid 2', parentId: 'root'),
+        const Category(
+          id: 'kid2',
+          companyId: 'c_organic',
+          name: 'Kid 2',
+          parentId: 'root',
+        ),
       );
       await repo.saveCategory(
         const Category(id: 'other', companyId: 'c_organic', name: 'Other'),
@@ -81,7 +106,12 @@ void main() {
 
       // Move "Other" under Root -> after kid1 (0) and kid2 (1).
       await repo.saveCategory(
-        const Category(id: 'other', companyId: 'c_organic', name: 'Other', parentId: 'root'),
+        const Category(
+          id: 'other',
+          companyId: 'c_organic',
+          name: 'Other',
+          parentId: 'root',
+        ),
       );
 
       final moved = await repo.category('other', companyId: 'c_organic');
@@ -94,12 +124,22 @@ void main() {
         const Category(id: 'root', companyId: 'c_organic', name: 'Root'),
       );
       await repo.saveCategory(
-        const Category(id: 'kid', companyId: 'c_organic', name: 'Kid', parentId: 'root'),
+        const Category(
+          id: 'kid',
+          companyId: 'c_organic',
+          name: 'Kid',
+          parentId: 'root',
+        ),
       );
 
       expect(
         () => repo.saveCategory(
-          const Category(id: 'root', companyId: 'c_organic', name: 'Root', parentId: 'kid'),
+          const Category(
+            id: 'root',
+            companyId: 'c_organic',
+            name: 'Root',
+            parentId: 'kid',
+          ),
         ),
         throwsArgumentError,
       );
@@ -119,9 +159,24 @@ void main() {
       );
 
       await repo.reorderCategories([
-        const Category(id: 'c3', companyId: 'c_organic', name: 'Three', sortOrder: 9),
-        const Category(id: 'c1', companyId: 'c_organic', name: 'One', sortOrder: 4),
-        const Category(id: 'c2', companyId: 'c_organic', name: 'Two', sortOrder: 7),
+        const Category(
+          id: 'c3',
+          companyId: 'c_organic',
+          name: 'Three',
+          sortOrder: 9,
+        ),
+        const Category(
+          id: 'c1',
+          companyId: 'c_organic',
+          name: 'One',
+          sortOrder: 4,
+        ),
+        const Category(
+          id: 'c2',
+          companyId: 'c_organic',
+          name: 'Two',
+          sortOrder: 7,
+        ),
       ]);
 
       final cats = await repo.categories(companyId: 'c_organic').first;
@@ -133,43 +188,46 @@ void main() {
   });
 
   group('backfillCategorySortOrder', () {
-    test('numbers legacy duplicates by creation time and is idempotent', () async {
-      await repo.saveCategory(
-        const Category(
-          id: 'old_a',
-          companyId: 'c_organic',
-          name: 'Zulu',
-          createdAt: null,
-        ),
-      );
-      await repo.saveCategory(
-        const Category(id: 'old_b', companyId: 'c_organic', name: 'Alpha'),
-      );
-      // Simulate pre-ordering data: both claim the same position.
-      final seed = await repo.categories(companyId: 'c_organic').first;
-      for (final c in seed) {
-        await repo.saveCategory(c.copyWith(sortOrder: 0));
-      }
+    test(
+      'numbers legacy duplicates by creation time and is idempotent',
+      () async {
+        await repo.saveCategory(
+          const Category(
+            id: 'old_a',
+            companyId: 'c_organic',
+            name: 'Zulu',
+            createdAt: null,
+          ),
+        );
+        await repo.saveCategory(
+          const Category(id: 'old_b', companyId: 'c_organic', name: 'Alpha'),
+        );
+        // Simulate pre-ordering data: both claim the same position.
+        final seed = await repo.categories(companyId: 'c_organic').first;
+        for (final c in seed) {
+          await repo.saveCategory(c.copyWith(sortOrder: 0));
+        }
 
-      await repo.backfillCategorySortOrder(companyId: 'c_organic');
+        await repo.backfillCategorySortOrder(companyId: 'c_organic');
 
-      final fixed = await repo.categories(companyId: 'c_organic').first;
-      final byId = {for (final c in fixed) c.id: c};
-      expect(byId['old_a']!.sortOrder, 0, reason: 'created first');
-      expect(byId['old_b']!.sortOrder, 1);
+        final fixed = await repo.categories(companyId: 'c_organic').first;
+        final byId = {for (final c in fixed) c.id: c};
+        expect(byId['old_a']!.sortOrder, 0, reason: 'created first');
+        expect(byId['old_b']!.sortOrder, 1);
 
-      // A second run leaves the arrangement untouched even after a manual move.
-      await repo.reorderCategories([
-        byId['old_b']!.copyWith(sortOrder: 0),
-        byId['old_a']!.copyWith(sortOrder: 1),
-      ]);
-      await repo.backfillCategorySortOrder(companyId: 'c_organic');
+        // A second run leaves the arrangement untouched even after a manual move.
+        await repo.reorderCategories([
+          byId['old_b']!.copyWith(sortOrder: 0),
+          byId['old_a']!.copyWith(sortOrder: 1),
+        ]);
+        await repo.backfillCategorySortOrder(companyId: 'c_organic');
 
-      final again = await repo.categories(companyId: 'c_organic').first;
-      final againById = {for (final c in again) c.id: c};
-      expect(againById['old_b']!.sortOrder, 0);
-      expect(againById['old_a']!.sortOrder, 1, reason: 'idempotent backfill');
-    });
+        final again = await repo.categories(companyId: 'c_organic').first;
+        final againById = {for (final c in again) c.id: c};
+        expect(againById['old_b']!.sortOrder, 0);
+        expect(againById['old_a']!.sortOrder, 1, reason: 'idempotent backfill');
+      },
+    );
   });
 
   group('saved addresses', () {
@@ -225,7 +283,12 @@ void main() {
         userId: 'u_1',
         companyId: 'c_organic',
         items: const [
-          OrderItem(productId: 'p_tomato', qty: 5, unitPrice: 48, name: 'Fresh Tomatoes'),
+          OrderItem(
+            productId: 'p_tomato',
+            qty: 5,
+            unitPrice: 48,
+            name: 'Fresh Tomatoes',
+          ),
         ],
         subtotal: 240,
         deliveryCharge: 30,
@@ -242,19 +305,14 @@ void main() {
     });
 
     test('refuses empty or company-less orders', () async {
-      expect(
-        () => repo.placeOrders(const []),
-        returnsNormally,
-      );
+      expect(() => repo.placeOrders(const []), returnsNormally);
       expect(
         () => repo.placeOrders([
           Order(
             id: '',
             userId: 'u_1',
             companyId: '',
-            items: const [
-              OrderItem(productId: 'p_x', qty: 1, unitPrice: 1),
-            ],
+            items: const [OrderItem(productId: 'p_x', qty: 1, unitPrice: 1)],
           ),
         ]),
         throwsArgumentError,

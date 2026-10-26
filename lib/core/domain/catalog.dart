@@ -1,4 +1,5 @@
 import '../models/category.dart';
+import '../models/company.dart';
 import '../models/product.dart';
 import '../../app/l10n/l10n_service.dart';
 
@@ -62,6 +63,7 @@ class CatalogQuery {
   final Set<String> categoryIds;
   final Set<String> companyIds;
   final List<Category>? categories;
+  final List<Company>? companies;
   final bool inStockOnly;
   final bool discountedOnly;
   final bool includeOutOfStockLast;
@@ -80,6 +82,7 @@ class CatalogQuery {
     this.categoryIds = const <String>{},
     this.companyIds = const <String>{},
     this.categories,
+    this.companies,
     this.inStockOnly = false,
     this.discountedOnly = false,
     this.includeOutOfStockLast = true,
@@ -93,6 +96,7 @@ class CatalogQuery {
     Set<String>? categoryIds,
     Set<String>? companyIds,
     List<Category>? categories,
+    List<Company>? companies,
     bool? inStockOnly,
     bool? discountedOnly,
     bool? includeOutOfStockLast,
@@ -104,6 +108,7 @@ class CatalogQuery {
     categoryIds: categoryIds ?? this.categoryIds,
     companyIds: companyIds ?? this.companyIds,
     categories: categories ?? this.categories,
+    companies: companies ?? this.companies,
     inStockOnly: inStockOnly ?? this.inStockOnly,
     discountedOnly: discountedOnly ?? this.discountedOnly,
     includeOutOfStockLast: includeOutOfStockLast ?? this.includeOutOfStockLast,
@@ -134,15 +139,41 @@ class CatalogQuery {
 class Catalog {
   const Catalog();
 
-  /// Case-insensitive match against name, SKU, description and sub-details.
-  static bool matchesSearch(Product product, String query) {
+  /// Case-insensitive match against name, SKU, category, brand, description and sub-details.
+  static bool matchesSearch(
+    Product product,
+    String query, {
+    List<Category>? categories,
+    List<Company>? companies,
+  }) {
     final q = query.trim().toLowerCase();
     if (q.isEmpty) return true;
+
+    // Resolve category name(s) matching this product
+    String catNames = '';
+    if (categories != null && categories.isNotEmpty) {
+      final matchingCats = categories.where(
+        (c) => c.id == product.categoryId || c.productList.contains(product.id),
+      );
+      catNames = matchingCats.map((c) => c.name).join(' ');
+    }
+
+    // Resolve company name matching this product
+    String compName = '';
+    if (companies != null && companies.isNotEmpty) {
+      final comp = companies
+          .where((c) => c.id == product.companyId)
+          .firstOrNull;
+      if (comp != null) compName = comp.name;
+    }
+
+    final fullIndex = '${product.searchIndex} $catNames $compName'
+        .toLowerCase();
 
     // Every term must appear somewhere (multi-word friendly search).
     for (final term in q.split(RegExp(r'\s+'))) {
       if (term.isEmpty) continue;
-      if (!product.searchIndex.contains(term)) return false;
+      if (!fullIndex.contains(term)) return false;
     }
     return true;
   }
@@ -240,7 +271,12 @@ class Catalog {
       }
       if (query.inStockOnly && !p.isInStock) return false;
       if (query.discountedOnly && !p.isDiscounted) return false;
-      return matchesSearch(p, query.search);
+      return matchesSearch(
+        p,
+        query.search,
+        categories: query.categories,
+        companies: query.companies,
+      );
     }).toList();
 
     switch (query.sort) {
@@ -273,8 +309,7 @@ class Catalog {
             for (var i = 0; i < query.productOrder.length; i++)
               query.productOrder[i]: i,
           };
-          int rank(Product p) =>
-              orderIndex[p.id] ?? (orderIndex.length + 1);
+          int rank(Product p) => orderIndex[p.id] ?? (orderIndex.length + 1);
           filtered.sort((a, b) {
             final byOrder = rank(a).compareTo(rank(b));
             if (byOrder != 0) return byOrder;

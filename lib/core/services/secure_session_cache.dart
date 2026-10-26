@@ -41,9 +41,7 @@ class SecureSessionCache {
 
     // 1. Try secure storage with timeout
     try {
-      await _storage
-          .write(key: _key, value: encrypted)
-          .timeout(_timeout);
+      await _storage.write(key: _key, value: encrypted).timeout(_timeout);
     } catch (e) {
       debugPrint('SecureSessionCache storage write: $e');
     }

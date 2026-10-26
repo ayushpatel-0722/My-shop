@@ -14,9 +14,10 @@ import '../../../core/models/customer.dart';
 import '../../../core/models/order.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
-import '../../../core/services/email_service.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/app_product_image.dart';
 import '../../auth/auth_cubit.dart';
 import '../cart/cart_cubit.dart';
 import 'widgets/address_selector.dart';
@@ -389,15 +390,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final address = _selectedAddress();
 
     // 1. Customer name & mobile are mandatory for every order.
-    // Fall back to the selected delivery address if profile mobile/name is not yet populated.
-    final effectiveName = profile.name.trim().isNotEmpty
-        ? profile.name.trim()
-        : (address?.name.trim() ?? '');
-    final effectiveMobile = profile.mobile.trim().isNotEmpty
-        ? profile.mobile.trim()
-        : (address?.phone.trim() ?? '');
-
-    if (effectiveName.isEmpty || effectiveMobile.isEmpty) {
+    if (profile.name.trim().isEmpty || profile.mobile.trim().isEmpty) {
       _snack(
         AppLocalizations.of(
           context,
@@ -406,9 +399,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    if (profile.mobile.trim().isEmpty && effectiveMobile.isNotEmpty && profile.id.isNotEmpty) {
-      unawaited(repo.updateUserMobile(profile.id, effectiveMobile));
-    }
+    final effectiveName = profile.name.trim();
+    final effectiveMobile = profile.mobile.trim();
 
     // 2. Address is required only for shops with Home Delivery.
     final needsAddress = state.byCompany.keys.any(
@@ -535,6 +527,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           paymentStatus: PaymentStatus.pending,
           orderStatus: OrderStatus.pending,
           deliveryType: deliveryType,
+          paymentMethod: '',
+          transactionRef: null,
         );
         placed.add(order);
       }
@@ -547,10 +541,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       // One write for every shop's order — never a half-saved checkout.
       final saved = await repo.placeOrders(placed);
-      for (final savedOrder in saved) {
-        // Send / trigger order placed email notification (non-blocking).
-        unawaited(EmailService.sendOrderPlacedEmail(order: savedOrder));
-      }
 
       if (!mounted) return;
       if (!_isDirectBuy) {
@@ -560,7 +550,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.orderPlaced)));
       if (saved.length == 1) {
-        context.go(AppRoutes.orderPath(saved.first.id));
+        context.go(
+          AppRoutes.orderPath(saved.first.id, companyId: saved.first.companyId),
+        );
       } else {
         context.go(AppRoutes.orders);
       }
@@ -583,234 +575,1081 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).placeOrder)),
-      body: BlocBuilder<CartCubit, CartState>(
-        builder: (context, cubitState) {
-          if (_loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final cartState = _effectiveCartState(cubitState);
-          if (cartState.items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    return PopScope(
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          context.go(AppRoutes.cart);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).placeOrder),
+          leading: BackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(AppRoutes.cart);
+              }
+            },
+          ),
+        ),
+        body: BlocBuilder<CartCubit, CartState>(
+          builder: (context, cubitState) {
+            if (_loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final cartState = _effectiveCartState(cubitState);
+            if (cartState.items.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.shopping_cart_outlined, size: 56),
+                    const SizedBox(height: 12),
+                    Text(AppLocalizations.of(context).yourCartIsEmpty),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: () => context.go(AppRoutes.home),
+                      child: Text(l10n.home),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final companies = _companiesOf(cartState);
+            for (final companyId in companies) {
+              _voucherCtrls.putIfAbsent(companyId, TextEditingController.new);
+            }
+            final bills = _bills(cartState);
+            final profile = _profile;
+
+            final subtotal = bills.values.fold<double>(
+              0,
+              (sum, b) => sum + b.subtotal,
+            );
+            final discount = bills.values.fold<double>(
+              0,
+              (sum, b) => sum + b.discount,
+            );
+            final delivery = bills.values.fold<double>(
+              0,
+              (sum, b) => sum + b.deliveryCharge,
+            );
+            final total = bills.values.fold<double>(
+              0,
+              (sum, b) => sum + b.total,
+            );
+
+            final anyHomeDelivery = companies.any(
+              (id) => _deliveryTypes[id] == DeliveryType.homeDelivery,
+            );
+            final anyUnavailable =
+                cartState.items.any((e) => _unavailable.contains(e.cartKey)) ||
+                _unavailable.isNotEmpty;
+
+            if (context.screenWidth >= 1024) {
+              return _buildDesktopLayout(
+                context: context,
+                cartState: cartState,
+                companies: companies,
+                bills: bills,
+                profile: profile,
+                subtotal: subtotal,
+                discount: discount,
+                delivery: delivery,
+                total: total,
+                anyHomeDelivery: anyHomeDelivery,
+                anyUnavailable: anyUnavailable,
+                l10n: l10n,
+              );
+            } else if (context.screenWidth >= 600) {
+              return _buildTabletLayout(
+                context: context,
+                cartState: cartState,
+                companies: companies,
+                bills: bills,
+                profile: profile,
+                subtotal: subtotal,
+                discount: discount,
+                delivery: delivery,
+                total: total,
+                anyHomeDelivery: anyHomeDelivery,
+                anyUnavailable: anyUnavailable,
+                l10n: l10n,
+              );
+            }
+
+            return _buildMobileLayout(
+              context: context,
+              cartState: cartState,
+              companies: companies,
+              bills: bills,
+              profile: profile,
+              subtotal: subtotal,
+              discount: discount,
+              delivery: delivery,
+              total: total,
+              anyHomeDelivery: anyHomeDelivery,
+              anyUnavailable: anyUnavailable,
+              l10n: l10n,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionHeading({
+    required BuildContext context,
+    required String step,
+    required String title,
+    IconData? icon,
+    String? badge,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              step,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          if (icon != null) ...[
+            Icon(icon, size: 20, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (badge != null) ...[
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                badge,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout({
+    required BuildContext context,
+    required CartState cartState,
+    required List<String> companies,
+    required Map<String, OrderBill> bills,
+    required AppUserSnapshot profile,
+    required double subtotal,
+    required double discount,
+    required double delivery,
+    required double total,
+    required bool anyHomeDelivery,
+    required bool anyUnavailable,
+    required AppLocalizations l10n,
+  }) {
+    final isUltrawide = context.screenWidth >= 1440;
+    final hPad = isUltrawide
+        ? 48.0
+        : (context.screenWidth >= 1200 ? 32.0 : 24.0);
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1600),
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
+          children: [
+            // Breadcrumbs
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
                 children: [
-                  const Icon(Icons.shopping_cart_outlined, size: 56),
-                  const SizedBox(height: 12),
-                  Text(AppLocalizations.of(context).yourCartIsEmpty),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () => context.go(AppRoutes.home),
-                    child: Text(l10n.home),
+                  InkWell(
+                    onTap: () => context.go(AppRoutes.home),
+                    child: Text(
+                      l10n.home,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, size: 14, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => context.go(AppRoutes.cart),
+                    child: Text(
+                      AppLocalizations.of(context).cart,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, size: 14, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(
+                    AppLocalizations.of(context).placeOrder,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
-            );
-          }
+            ),
 
-          final companies = _companiesOf(cartState);
-          for (final companyId in companies) {
-            _voucherCtrls.putIfAbsent(companyId, TextEditingController.new);
-          }
-          final bills = _bills(cartState);
-          final profile = _profile;
-
-          final subtotal = bills.values.fold<double>(
-            0,
-            (sum, b) => sum + b.subtotal,
-          );
-          final discount = bills.values.fold<double>(
-            0,
-            (sum, b) => sum + b.discount,
-          );
-          final delivery = bills.values.fold<double>(
-            0,
-            (sum, b) => sum + b.deliveryCharge,
-          );
-          final total = bills.values.fold<double>(0, (sum, b) => sum + b.total);
-
-          final anyHomeDelivery = companies.any(
-            (id) => _deliveryTypes[id] == DeliveryType.homeDelivery,
-          );
-          final anyUnavailable =
-              cartState.items.any((e) => _unavailable.contains(e.cartKey)) ||
-              _unavailable.isNotEmpty;
-
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // ------------------------------------------- Customer details
-              CustomerDetailsCard(
-                name: profile.name,
-                email: profile.email,
-                mobile: profile.mobile,
-              ),
-              const SizedBox(height: 16),
-
-              // --------------------------------------------- Saved addresses
-              if (anyHomeDelivery) ...[
-                AddressSelector(
-                  addresses: _addresses,
-                  selectedAddressId: _selectedAddressId,
-                  onSelected: (address) {
-                    setState(() => _selectedAddressId = address.id);
-                    _lookupDelivery(companies);
-                  },
-                  onEdit: (address) async {
-                    await showAddressForm(context, initial: address);
-                    if (!mounted) return;
-                    _loadAddresses();
-                  },
-                  onAddNew: () async {
-                    await showAddressForm(context);
-                    if (!mounted) return;
-                    _loadAddresses();
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // ------------------------------------------- Shop-wise blocks
-              for (final companyId in companies) ...[
-                _StoreCheckoutCard(
-                  key: Key('checkout-store-card-$companyId'),
-                  companyId: companyId,
-                  company: _companies[companyId],
-                  items: cartState.byCompany[companyId] ?? const <CartItem>[],
-                  bill: bills[companyId],
-                  deliveryType:
-                      _deliveryTypes[companyId] ?? DeliveryType.homeDelivery,
-                  onDeliveryTypeChanged: (type) {
-                    setState(() => _deliveryTypes[companyId] = type);
-                    _lookupDelivery([companyId]);
-                  },
-                  unavailableKeys: _unavailable,
-                  voucherCtrl: _voucherCtrls[companyId]!,
-                  voucherError: _voucherError[companyId],
-                  onApply: () => _applyVoucher(
-                    companyId,
-                    cartState.byCompany[companyId] ?? const <CartItem>[],
-                  ),
-                  onRemove: () => _removeVoucher(companyId),
-                  applyLabel: l10n.applyVoucher,
-                ),
-                const SizedBox(height: 12),
-              ],
-
-              if (anyUnavailable)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    AppLocalizations.of(
-                      context,
-                    ).unavailableItemsAreExcludedFromTheTotal,
+            // Page Title & Item Count
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Row(
+                children: [
+                  Text(
+                    l10n.placeOrder,
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.error,
+                      fontSize: isUltrawide ? 30 : 26,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 14),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      '${cartState.items.length} ${cartState.items.length == 1 ? 'item' : 'items'}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-              // --------------------------------------------------- Summary
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left Column: Customer details, Address, Store checkout cards, Payment method
+                Expanded(
+                  flex: isUltrawide ? 8 : 7,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Section 1: Customer Details & Delivery Address
+                      _sectionHeading(
+                        context: context,
+                        step: '1',
+                        title: anyHomeDelivery
+                            ? l10n.deliveryAddress
+                            : AppLocalizations.of(context).customerDetails,
+                        icon: anyHomeDelivery
+                            ? Icons.location_on_outlined
+                            : Icons.person_pin_outlined,
+                      ),
+                      CustomerDetailsCard(
+                        name: profile.name,
+                        email: profile.email,
+                        mobile: profile.mobile,
+                      ),
+                      if (anyHomeDelivery) ...[
+                        const SizedBox(height: 14),
+                        AddressSelector(
+                          addresses: _addresses,
+                          selectedAddressId: _selectedAddressId,
+                          onSelected: (address) {
+                            setState(() => _selectedAddressId = address.id);
+                            _lookupDelivery(companies);
+                          },
+                          onEdit: (address) async {
+                            await showAddressForm(context, initial: address);
+                            if (!mounted) return;
+                            _loadAddresses();
+                          },
+                          onAddNew: () async {
+                            await showAddressForm(context);
+                            if (!mounted) return;
+                            _loadAddresses();
+                          },
+                        ),
+                      ],
+                      const SizedBox(height: 28),
+
+                      // Section 2: Store Items & Offers
+                      _sectionHeading(
+                        context: context,
+                        step: '2',
+                        title: 'Review Ordered Items & Store Delivery',
+                        icon: Icons.shopping_bag_outlined,
+                        badge:
+                            '${cartState.items.length} items from ${companies.length} ${companies.length == 1 ? 'store' : 'stores'}',
+                      ),
+                      for (final companyId in companies) ...[
+                        _StoreCheckoutCard(
+                          key: Key('checkout-store-card-$companyId'),
+                          companyId: companyId,
+                          company: _companies[companyId],
+                          items:
+                              cartState.byCompany[companyId] ??
+                              const <CartItem>[],
+                          bill: bills[companyId],
+                          deliveryType:
+                              _deliveryTypes[companyId] ??
+                              DeliveryType.homeDelivery,
+                          onDeliveryTypeChanged: (type) {
+                            setState(() => _deliveryTypes[companyId] = type);
+                            _lookupDelivery([companyId]);
+                          },
+                          unavailableKeys: _unavailable,
+                          voucherCtrl: _voucherCtrls[companyId]!,
+                          voucherError: _voucherError[companyId],
+                          onApply: () => _applyVoucher(
+                            companyId,
+                            cartState.byCompany[companyId] ??
+                                const <CartItem>[],
+                          ),
+                          onRemove: () => _removeVoucher(companyId),
+                          applyLabel: l10n.applyVoucher,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (anyUnavailable)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            ).unavailableItemsAreExcludedFromTheTotal,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+
+                      // Section 3: Payment
+                      _sectionHeading(
+                        context: context,
+                        step: '3',
+                        title: 'Payment',
+                        icon: Icons.payments_outlined,
+                      ),
+                      _buildPaymentNoticeCard(context),
+                    ],
+                  ),
+                ),
+                SizedBox(width: isUltrawide ? 36 : 24),
+
+                // Right Column: Order Summary card
+                SizedBox(
+                  width: isUltrawide ? 420 : 380,
                   child: Column(
                     children: [
-                      _summaryRow(l10n.subtotal, formatCurrency(subtotal)),
-                      if (discount > 0)
-                        _summaryRow(
-                          l10n.discount,
-                          '− ${formatCurrency(discount)}',
-                          color: Colors.green.shade700,
+                      Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: Color(0xFFE2E8F0)),
                         ),
-                      _summaryRow(
-                        l10n.deliveryCharge,
-                        formatCurrency(delivery),
-                      ),
-                      const Divider(height: 20),
-                      _summaryRow(
-                        l10n.totalAmount,
-                        formatCurrency(total),
-                        bold: true,
+                        child: Padding(
+                          padding: const EdgeInsets.all(22),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Order Summary',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                              ),
+                              const SizedBox(height: 18),
+                              _summaryRow(
+                                l10n.subtotal,
+                                formatCurrency(subtotal),
+                              ),
+                              if (discount > 0)
+                                _summaryRow(
+                                  l10n.discount,
+                                  '− ${formatCurrency(discount)}',
+                                  color: Colors.green.shade700,
+                                ),
+                              _summaryRow(
+                                l10n.deliveryCharge,
+                                delivery == 0
+                                    ? 'FREE'
+                                    : formatCurrency(delivery),
+                                color: delivery == 0
+                                    ? Colors.green.shade700
+                                    : null,
+                              ),
+                              const Divider(height: 24),
+                              _summaryRow(
+                                l10n.totalAmount,
+                                formatCurrency(total),
+                                bold: true,
+                              ),
+                              const SizedBox(height: 22),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: FilledButton(
+                                  key: const Key('checkout-place-order-button'),
+                                  onPressed: _placing
+                                      ? null
+                                      : () => _placeOrder(cartState),
+                                  style: FilledButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: _placing
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : Text(
+                                          _isDirectBuy
+                                              ? AppLocalizations.of(
+                                                  context,
+                                                ).placeDirectOrder(
+                                                  formatCurrency(total),
+                                                )
+                                              : AppLocalizations.of(
+                                                  context,
+                                                ).confirmPlaceOrder(
+                                                  formatCurrency(total),
+                                                ),
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              _buildTrustBadges(context),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletLayout({
+    required BuildContext context,
+    required CartState cartState,
+    required List<String> companies,
+    required Map<String, OrderBill> bills,
+    required AppUserSnapshot profile,
+    required double subtotal,
+    required double discount,
+    required double delivery,
+    required double total,
+    required bool anyHomeDelivery,
+    required bool anyUnavailable,
+    required AppLocalizations l10n,
+  }) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 880),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          children: [
+            // Breadcrumbs
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: () => context.go(AppRoutes.home),
+                    child: Text(
+                      l10n.home,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, size: 14, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => context.go(AppRoutes.cart),
+                    child: Text(
+                      AppLocalizations.of(context).cart,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, size: 14, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(
+                    AppLocalizations.of(context).placeOrder,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Page Title
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                children: [
+                  Text(
+                    l10n.placeOrder,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      '${cartState.items.length} ${cartState.items.length == 1 ? 'item' : 'items'}',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Step 1: Delivery Address & Customer Details
+            _sectionHeading(
+              context: context,
+              step: '1',
+              title: anyHomeDelivery
+                  ? l10n.deliveryAddress
+                  : AppLocalizations.of(context).customerDetails,
+              icon: anyHomeDelivery
+                  ? Icons.location_on_outlined
+                  : Icons.person_pin_outlined,
+            ),
+            CustomerDetailsCard(
+              name: profile.name,
+              email: profile.email,
+              mobile: profile.mobile,
+            ),
+            if (anyHomeDelivery) ...[
+              const SizedBox(height: 14),
+              AddressSelector(
+                addresses: _addresses,
+                selectedAddressId: _selectedAddressId,
+                onSelected: (address) {
+                  setState(() => _selectedAddressId = address.id);
+                  _lookupDelivery(companies);
+                },
+                onEdit: (address) async {
+                  await showAddressForm(context, initial: address);
+                  if (!mounted) return;
+                  _loadAddresses();
+                },
+                onAddNew: () async {
+                  await showAddressForm(context);
+                  if (!mounted) return;
+                  _loadAddresses();
+                },
+              ),
+            ],
+            const SizedBox(height: 24),
+
+            // Step 2: Review Ordered Items & Store Delivery
+            _sectionHeading(
+              context: context,
+              step: '2',
+              title: 'Review Ordered Items & Store Delivery',
+              icon: Icons.shopping_bag_outlined,
+              badge: '${cartState.items.length} items',
+            ),
+            for (final companyId in companies) ...[
+              _StoreCheckoutCard(
+                key: Key('checkout-store-card-$companyId'),
+                companyId: companyId,
+                company: _companies[companyId],
+                items: cartState.byCompany[companyId] ?? const <CartItem>[],
+                bill: bills[companyId],
+                deliveryType:
+                    _deliveryTypes[companyId] ?? DeliveryType.homeDelivery,
+                onDeliveryTypeChanged: (type) {
+                  setState(() => _deliveryTypes[companyId] = type);
+                  _lookupDelivery([companyId]);
+                },
+                unavailableKeys: _unavailable,
+                voucherCtrl: _voucherCtrls[companyId]!,
+                voucherError: _voucherError[companyId],
+                onApply: () => _applyVoucher(
+                  companyId,
+                  cartState.byCompany[companyId] ?? const <CartItem>[],
+                ),
+                onRemove: () => _removeVoucher(companyId),
+                applyLabel: l10n.applyVoucher,
               ),
               const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.amber.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.amber.shade700.withValues(alpha: 0.35),
+            ],
+
+            if (anyUnavailable)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).unavailableItemsAreExcludedFromTheTotal,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.error,
                   ),
                 ),
-                child: Row(
+              ),
+            const SizedBox(height: 20),
+
+            // Step 3: Payment
+            _sectionHeading(
+              context: context,
+              step: '3',
+              title: 'Payment',
+              icon: Icons.payments_outlined,
+            ),
+            _buildPaymentNoticeCard(context),
+            const SizedBox(height: 24),
+
+            // Tablet Order Summary Card
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.payments_outlined,
-                      color: Colors.amber.shade900,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context).manualOfflinePayment,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: Colors.amber.shade900,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).payDirectlyCashUpiOnDeliveryOrPickupPaymentStatusWillDefaultToPendingAndCanBeMarkedAsDoneByTheAdmin,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade800,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'Order Summary',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    _summaryRow(l10n.subtotal, formatCurrency(subtotal)),
+                    if (discount > 0)
+                      _summaryRow(
+                        l10n.discount,
+                        '− ${formatCurrency(discount)}',
+                        color: Colors.green.shade700,
+                      ),
+                    _summaryRow(
+                      l10n.deliveryCharge,
+                      delivery == 0 ? 'FREE' : formatCurrency(delivery),
+                      color: delivery == 0 ? Colors.green.shade700 : null,
+                    ),
+                    const Divider(height: 24),
+                    _summaryRow(
+                      l10n.totalAmount,
+                      formatCurrency(total),
+                      bold: true,
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: FilledButton(
+                        key: const Key('checkout-place-order-button'),
+                        onPressed: _placing
+                            ? null
+                            : () => _placeOrder(cartState),
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _placing
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                _isDirectBuy
+                                    ? AppLocalizations.of(
+                                        context,
+                                      ).placeDirectOrder(formatCurrency(total))
+                                    : AppLocalizations.of(
+                                        context,
+                                      ).confirmPlaceOrder(
+                                        formatCurrency(total),
+                                      ),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTrustBadges(context),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout({
+    required BuildContext context,
+    required CartState cartState,
+    required List<String> companies,
+    required Map<String, OrderBill> bills,
+    required AppUserSnapshot profile,
+    required double subtotal,
+    required double discount,
+    required double delivery,
+    required double total,
+    required bool anyHomeDelivery,
+    required bool anyUnavailable,
+    required AppLocalizations l10n,
+  }) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1000),
+        child: ListView(
+          padding: EdgeInsets.symmetric(
+            horizontal: context.isDesktop ? 24 : 16,
+            vertical: 16,
+          ),
+          children: [
+            // ------------------------------------------- Customer details
+            CustomerDetailsCard(
+              name: profile.name,
+              email: profile.email,
+              mobile: profile.mobile,
+            ),
+            const SizedBox(height: 16),
+
+            // --------------------------------------------- Saved addresses
+            if (anyHomeDelivery) ...[
+              AddressSelector(
+                addresses: _addresses,
+                selectedAddressId: _selectedAddressId,
+                onSelected: (address) {
+                  setState(() => _selectedAddressId = address.id);
+                  _lookupDelivery(companies);
+                },
+                onEdit: (address) async {
+                  await showAddressForm(context, initial: address);
+                  if (!mounted) return;
+                  _loadAddresses();
+                },
+                onAddNew: () async {
+                  await showAddressForm(context);
+                  if (!mounted) return;
+                  _loadAddresses();
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // ------------------------------------------- Shop-wise blocks
+            for (final companyId in companies) ...[
+              _StoreCheckoutCard(
+                key: Key('checkout-store-card-$companyId'),
+                companyId: companyId,
+                company: _companies[companyId],
+                items: cartState.byCompany[companyId] ?? const <CartItem>[],
+                bill: bills[companyId],
+                deliveryType:
+                    _deliveryTypes[companyId] ?? DeliveryType.homeDelivery,
+                onDeliveryTypeChanged: (type) {
+                  setState(() => _deliveryTypes[companyId] = type);
+                  _lookupDelivery([companyId]);
+                },
+                unavailableKeys: _unavailable,
+                voucherCtrl: _voucherCtrls[companyId]!,
+                voucherError: _voucherError[companyId],
+                onApply: () => _applyVoucher(
+                  companyId,
+                  cartState.byCompany[companyId] ?? const <CartItem>[],
+                ),
+                onRemove: () => _removeVoucher(companyId),
+                applyLabel: l10n.applyVoucher,
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            if (anyUnavailable)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).unavailableItemsAreExcludedFromTheTotal,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+
+            // --------------------------------------------------- Summary
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    _summaryRow(l10n.subtotal, formatCurrency(subtotal)),
+                    if (discount > 0)
+                      _summaryRow(
+                        l10n.discount,
+                        '− ${formatCurrency(discount)}',
+                        color: Colors.green.shade700,
+                      ),
+                    _summaryRow(l10n.deliveryCharge, formatCurrency(delivery)),
+                    const Divider(height: 20),
+                    _summaryRow(
+                      l10n.totalAmount,
+                      formatCurrency(total),
+                      bold: true,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              FilledButton(
-                key: const Key('checkout-place-order-button'),
-                onPressed: _placing ? null : () => _placeOrder(cartState),
-                child: _placing
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(
-                        _isDirectBuy
-                            ? AppLocalizations.of(
-                                context,
-                              ).placeDirectOrder(formatCurrency(total))
-                            : AppLocalizations.of(
-                                context,
-                              ).confirmPlaceOrder(formatCurrency(total)),
-                      ),
+            ),
+            const SizedBox(height: 14),
+            _buildPaymentNoticeCard(context),
+            const SizedBox(height: 20),
+            FilledButton(
+              key: const Key('checkout-place-order-button'),
+              onPressed: _placing ? null : () => _placeOrder(cartState),
+              child: _placing
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      _isDirectBuy
+                          ? AppLocalizations.of(
+                              context,
+                            ).placeDirectOrder(formatCurrency(total))
+                          : AppLocalizations.of(
+                              context,
+                            ).confirmPlaceOrder(formatCurrency(total)),
+                    ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentNoticeCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.teal.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.payments_outlined,
+              color: Colors.teal.shade800,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Pay on Delivery / Pickup',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Pay via Cash or UPI when your order is delivered or at store counter. Store admin will verify and record the payment receipt upon delivery/pickup.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade700,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrustBadges(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.verified_user_outlined,
+                size: 16,
+                color: Colors.green.shade700,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  '100% Safe & Secure Checkout',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                ),
+              ),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(
+                Icons.local_shipping_outlined,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Trackable Direct Store Delivery',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(
+                Icons.store_outlined,
+                size: 16,
+                color: Color(0xFF3D38D9),
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Verified Quality Products',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -901,28 +1740,50 @@ class _StoreCheckoutCard extends StatelessWidget {
               ? company!.name
               : AppLocalizations.of(context).store2);
     final isHome = deliveryType == DeliveryType.homeDelivery;
+    final isDesktop = context.screenWidth >= 600;
 
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.8),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(isDesktop ? 18 : 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.storefront, size: 18),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.storefront,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     storeName,
                     key: Key('checkout-store-name-$companyId'),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: isDesktop ? 16 : 14,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const Divider(height: 16),
+            const Divider(height: 20),
             for (final item in items) _itemRow(context, item),
             const SizedBox(height: 12),
 
@@ -939,7 +1800,10 @@ class _StoreCheckoutCard extends StatelessWidget {
                 resolvedBill.subtotal < company!.minOrderAmount) ...[
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(8),
@@ -1049,36 +1913,38 @@ class _StoreCheckoutCard extends StatelessWidget {
   /// One order line: image, name, variant label ("500g × 2") and price.
   Widget _itemRow(BuildContext context, CartItem item) {
     final unavailable = unavailableKeys.contains(item.cartKey);
+    final isDesktop = context.screenWidth >= 600;
+    final imageSize = isDesktop ? 56.0 : 36.0;
     final label = item.variantLabel.isNotEmpty
         ? '${item.variantLabel} × ${item.qty}'
         : '× ${item.qty}';
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: isDesktop ? 6 : 4),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (item.product.images.isNotEmpty &&
-              item.product.images.first.trim().isNotEmpty)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Image.network(
-                item.product.images.first.trim(),
-                width: 32,
-                height: 32,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: imageSize,
+              height: imageSize,
+              child: AppProductImage.product(
+                product: item.product,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 18,
-                  color: Colors.grey,
+                fallback: Container(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
-            )
-          else
-            const Icon(
-              Icons.shopping_bag_outlined,
-              size: 18,
-              color: Colors.grey,
             ),
-          const SizedBox(width: 8),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1086,35 +1952,74 @@ class _StoreCheckoutCard extends StatelessWidget {
                 Text(
                   item.product.name,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: isDesktop ? 15 : 13,
+                    fontWeight: isDesktop ? FontWeight.w600 : FontWeight.normal,
                     decoration: unavailable ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                Text(
-                  label,
-                  key: Key('checkout-item-variant-${item.cartKey}'),
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Container(
+                      key: Key('checkout-item-variant-${item.cartKey}'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: isDesktop ? 12 : 11.5,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.75),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (isDesktop && item.qty > 1) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        '(${formatCurrency(item.effectivePrice)} each)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 if (unavailable)
-                  Text(
-                    AppLocalizations.of(context).unavailable,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.error,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      AppLocalizations.of(context).unavailable,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
           Text(
             formatCurrency(item.lineTotal),
-            style: const TextStyle(fontSize: 13),
+            style: TextStyle(
+              fontSize: isDesktop ? 15 : 13,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

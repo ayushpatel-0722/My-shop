@@ -65,7 +65,7 @@ class CategoryTree {
       final parentId = c.parentId;
       if (parentId == null || parentId.isEmpty) continue;
 
-      if (parentId == c.id || _reaches(c.id, parentId, byId)) {
+      if (parentId == c.id || _reaches(parentId, c.id, byId)) {
         // Assigning this parent would create a loop -> keep it at the root.
         repaired.add(c);
         continue;

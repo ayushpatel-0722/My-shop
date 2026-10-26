@@ -133,8 +133,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
 
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
@@ -186,9 +186,11 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-theme: AppTheme.light(), home: const AdminProductsScreen()),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        theme: AppTheme.light(),
+        home: const AdminProductsScreen(),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -446,9 +448,11 @@ theme: AppTheme.light(), home: const AdminProductsScreen()),
 
     await tester.pumpWidget(
       MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-theme: AppTheme.light(), home: const AdminAddProductScreen()),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        theme: AppTheme.light(),
+        home: const AdminAddProductScreen(),
+      ),
     );
     await tester.pumpAndSettle();
 

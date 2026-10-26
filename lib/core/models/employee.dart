@@ -8,9 +8,11 @@ class Employee {
   final String address; // Residential address
   final String? dob; // Date of birth (formatted string / timestamp)
   final String gender; // male | female | other
-  final String role; // Designation: Picker, Manufacturer, Manager, Dispatcher, etc.
+  final String
+  role; // Designation: Picker, Manufacturer, Manager, Dispatcher, etc.
   final String email; // Login email (unique)
-  final Map<String, bool> permissions; // e.g. {canPack: true, canDispatch: false, ...}
+  final Map<String, bool>
+  permissions; // e.g. {canPack: true, canDispatch: false, ...}
   final bool shiftActive; // Gates login to scheduled hours
   final String? createdBy; // Admin who provisioned this account
   final double salary; // Salary amount
@@ -39,22 +41,23 @@ class Employee {
   });
 
   factory Employee.fromMap(String id, Map<String, dynamic> map) => Employee(
-        id: id,
-        companyId: map['companyId'] ?? '',
-        name: map['name'] ?? '',
-        details: map['details'] ?? '',
-        address: map['address'] ?? '',
-        dob: map['dob']?.toString(),
-        gender: map['gender'] ?? 'male',
-        role: map['role'] ?? 'Picker',
-        email: map['email'] ?? '',
-        permissions: (map['permissions'] as Map? ?? const {})
-            .map((k, v) => MapEntry(k.toString(), v == true)),
-        shiftActive: map['shiftActive'] ?? true,
-        createdBy: map['createdBy'],
-        salary: (map['salary'] ?? 0).toDouble(),
-        salaryType: map['salaryType'] ?? 'monthly',
-      );
+    id: id,
+    companyId: map['companyId'] ?? '',
+    name: map['name'] ?? '',
+    details: map['details'] ?? '',
+    address: map['address'] ?? '',
+    dob: map['dob']?.toString(),
+    gender: map['gender'] ?? 'male',
+    role: map['role'] ?? 'Picker',
+    email: map['email'] ?? '',
+    permissions: (map['permissions'] as Map? ?? const {}).map(
+      (k, v) => MapEntry(k.toString(), v == true),
+    ),
+    shiftActive: map['shiftActive'] ?? true,
+    createdBy: map['createdBy'],
+    salary: (map['salary'] ?? 0).toDouble(),
+    salaryType: map['salaryType'] ?? 'monthly',
+  );
 
   Employee copyWith({
     String? id,
@@ -91,19 +94,19 @@ class Employee {
   }
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'companyId': companyId,
-        'name': name,
-        'details': details,
-        'address': address,
-        'dob': dob,
-        'gender': gender,
-        'role': role,
-        'email': email,
-        'permissions': permissions,
-        'shiftActive': shiftActive,
-        'createdBy': createdBy,
-        'salary': salary,
-        'salaryType': salaryType,
-      };
+    'id': id,
+    'companyId': companyId,
+    'name': name,
+    'details': details,
+    'address': address,
+    'dob': dob,
+    'gender': gender,
+    'role': role,
+    'email': email,
+    'permissions': permissions,
+    'shiftActive': shiftActive,
+    'createdBy': createdBy,
+    'salary': salary,
+    'salaryType': salaryType,
+  };
 }

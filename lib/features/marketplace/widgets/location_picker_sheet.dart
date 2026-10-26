@@ -31,10 +31,7 @@ class LocationPickerSheet extends StatefulWidget {
       builder: (ctx) {
         final sheet = LocationPickerSheet(company: company);
         if (authCubit != null) {
-          return BlocProvider<AuthCubit>.value(
-            value: authCubit,
-            child: sheet,
-          );
+          return BlocProvider<AuthCubit>.value(value: authCubit, child: sheet);
         }
         return sheet;
       },

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/theme/app_theme.dart';
+import '../../../core/utils/responsive_extensions.dart';
 
 /// Reusable section title with an optional "view all" action.
 class SectionHeader extends StatelessWidget {
@@ -16,8 +18,11 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDesktop = context.isDesktop;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: isDesktop ? 8 : 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -27,22 +32,14 @@ class SectionHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 17.5,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1E2229),
-                    letterSpacing: -0.3,
-                  ),
-                ),
+                Text(title, style: AppTheme.shopperSectionHeading(context)),
                 if (subtitle != null && subtitle!.isNotEmpty) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      fontSize: isDesktop ? 13.5 : 12,
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -55,20 +52,23 @@ class SectionHeader extends StatelessWidget {
               onTap: onViewAll,
               borderRadius: BorderRadius.circular(8),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 10 : 6,
+                  vertical: isDesktop ? 6 : 4,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       AppLocalizations.of(context).seeAll,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: isDesktop ? 14 : 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFFF5247),
+                        color: const Color(0xFFFF5247),
                       ),
                     ),
-                    SizedBox(width: 2),
-                    Icon(
+                    const SizedBox(width: 3),
+                    const Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 11,
                       color: Color(0xFFFF5247),

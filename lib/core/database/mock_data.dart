@@ -12,8 +12,8 @@ class MockData {
   static final companies = <Company>[
     Company(
       id: 'c_organic',
-      name: 'Om Mart Express',
-      slug: 'om-mart-express',
+      name: 'GreenLeaf Organics',
+      slug: 'greenleaf-organics',
       companyPassword: 'green@123',
       details: 'Farm-fresh organic groceries delivered daily.',
       category: 'Grocery & Staples',
@@ -34,7 +34,6 @@ class MockData {
       reviewCount: 1240,
       handlingMinutes: 30,
       deliveryMinutes: 20,
-      minOrderAmount: 199,
     ),
     Company(
       id: 'c_techtronics',
@@ -54,11 +53,10 @@ class MockData {
       currency: 'INR',
       deliveryTypes: const ['home_delivery'],
       weeklyHours: Company.defaultWeek(),
-      isVerified: true,
+      isVerified: false,
       followers: 42,
       rating: 4.6,
       reviewCount: 320,
-      minOrderAmount: 499,
     ),
   ];
 
@@ -218,8 +216,18 @@ class MockData {
       stockQty: 25,
       isRecommended: true,
       variants: [
-        ProductVariant(title: 'Black', color: 'Black', sku: 'NOVA-X5-BLK', stockQty: 15),
-        ProductVariant(title: 'Silver', color: 'Silver', sku: 'NOVA-X5-SLV', stockQty: 10),
+        ProductVariant(
+          title: 'Black',
+          color: 'Black',
+          sku: 'NOVA-X5-BLK',
+          stockQty: 15,
+        ),
+        ProductVariant(
+          title: 'Silver',
+          color: 'Silver',
+          sku: 'NOVA-X5-SLV',
+          stockQty: 10,
+        ),
       ],
     ),
     const Product(

@@ -8,6 +8,7 @@ import '../../../core/models/product.dart';
 import '../../../core/models/voucher.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
@@ -345,21 +346,31 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = context.isDesktop;
     return ModernCard(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: isDesktop ? 14 : 10,
+          vertical: isDesktop ? 14 : 12,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 18, color: color),
+            Icon(icon, size: isDesktop ? 22 : 18, color: color),
             const SizedBox(height: 6),
             Text(
               value,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: isDesktop ? 22 : 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
               label,
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              style: TextStyle(
+                fontSize: isDesktop ? 13 : 11,
+                color: Colors.grey,
+              ),
             ),
           ],
         ),
@@ -386,6 +397,7 @@ class _VoucherTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final theme = Theme.of(context);
+    final isDesktop = context.isDesktop;
     final expired = voucher.isExpiredAt(now);
     final exhausted = voucher.isExhausted;
 
@@ -412,16 +424,16 @@ class _VoucherTile extends StatelessWidget {
 
     return ModernCard(
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(isDesktop ? 18 : 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 12 : 10,
+                    vertical: isDesktop ? 7 : 6,
                   ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -432,15 +444,16 @@ class _VoucherTile extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
+                      fontSize: isDesktop ? 15 : 14,
                       color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 10 : 8,
+                    vertical: isDesktop ? 4 : 3,
                   ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.14),
@@ -449,7 +462,7 @@ class _VoucherTile extends StatelessWidget {
                   child: Text(
                     statusLabel,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: isDesktop ? 12 : 11,
                       fontWeight: FontWeight.bold,
                       color: statusColor,
                     ),
@@ -457,14 +470,14 @@ class _VoucherTile extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 20),
+                  icon: Icon(Icons.edit_outlined, size: isDesktop ? 22 : 20),
                   tooltip: AppLocalizations.of(context).editVoucher,
                   onPressed: onEdit,
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline,
-                    size: 20,
+                    size: isDesktop ? 22 : 20,
                     color: Colors.redAccent,
                   ),
                   tooltip: AppLocalizations.of(context).deleteVoucher,
@@ -475,7 +488,10 @@ class _VoucherTile extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               '${voucher.discountLabel} · ${voucher.typeLabel}',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: isDesktop ? 16.5 : 15,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -489,7 +505,10 @@ class _VoucherTile extends StatelessWidget {
                     ? ' (${voucher.productIds.length})'
                     : '',
               ),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(
+                fontSize: isDesktop ? 13.5 : 12,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
@@ -501,7 +520,10 @@ class _VoucherTile extends StatelessWidget {
                     : '',
                 _fmt(context, voucher.expiryDate),
               ),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(
+                fontSize: isDesktop ? 13 : 12,
+                color: Colors.grey,
+              ),
             ),
             if (voucher.maxUses > 0) ...[
               const SizedBox(height: 8),

@@ -38,8 +38,49 @@ class OrderStatus {
 class PaymentStatus {
   static const pending = 'pending';
   static const done = 'done';
+  static const failed = 'failed';
 
-  static const all = <String>[pending, done];
+  static const all = <String>[pending, done, failed];
+
+  static String displayName(String status) {
+    switch (status.toLowerCase()) {
+      case done:
+        return 'Paid';
+      case failed:
+        return 'Failed';
+      case pending:
+      default:
+        return 'Pending';
+    }
+  }
+}
+
+/// Payment methods supported by the marketplace.
+class PaymentMethod {
+  static const cash = 'cash';
+  static const upi = 'upi';
+
+  static const all = <String>[cash, upi];
+
+  static bool isValid(String method) => all.contains(method.toLowerCase());
+
+  static bool isCash(String method) {
+    final m = method.toLowerCase().trim();
+    if (m.isEmpty) return false;
+    return m == cash || m == 'cod' || m == 'offline' || m.contains('cash');
+  }
+
+  static bool isUpi(String method) {
+    final m = method.toLowerCase().trim();
+    if (m.isEmpty) return false;
+    return m == upi || m == 'online' || m.contains('upi');
+  }
+
+  static String displayName(String method) {
+    if (isUpi(method)) return 'UPI';
+    if (isCash(method)) return 'Cash';
+    return method.isNotEmpty ? method.toUpperCase() : 'Not recorded';
+  }
 }
 
 /// Delivery modes.
@@ -80,6 +121,35 @@ class PickupShop {
 
   @override
   String toString() => 'PickupShop($name)';
+}
+
+/// A recorded entry in an order's status history timeline.
+class OrderStatusHistoryEntry {
+  final String status;
+  final String note;
+  final DateTime timestamp;
+
+  const OrderStatusHistoryEntry({
+    required this.status,
+    this.note = '',
+    required this.timestamp,
+  });
+
+  factory OrderStatusHistoryEntry.fromMap(Map<String, dynamic> map) =>
+      OrderStatusHistoryEntry(
+        status: asString(map['status']),
+        note: asString(map['note'] ?? map['reason']),
+        timestamp: asDateTime(map['timestamp']) ?? DateTime.now(),
+      );
+
+  Map<String, dynamic> toMap() => {
+    'status': status,
+    'note': note,
+    'timestamp': timestamp.toIso8601String(),
+  };
+
+  @override
+  String toString() => 'OrderStatusHistoryEntry($status, $note, $timestamp)';
 }
 
 /// One line of an order.
@@ -126,8 +196,7 @@ class OrderItem {
 
   double get itemTotal => unitPrice * (qty < 0 ? 0 : qty);
 
-  double get itemMrpTotal =>
-      (mrp > 0 ? mrp : unitPrice) * (qty < 0 ? 0 : qty);
+  double get itemMrpTotal => (mrp > 0 ? mrp : unitPrice) * (qty < 0 ? 0 : qty);
 
   /// "500g" — falls back to the variant title / sku.
   String get displayVariantLabel {
@@ -158,7 +227,7 @@ class OrderItem {
       qty: asInt(map['qty'], 1),
       unitPrice: asDouble(map['unitPrice']),
       name: asString(map['name']),
-      image: asString(map['image']),
+      image: asString(map['image'] ?? map['imageUrl'] ?? map['productImage']),
       variantTitle: asString(map['variantTitle']),
       variantSku: asString(map['variantSku'] ?? map['variantId']),
       variantLabel: asString(map['variantLabel'] ?? map['variantTitle']),
@@ -267,12 +336,16 @@ class Order {
   final double? amountPaid;
   final String? transactionRef;
   final DateTime? paidAt;
+  final String? paymentVerifiedBy;
+  final DateTime? paymentVerifiedAt;
   final String? assignedEmployeeId;
   final bool employeePackingDone;
   final String? reviewId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? cancelledAt;
+  final List<OrderStatusHistoryEntry> statusHistory;
+  final bool stockRestored;
 
   Order({
     required this.id,
@@ -300,12 +373,16 @@ class Order {
     this.amountPaid,
     this.transactionRef,
     this.paidAt,
+    this.paymentVerifiedBy,
+    this.paymentVerifiedAt,
     this.assignedEmployeeId,
     this.employeePackingDone = false,
     this.reviewId,
     this.createdAt,
     this.updatedAt,
     this.cancelledAt,
+    this.statusHistory = const <OrderStatusHistoryEntry>[],
+    this.stockRestored = false,
   }) : subtotal = subtotal ?? itemsTotalOf(items),
        totalAmount = totalAmount ?? itemsTotalOf(items);
 
@@ -331,6 +408,13 @@ class Order {
   bool get isOpen => !isCancelled && !isCompleted;
 
   bool get isPaid => paymentStatus == PaymentStatus.done;
+  bool get isPaymentPending => paymentStatus == PaymentStatus.pending;
+  bool get isPaymentFailed => paymentStatus == PaymentStatus.failed;
+  bool get isCash => PaymentMethod.isCash(paymentMethod);
+  bool get isUpi => PaymentMethod.isUpi(paymentMethod);
+  bool get hasPaymentMethod => isCash || isUpi;
+  String get paymentMethodDisplay => PaymentMethod.displayName(paymentMethod);
+  String get paymentStatusDisplay => PaymentStatus.displayName(paymentStatus);
   bool get isSelfPickup => deliveryType == DeliveryType.selfPickup;
 
   /// Compact, always-safe label for chips and titles (`#A1B2C3`).
@@ -391,11 +475,18 @@ class Order {
       cancellationReason: map['cancellationReason'] != null
           ? asString(map['cancellationReason'])
           : null,
-      amountPaid: map['amountPaid'] != null ? asDouble(map['amountPaid']) : null,
+      amountPaid: map['amountPaid'] != null
+          ? asDouble(map['amountPaid'])
+          : null,
       transactionRef: map['transactionRef'] != null
           ? asString(map['transactionRef'])
           : null,
       paidAt: asDateTime(map['paidAt']),
+      paymentVerifiedBy: map['paymentVerifiedBy'] != null
+          ? asString(map['paymentVerifiedBy'])
+          : null,
+      paymentVerifiedAt:
+          asDateTime(map['paymentVerifiedAt']) ?? asDateTime(map['paidAt']),
       assignedEmployeeId: map['assignedEmployeeId'] == null
           ? null
           : asString(map['assignedEmployeeId']).isNotEmpty
@@ -410,6 +501,10 @@ class Order {
       createdAt: asDateTime(map['createdAt']),
       updatedAt: asDateTime(map['updatedAt']),
       cancelledAt: asDateTime(map['cancelledAt']),
+      statusHistory: asMapList(
+        map['statusHistory'],
+      ).map(OrderStatusHistoryEntry.fromMap).toList(),
+      stockRestored: asBool(map['stockRestored']),
     );
   }
 
@@ -439,12 +534,17 @@ class Order {
     'amountPaid': amountPaid,
     'transactionRef': transactionRef,
     'paidAt': paidAt?.toIso8601String(),
+    'paymentVerifiedBy': paymentVerifiedBy,
+    'paymentVerifiedAt':
+        paymentVerifiedAt?.toIso8601String() ?? paidAt?.toIso8601String(),
     'assignedEmployeeId': assignedEmployeeId,
     'employeePackingDone': employeePackingDone,
     'reviewId': reviewId,
     'createdAt': createdAt?.toIso8601String(),
     'updatedAt': updatedAt?.toIso8601String(),
     'cancelledAt': cancelledAt?.toIso8601String(),
+    'statusHistory': statusHistory.map((e) => e.toMap()).toList(),
+    'stockRestored': stockRestored,
   };
 
   // ------------------------------------------------------------- Mutation --
@@ -462,6 +562,8 @@ class Order {
     double? amountPaid,
     String? transactionRef,
     DateTime? paidAt,
+    String? paymentVerifiedBy,
+    DateTime? paymentVerifiedAt,
     String? assignedEmployeeId,
     bool clearAssignedEmployee = false,
     bool? employeePackingDone,
@@ -478,6 +580,8 @@ class Order {
     DateTime? updatedAt,
     DateTime? cancelledAt,
     bool clearCancelledAt = false,
+    List<OrderStatusHistoryEntry>? statusHistory,
+    bool? stockRestored,
   }) => Order(
     id: id ?? this.id,
     userId: userId,
@@ -504,6 +608,8 @@ class Order {
     amountPaid: amountPaid ?? this.amountPaid,
     transactionRef: transactionRef ?? this.transactionRef,
     paidAt: paidAt ?? this.paidAt,
+    paymentVerifiedBy: paymentVerifiedBy ?? this.paymentVerifiedBy,
+    paymentVerifiedAt: paymentVerifiedAt ?? this.paymentVerifiedAt,
     assignedEmployeeId: clearAssignedEmployee
         ? null
         : (assignedEmployeeId ?? this.assignedEmployeeId),
@@ -512,6 +618,8 @@ class Order {
     createdAt: createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     cancelledAt: clearCancelledAt ? null : (cancelledAt ?? this.cancelledAt),
+    statusHistory: statusHistory ?? this.statusHistory,
+    stockRestored: stockRestored ?? this.stockRestored,
   );
 
   Order copyWithItems(List<OrderItem> newItems, {double? subtotal}) => Order(
@@ -540,26 +648,52 @@ class Order {
     amountPaid: amountPaid,
     transactionRef: transactionRef,
     paidAt: paidAt,
+    paymentVerifiedBy: paymentVerifiedBy,
+    paymentVerifiedAt: paymentVerifiedAt,
     assignedEmployeeId: assignedEmployeeId,
     employeePackingDone: employeePackingDone,
     reviewId: reviewId,
     createdAt: createdAt,
     updatedAt: updatedAt,
     cancelledAt: cancelledAt,
+    statusHistory: statusHistory,
+    stockRestored: stockRestored,
   );
 
   /// Applies a status change and stamps the audit timestamps.
-  Order withStatus(String status, {DateTime? now, bool? paid, String? reason}) {
+  Order withStatus(
+    String status, {
+    DateTime? now,
+    bool? paid,
+    String? reason,
+    String? note,
+  }) {
     final timestamp = now ?? DateTime.now();
+    final newHistory = List<OrderStatusHistoryEntry>.from(statusHistory)
+      ..add(
+        OrderStatusHistoryEntry(
+          status: status,
+          note:
+              note ??
+              reason ??
+              (status == OrderStatus.cancelled
+                  ? 'Cancelled'
+                  : 'Status updated to $status'),
+          timestamp: timestamp,
+        ),
+      );
     return copyWith(
       orderStatus: status,
       updatedAt: timestamp,
       cancelledAt: status == OrderStatus.cancelled ? timestamp : null,
       clearCancelledAt: status != OrderStatus.cancelled,
-      cancellationReason: status == OrderStatus.cancelled ? (reason ?? cancellationReason) : null,
+      cancellationReason: status == OrderStatus.cancelled
+          ? (reason ?? cancellationReason)
+          : null,
       paymentStatus: paid != null
           ? (paid ? PaymentStatus.done : PaymentStatus.pending)
           : paymentStatus,
+      statusHistory: newHistory,
     );
   }
 

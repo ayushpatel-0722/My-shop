@@ -135,14 +135,8 @@ void main() {
 
     await pumpCart(tester);
 
-    expect(
-      find.byKey(const Key('cart-line-p_rice_RICE-500')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('cart-line-p_rice_RICE-1KG')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('cart-line-p_rice_RICE-500')), findsOneWidget);
+    expect(find.byKey(const Key('cart-line-p_rice_RICE-1KG')), findsOneWidget);
     expect(find.text('₹300 / 500g'), findsOneWidget);
     expect(find.text('₹500 / 1kg'), findsOneWidget);
     expect(cart.state.items.length, 2);
@@ -152,7 +146,12 @@ void main() {
     tester,
   ) async {
     cart.add(rice, variant: variantOf('RICE-500'), companyId: 'c_organic');
-    cart.add(rice, variant: variantOf('RICE-500'), companyId: 'c_organic', qty: 2);
+    cart.add(
+      rice,
+      variant: variantOf('RICE-500'),
+      companyId: 'c_organic',
+      qty: 2,
+    );
 
     await pumpCart(tester);
 
@@ -272,6 +271,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(cart.state.items.single.qty, 3, reason: 'stock blocks the increment');
+    expect(
+      cart.state.items.single.qty,
+      3,
+      reason: 'stock blocks the increment',
+    );
   });
 }

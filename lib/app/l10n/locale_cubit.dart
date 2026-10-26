@@ -9,11 +9,7 @@ import 'l10n_service.dart';
 class LocaleCubit extends Cubit<Locale> {
   LocaleCubit() : super(const Locale('en'));
 
-  static const supported = [
-    Locale('en'),
-    Locale('gu'),
-    Locale('hi'),
-  ];
+  static const supported = [Locale('en'), Locale('gu'), Locale('hi')];
 
   static const _prefKey = 'preferred_language';
 

@@ -23,25 +23,25 @@ class Admin {
   });
 
   factory Admin.fromMap(String id, Map<String, dynamic> map) => Admin(
-        id: id,
-        companyId: map['companyId'] ?? '',
-        name: map['name'] ?? '',
-        email: map['email'] ?? '',
-        mobileNumber: map['mobileNumber'] ?? '',
-        address: map['address'] ?? '',
-        gender: map['gender'] ?? 'other',
-        createdBy: map['createdBy'],
-        emailVerified: map['emailVerified'] ?? false,
-      );
+    id: id,
+    companyId: map['companyId'] ?? '',
+    name: map['name'] ?? '',
+    email: map['email'] ?? '',
+    mobileNumber: map['mobileNumber'] ?? '',
+    address: map['address'] ?? '',
+    gender: map['gender'] ?? 'other',
+    createdBy: map['createdBy'],
+    emailVerified: map['emailVerified'] ?? false,
+  );
 
   Map<String, dynamic> toMap() => {
-        'companyId': companyId,
-        'name': name,
-        'email': email,
-        'mobileNumber': mobileNumber,
-        'address': address,
-        'gender': gender,
-        'createdBy': createdBy,
-        'emailVerified': emailVerified,
-      };
+    'companyId': companyId,
+    'name': name,
+    'email': email,
+    'mobileNumber': mobileNumber,
+    'address': address,
+    'gender': gender,
+    'createdBy': createdBy,
+    'emailVerified': emailVerified,
+  };
 }

@@ -25,8 +25,12 @@ class LanguageSelector extends StatelessWidget {
   }
 
   Widget _lang(
-      BuildContext context, LocaleCubit cubit, String code, String label,
-      Locale current) {
+    BuildContext context,
+    LocaleCubit cubit,
+    String code,
+    String label,
+    Locale current,
+  ) {
     final active = current.languageCode == code;
     return ChoiceChip(
       label: Text(label),

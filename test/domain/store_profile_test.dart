@@ -65,7 +65,8 @@ void main() {
         const WeeklyHours(day: 'Mon', openTime: '22:00', closeTime: '06:00'),
         ...List.generate(
           6,
-          (_) => const WeeklyHours(day: '', openTime: '22:00', closeTime: '06:00'),
+          (_) =>
+              const WeeklyHours(day: '', openTime: '22:00', closeTime: '06:00'),
         ),
       ];
       final shop = _shop(hours: overnight);
@@ -105,33 +106,30 @@ void main() {
 
   group('StoreStats', () {
     test('averages only visible reviews', () {
-      final stats = StoreStats.fromReviews(
-        [
-          const Review(
-            id: 'a',
-            orderId: 'o1',
-            userId: 'u',
-            companyId: 'c',
-            rating: 5,
-          ),
-          const Review(
-            id: 'b',
-            orderId: 'o2',
-            userId: 'u',
-            companyId: 'c',
-            rating: 3,
-          ),
-          const Review(
-            id: 'hidden',
-            orderId: 'o3',
-            userId: 'u',
-            companyId: 'c',
-            rating: 1,
-            isVisible: false,
-          ),
-        ],
-        followerCount: 128,
-      );
+      final stats = StoreStats.fromReviews([
+        const Review(
+          id: 'a',
+          orderId: 'o1',
+          userId: 'u',
+          companyId: 'c',
+          rating: 5,
+        ),
+        const Review(
+          id: 'b',
+          orderId: 'o2',
+          userId: 'u',
+          companyId: 'c',
+          rating: 3,
+        ),
+        const Review(
+          id: 'hidden',
+          orderId: 'o3',
+          userId: 'u',
+          companyId: 'c',
+          rating: 1,
+          isVisible: false,
+        ),
+      ], followerCount: 128);
 
       expect(stats.averageRating, 4);
       expect(stats.reviewCount, 2);

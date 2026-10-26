@@ -73,6 +73,28 @@ class OrderStatusRules {
   static bool isCancellable(String status) =>
       allowedNext(status).contains(OrderStatus.cancelled);
 
+  /// Customers can cancel their own order only when its status is pending.
+  /// Once confirmed or processed by the store, customer cancellation is disallowed.
+  static bool isCustomerCancellable(String status) =>
+      status == OrderStatus.pending;
+
+  /// Clear feedback explaining why an order cannot be cancelled by a customer.
+  static String? customerCancellationIneligibleReason(String status) {
+    if (status == OrderStatus.cancelled) {
+      return 'This order has already been cancelled.';
+    }
+    if (status == OrderStatus.completed) {
+      return 'This order has already been delivered and completed.';
+    }
+    if (status == OrderStatus.confirmed ||
+        status == OrderStatus.packing ||
+        status == OrderStatus.ready ||
+        status == OrderStatus.onTheWay) {
+      return 'This order has already been confirmed by the store and can no longer be cancelled.';
+    }
+    return null;
+  }
+
   /// 0-based position in the customer facing tracker (-1 when cancelled).
   static int trackerIndex(String status) =>
       OrderStatus.trackerChain.indexOf(status);

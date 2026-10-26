@@ -10,8 +10,8 @@ void showAddToCartNotification(
   String? variantLabel,
 }) {
   final messenger = ScaffoldMessenger.of(context);
-  // Dismiss any existing notification so notifications don't stack duplicates
-  messenger.hideCurrentSnackBar();
+  // Dismiss any existing notification immediately so rapid clicks don't stack
+  messenger.clearSnackBars();
 
   final variantSuffix = (variantLabel != null && variantLabel.trim().isNotEmpty)
       ? ' ($variantLabel)'
@@ -30,7 +30,7 @@ void showAddToCartNotification(
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              '$productName$variantSuffix added to cart successfully.',
+              '$productName$variantSuffix added to cart',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -42,7 +42,7 @@ void showAddToCartNotification(
           ),
         ],
       ),
-      duration: const Duration(days: 365), // Persistent until manually dismissed
+      duration: const Duration(seconds: 3),
       showCloseIcon: true,
       closeIconColor: Colors.white70,
       behavior: SnackBarBehavior.floating,
@@ -60,4 +60,3 @@ void showAddToCartNotification(
     ),
   );
 }
-

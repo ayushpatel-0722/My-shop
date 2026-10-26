@@ -2,6 +2,8 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/utils/responsive_extensions.dart';
+
 /// Comprehensive Modern Design System & Design Tokens (M3 UI).
 ///
 /// Crafted following modern aesthetics seen on Stripe, Linear, and Vercel:
@@ -71,6 +73,258 @@ class AppTheme {
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
   static const Color info = Color(0xFF3D38D9); // Royal Blue
+
+  // ---------------------------------------------------------------------------
+  // Centralized Admin Dashboard Design Tokens
+  // ---------------------------------------------------------------------------
+  static const Color adminBgLight = Color(
+    0xFFF8FAFC,
+  ); // Clean slate-50 SaaS canvas
+  static const Color adminBgDark = Color(
+    0xFF0B0F19,
+  ); // Midnight charcoal dark canvas
+
+  static const Color adminSidebarBgLight = Color(
+    0xFFFFFFFF,
+  ); // Pure white sidebar
+  static const Color adminSidebarBgDark = Color(
+    0xFF0F172A,
+  ); // Elevated slate-900 sidebar
+
+  static const Color adminSidebarBorderLight = Color(0xFFE2E8F0);
+  static const Color adminSidebarBorderDark = Color(0x1FFFFFFF);
+
+  static const Color adminActiveIndicator = Color(0xFFC5221F);
+  static const Color adminActiveNavBgLight = Color(0xFFFFF1F0);
+  static const Color adminActiveNavBgDark = Color(0xFF2A1C1D);
+
+  static const Color adminHoverNavBgLight = Color(0xFFF1F5F9);
+  static const Color adminHoverNavBgDark = Color(0xFF1E293B);
+
+  static const Color adminCardBorderLight = Color(0xFFE2E8F0);
+  static const Color adminCardBorderDark = Color(0x1FFFFFFF);
+
+  static const Color adminCardHoverLight = Color(0xFFF8FAFC);
+  static const Color adminCardHoverDark = Color(0xFF1E293B);
+
+  /// Helper to get theme-aware admin sidebar background
+  static Color adminSidebarBackground(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? adminSidebarBgDark
+        : adminSidebarBgLight;
+  }
+
+  /// Helper to get theme-aware admin sidebar border
+  static Color adminSidebarBorder(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? adminSidebarBorderDark
+        : adminSidebarBorderLight;
+  }
+
+  /// Helper to get theme-aware admin card border
+  static Color adminCardBorder(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? adminCardBorderDark
+        : adminCardBorderLight;
+  }
+
+  /// Helper to get theme-aware admin active nav background
+  static Color adminActiveNavBackground(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? adminActiveNavBgDark
+        : adminActiveNavBgLight;
+  }
+
+  /// Helper to get theme-aware admin hover nav background
+  static Color adminHoverNavBackground(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? adminHoverNavBgDark
+        : adminHoverNavBgLight;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Centralized Admin Responsive Typography & Component Tokens
+  // ---------------------------------------------------------------------------
+
+  /// Card internal padding: 14 on mobile, 18 on desktop
+  static EdgeInsets adminCardPadding(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return width >= 1024 ? const EdgeInsets.all(18) : const EdgeInsets.all(14);
+  }
+
+  /// Responsive page title style
+  static TextStyle adminPageTitle(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: isDesktop ? 24 : 20,
+      fontWeight: FontWeight.bold,
+      letterSpacing: -0.3,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive section heading style
+  static TextStyle adminSectionTitle(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: isDesktop ? 18 : 16,
+      fontWeight: FontWeight.bold,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive card title style
+  static TextStyle adminCardTitle(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: isDesktop ? 15.5 : 14,
+      fontWeight: FontWeight.w700,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive metric KPI value style
+  static TextStyle adminMetricValue(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: isDesktop ? 26 : 20,
+      fontWeight: FontWeight.bold,
+      letterSpacing: -0.5,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive metric KPI label style
+  static TextStyle adminMetricLabel(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: isDesktop ? 13.5 : 12,
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+  }
+
+  /// Responsive body text style
+  static TextStyle adminBody(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: isDesktop ? 14.5 : 13.5,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive secondary body / subtitle text style
+  static TextStyle adminBodySmall(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: isDesktop ? 13 : 11.5,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+  }
+
+  /// Responsive badge / tag style
+  static TextStyle adminBadgeText(BuildContext context) {
+    final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
+    return TextStyle(
+      fontSize: isDesktop ? 11.5 : 10.5,
+      fontWeight: FontWeight.bold,
+      height: 1.0,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Centralized Shopper Web & Responsive Design Tokens
+  // ---------------------------------------------------------------------------
+
+  /// Recommended max content width for shopper web screens to maintain readable,
+  /// centered layouts without stretching across ultrawide monitors.
+  static const double shopperMaxContentWidth = 1200.0;
+  static const double shopperNarrowMaxContentWidth = 1000.0;
+
+  /// Responsive page title for shopper screens (22 Mobile | 26 Tablet | 32 Desktop | 36 Large Desktop)
+  static TextStyle shopperPageTitle(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: context.titleSize,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.4,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive section heading for shopper screens (18 Mobile | 21 Tablet | 26 Desktop | 28 Large Desktop)
+  static TextStyle shopperSectionHeading(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: context.sectionHeadingSize,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.3,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive subsection heading (16 Mobile | 18 Tablet | 21 Desktop | 24 Large Desktop)
+  static TextStyle shopperSubSectionHeading(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: context.subSectionHeadingSize,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.2,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive product title on cards & listings (14 Mobile | 16 Tablet | 18 Desktop | 20 Large Desktop)
+  static TextStyle shopperProductTitle(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: context.productNameSize,
+      fontWeight: FontWeight.w700,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive price text (16 Mobile | 18 Tablet | 22 Desktop | 24 Large Desktop)
+  static TextStyle shopperPrice(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: context.productPriceSize,
+      fontWeight: FontWeight.w800,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive body text for shopper screens (14 Mobile | 15 Tablet | 16 Desktop | 17 Large Desktop)
+  static TextStyle shopperBody(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: context.bodyTextSize,
+      fontWeight: FontWeight.w400,
+      height: 1.45,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// Responsive small secondary text for shopper screens (12 Mobile | 13 Tablet | 14 Desktop | 15 Large Desktop)
+  static TextStyle shopperBodySmall(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextStyle(
+      fontSize: context.supportingTextSize,
+      fontWeight: FontWeight.w500,
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+  }
 
   // ---------------------------------------------------------------------------
   // Shadows, Elevations & Depth ("Sedoe")

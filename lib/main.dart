@@ -38,7 +38,9 @@ Future<void> main() async {
       }
     }
     firebaseReady = true;
-    debugPrint('\u2705 Firebase initialized for ${EnvironmentConfig.current.name.toUpperCase()} environment.');
+    debugPrint(
+      '\u2705 Firebase initialized for ${EnvironmentConfig.current.name.toUpperCase()} environment.',
+    );
 
     // App Check (blocks non-genuine clients). Skip on web (needs reCAPTCHA).
     try {

@@ -9,19 +9,18 @@ CartItem line(
   String categoryId = 'cat_veg',
   double price = 100,
   int qty = 1,
-}) =>
-    CartItem(
-      companyId: 'c_organic',
-      companyName: 'GreenLeaf Organics',
-      product: Product(
-        id: productId,
-        companyId: 'c_organic',
-        categoryId: categoryId,
-        name: 'Product $productId',
-        amount: price,
-      ),
-      qty: qty,
-    );
+}) => CartItem(
+  companyId: 'c_organic',
+  companyName: 'GreenLeaf Organics',
+  product: Product(
+    id: productId,
+    companyId: 'c_organic',
+    categoryId: categoryId,
+    name: 'Product $productId',
+    amount: price,
+  ),
+  qty: qty,
+);
 
 Voucher voucher({
   String id = 'v_1',
@@ -39,42 +38,45 @@ Voucher voucher({
   List<String> categoryIds = const [],
   List<String> usedOrders = const [],
   Map<String, int> usageByUser = const {},
-}) =>
-    Voucher(
-      id: id,
-      companyId: 'c_organic',
-      code: code,
-      discountType: type,
-      discountValue: value,
-      appliesTo: scope,
-      productIds: productIds,
-      categoryIds: categoryIds,
-      perUserLimit: perUser,
-      maxUses: maxUses,
-      expiryDate: expiry,
-      minOrderAmt: minOrder,
-      firstTimeOnly: firstTimeOnly,
-      isActive: active,
-      usedOrderIds: usedOrders,
-      usageByUser: usageByUser,
-    );
+}) => Voucher(
+  id: id,
+  companyId: 'c_organic',
+  code: code,
+  discountType: type,
+  discountValue: value,
+  appliesTo: scope,
+  productIds: productIds,
+  categoryIds: categoryIds,
+  perUserLimit: perUser,
+  maxUses: maxUses,
+  expiryDate: expiry,
+  minOrderAmt: minOrder,
+  firstTimeOnly: firstTimeOnly,
+  isActive: active,
+  usedOrderIds: usedOrders,
+  usageByUser: usageByUser,
+);
 
 final now = DateTime(2026, 6, 1, 12);
 final future = DateTime(2026, 12, 31, 23, 59, 59);
 final past = DateTime(2020, 1, 1);
 
-VoucherContext context({
-  String userId = 'u_1',
-  int previousOrders = 0,
-}) =>
-    VoucherContext(now: now, userId: userId, previousOrderCount: previousOrders);
+VoucherContext context({String userId = 'u_1', int previousOrders = 0}) =>
+    VoucherContext(
+      now: now,
+      userId: userId,
+      previousOrderCount: previousOrders,
+    );
 
 void main() {
   const evaluator = VoucherEvaluator();
 
   group('VoucherEvaluator — happy paths', () {
     test('no voucher means no discount (and no crash)', () {
-      final result = evaluator.evaluate(items: [line('p1')], context: context());
+      final result = evaluator.evaluate(
+        items: [line('p1')],
+        context: context(),
+      );
 
       expect(result.isAccepted, isFalse);
       expect(result.reason, VoucherRejection.none);
@@ -98,7 +100,11 @@ void main() {
 
     test('fixed amount voucher is clamped to the eligible subtotal', () {
       final result = evaluator.evaluate(
-        voucher: voucher(type: VoucherType.fixedAmount, value: 500, expiry: future),
+        voucher: voucher(
+          type: VoucherType.fixedAmount,
+          value: 500,
+          expiry: future,
+        ),
         items: [line('p1', price: 120)],
         context: context(),
       );
@@ -175,7 +181,10 @@ void main() {
           value: 10,
           expiry: future,
         ),
-        items: [line('p1', categoryId: 'cat_veg', price: 100), line('p2', categoryId: 'cat_fruit', price: 500)],
+        items: [
+          line('p1', categoryId: 'cat_veg', price: 100),
+          line('p2', categoryId: 'cat_fruit', price: 500),
+        ],
         context: context(),
       );
 
@@ -326,7 +335,13 @@ void main() {
         voucher(id: 'v_ok', expiry: future),
         voucher(id: 'v_old', code: 'OLD', expiry: past),
         voucher(id: 'v_pause', code: 'PAUSED', expiry: future, active: false),
-        voucher(id: 'v_done', code: 'DONE', expiry: future, maxUses: 1, usedOrders: ['o_1']),
+        voucher(
+          id: 'v_done',
+          code: 'DONE',
+          expiry: future,
+          maxUses: 1,
+          usedOrders: ['o_1'],
+        ),
         voucher(
           id: 'v_scope',
           code: 'SCOPED',

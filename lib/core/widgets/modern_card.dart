@@ -94,10 +94,7 @@ class _ModernCardState extends State<ModernCard> {
         border: border,
         boxShadow: shadows,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: widget.child,
-      ),
+      child: Material(color: Colors.transparent, child: widget.child),
     );
 
     if (interactive) {

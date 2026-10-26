@@ -20,6 +20,7 @@ void main() {
     WidgetTester tester, {
     CartCubit? cartCubit,
     String slug = 'greenleaf-organics',
+    Size? size,
   }) => pumpTestApp(
     tester,
     CompanyStoreScreen(slug: slug),
@@ -27,7 +28,7 @@ void main() {
     cartCubit: cartCubit,
     // Tall frame so every shelf, trending and the grid are all built by
     // the lazy ListView in one frame.
-    size: const Size(430, 6000),
+    size: size ?? const Size(430, 6000),
   );
 
   testWidgets('shop details: logo, verified badge, rating, followers, pill', (
@@ -84,9 +85,27 @@ void main() {
     }
 
     // The shelf headers carry the category names.
-    expect(find.text('Vegetables'), findsOneWidget);
-    expect(find.text('Fruits'), findsOneWidget);
-    expect(find.text('Dairy & Eggs'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('store-shelf-cat_veg')),
+        matching: find.text('Vegetables'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('store-shelf-cat_fruit')),
+        matching: find.text('Fruits'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('store-shelf-cat_dairy')),
+        matching: find.text('Dairy & Eggs'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shelves with few products stay shelves', (tester) async {
@@ -182,7 +201,7 @@ void main() {
   ) async {
     await pumpStore(tester);
 
-    expect(find.text('All Products (5)'), findsOneWidget);
+    expect(find.text('All Products (6)'), findsOneWidget);
     expect(find.byKey(const Key('all-products-grid')), findsOneWidget);
     expect(find.byKey(const Key('filter-pill-price')), findsOneWidget);
     expect(find.byKey(const Key('filter-pill-rating')), findsOneWidget);
@@ -203,7 +222,7 @@ void main() {
 
     await pumpStore(tester);
     final grid = find.byKey(const Key('all-products-grid'));
-    expect(find.text('All Products (6)'), findsOneWidget);
+    expect(find.text('All Products (7)'), findsOneWidget);
     expect(
       find.descendant(of: grid, matching: find.text('Sold Out Kale')),
       findsOneWidget,
@@ -212,7 +231,7 @@ void main() {
     await tester.tap(find.byKey(const Key('filter-pill-instock')));
     await tester.pumpAndSettle();
 
-    expect(find.text('All Products (5)'), findsOneWidget);
+    expect(find.text('All Products (6)'), findsOneWidget);
     expect(
       find.descendant(of: grid, matching: find.text('Sold Out Kale')),
       findsNothing,
@@ -299,14 +318,14 @@ void main() {
     'product grid columns scale up with screen width keeping card width <= 250',
     (tester) async {
       // Test on tablet/wide viewport (width 1000)
-      tester.view.physicalSize = const Size(1000, 1200);
+      tester.view.physicalSize = const Size(1000, 6000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
       });
 
-      await pumpStore(tester);
+      await pumpStore(tester, size: const Size(1000, 6000));
 
       final gridFinder = find.byKey(const Key('all-products-grid'));
       expect(gridFinder, findsOneWidget);

@@ -26,12 +26,8 @@ void main() {
     productList: productList,
   );
 
-  Product prod(String id, String name) => Product(
-    id: id,
-    companyId: 'c_organic',
-    categoryId: 'cat_a',
-    name: name,
-  );
+  Product prod(String id, String name) =>
+      Product(id: id, companyId: 'c_organic', categoryId: 'cat_a', name: name);
 
   group('CategoryHierarchy.compareByOrder / sortedByOrder', () {
     test('sortOrder wins over name and creation time', () {
@@ -72,10 +68,7 @@ void main() {
     });
 
     test('docs missing sortOrder never disappear — they sort by name', () {
-      final tree = CategoryTree.build([
-        cat('b', 'Beta'),
-        cat('a', 'Alpha'),
-      ]);
+      final tree = CategoryTree.build([cat('b', 'Beta'), cat('a', 'Alpha')]);
       expect(tree.roots.map((n) => n.id), ['a', 'b']);
     });
   });
@@ -97,26 +90,26 @@ void main() {
       expect(result.map((p) => p.id), ['p2', 'p3', 'p1', 'p9']);
     });
 
-    test('unlisted products tie-break alphabetically after the listed ones', () {
-      final products = [
-        prod('pz', 'Zeta'),
-        prod('pa', 'Aardvark'),
-        prod('p1', 'Listed'),
-      ];
+    test(
+      'unlisted products tie-break alphabetically after the listed ones',
+      () {
+        final products = [
+          prod('pz', 'Zeta'),
+          prod('pa', 'Aardvark'),
+          prod('p1', 'Listed'),
+        ];
 
-      final result = Catalog.apply(
-        products,
-        const CatalogQuery(productOrder: ['p1']),
-      );
+        final result = Catalog.apply(
+          products,
+          const CatalogQuery(productOrder: ['p1']),
+        );
 
-      expect(result.map((p) => p.id), ['p1', 'pa', 'pz']);
-    });
+        expect(result.map((p) => p.id), ['p1', 'pa', 'pz']);
+      },
+    );
 
     test('explicit sort options override the curated order', () {
-      final products = [
-        prod('p2', 'Beta'),
-        prod('p1', 'Alpha'),
-      ];
+      final products = [prod('p2', 'Beta'), prod('p1', 'Alpha')];
 
       final result = Catalog.apply(
         products,

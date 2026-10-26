@@ -21,7 +21,9 @@ class AdminReviewsScreen extends StatelessWidget {
         builder: (context, snap) {
           final list = snap.data ?? const <Review>[];
           if (list.isEmpty) {
-            return Center(child: Text(AppLocalizations.of(context).noReviewsYet));
+            return Center(
+              child: Text(AppLocalizations.of(context).noReviewsYet),
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -36,20 +38,21 @@ class AdminReviewsScreen extends StatelessWidget {
                       Expanded(child: Text(r.userName)),
                       Row(
                         children: List.generate(
-                            5,
-                            (j) => Icon(
-                                  j < r.rating ? Icons.star : Icons.star_border,
-                                  color: Colors.amber,
-                                  size: 16,
-                                )),
+                          5,
+                          (j) => Icon(
+                            j < r.rating ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 16,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                   subtitle: r.message.isEmpty ? null : Text(r.message),
                   trailing: IconButton(
-                    icon: Icon(r.isVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off),
+                    icon: Icon(
+                      r.isVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
                     onPressed: () =>
                         repo.setReviewVisibility(r.id, !r.isVisible),
                   ),

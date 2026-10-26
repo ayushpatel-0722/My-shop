@@ -11,7 +11,9 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
+import '../../../core/services/qr_deep_link_service.dart';
 import '../admin_shell.dart';
+import '../qr/widgets/entity_qr_dialog.dart';
 
 /// Admin category manager with a real hierarchy view.
 ///
@@ -54,6 +56,21 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   }
 
   String get _companyId => AuthSession.currentUser?.companyId ?? '';
+
+  void _showQrForCategory(Category cat) {
+    final effectiveShopId = cat.companyId.isNotEmpty
+        ? cat.companyId
+        : (_companyId.isNotEmpty ? _companyId : 'masala-mart');
+    showEntityQrDialog(
+      context: context,
+      type: QrEntityType.category,
+      title: cat.name,
+      shopId: effectiveShopId,
+      shopName: effectiveShopId,
+      categoryId: cat.id,
+      subtitle: 'Category ID: ${cat.id} · Shop: $effectiveShopId',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,6 +230,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                         AppRoutes.adminEditCategoryPath(matches[i].id),
                         extra: matches[i].category,
                       ),
+                      onQr: () => _showQrForCategory(matches[i].category),
                       onDelete: () =>
                           _confirmDelete(matches[i].category, categories),
                     ),
@@ -266,6 +284,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
                           AppRoutes.adminEditCategoryPath(node.id),
                           extra: node.category,
                         ),
+                        onQr: () => _showQrForCategory(node.category),
                         onDelete: () =>
                             _confirmDelete(node.category, categories),
                       ),
@@ -473,8 +492,8 @@ class _Stat extends StatelessWidget {
     return Expanded(
       child: ModernCard(
         padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 8 : 12,
-          vertical: isMobile ? 10 : 12,
+          horizontal: isMobile ? 8 : 14,
+          vertical: isMobile ? 10 : 14,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,14 +501,14 @@ class _Stat extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                fontSize: isMobile ? 16 : 18,
+                fontSize: isMobile ? 16 : 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               label,
               style: TextStyle(
-                fontSize: isMobile ? 10 : 11,
+                fontSize: isMobile ? 10.5 : 13,
                 color: Colors.grey,
               ),
               maxLines: 1,
@@ -509,6 +528,7 @@ class _CategoryTile extends StatelessWidget {
   final VoidCallback? onToggle;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onQr;
   final String pathLabel;
 
   const _CategoryTile({
@@ -516,6 +536,7 @@ class _CategoryTile extends StatelessWidget {
     required this.indent,
     required this.onEdit,
     required this.onDelete,
+    required this.onQr,
     this.collapsed = false,
     this.onToggle,
     this.pathLabel = '',
@@ -610,7 +631,7 @@ class _CategoryTile extends StatelessWidget {
                               'products',
                             ),
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: theme.colorScheme.primary,
                             ),
@@ -634,7 +655,7 @@ class _CategoryTile extends StatelessWidget {
                             : '',
                       ),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.5,
                         color: theme.colorScheme.onSurface.withValues(
                           alpha: 0.65,
                         ),
@@ -682,6 +703,13 @@ class _CategoryTile extends StatelessWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     iconSize: 20,
+                    icon: const Icon(Icons.qr_code_2_rounded),
+                    tooltip: 'QR Code & Share Link',
+                    onPressed: onQr,
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 20,
                     icon: const Icon(Icons.edit_outlined),
                     tooltip: AppLocalizations.of(context).editCategory,
                     onPressed: onEdit,
@@ -710,7 +738,7 @@ class _CategoryTile extends StatelessWidget {
 
     return ModernCard(
       key: Key('category-tile-${node.id}'),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       onTap: onEdit,
       child: Row(
         children: [
@@ -720,7 +748,7 @@ class _CategoryTile extends StatelessWidget {
                 collapsed
                     ? Icons.keyboard_arrow_right
                     : Icons.keyboard_arrow_down,
-                size: 20,
+                size: 22,
               ),
               tooltip: collapsed
                   ? AppLocalizations.of(context).expand
@@ -731,7 +759,7 @@ class _CategoryTile extends StatelessWidget {
             const SizedBox(width: 40),
           const SizedBox(width: 4),
           _CategoryGlyph(category: node.category),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -744,7 +772,7 @@ class _CategoryTile extends StatelessWidget {
                         node.category.name,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 15,
+                          fontSize: 16.5,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -753,7 +781,7 @@ class _CategoryTile extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 2,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withValues(
@@ -770,7 +798,7 @@ class _CategoryTile extends StatelessWidget {
                           'products',
                         ),
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.primary,
                         ),
@@ -793,15 +821,18 @@ class _CategoryTile extends StatelessWidget {
                           ).sub('${node.descendantCount}')
                         : '',
                   ),
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 if (pathLabel.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     AppLocalizations.of(context).under(pathLabel),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.grey.shade600,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -815,16 +846,21 @@ class _CategoryTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           IconButton(
-            icon: const Icon(Icons.edit_outlined, size: 20),
+            icon: const Icon(Icons.qr_code_2_rounded, size: 22),
+            tooltip: 'QR Code & Share Link',
+            onPressed: onQr,
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 22),
             tooltip: AppLocalizations.of(context).editCategory,
             onPressed: onEdit,
           ),
           IconButton(
             icon: const Icon(
               Icons.delete_outline,
-              size: 20,
+              size: 22,
               color: Colors.redAccent,
             ),
             tooltip: AppLocalizations.of(context).deleteCategory,

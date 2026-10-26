@@ -116,7 +116,11 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
-                    key: Key(_step < 2 ? 'onboarding_next_button' : 'onboarding_save_button'),
+                    key: Key(
+                      _step < 2
+                          ? 'onboarding_next_button'
+                          : 'onboarding_save_button',
+                    ),
                     onPressed: _step < 2 ? _next : (_busy ? null : _finish),
                     child: _busy
                         ? const SizedBox(
@@ -158,7 +162,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               key: const Key('store_category_field'),
               controller: _categoryCtrl,
               onChanged: (v) {
-                if (_categoryError != null) setState(() => _categoryError = null);
+                if (_categoryError != null)
+                  setState(() => _categoryError = null);
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).storeCategory} *',
@@ -330,7 +335,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _passwordCtrl,
               obscureText: true,
               onChanged: (v) {
-                if (_passwordError != null) setState(() => _passwordError = null);
+                if (_passwordError != null)
+                  setState(() => _passwordError = null);
               },
               decoration: InputDecoration(
                 labelText: '${l10n.companyPassword} *',
@@ -364,7 +370,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _bannerUrlCtrl,
               keyboardType: TextInputType.url,
               onChanged: (v) {
-                if (_bannerUrlError != null) setState(() => _bannerUrlError = null);
+                if (_bannerUrlError != null)
+                  setState(() => _bannerUrlError = null);
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).companyBannerUrl} *',
@@ -386,9 +393,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
                 }
               },
               decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(
-                  context,
-                ).companyStorefrontProfileImageUrl} *',
+                labelText:
+                    '${AppLocalizations.of(context).companyStorefrontProfileImageUrl} *',
                 hintText: AppLocalizations.of(
                   context,
                 ).httpsExampleComStorefrontPhotoJpg,
@@ -408,7 +414,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               key: const Key('admin_name_field'),
               controller: _adminNameCtrl,
               onChanged: (v) {
-                if (_adminNameError != null) setState(() => _adminNameError = null);
+                if (_adminNameError != null)
+                  setState(() => _adminNameError = null);
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).adminName} *',
@@ -422,7 +429,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _adminEmailCtrl,
               keyboardType: TextInputType.emailAddress,
               onChanged: (v) {
-                if (_adminEmailError != null) setState(() => _adminEmailError = null);
+                if (_adminEmailError != null)
+                  setState(() => _adminEmailError = null);
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).adminEmail} *',
@@ -453,7 +461,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _adminPassCtrl,
               obscureText: true,
               onChanged: (v) {
-                if (_adminPassError != null) setState(() => _adminPassError = null);
+                if (_adminPassError != null)
+                  setState(() => _adminPassError = null);
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).password} *',
@@ -583,7 +592,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (logoUrl.isEmpty) {
         _logoUrlError = 'Company logo URL is required';
         hasError = true;
-      } else if (!logoUrl.startsWith('http://') && !logoUrl.startsWith('https://')) {
+      } else if (!logoUrl.startsWith('http://') &&
+          !logoUrl.startsWith('https://')) {
         _logoUrlError = 'Please enter a valid HTTP or HTTPS URL';
         hasError = true;
       } else {
@@ -593,7 +603,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (bannerUrl.isEmpty) {
         _bannerUrlError = 'Company banner URL is required';
         hasError = true;
-      } else if (!bannerUrl.startsWith('http://') && !bannerUrl.startsWith('https://')) {
+      } else if (!bannerUrl.startsWith('http://') &&
+          !bannerUrl.startsWith('https://')) {
         _bannerUrlError = 'Please enter a valid HTTP or HTTPS URL';
         hasError = true;
       } else {
@@ -603,7 +614,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (profileImageUrl.isEmpty) {
         _profileImageUrlError = 'Storefront profile image URL is required';
         hasError = true;
-      } else if (!profileImageUrl.startsWith('http://') && !profileImageUrl.startsWith('https://')) {
+      } else if (!profileImageUrl.startsWith('http://') &&
+          !profileImageUrl.startsWith('https://')) {
         _profileImageUrlError = 'Please enter a valid HTTP or HTTPS URL';
         hasError = true;
       } else {

@@ -38,13 +38,13 @@ class AppNotification {
       );
 
   Map<String, dynamic> toMap() => {
-        'recipientId': recipientId,
-        'role': role,
-        'type': type,
-        'title': title,
-        'body': body,
-        'deepLink': deepLink,
-        'isRead': isRead,
-        'createdAt': createdAt?.toIso8601String(),
-      };
+    'recipientId': recipientId,
+    'role': role,
+    'type': type,
+    'title': title,
+    'body': body,
+    'deepLink': deepLink,
+    'isRead': isRead,
+    'createdAt': createdAt?.toIso8601String(),
+  };
 }

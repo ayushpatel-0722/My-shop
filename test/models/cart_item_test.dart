@@ -113,7 +113,11 @@ void main() {
         ],
       );
       final snap = VariantSnapshot.fromVariant(odd, odd.variants.first);
-      expect(snap.mrp, 80, reason: 'never strike a price below the selling price');
+      expect(
+        snap.mrp,
+        80,
+        reason: 'never strike a price below the selling price',
+      );
     });
   });
 
@@ -184,7 +188,11 @@ void main() {
         product: rice,
         selectedVariant: variantOf('RICE-250'),
       );
-      expect(oneSmall.totalUnitLabel, '250 g', reason: 'under 1000 g stays in g');
+      expect(
+        oneSmall.totalUnitLabel,
+        '250 g',
+        reason: 'under 1000 g stays in g',
+      );
     });
 
     test('no selection resolves to the default variant (1kg), never the '

@@ -18,12 +18,7 @@ void main() {
     });
 
     test('toMap/fromMap round-trips', () {
-      const h = HighlightItem(
-        id: 'h1',
-        title: 'RAM',
-        value: '8 GB',
-        order: 3,
-      );
+      const h = HighlightItem(id: 'h1', title: 'RAM', value: '8 GB', order: 3);
       final back = HighlightItem.fromMap(h.toMap());
       expect(back.id, 'h1');
       expect(back.title, 'RAM');
@@ -58,7 +53,12 @@ void main() {
     });
 
     test('round-trips', () {
-      const d = DetailItem(id: 'd1', title: 'Fabric', value: 'Cotton', order: 1);
+      const d = DetailItem(
+        id: 'd1',
+        title: 'Fabric',
+        value: 'Cotton',
+        order: 1,
+      );
       final back = DetailItem.fromMap(d.toMap());
       expect(back.id, 'd1');
       expect(back.title, 'Fabric');
@@ -141,12 +141,26 @@ void main() {
           HighlightItem(title: 'Third', value: '3', order: 2),
         ],
         allDetails: [
-          DetailSection(title: 'B', type: DetailSectionType.text, text: 'b', order: 1),
-          DetailSection(title: 'A', type: DetailSectionType.text, text: 'a', order: 0),
+          DetailSection(
+            title: 'B',
+            type: DetailSectionType.text,
+            text: 'b',
+            order: 1,
+          ),
+          DetailSection(
+            title: 'A',
+            type: DetailSectionType.text,
+            text: 'a',
+            order: 0,
+          ),
         ],
       );
 
-      expect(p.sortedHighlights.map((h) => h.title), ['First', 'Second', 'Third']);
+      expect(p.sortedHighlights.map((h) => h.title), [
+        'First',
+        'Second',
+        'Third',
+      ]);
       expect(p.sortedAllDetails.map((s) => s.title), ['A', 'B']);
     });
   });

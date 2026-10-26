@@ -31,11 +31,10 @@ class CartState {
       .where((e) => e.companyId == companyId)
       .fold(0.0, (sum, e) => sum + e.lineTotal);
 
-  CartState copyWith({List<CartItem>? items, bool? isLoading}) =>
-      CartState(
-        items: items ?? this.items,
-        isLoading: isLoading ?? this.isLoading,
-      );
+  CartState copyWith({List<CartItem>? items, bool? isLoading}) => CartState(
+    items: items ?? this.items,
+    isLoading: isLoading ?? this.isLoading,
+  );
 }
 
 /// Cart state backed by local database (SharedPreferences via [CartStorage]).
@@ -47,8 +46,8 @@ class CartCubit extends Cubit<CartState> {
   final CartStorage _storage;
 
   CartCubit([CartStorage? storage])
-      : _storage = storage ?? CartStorage(),
-        super(const CartState()) {
+    : _storage = storage ?? CartStorage(),
+      super(const CartState()) {
     loadFromStorage();
   }
 
@@ -104,8 +103,7 @@ class CartCubit extends Cubit<CartState> {
   }
 
   /// True when [cartKey] is not already a row of the cart.
-  bool contains(String cartKey) =>
-      state.items.any((e) => e.cartKey == cartKey);
+  bool contains(String cartKey) => state.items.any((e) => e.cartKey == cartKey);
 
   CartItem? byKey(String cartKey) {
     for (final e in state.items) {
@@ -141,8 +139,7 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void removeByCartKey(String cartKey) {
-    final remaining =
-        state.items.where((e) => e.cartKey != cartKey).toList();
+    final remaining = state.items.where((e) => e.cartKey != cartKey).toList();
     _persist(remaining);
     emit(state.copyWith(items: remaining));
   }
@@ -190,8 +187,7 @@ class CartCubit extends Cubit<CartState> {
       // Fallback: remove every row of that product in the company.
       final remaining = state.items
           .where(
-            (e) =>
-                !(e.companyId == companyId && e.product.id == productId),
+            (e) => !(e.companyId == companyId && e.product.id == productId),
           )
           .toList();
       _persist(remaining);

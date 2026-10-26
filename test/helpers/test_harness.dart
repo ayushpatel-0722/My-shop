@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:myshop/app/routes/app_router.dart';
 
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/l10n/locale_cubit.dart';
 import 'package:myshop/app/theme/app_theme.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';
@@ -297,6 +298,7 @@ Widget buildTestApp(
         BlocProvider<WishlistCubit>.value(
           value: wishlistCubit ?? WishlistCubit(),
         ),
+        BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()),
       ],
       child: child,
     ),
@@ -331,8 +333,14 @@ Future<void> pumpTestApp(
   AuthCubit? authCubit,
   CartCubit? cartCubit,
   WishlistCubit? wishlistCubit,
-  Size size = const Size(1200, 2400),
+  Size size = const Size(1600, 2400),
 }) async {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(() {
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
   await tester.pumpWidget(
     buildTestApp(
       child,

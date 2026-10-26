@@ -70,7 +70,9 @@ void main() {
     expect(find.text('FREESHIP'), findsNothing);
   });
 
-  testWidgets('an unmatched search shows the empty filter state', (tester) async {
+  testWidgets('an unmatched search shows the empty filter state', (
+    tester,
+  ) async {
     await pumpTestApp(tester, const AdminVouchersScreen());
 
     await tester.enterText(field('voucher-search-field'), 'ZZZZ');
@@ -142,10 +144,12 @@ void main() {
     );
     await pumpTestApp(tester, const AdminVouchersScreen());
 
-    await tester.tap(find.descendant(
-      of: find.byKey(const Key('voucher-tile-v_edit')),
-      matching: find.byIcon(Icons.edit_outlined),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('voucher-tile-v_edit')),
+        matching: find.byIcon(Icons.edit_outlined),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Edit Voucher'), findsOneWidget);
@@ -172,17 +176,22 @@ void main() {
     await tester.tap(toggle);
     await tester.pumpAndSettle();
 
-    expect((await repo.voucherByCode('c_organic', 'FRESH20'))!.isActive, isFalse);
+    expect(
+      (await repo.voucherByCode('c_organic', 'FRESH20'))!.isActive,
+      isFalse,
+    );
   });
 
   testWidgets('deleting asks for confirmation first', (tester) async {
     await pumpTestApp(tester, const AdminVouchersScreen());
 
     final voucher = (await repo.voucherByCode('c_organic', 'FRESH20'))!;
-    await tester.tap(find.descendant(
-      of: find.byKey(Key('voucher-tile-${voucher.id}')),
-      matching: find.byIcon(Icons.delete_outline),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(Key('voucher-tile-${voucher.id}')),
+        matching: find.byIcon(Icons.delete_outline),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Delete voucher?'), findsOneWidget);
@@ -193,10 +202,12 @@ void main() {
     expect(await repo.voucherByCode('c_organic', 'FRESH20'), isNotNull);
 
     // Confirming removes it.
-    await tester.tap(find.descendant(
-      of: find.byKey(Key('voucher-tile-${voucher.id}')),
-      matching: find.byIcon(Icons.delete_outline),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(Key('voucher-tile-${voucher.id}')),
+        matching: find.byIcon(Icons.delete_outline),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
@@ -204,7 +215,9 @@ void main() {
     expect(await repo.voucherByCode('c_organic', 'FRESH20'), isNull);
   });
 
-  testWidgets('an empty store shows the create-first empty state', (tester) async {
+  testWidgets('an empty store shows the create-first empty state', (
+    tester,
+  ) async {
     TestHarness.signIn(TestHarness.otherAdmin);
     // Remove every TechTronics voucher to hit the empty state.
     for (final v in await repo.vouchers('c_techtronics').first) {

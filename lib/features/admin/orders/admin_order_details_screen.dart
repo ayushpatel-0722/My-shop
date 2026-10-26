@@ -12,6 +12,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
+import 'widgets/payment_verification_dialog.dart';
 
 class AdminOrderDetailsScreen extends StatefulWidget {
   final String orderId;
@@ -279,7 +280,10 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                     const SizedBox(width: 6),
                     Text(
                       'Placed on: $dateStr',
-                      style: const TextStyle(fontSize: 12.5, color: Colors.grey),
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                 ),
@@ -353,11 +357,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.cancel_outlined,
-            color: theme.colorScheme.error,
-            size: 22,
-          ),
+          Icon(Icons.cancel_outlined, color: theme.colorScheme.error, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -430,7 +430,9 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
               children: [
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  backgroundColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.1,
+                  ),
                   child: Text(
                     order.customerName.isNotEmpty
                         ? order.customerName[0].toUpperCase()
@@ -460,7 +462,11 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                       if (order.customerPhone.isNotEmpty) ...[
                         Row(
                           children: [
-                            const Icon(Icons.phone, size: 14, color: Colors.grey),
+                            const Icon(
+                              Icons.phone,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 6),
                             SelectableText(
                               order.customerPhone,
@@ -482,7 +488,11 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                       if (order.customerEmail.isNotEmpty) ...[
                         Row(
                           children: [
-                            const Icon(Icons.email_outlined, size: 14, color: Colors.grey),
+                            const Icon(
+                              Icons.email_outlined,
+                              size: 14,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: SelectableText(
@@ -538,7 +548,10 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
@@ -558,7 +571,9 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.4,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -568,8 +583,8 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                       shop?.name.isNotEmpty == true
                           ? shop!.name
                           : (order.companyName.isNotEmpty
-                              ? order.companyName
-                              : 'Pickup Store'),
+                                ? order.companyName
+                                : 'Pickup Store'),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -577,29 +592,36 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                     ),
                     if (shop?.address.isNotEmpty == true) ...[
                       const SizedBox(height: 4),
-                      Text(
-                        shop!.address,
-                        style: const TextStyle(fontSize: 13),
-                      ),
+                      Text(shop!.address, style: const TextStyle(fontSize: 13)),
                     ],
                     if (shop?.phone.isNotEmpty == true) ...[
                       const SizedBox(height: 4),
                       Text(
                         'Phone: ${shop!.phone}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                     if (shop?.timings.isNotEmpty == true) ...[
                       const SizedBox(height: 4),
                       Text(
                         'Store Hours: ${shop!.timings}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.info_outline, size: 14, color: Colors.blue),
+                        const Icon(
+                          Icons.info_outline,
+                          size: 14,
+                          color: Colors.blue,
+                        ),
                         const SizedBox(width: 6),
                         const Expanded(
                           child: Text(
@@ -654,7 +676,11 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on_outlined, size: 18, color: Colors.red),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 18,
+                  color: Colors.red,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -735,7 +761,8 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                       child: Container(
                         width: 52,
                         height: 52,
-                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.4),
                         child: item.image.isNotEmpty
                             ? Image.network(
                                 item.image,
@@ -807,8 +834,12 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
 
   Widget _buildAmountSummaryCard(BuildContext context, Order order) {
     final theme = Theme.of(context);
-    final amountPaid = order.amountPaid ?? (order.isPaid ? order.totalAmount : 0.0);
-    final balance = (order.totalAmount - amountPaid).clamp(0.0, double.infinity);
+    final amountPaid =
+        order.amountPaid ?? (order.isPaid ? order.totalAmount : 0.0);
+    final balance = (order.totalAmount - amountPaid).clamp(
+      0.0,
+      double.infinity,
+    );
 
     return Card(
       elevation: 0,
@@ -869,7 +900,9 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
             _billRow(
               'Amount Paid',
               formatCurrency(amountPaid),
-              valueColor: order.isPaid ? Colors.green.shade800 : Colors.grey.shade700,
+              valueColor: order.isPaid
+                  ? Colors.green.shade800
+                  : Colors.grey.shade700,
             ),
             if (balance > 0) ...[
               const SizedBox(height: 8),
@@ -881,6 +914,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
               ),
             ],
             const Divider(height: 20),
+            // Payment Method Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -888,20 +922,155 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                   'Payment Method:',
                   style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    order.paymentMethod.isNotEmpty
-                        ? order.paymentMethod.toUpperCase()
-                        : (order.isPaid ? 'PAID (VERIFIED)' : 'CASH ON DELIVERY / OFFLINE'),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                    textAlign: TextAlign.end,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: order.hasPaymentMethod
+                        ? (order.isUpi
+                              ? Colors.indigo.withValues(alpha: 0.12)
+                              : Colors.teal.withValues(alpha: 0.12))
+                        : Colors.grey.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        order.isUpi
+                            ? Icons.qr_code_2
+                            : (order.isCash
+                                  ? Icons.payments_outlined
+                                  : Icons.help_outline),
+                        size: 14,
+                        color: order.hasPaymentMethod
+                            ? (order.isUpi
+                                  ? Colors.indigo.shade800
+                                  : Colors.teal.shade800)
+                            : Colors.grey.shade700,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        order.paymentMethodDisplay,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: order.hasPaymentMethod
+                              ? (order.isUpi
+                                    ? Colors.indigo.shade800
+                                    : Colors.teal.shade800)
+                              : Colors.grey.shade800,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 6),
+            // Payment Status Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Payment Status:',
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: order.isPaid
+                        ? Colors.green.withValues(alpha: 0.12)
+                        : (order.isPaymentFailed
+                              ? Colors.red.withValues(alpha: 0.12)
+                              : Colors.orange.withValues(alpha: 0.12)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        order.isPaid
+                            ? Icons.check_circle_outline
+                            : (order.isPaymentFailed
+                                  ? Icons.error_outline
+                                  : Icons.schedule),
+                        size: 14,
+                        color: order.isPaid
+                            ? Colors.green.shade800
+                            : (order.isPaymentFailed
+                                  ? Colors.red.shade800
+                                  : Colors.orange.shade900),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        order.paymentStatusDisplay.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: order.isPaid
+                              ? Colors.green.shade800
+                              : (order.isPaymentFailed
+                                    ? Colors.red.shade800
+                                    : Colors.orange.shade900),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // Transaction / UTR ref if UPI
+            if (order.transactionRef != null &&
+                order.transactionRef!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'UPI Reference / UTR:',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SelectableText(
+                        order.transactionRef!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        icon: const Icon(Icons.copy, size: 14),
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Copy Reference',
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(text: order.transactionRef!),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Reference copied to clipboard!'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
             if (order.paidAt != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -909,10 +1078,29 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                     'Paid At:',
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
-                  const SizedBox(width: 8),
                   Text(
                     DateFormat('dd MMM yyyy, hh:mm a').format(order.paidAt!),
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: const TextStyle(fontSize: 12, color: Colors.black87),
+                  ),
+                ],
+              ),
+            ],
+            if (order.paymentVerifiedBy != null &&
+                order.paymentVerifiedBy!.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Verified By:',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                  Text(
+                    order.paymentVerifiedBy!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -983,9 +1171,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.green.shade700,
                 ),
-                onPressed: _isActionLoading
-                    ? null
-                    : () => _confirmOrder(order),
+                onPressed: _isActionLoading ? null : () => _confirmOrder(order),
               ),
             ] else if (next != null) ...[
               // Advance to next forward stage
@@ -1006,6 +1192,36 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                 onPressed: _isActionLoading
                     ? null
                     : () => _confirmPayment(order),
+              ),
+            ] else if (order.isPaid) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.verified,
+                      color: Colors.green.shade800,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Payment Verified (${order.paymentMethodDisplay})',
+                      style: TextStyle(
+                        color: Colors.green.shade800,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
 
@@ -1043,7 +1259,9 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.green.shade700),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Confirm'),
           ),
@@ -1092,11 +1310,9 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
         companyId: order.companyId.isNotEmpty ? order.companyId : _companyId,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Order moved to $statusLabel'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Order moved to $statusLabel')));
       }
     } catch (e) {
       if (mounted) {
@@ -1113,55 +1329,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
   }
 
   Future<void> _confirmPayment(Order order) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Payment Received'),
-        content: Text(
-          'Mark payment of ${formatCurrency(order.totalAmount)} as received for order ${order.reference}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Confirm Payment'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    setState(() => _isActionLoading = true);
-    try {
-      await repo.togglePaymentStatus(
-        order.id,
-        companyId: order.companyId.isNotEmpty ? order.companyId : _companyId,
-        status: PaymentStatus.done,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Payment confirmed for ${order.reference}'),
-            backgroundColor: Colors.green.shade800,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to record payment: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isActionLoading = false);
-    }
+    await PaymentVerificationDialog.show(context, order);
   }
 
   Future<void> _promptCancelOrder(Order order) async {

@@ -30,6 +30,7 @@ import '../widgets/common_carousel.dart';
 import '../widgets/location_picker_sheet.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/product_card.dart';
+import '../widgets/web_header.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Company micro-storefront, restructured into clear "aisles":
@@ -54,6 +55,7 @@ class CompanyStoreScreen extends StatefulWidget {
 
 class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   Company? _company;
+  bool _loadingStore = true;
 
   /// Selected category filter chip above shelves (null means 'All').
   String? _selectedCategoryId;
@@ -105,9 +107,13 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         list.where((c) => c.id == widget.slug).firstOrNull ??
         list
             .where((c) => c.name.toLowerCase() == widget.slug.toLowerCase())
-            .firstOrNull ??
-        list.firstOrNull;
-    if (mounted) setState(() => _company = c);
+            .firstOrNull;
+    if (mounted) {
+      setState(() {
+        _company = c;
+        _loadingStore = false;
+      });
+    }
   }
 
   void _handleAddToCart(BuildContext context, Product product) {
@@ -147,6 +153,61 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_loadingStore && _company == null) {
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: BackButton(
+            color: const Color(0xFF1E2229),
+            onPressed: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                context.go(AppRoutes.home);
+              }
+            },
+          ),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.store_mall_directory_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Store Unavailable',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E2229),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'The requested store could not be found or is temporarily unavailable.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => context.go(AppRoutes.home),
+                  child: const Text('Explore Other Stores'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     if (_company == null) {
       return Scaffold(
         backgroundColor: AppTheme.backgroundLight,
@@ -156,8 +217,8 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
           leading: BackButton(
             color: const Color(0xFF1E2229),
             onPressed: () {
-              if (context.canPop()) {
-                context.pop();
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
               } else {
                 context.go(AppRoutes.home);
               }
@@ -183,83 +244,104 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
     }
     final company = _company!;
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      appBar: _buildAppBar(context, company),
-      bottomNavigationBar: const MarketplaceBottomNav(currentIndex: 0),
-      body: StreamBuilder<List<Product>>(
-        stream: repo.products(companyId: company.id),
-        builder: (context, productSnap) {
-          if (productSnap.connectionState == ConnectionState.waiting &&
-              !productSnap.hasData) {
-            return SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    SizedBox(height: 12),
-                    M3BannerSkeleton(),
-                    SizedBox(height: 18),
-                    M3CategoryRailSkeleton(),
-                    SizedBox(height: 18),
-                    M3ProductGridSkeleton(itemCount: 4),
-                  ],
-                ),
-              ),
-            );
+    return PopScope(
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go(AppRoutes.home);
           }
-          final allProducts = productSnap.data ?? const <Product>[];
-          return StreamBuilder<List<Category>>(
-            stream: repo.categories(companyId: company.id),
-            builder: (context, catSnap) {
-              // Admin-defined category order (Category.sortOrder per level).
-              final categories = CategoryHierarchy.sortedByOrder(
-                catSnap.data ?? const <Category>[],
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        appBar: context.isDesktop
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(64),
+                child: WebHeader(currentIndex: 0),
+              )
+            : _buildAppBar(context, company),
+        bottomNavigationBar: context.isDesktop
+            ? null
+            : const MarketplaceBottomNav(currentIndex: 0),
+        body: StreamBuilder<List<Product>>(
+          stream: repo.products(companyId: company.id),
+          builder: (context, productSnap) {
+            if (productSnap.connectionState == ConnectionState.waiting &&
+                !productSnap.hasData) {
+              return SafeArea(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      SizedBox(height: 12),
+                      M3BannerSkeleton(),
+                      SizedBox(height: 18),
+                      M3CategoryRailSkeleton(),
+                      SizedBox(height: 18),
+                      M3ProductGridSkeleton(itemCount: 4),
+                    ],
+                  ),
+                ),
               );
-              return StreamBuilder<List<OfferBanner>>(
-                stream: repo.offerBanners(company.id),
-                builder: (context, bannerSnap) {
-                  final offerBanners = bannerSnap.data ?? const <OfferBanner>[];
-                  return StreamBuilder<List<Voucher>>(
-                    stream: repo.vouchers(company.id),
-                    builder: (context, voucherSnap) {
-                      final activeVouchers =
-                          (voucherSnap.data ?? const <Voucher>[])
-                              .where(
-                                (v) =>
-                                    v.isLiveAt(DateTime.now()) &&
-                                    !v.isExhausted,
-                              )
-                              .toList();
-                      return StreamBuilder<List<Review>>(
-                        stream: repo.reviews(company.id),
-                        builder: (context, reviewSnap) {
-                          final reviews = reviewSnap.data ?? const <Review>[];
-                          return StreamBuilder<List<Order>>(
-                            stream: repo.orders(companyId: company.id),
-                            builder: (context, orderSnap) {
-                              final orders = orderSnap.data ?? const <Order>[];
-                              return _buildContent(
-                                context,
-                                company,
-                                allProducts,
-                                categories,
-                                offerBanners,
-                                activeVouchers,
-                                reviews,
-                                orders,
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          );
-        },
+            }
+            final allProducts = productSnap.data ?? const <Product>[];
+            return StreamBuilder<List<Category>>(
+              stream: repo.categories(companyId: company.id),
+              builder: (context, catSnap) {
+                // Admin-defined category order (Category.sortOrder per level).
+                final categories = CategoryHierarchy.sortedByOrder(
+                  catSnap.data ?? const <Category>[],
+                );
+                return StreamBuilder<List<OfferBanner>>(
+                  stream: repo.offerBanners(company.id),
+                  builder: (context, bannerSnap) {
+                    final offerBanners =
+                        bannerSnap.data ?? const <OfferBanner>[];
+                    return StreamBuilder<List<Voucher>>(
+                      stream: repo.vouchers(company.id),
+                      builder: (context, voucherSnap) {
+                        final activeVouchers =
+                            (voucherSnap.data ?? const <Voucher>[])
+                                .where(
+                                  (v) =>
+                                      v.isLiveAt(DateTime.now()) &&
+                                      !v.isExhausted,
+                                )
+                                .toList();
+                        return StreamBuilder<List<Review>>(
+                          stream: repo.reviews(company.id),
+                          builder: (context, reviewSnap) {
+                            final reviews = reviewSnap.data ?? const <Review>[];
+                            return StreamBuilder<List<Order>>(
+                              stream: repo.orders(companyId: company.id),
+                              builder: (context, orderSnap) {
+                                final orders =
+                                    orderSnap.data ?? const <Order>[];
+                                return _buildContent(
+                                  context,
+                                  company,
+                                  allProducts,
+                                  categories,
+                                  offerBanners,
+                                  activeVouchers,
+                                  reviews,
+                                  orders,
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -296,7 +378,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.search_rounded, color: Color(0xFF1E2229)),
+          icon: const Icon(Icons.search, color: Color(0xFF1E2229)),
           tooltip: AppLocalizations.of(context).searchInThisStore,
           onPressed: () => context.push(
             '${AppRoutes.search}?companyId=${company.id}&name=${Uri.encodeComponent(company.name)}',
@@ -336,10 +418,10 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               onPressed: () async {
                 if (AuthSession.currentUser == null) {
                   final ok = await AuthBottomSheet.show(context);
-                  if (ok && context.mounted) context.go(AppRoutes.cart);
+                  if (ok && context.mounted) context.push(AppRoutes.cart);
                   return;
                 }
-                context.go(AppRoutes.cart);
+                context.push(AppRoutes.cart);
               },
             );
           },
@@ -366,6 +448,111 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
       controller: _scrollCtrl,
       padding: const EdgeInsets.only(bottom: 24),
       children: [
+        if (context.isDesktop)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+            child: Row(
+              children: [
+                InkWell(
+                  onTap: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go(AppRoutes.home);
+                    }
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.arrow_back_rounded,
+                        size: 16,
+                        color: Color(0xFF64748B),
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Back',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Text('•', style: TextStyle(color: Color(0xFFCBD5E1))),
+                ),
+                InkWell(
+                  onTap: () => context.go(AppRoutes.home),
+                  child: const Text(
+                    'Home',
+                    style: TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6),
+                  child: Icon(
+                    Icons.chevron_right,
+                    size: 15,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
+                Text(
+                  company.name,
+                  style: const TextStyle(
+                    color: Color(0xFF1E2229),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Spacer(),
+                InkWell(
+                  onTap: () => context.push(
+                    '${AppRoutes.search}?companyId=${company.id}&name=${Uri.encodeComponent(company.name)}',
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.search,
+                          size: 16,
+                          color: Color(0xFFFF5247),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Search in ${company.name}',
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         // 1. Shop details block (banner + logo + meta).
         _ShopDetailsBlock(
           company: company,
@@ -615,37 +802,81 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
-                AppLocalizations.of(context).msgIn(company.name),
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  color: Color(0xFF6C757D),
+              Flexible(
+                child: Text(
+                  AppLocalizations.of(context).msgIn(company.name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    color: Color(0xFF6C757D),
+                  ),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          height: 285,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
+        if (context.isDesktop)
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: products.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 14),
-            itemBuilder: (context, i) => SizedBox(
-              width: 165,
-              child: ProductCard(
-                product: products[i],
-                company: company,
-                showBrand: false,
-                onTap: () =>
-                    context.push(AppRoutes.productPath(products[i].id)),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final crossAxisCount = ResponsiveGrid.calculateCrossAxisCount(
+                  width,
+                  maxCardWidth: 290,
+                  maxCount: 5,
+                );
+                final childAspectRatio =
+                    ResponsiveGrid.calculateProductAspectRatio(
+                      width,
+                      crossAxisCount,
+                      showBrand: false,
+                    );
+                final preview = products.take(crossAxisCount).toList();
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: childAspectRatio,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: preview.length,
+                  itemBuilder: (context, i) => ProductCard(
+                    product: preview[i],
+                    company: company,
+                    showBrand: false,
+                    onTap: () =>
+                        context.push(AppRoutes.productPath(preview[i].id)),
+                  ),
+                );
+              },
+            ),
+          )
+        else
+          SizedBox(
+            height: 285,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: products.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 14),
+              itemBuilder: (context, i) => SizedBox(
+                width: 165,
+                child: ProductCard(
+                  product: products[i],
+                  company: company,
+                  showBrand: false,
+                  onTap: () =>
+                      context.push(AppRoutes.productPath(products[i].id)),
+                ),
               ),
             ),
           ),
-        ),
         const SizedBox(height: 24),
       ],
     );
@@ -754,9 +985,11 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
+                final isDesktop = context.isDesktop;
                 final crossAxisCount = ResponsiveGrid.calculateCrossAxisCount(
                   width,
-                  maxCardWidth: 250,
+                  maxCardWidth: isDesktop ? 290 : 250,
+                  maxCount: isDesktop ? 5 : 8,
                 );
                 final childAspectRatio =
                     ResponsiveGrid.calculateProductAspectRatio(
@@ -1001,7 +1234,7 @@ class _ShopDetailsBlock extends StatelessWidget {
           ),
         const SizedBox(height: 6),
 
-        // Rating row (tappable → all reviews, only if >= 5 reviews) • Open/Closed pill (Left-Aligned).
+        // Rating row (tappable → all reviews) • Open/Closed pill (Left-Aligned).
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Wrap(
@@ -1009,7 +1242,7 @@ class _ShopDetailsBlock extends StatelessWidget {
             spacing: 6,
             runSpacing: 5,
             children: [
-              if (stats.reviewCount >= 5) ...[
+              if (stats.reviewCount > 0) ...[
                 InkWell(
                   key: const Key('store-rating-row'),
                   borderRadius: BorderRadius.circular(6),
@@ -1090,6 +1323,45 @@ class _ShopDetailsBlock extends StatelessWidget {
                   ],
                 ),
               ),
+              const Text(
+                '•',
+                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
+              ),
+              Text(
+                stats.followerLabel,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF6C757D)),
+              ),
+              const SizedBox(width: 4),
+              OutlinedButton(
+                key: const Key('follow-button'),
+                onPressed: onToggleFollow,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 26),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 0,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  side: BorderSide(
+                    color: isFollowing
+                        ? const Color(0xFF3D38D9)
+                        : const Color(0xFFCBD5E1),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Text(
+                  isFollowing ? '✓ Following' : '+ Follow',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: isFollowing
+                        ? const Color(0xFF3D38D9)
+                        : const Color(0xFF1E2229),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -1155,12 +1427,16 @@ class _ShopDetailsBlock extends StatelessWidget {
           children: [
             Icon(icon, color: iconColor, size: 16),
             const SizedBox(width: 5),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF334155),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF334155),
+                ),
               ),
             ),
             const SizedBox(width: 4),
@@ -1449,6 +1725,7 @@ class _CategoryShelf extends StatelessWidget {
     if (products.isEmpty) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDesktop = context.isDesktop;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1464,7 +1741,7 @@ class _CategoryShelf extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16.5,
+                    fontSize: isDesktop ? 18.5 : 16.5,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : const Color(0xFF1E2229),
                     letterSpacing: -0.2,
@@ -1480,15 +1757,28 @@ class _CategoryShelf extends StatelessWidget {
                     vertical: 4,
                     horizontal: 4,
                   ),
-                  child: Text(
-                    AppLocalizations.of(context).seeAll,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? const Color(0xFFFF8A80)
-                          : const Color(0xFFB3261E),
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).seeAll,
+                        style: TextStyle(
+                          fontSize: isDesktop ? 13.5 : 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? const Color(0xFFFF8A80)
+                              : const Color(0xFFB3261E),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        size: isDesktop ? 15 : 13,
+                        color: isDark
+                            ? const Color(0xFFFF8A80)
+                            : const Color(0xFFB3261E),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -1497,27 +1787,67 @@ class _CategoryShelf extends StatelessWidget {
         ),
         const SizedBox(height: 10),
 
-        // Horizontal Product Rail for this category
-        SizedBox(
-          height: 285,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
+        if (isDesktop)
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: products.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 14),
-            itemBuilder: (context, i) => SizedBox(
-              width: 165,
-              child: ProductCard(
-                product: products[i],
-                company: company,
-                showBrand: false,
-                onTap: () =>
-                    context.push(AppRoutes.productPath(products[i].id)),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final crossAxisCount = ResponsiveGrid.calculateCrossAxisCount(
+                  width,
+                  maxCardWidth: 290,
+                  maxCount: 5,
+                );
+                final childAspectRatio =
+                    ResponsiveGrid.calculateProductAspectRatio(
+                      width,
+                      crossAxisCount,
+                      showBrand: false,
+                    );
+                final previewProducts = products.take(crossAxisCount).toList();
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: childAspectRatio,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: previewProducts.length,
+                  itemBuilder: (context, i) => ProductCard(
+                    product: previewProducts[i],
+                    company: company,
+                    showBrand: false,
+                    onTap: () => context.push(
+                      AppRoutes.productPath(previewProducts[i].id),
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
+        else
+          SizedBox(
+            height: 285,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: products.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 14),
+              itemBuilder: (context, i) => SizedBox(
+                width: 165,
+                child: ProductCard(
+                  product: products[i],
+                  company: company,
+                  showBrand: false,
+                  onTap: () =>
+                      context.push(AppRoutes.productPath(products[i].id)),
+                ),
               ),
             ),
           ),
-        ),
 
         const SizedBox(height: 20),
       ],
@@ -1678,7 +2008,7 @@ class _StoreCouponsSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 72,
+          height: 90,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -1728,7 +2058,7 @@ class _StoreCouponCard extends StatelessWidget {
 
     return Container(
       width: 218,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

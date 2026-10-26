@@ -6,6 +6,8 @@
 /// through these helpers so a bad document degrades to a default value.
 library;
 
+import 'dart:convert';
+
 /// Reads [value] as [double]; accepts `num` and numeric strings.
 double asDouble(dynamic value, [double fallback = 0]) {
   if (value == null) return fallback;
@@ -46,11 +48,28 @@ bool asBool(dynamic value, [bool fallback = false]) {
 }
 
 /// Reads [value] as `List<String>`, dropping nulls and empty entries.
+/// Accepts Iterable, single String, or JSON-encoded array string.
 List<String> asStringList(dynamic value) {
   if (value == null) return const <String>[];
+  if (value is String) {
+    final v = value.trim();
+    if (v.isEmpty) return const <String>[];
+    if (v.startsWith('[') && v.endsWith(']')) {
+      try {
+        final decoded = jsonDecode(v);
+        if (decoded is Iterable) {
+          return decoded
+              .map((e) => e?.toString().trim() ?? '')
+              .where((e) => e.isNotEmpty)
+              .toList(growable: false);
+        }
+      } catch (_) {}
+    }
+    return [v];
+  }
   if (value is Iterable) {
     return value
-        .map((e) => e?.toString() ?? '')
+        .map((e) => e?.toString().trim() ?? '')
         .where((e) => e.isNotEmpty)
         .toList(growable: false);
   }
@@ -60,7 +79,10 @@ List<String> asStringList(dynamic value) {
 /// Reads [value] as `List<Map<String, dynamic>>`.
 List<Map<String, dynamic>> asMapList(dynamic value) {
   if (value is! Iterable) return const <Map<String, dynamic>>[];
-  return value.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+  return value
+      .whereType<Map>()
+      .map((e) => Map<String, dynamic>.from(e))
+      .toList();
 }
 
 /// Reads [value] as `Map<String, int>`.

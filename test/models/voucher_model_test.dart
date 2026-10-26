@@ -12,20 +12,19 @@ Voucher base({
   bool active = true,
   List<String> usedOrders = const [],
   Map<String, int> usageByUser = const {},
-}) =>
-    Voucher(
-      id: id,
-      companyId: 'c_organic',
-      code: code,
-      discountType: type,
-      discountValue: value,
-      expiryDate: expiry,
-      maxUses: maxUses,
-      perUserLimit: perUser,
-      isActive: active,
-      usedOrderIds: usedOrders,
-      usageByUser: usageByUser,
-    );
+}) => Voucher(
+  id: id,
+  companyId: 'c_organic',
+  code: code,
+  discountType: type,
+  discountValue: value,
+  expiryDate: expiry,
+  maxUses: maxUses,
+  perUserLimit: perUser,
+  isActive: active,
+  usedOrderIds: usedOrders,
+  usageByUser: usageByUser,
+);
 
 void main() {
   group('Voucher — code normalisation', () {
@@ -68,8 +67,10 @@ void main() {
 
     test('legacy documents without isActive default to enabled', () {
       expect(Voucher.fromMap('v1', {'code': 'OLD'}).isActive, isTrue);
-      expect(Voucher.fromMap('v1', {'code': 'OLD', 'isActive': false}).isActive,
-          isFalse);
+      expect(
+        Voucher.fromMap('v1', {'code': 'OLD', 'isActive': false}).isActive,
+        isFalse,
+      );
     });
 
     test('a missing document does not throw', () {
@@ -115,7 +116,10 @@ void main() {
     });
 
     test('never returns a negative discount', () {
-      expect(base(type: VoucherType.fixedAmount, value: -50).computeDiscount(100), 0);
+      expect(
+        base(type: VoucherType.fixedAmount, value: -50).computeDiscount(100),
+        0,
+      );
       expect(base(value: -10).computeDiscount(100), 0);
     });
   });
@@ -196,7 +200,10 @@ void main() {
     });
 
     test('scope and type labels', () {
-      expect(VoucherScope.label(VoucherScope.specificProduct), 'Specific products');
+      expect(
+        VoucherScope.label(VoucherScope.specificProduct),
+        'Specific products',
+      );
       expect(VoucherScope.label('nonsense'), 'All categories');
       expect(VoucherType.label(VoucherType.percentage), 'Percentage');
     });

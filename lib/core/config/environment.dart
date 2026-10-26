@@ -50,4 +50,14 @@ class EnvironmentConfig {
         return 'https://api.example.com';
     }
   }
+
+  /// Canonical public domain for shareable deep links and QR codes.
+  static String get publicDomain {
+    switch (_current) {
+      case AppEnvironment.uat:
+        return 'https://myshop-8bd4d.web.app';
+      case AppEnvironment.prod:
+        return 'https://myshop-prod.web.app';
+    }
+  }
 }

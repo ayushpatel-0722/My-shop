@@ -21,46 +21,37 @@ void main() {
     String status = OrderStatus.pending,
     double total = 250,
     String name = 'Fresh Tomatoes',
-  }) =>
-      repo.placeOrder(
-        Order(
-          id: '',
-          userId: TestHarness.shopper.id,
-          companyId: 'c_organic',
-          companyName: 'GreenLeaf Organics',
-          items: [
-            OrderItem(
-              productId: 'p_tomato',
-              qty: 2,
-              unitPrice: total / 2,
-              name: name,
-            ),
-          ],
-          subtotal: total,
-          deliveryCharge: 30,
-          totalAmount: total + 30,
-          address: '12 Market Street',
-          pincode: '380001',
-          orderStatus: status,
+  }) => repo.placeOrder(
+    Order(
+      id: '',
+      userId: TestHarness.shopper.id,
+      companyId: 'c_organic',
+      companyName: 'GreenLeaf Organics',
+      items: [
+        OrderItem(
+          productId: 'p_tomato',
+          qty: 2,
+          unitPrice: total / 2,
+          name: name,
         ),
-      );
+      ],
+      subtotal: total,
+      deliveryCharge: 30,
+      totalAmount: total + 30,
+      address: '12 Market Street',
+      pincode: '380001',
+      orderStatus: status,
+    ),
+  );
 
   testWidgets('guests are asked to sign in', (tester) async {
-    await pumpTestApp(
-      tester,
-      const OrdersScreen(),
-      authCubit: AuthCubit(),
-    );
+    await pumpTestApp(tester, const OrdersScreen(), authCubit: AuthCubit());
 
     expect(find.text('Sign In to View Orders'), findsOneWidget);
   });
 
   testWidgets('a shopper with no orders sees the empty state', (tester) async {
-    await pumpTestApp(
-      tester,
-      const OrdersScreen(),
-      user: TestHarness.shopper,
-    );
+    await pumpTestApp(tester, const OrdersScreen(), user: TestHarness.shopper);
 
     expect(find.text('No Orders Yet'), findsOneWidget);
   });
@@ -81,11 +72,7 @@ void main() {
       ),
     );
 
-    await pumpTestApp(
-      tester,
-      const OrdersScreen(),
-      user: TestHarness.shopper,
-    );
+    await pumpTestApp(tester, const OrdersScreen(), user: TestHarness.shopper);
 
     expect(find.byKey(Key('order-card-${mine.id}')), findsOneWidget);
     expect(find.text('Order ${mine.reference}'), findsOneWidget);
@@ -96,11 +83,7 @@ void main() {
     final pending = await placeOrder(status: OrderStatus.pending);
     final delivered = await placeOrder(status: OrderStatus.completed);
 
-    await pumpTestApp(
-      tester,
-      const OrdersScreen(),
-      user: TestHarness.shopper,
-    );
+    await pumpTestApp(tester, const OrdersScreen(), user: TestHarness.shopper);
 
     await tester.tap(find.text('Completed (1)'));
     await tester.pumpAndSettle();
@@ -113,11 +96,7 @@ void main() {
     final order = await placeOrder();
     await repo.cancelOrder(order.id);
 
-    await pumpTestApp(
-      tester,
-      const OrdersScreen(),
-      user: TestHarness.shopper,
-    );
+    await pumpTestApp(tester, const OrdersScreen(), user: TestHarness.shopper);
 
     await tester.tap(find.text('Cancelled (1)'));
     await tester.pumpAndSettle();
@@ -131,11 +110,7 @@ void main() {
   testWidgets('tapping an order opens its tracking screen', (tester) async {
     final order = await placeOrder();
 
-    await pumpTestApp(
-      tester,
-      const OrdersScreen(),
-      user: TestHarness.shopper,
-    );
+    await pumpTestApp(tester, const OrdersScreen(), user: TestHarness.shopper);
 
     await tester.tap(find.byKey(Key('order-card-${order.id}')));
     await tester.pumpAndSettle();
@@ -143,8 +118,9 @@ void main() {
     expect(find.text('Order ${order.id}'), findsOneWidget);
   });
 
-  testWidgets('the tracking screen shows the bill and allows cancelling',
-      (tester) async {
+  testWidgets('the tracking screen shows the bill and allows cancelling', (
+    tester,
+  ) async {
     final order = await repo.placeOrder(
       Order(
         id: '',
@@ -191,8 +167,9 @@ void main() {
     expect((await repo.order(order.id))!.isCancelled, isTrue);
   });
 
-  testWidgets('a dispatched order cannot be cancelled by the shopper',
-      (tester) async {
+  testWidgets('a dispatched order cannot be cancelled by the shopper', (
+    tester,
+  ) async {
     final order = await placeOrder();
     await repo.updateOrderStatus(order.id, OrderStatus.confirmed);
     await repo.updateOrderStatus(order.id, OrderStatus.packing);
@@ -352,10 +329,7 @@ void main() {
       );
 
       expect(find.text('+2 more'), findsOneWidget);
-      expect(
-        find.byKey(Key('order-card-${order.id}')),
-        findsOneWidget,
-      );
+      expect(find.byKey(Key('order-card-${order.id}')), findsOneWidget);
     });
 
     testWidgets('reorder adds the same lines back to the cart', (tester) async {
@@ -444,16 +418,16 @@ void main() {
 
       // Five tappable stars on an unreviewed completed order.
       final card = find.byKey(Key('order-card-${order.id}'));
-      final stars = find.descendant(of: card, matching: find.byIcon(Icons.star_outline));
+      final stars = find.descendant(
+        of: card,
+        matching: find.byIcon(Icons.star_outline),
+      );
       expect(stars, findsNWidgets(5));
 
       await tester.tap(stars.at(2)); // 3 stars
       await tester.pumpAndSettle();
 
-      expect(
-        find.textContaining('Leave review ${order.id}'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Leave review ${order.id}'), findsOneWidget);
       expect(find.textContaining('rating=3'), findsOneWidget);
     });
 

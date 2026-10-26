@@ -317,8 +317,14 @@ void main() {
       expect(find.text('Add New Address'), findsOneWidget);
       expect(find.text('Save & Deliver Here'), findsOneWidget);
 
-      await tester.enterText(find.widgetWithText(TextFormField, 'Full Name *'), '');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Mobile Number *'), '');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Full Name *'),
+        '',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Mobile Number *'),
+        '',
+      );
       await tester.tap(find.text('Save & Deliver Here'));
       await tester.pumpAndSettle();
 

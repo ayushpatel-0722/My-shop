@@ -30,11 +30,11 @@ class Recommendation {
       );
 
   Map<String, dynamic> toMap() => {
-        'companyId': companyId,
-        'sourceId': sourceId,
-        'pinnedProductId': pinnedProductId,
-        'linkedProds': linkedProds,
-        'strategy': strategy,
-        'priority': priority,
-      };
+    'companyId': companyId,
+    'sourceId': sourceId,
+    'pinnedProductId': pinnedProductId,
+    'linkedProds': linkedProds,
+    'strategy': strategy,
+    'priority': priority,
+  };
 }

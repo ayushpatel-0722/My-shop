@@ -77,10 +77,7 @@ void main() {
       // Header & Icon
       expect(find.byIcon(Icons.storefront), findsOneWidget);
       expect(find.text('Continue as'), findsOneWidget);
-      expect(
-        find.text('Choose your account type to proceed'),
-        findsOneWidget,
-      );
+      expect(find.text('Choose your account type to proceed'), findsOneWidget);
 
       // Role Cards
       expect(find.text('I am an Admin'), findsOneWidget);

@@ -37,7 +37,11 @@ void main() {
 
     test('a missing parent promotes the child to a root', () {
       final tree = CategoryTree.build([
-        const Category(id: 'orphan', name: 'Orphan', parentId: 'does-not-exist'),
+        const Category(
+          id: 'orphan',
+          name: 'Orphan',
+          parentId: 'does-not-exist',
+        ),
       ]);
       expect(tree.roots.map((n) => n.id), ['orphan']);
     });
@@ -61,8 +65,13 @@ void main() {
 
     test('flatten returns a depth-first list', () {
       final tree = CategoryTree.build(flat);
-      expect(tree.flatten().map((n) => n.id),
-          ['root', 'men', 'shirts', 'women', 'lone']);
+      expect(tree.flatten().map((n) => n.id), [
+        'root',
+        'men',
+        'shirts',
+        'women',
+        'lone',
+      ]);
     });
 
     test('an empty list builds an empty tree', () {
@@ -76,7 +85,12 @@ void main() {
     test('totalProductCount includes descendants', () {
       final tree = CategoryTree.build([
         const Category(id: 'root', name: 'Root', productList: ['p1']),
-        const Category(id: 'child', name: 'Child', parentId: 'root', productList: ['p2', 'p3']),
+        const Category(
+          id: 'child',
+          name: 'Child',
+          parentId: 'root',
+          productList: ['p2', 'p3'],
+        ),
         const Category(
           id: 'grand',
           name: 'Grand',
@@ -126,7 +140,11 @@ void main() {
     ];
 
     test('descendantIds walks the whole sub-tree', () {
-      expect(CategoryHierarchy.descendantIds('root', all), {'men', 'shirts', 'women'});
+      expect(CategoryHierarchy.descendantIds('root', all), {
+        'men',
+        'shirts',
+        'women',
+      });
       expect(CategoryHierarchy.descendantIds('men', all), {'shirts'});
       expect(CategoryHierarchy.descendantIds('shirts', all), isEmpty);
     });
@@ -176,11 +194,15 @@ void main() {
     });
 
     test('pathTo returns the breadcrumb', () {
+      expect(CategoryHierarchy.pathTo('shirts', all).map((c) => c.name), [
+        'Apparel',
+        'Men',
+        'Shirts',
+      ]);
       expect(
-        CategoryHierarchy.pathTo('shirts', all).map((c) => c.name),
-        ['Apparel', 'Men', 'Shirts'],
+        CategoryHierarchy.pathLabel('shirts', all),
+        'Apparel / Men / Shirts',
       );
-      expect(CategoryHierarchy.pathLabel('shirts', all), 'Apparel / Men / Shirts');
     });
 
     test('pathTo terminates on a cycle', () {

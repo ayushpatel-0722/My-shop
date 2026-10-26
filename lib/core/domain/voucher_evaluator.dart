@@ -44,14 +44,16 @@ Map<VoucherRejection, String> get voucherRejectionMessages => {
   VoucherRejection.notFound: L10n.current.thatCodeIsNotValidForThisStore,
   VoucherRejection.inactive: L10n.current.thisVoucherIsCurrentlyDisabled,
   VoucherRejection.expired: L10n.current.thisVoucherHasExpired,
-  VoucherRejection.minOrderNotMet: L10n.current.addAFewMoreItemsToUseThisVoucher,
+  VoucherRejection.minOrderNotMet:
+      L10n.current.addAFewMoreItemsToUseThisVoucher,
   VoucherRejection.scopeMismatch:
       L10n.current.thisVoucherDoesNotApplyToTheItemsInYourCart,
   VoucherRejection.perUserLimitReached:
       L10n.current.youHaveAlreadyUsedThisVoucherTheMaximumNumberOfTimes,
   VoucherRejection.usageLimitReached:
       L10n.current.thisVoucherHasReachedItsRedemptionLimit,
-  VoucherRejection.firstTimeOnly: L10n.current.thisVoucherIsForFirstTimeOrdersOnly,
+  VoucherRejection.firstTimeOnly:
+      L10n.current.thisVoucherIsForFirstTimeOrdersOnly,
 };
 
 /// Outcome of validating one voucher against one cart.
@@ -171,14 +173,13 @@ class VoucherEvaluator {
       VoucherRejection reason, {
       double eligible = 0,
       int matched = 0,
-    }) =>
-        VoucherEvaluation(
-          voucher: voucher,
-          reason: reason,
-          cartSubtotal: cartSubtotal,
-          eligibleSubtotal: eligible,
-          matchedItemCount: matched,
-        );
+    }) => VoucherEvaluation(
+      voucher: voucher,
+      reason: reason,
+      cartSubtotal: cartSubtotal,
+      eligibleSubtotal: eligible,
+      matchedItemCount: matched,
+    );
 
     if (!voucher.isActive) return reject(VoucherRejection.inactive);
     if (voucher.isExpiredAt(ctx.now)) return reject(VoucherRejection.expired);
@@ -232,10 +233,9 @@ class VoucherEvaluator {
     List<Voucher> vouchers, {
     List<CartItem> items = const <CartItem>[],
     VoucherContext? context,
-  }) =>
-      vouchers
-          .where(
-            (v) => evaluate(voucher: v, items: items, context: context).isAccepted,
-          )
-          .toList();
+  }) => vouchers
+      .where(
+        (v) => evaluate(voucher: v, items: items, context: context).isAccepted,
+      )
+      .toList();
 }

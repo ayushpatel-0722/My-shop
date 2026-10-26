@@ -6,8 +6,10 @@ import '../../app/l10n/app_localizations.dart';
 import '../../app/routes/app_router.dart';
 import '../../core/models/notification.dart';
 import '../../core/services/service_locator.dart';
+import '../../core/utils/responsive_extensions.dart';
 import '../../core/widgets/modern_shimmer.dart';
 import '../auth/auth_cubit.dart';
+import '../marketplace/widgets/web_header.dart';
 
 /// In-app notification centre (Section 16).
 class NotificationsScreen extends StatelessWidget {
@@ -17,18 +19,23 @@ class NotificationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.notificationCentre),
-        leading: BackButton(
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppRoutes.home);
-            }
-          },
-        ),
-      ),
+      appBar: context.isDesktop
+          ? const PreferredSize(
+              preferredSize: Size.fromHeight(64),
+              child: WebHeader(),
+            )
+          : AppBar(
+              title: Text(l10n.notificationCentre),
+              leading: BackButton(
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go(AppRoutes.home);
+                  }
+                },
+              ),
+            ),
       body: Builder(
         builder: (context) {
           final userId = context.read<AuthCubit>().currentUser?.id ?? 'guest';
@@ -38,17 +45,25 @@ class NotificationsScreen extends StatelessWidget {
               if (snap.connectionState == ConnectionState.waiting &&
                   !snap.hasData) {
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.isDesktop ? 24 : 16,
+                    vertical: 16,
+                  ),
                   itemCount: 5,
                   itemBuilder: (_, _) => const M3ListTileSkeleton(),
                 );
               }
               final list = snap.data ?? const <AppNotification>[];
               if (list.isEmpty) {
-                return Center(child: Text(AppLocalizations.of(context).noNotifications));
+                return Center(
+                  child: Text(AppLocalizations.of(context).noNotifications),
+                );
               }
               return ListView.builder(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.isDesktop ? 24 : 8,
+                  vertical: 8,
+                ),
                 itemCount: list.length,
                 itemBuilder: (context, i) {
                   final n = list[i];

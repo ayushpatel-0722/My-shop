@@ -52,8 +52,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Reordering: top level'), findsOneWidget);
-      expect(find.byKey(const Key('category-drag-handle-cat_a')), findsOneWidget);
-      expect(find.byKey(const Key('category-drag-handle-cat_b')), findsOneWidget);
+      expect(
+        find.byKey(const Key('category-drag-handle-cat_a')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('category-drag-handle-cat_b')),
+        findsOneWidget,
+      );
       expect(
         find.text('Drag the ≡ handle to set the order customers see.'),
         findsOneWidget,
@@ -132,33 +138,48 @@ void main() {
 
   group('F2 — product order inside a category', () {
     final products = [
-      const Product(id: 'p_1', companyId: 'c_organic', categoryId: 'cat_a', name: 'Almonds'),
-      const Product(id: 'p_2', companyId: 'c_organic', categoryId: 'cat_a', name: 'Bread'),
-      const Product(id: 'p_3', companyId: 'c_organic', categoryId: 'cat_a', name: 'Carrots'),
+      const Product(
+        id: 'p_1',
+        companyId: 'c_organic',
+        categoryId: 'cat_a',
+        name: 'Almonds',
+      ),
+      const Product(
+        id: 'p_2',
+        companyId: 'c_organic',
+        categoryId: 'cat_a',
+        name: 'Bread',
+      ),
+      const Product(
+        id: 'p_3',
+        companyId: 'c_organic',
+        categoryId: 'cat_a',
+        name: 'Carrots',
+      ),
     ];
 
-    Widget picker(List<String> selected, ValueChanged<List<String>> onChanged) =>
-        MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+    Widget picker(
+      List<String> selected,
+      ValueChanged<List<String>> onChanged,
+    ) => MaterialApp(
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
 
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: ProductAssignmentPicker(
-                allProducts: products,
-                selectedProductIds: selected,
-                onSelectedChanged: onChanged,
-              ),
-            ),
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: ProductAssignmentPicker(
+            allProducts: products,
+            selectedProductIds: selected,
+            onSelectedChanged: onChanged,
           ),
-        );
+        ),
+      ),
+    );
 
     testWidgets('the assigned panel follows the selectedProductIds order', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        picker(const ['p_2', 'p_1'], (_) {}),
-      );
+      await tester.pumpWidget(picker(const ['p_2', 'p_1'], (_) {}));
 
       expect(find.byKey(const Key('assignment-counter')), findsOneWidget);
       expect(find.text('2 products selected'), findsOneWidget);
@@ -195,13 +216,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(selected, ['p_2', 'p_1', 'p_3'], reason: 'local order until saved');
+      expect(selected, [
+        'p_2',
+        'p_1',
+        'p_3',
+      ], reason: 'local order until saved');
     });
 
     testWidgets('search text disables the drag handles', (tester) async {
-      await tester.pumpWidget(
-        picker(const ['p_1', 'p_2'], (_) {}),
-      );
+      await tester.pumpWidget(picker(const ['p_1', 'p_2'], (_) {}));
 
       await tester.enterText(find.byType(TextField), 'bread');
       await tester.pumpAndSettle();
@@ -237,9 +260,7 @@ void main() {
     testWidgets('ids without a product stay at the end of the order', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        picker(const ['p_gone', 'p_2', 'p_1'], (_) {}),
-      );
+      await tester.pumpWidget(picker(const ['p_gone', 'p_2', 'p_1'], (_) {}));
 
       // The counter tracks assigned ids; unknown ids simply have no card.
       expect(find.text('3 products selected'), findsOneWidget);
@@ -248,9 +269,7 @@ void main() {
     });
 
     testWidgets('a single product hides its drag handle', (tester) async {
-      await tester.pumpWidget(
-        picker(const ['p_1'], (_) {}),
-      );
+      await tester.pumpWidget(picker(const ['p_1'], (_) {}));
       expect(find.text('1 product selected'), findsOneWidget);
       expect(find.byKey(const Key('drag-handle-p_1')), findsNothing);
     });

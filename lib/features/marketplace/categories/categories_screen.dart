@@ -15,7 +15,9 @@ import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/section_header.dart';
+import '../widgets/web_header.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import '../../../core/utils/responsive_extensions.dart';
 
 /// Categories Screen displaying All Shops and All Shop Categories with rich styling.
 class CategoriesScreen extends StatelessWidget {
@@ -36,134 +38,197 @@ class CategoriesScreen extends StatelessWidget {
     final categoriesStream = repo.categories();
     final companiesStream = repo.companies();
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 1,
-        title: Text(
-          AppLocalizations.of(context).categoriesShops,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1E2229),
-            fontSize: 19,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFF1E2229)),
-            onPressed: () => context.push(AppRoutes.search),
-          ),
-          BlocBuilder<CartCubit, CartState>(
-            builder: (context, state) {
-              final count = state.totalItems;
-              return IconButton(
-                icon: Badge(
-                  isLabelVisible: count > 0,
-                  label: Text(
-                    '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
+    bool canPop() {
+      try {
+        return context.canPop();
+      } catch (_) {
+        return Navigator.of(context).canPop();
+      }
+    }
+
+    void handleBack() {
+      try {
+        if (context.canPop()) {
+          context.pop();
+          return;
+        }
+      } catch (_) {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+          return;
+        }
+      }
+      try {
+        context.go(AppRoutes.home);
+      } catch (_) {}
+    }
+
+    return PopScope(
+      canPop: canPop(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          handleBack();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        appBar: context.isDesktop
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(64),
+                child: WebHeader(currentIndex: 1),
+              )
+            : AppBar(
+                automaticallyImplyLeading: false,
+                leading: canPop()
+                    ? BackButton(
+                        color: const Color(0xFF1E2229),
+                        onPressed: handleBack,
+                      )
+                    : null,
+                backgroundColor: Colors.white,
+                elevation: 0,
+                scrolledUnderElevation: 1,
+                title: Text(
+                  AppLocalizations.of(context).categoriesShops,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E2229),
+                    fontSize: 19,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.search, color: Color(0xFF1E2229)),
+                    onPressed: () => context.push(AppRoutes.search),
+                  ),
+                  BlocBuilder<CartCubit, CartState>(
+                    builder: (context, state) {
+                      final count = state.totalItems;
+                      return IconButton(
+                        icon: Badge(
+                          isLabelVisible: count > 0,
+                          label: Text(
+                            '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                          backgroundColor: const Color(0xFFFF5247),
+                          child: const Icon(
+                            Icons.shopping_cart_outlined,
+                            color: Color(0xFF1E2229),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (AuthSession.currentUser == null) {
+                            final ok = await AuthBottomSheet.show(context);
+                            if (ok && context.mounted) {
+                              context.push(AppRoutes.cart);
+                            }
+                            return;
+                          }
+                          context.push(AppRoutes.cart);
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+        body: CustomScrollView(
+          slivers: [
+            // Search Pill (mobile only, since desktop has search in header)
+            if (!context.isDesktop)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: InkWell(
+                    onTap: () => context.push(AppRoutes.search),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color.fromRGBO(0, 0, 0, 0.03),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.search,
+                            color: Color(0xFFFF5247),
+                            size: 20,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).searchCategoriesBrandsOrShops,
+                            style: TextStyle(
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  backgroundColor: const Color(0xFFFF5247),
-                  child: const Icon(
-                    Icons.shopping_cart_outlined,
-                    color: Color(0xFF1E2229),
-                  ),
                 ),
-                onPressed: () async {
-                  if (AuthSession.currentUser == null) {
-                    final ok = await AuthBottomSheet.show(context);
-                    if (ok && context.mounted) {
-                      context.push(AppRoutes.cart);
-                    }
-                    return;
-                  }
-                  context.push(AppRoutes.cart);
-                },
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
-          // Search Pill
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: InkWell(
-                onTap: () => context.push(AppRoutes.search),
-                borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.03),
-                        blurRadius: 8,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: Color(0xFFFF5247), size: 20),
-                      SizedBox(width: 10),
-                      Text(
-                        AppLocalizations.of(context).searchCategoriesBrandsOrShops,
-                        style: TextStyle(
-                          color: Color(0xFF9CA3AF),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+              ),
+
+            // All Categories Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  context.isDesktop ? 24 : 16,
+                  context.isDesktop ? 20 : 16,
+                  context.isDesktop ? 24 : 16,
+                  10,
+                ),
+                child: SectionHeader(
+                  title: AppLocalizations.of(context).shopByCategory,
+                  onViewAll: () => context.go(AppRoutes.search),
                 ),
               ),
             ),
-          ),
+            SliverToBoxAdapter(child: _buildCategoriesGrid(categoriesStream)),
 
-          // All Categories Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-              child: SectionHeader(
-                title: AppLocalizations.of(context).shopByCategory,
-                onViewAll: () => context.go(AppRoutes.search),
+            // All Shops Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  context.isDesktop ? 24 : 16,
+                  24,
+                  context.isDesktop ? 24 : 16,
+                  10,
+                ),
+                child: SectionHeader(
+                  title: AppLocalizations.of(context).exploreAllShopsStores,
+                  onViewAll: () => context.go(AppRoutes.search),
+                ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(child: _buildCategoriesGrid(categoriesStream)),
+            _buildShopsSliver(companiesStream),
 
-          // All Shops Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
-              child: SectionHeader(
-                title: AppLocalizations.of(context).exploreAllShopsStores,
-                onViewAll: () => context.go(AppRoutes.search),
-              ),
-            ),
-          ),
-          _buildShopsSliver(companiesStream),
-
-          const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
-        ],
+            const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+          ],
+        ),
+        bottomNavigationBar: context.isDesktop
+            ? null
+            : const MarketplaceBottomNav(currentIndex: 1),
       ),
-      bottomNavigationBar: const MarketplaceBottomNav(currentIndex: 1),
     );
   }
 
@@ -211,7 +276,9 @@ class CategoriesScreen extends StatelessWidget {
         if (list.isEmpty) {
           return SizedBox(
             height: 120,
-            child: Center(child: Text(AppLocalizations.of(context).noCategoriesYet)),
+            child: Center(
+              child: Text(AppLocalizations.of(context).noCategoriesYet),
+            ),
           );
         }
 
@@ -221,66 +288,83 @@ class CategoriesScreen extends StatelessWidget {
         if (roots.isEmpty) {
           return SizedBox(
             height: 120,
-            child: Center(child: Text(AppLocalizations.of(context).noCategoriesYet)),
+            child: Center(
+              child: Text(AppLocalizations.of(context).noCategoriesYet),
+            ),
           );
         }
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: roots.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 14,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.76,
-            ),
-            itemBuilder: (context, i) {
-              final cat = roots[i].category;
-              final bgColor = _pastelColors[i % _pastelColors.length];
+          padding: EdgeInsets.symmetric(
+            horizontal: context.isDesktop ? 24 : 16,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cols = context.isDesktop
+                  ? ((constraints.maxWidth + 14) / 120).floor().clamp(4, 12)
+                  : 4;
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: roots.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: cols,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.72,
+                ),
+                itemBuilder: (context, i) {
+                  final cat = roots[i].category;
+                  final bgColor = _pastelColors[i % _pastelColors.length];
 
-              return InkWell(
-                onTap: () => context.push(
-                  '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
-                ),
-                borderRadius: BorderRadius.circular(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 62,
-                      height: 62,
-                      decoration: BoxDecoration(
-                        color: bgColor,
-                        shape: BoxShape.circle,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.04),
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
+                  return InkWell(
+                    onTap: () => context.push(
+                      '${AppRoutes.categoryPath(cat.id)}?name=${Uri.encodeComponent(cat.name)}',
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 66,
+                          height: 66,
+                          decoration: BoxDecoration(
+                            color: bgColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color.fromRGBO(0, 0, 0, 0.05),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: Center(child: _buildCategoryIcon(cat)),
-                      ),
+                          child: ClipOval(child: _buildCategoryIcon(cat)),
+                        ),
+                        const SizedBox(height: 6),
+                        SizedBox(
+                          height: 32,
+                          child: Center(
+                            child: Text(
+                              cat.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.1,
+                                color: Color(0xFF2D3139),
+                                height: 1.15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      cat.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D3139),
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               );
             },
           ),
@@ -294,13 +378,35 @@ class CategoriesScreen extends StatelessWidget {
         cat.iconUrl.startsWith('https://')) {
       return Image.network(
         cat.iconUrl,
-        width: 32,
-        height: 32,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) => _fallbackCategoryIcon(cat),
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            color: Colors.black.withValues(alpha: 0.04),
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
+        errorBuilder: (_, _, _) => Center(child: _fallbackCategoryIcon(cat)),
       );
     }
-    return _fallbackCategoryIcon(cat);
+    if (cat.iconUrl.startsWith('assets/')) {
+      return Image.asset(
+        cat.iconUrl,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => Center(child: _fallbackCategoryIcon(cat)),
+      );
+    }
+    return Center(child: _fallbackCategoryIcon(cat));
   }
 
   Widget _fallbackCategoryIcon(Category cat) {
@@ -355,6 +461,24 @@ class CategoriesScreen extends StatelessWidget {
                   style: TextStyle(color: Colors.black54),
                 ),
               ),
+            ),
+          );
+        }
+
+        if (context.isDesktop) {
+          return SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 520,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                mainAxisExtent: 135,
+              ),
+              delegate: SliverChildBuilderDelegate((context, i) {
+                final company = list[i];
+                return _buildShopCard(context, company, i);
+              }, childCount: list.length),
             ),
           );
         }
@@ -500,7 +624,9 @@ class CategoriesScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                isOpen ? AppLocalizations.of(context).openNow : AppLocalizations.of(context).closed,
+                                isOpen
+                                    ? AppLocalizations.of(context).openNow
+                                    : AppLocalizations.of(context).closed,
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
@@ -534,9 +660,13 @@ class CategoriesScreen extends StatelessWidget {
                                 const SizedBox(width: 2),
                                 Text(
                                   offersHomeDelivery && offersPickup
-                                      ? AppLocalizations.of(context).deliveryPickup
+                                      ? AppLocalizations.of(
+                                          context,
+                                        ).deliveryPickup
                                       : offersHomeDelivery
-                                      ? AppLocalizations.of(context).homeDelivery2
+                                      ? AppLocalizations.of(
+                                          context,
+                                        ).homeDelivery2
                                       : AppLocalizations.of(context).selfPickup,
                                   style: const TextStyle(
                                     fontSize: 11,

@@ -32,7 +32,8 @@ class AdminBannersScreen extends StatelessWidget {
       child: StreamBuilder<List<OfferBanner>>(
         stream: repo.offerBanners(companyId),
         builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
+          if (snap.connectionState == ConnectionState.waiting &&
+              !snap.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -83,10 +84,7 @@ class AdminBannersScreen extends StatelessWidget {
                 separatorBuilder: (_, _) => const SizedBox(height: 16),
                 itemBuilder: (context, i) {
                   final banner = list[i];
-                  return _BannerCard(
-                    banner: banner,
-                    companyId: companyId,
-                  );
+                  return _BannerCard(banner: banner, companyId: companyId);
                 },
               ),
             ),
@@ -134,7 +132,9 @@ class _BannerCard extends StatelessWidget {
           AspectRatio(
             aspectRatio: 16 / 9,
             child: Container(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.4,
+              ),
               child: banner.image.isNotEmpty
                   ? Image.network(
                       banner.image,
@@ -145,7 +145,7 @@ class _BannerCard extends StatelessWidget {
                           child: CircularProgressIndicator(
                             value: progress.expectedTotalBytes != null
                                 ? progress.cumulativeBytesLoaded /
-                                    progress.expectedTotalBytes!
+                                      progress.expectedTotalBytes!
                                 : null,
                           ),
                         );
@@ -378,11 +378,14 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
             Container(
               height: 140,
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.4),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.6,
+                  ),
                 ),
               ),
               clipBehavior: Clip.antiAlias,
@@ -559,9 +562,9 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save banner: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save banner: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }

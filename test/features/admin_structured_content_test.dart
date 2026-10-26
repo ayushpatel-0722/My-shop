@@ -11,8 +11,8 @@ import 'package:myshop/features/admin/products/widgets/structured_content_editor
 /// ask for confirmation and validation blocks incomplete content.
 void main() {
   Widget shell(Widget child) => MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
 
     theme: ThemeData.light(),
     home: Scaffold(
@@ -38,7 +38,10 @@ void main() {
       );
 
       expect(find.byKey(const Key('highlights-empty')), findsOneWidget);
-      expect(find.text('No highlights yet — tap "Add Highlight".'), findsOneWidget);
+      expect(
+        find.text('No highlights yet — tap "Add Highlight".'),
+        findsOneWidget,
+      );
 
       await tester.tap(find.byKey(const Key('add-highlight')));
       await tester.pumpAndSettle();
@@ -273,7 +276,9 @@ void main() {
 
       expect(find.text('Change Section Type'), findsOneWidget);
       expect(
-        find.text('Switching the type will clear the content of this section. Continue?'),
+        find.text(
+          'Switching the type will clear the content of this section. Continue?',
+        ),
         findsOneWidget,
       );
 
@@ -299,7 +304,11 @@ void main() {
 
     testWidgets('deleting a section asks for confirmation', (tester) async {
       var sections = const [
-        DetailSection(title: 'Warranty', type: DetailSectionType.text, text: '1 year'),
+        DetailSection(
+          title: 'Warranty',
+          type: DetailSectionType.text,
+          text: '1 year',
+        ),
       ];
       await tester.pumpWidget(
         shell(
@@ -331,7 +340,11 @@ void main() {
     test('isValid enforces the per-type rules', () {
       expect(
         AllDetailsEditor.isValid(const [
-          DetailSection(title: 'Description', type: DetailSectionType.text, text: 'ok'),
+          DetailSection(
+            title: 'Description',
+            type: DetailSectionType.text,
+            text: 'ok',
+          ),
         ]),
         isTrue,
       );
@@ -344,7 +357,11 @@ void main() {
       );
       expect(
         AllDetailsEditor.isValid(const [
-          DetailSection(title: 'Description', type: DetailSectionType.text, text: ''),
+          DetailSection(
+            title: 'Description',
+            type: DetailSectionType.text,
+            text: '',
+          ),
         ]),
         isFalse,
         reason: 'text sections need text',

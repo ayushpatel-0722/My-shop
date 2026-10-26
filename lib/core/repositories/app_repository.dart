@@ -8,6 +8,8 @@ import '../models/category.dart';
 import '../models/company.dart';
 import '../models/delivery_charge.dart';
 import '../models/employee.dart';
+import '../models/home_explore_category.dart';
+import '../models/home_trending_item.dart';
 import '../models/notification.dart';
 import '../models/order.dart';
 import '../models/product.dart';
@@ -110,6 +112,19 @@ abstract class AppRepository {
   /// Raw recommendation documents, for the Admin manager.
   Stream<List<Recommendation>> recommendationRecords({String companyId = ''});
 
+  // ------------------------------------------ Home Dynamic Configurations --
+  /// Admin-configured Explore Categories entries for a shop's home screen.
+  Stream<List<HomeExploreCategory>> homeExploreCategories({
+    String shopId = '',
+    bool activeOnly = false,
+  });
+
+  /// Admin-configured Trending Now entries for a shop's home screen.
+  Stream<List<HomeTrendingItem>> homeTrendingNow({
+    String shopId = '',
+    bool activeOnly = false,
+  });
+
   // ---------------------------------------------------------------- Writes --
   /// Persists an order and performs the bookkeeping that belongs to it:
   /// stock decrement and voucher redemption counters.
@@ -131,16 +146,33 @@ abstract class AppRepository {
   });
 
   /// Cancels an order when its current status still allows it.
+  /// If [userId] is specified (customer cancellation), checks that the order
+  /// belongs to [userId] and its status is pending.
   Future<void> cancelOrder(
     String orderId, {
     String companyId = '',
     String? reason,
+    String? userId,
   });
 
   Future<void> togglePaymentStatus(
     String orderId, {
     String companyId = '',
     String? status,
+    String? verifiedBy,
+    String? transactionRef,
+    double? amountPaid,
+  });
+
+  Future<void> verifyPayment({
+    required String orderId,
+    required String companyId,
+    required String paymentStatus,
+    String? paymentMethod,
+    String? verifiedBy,
+    String? transactionRef,
+    double? amountPaid,
+    String? note,
   });
   Future<void> setEmployeePackingDone(String orderId, bool done);
   Future<void> assignEmployee(String orderId, String employeeId);
@@ -184,6 +216,32 @@ abstract class AppRepository {
   Future<void> saveBanner(OfferBanner banner);
   Future<void> saveAdBanner(AdBanner banner);
   Future<void> deleteBanner(String id, {String companyId = ''});
+
+  // Home Screen Sections Management
+  Future<void> saveHomeExploreCategory(HomeExploreCategory entry);
+  Future<void> deleteHomeExploreCategory(String id);
+  Future<void> reorderHomeExploreCategories(
+    List<HomeExploreCategory> orderedEntries,
+  );
+
+  Future<void> saveHomeTrendingItem(HomeTrendingItem entry);
+  Future<void> deleteHomeTrendingItem(String id);
+  Future<void> reorderHomeTrendingItems(List<HomeTrendingItem> orderedEntries);
+
+  /// Removes all `home_trending_now` entries for [productId] in [shopId].
+  ///
+  /// Only matches entries where `shopId == shopId`, `itemType == 'product'`,
+  /// and `productId == productId`. Returns the count of deleted entries.
+  Future<int> removeProductFromTrendingNow({
+    required String shopId,
+    required String productId,
+  });
+
+  /// Checks whether [productId] is present in `home_trending_now` for [shopId].
+  Future<bool> isProductInTrendingNow({
+    required String shopId,
+    required String productId,
+  });
 
   /// Registers an FCM push token against a customer.
   Future<void> registerFcmToken(String userId, String token);

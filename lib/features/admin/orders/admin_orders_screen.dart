@@ -8,11 +8,13 @@ import '../../../core/models/order.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'widgets/order_items_dialog.dart';
+import 'widgets/payment_verification_dialog.dart';
 
 /// Master order pipeline for the signed-in store.
 ///
@@ -235,6 +237,7 @@ class _PipelineSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = context.isDesktop;
     final open = orders.where((o) => o.isOpen).length;
     final revenue = orders
         .where((o) => !o.isCancelled)
@@ -242,7 +245,7 @@ class _PipelineSummary extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(isDesktop ? 18 : 14),
         child: Row(
           children: [
             Expanded(
@@ -282,15 +285,26 @@ class _Metric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = context.isDesktop;
     return Column(
       children: [
-        Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+        Icon(
+          icon,
+          size: isDesktop ? 22 : 18,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: isDesktop ? 20 : 15,
+          ),
         ),
-        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+        Text(
+          label,
+          style: TextStyle(fontSize: isDesktop ? 13 : 11, color: Colors.grey),
+        ),
       ],
     );
   }
@@ -364,6 +378,7 @@ class _OrderCardState extends State<_OrderCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDesktop = context.isDesktop;
     final next = OrderStatusRules.nextStage(order.orderStatus);
     final cancellable = OrderStatusRules.isCancellable(order.orderStatus);
     final dateStr = order.createdAt != null
@@ -379,7 +394,7 @@ class _OrderCardState extends State<_OrderCard> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(isDesktop ? 16 : 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -395,11 +410,11 @@ class _OrderCardState extends State<_OrderCard> {
                         order.customerName.isNotEmpty
                             ? order.customerName
                             : (order.customerPhone.isNotEmpty
-                                ? order.customerPhone
-                                : 'Guest Customer'),
-                        style: const TextStyle(
+                                  ? order.customerPhone
+                                  : 'Guest Customer'),
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: isDesktop ? 16.5 : 15,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -411,15 +426,15 @@ class _OrderCardState extends State<_OrderCard> {
                             order.reference,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 12,
+                              fontSize: isDesktop ? 13 : 12,
                               color: theme.colorScheme.primary,
                             ),
                           ),
                           if (dateStr.isNotEmpty) ...[
                             Text(
                               ' · $dateStr',
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: TextStyle(
+                                fontSize: isDesktop ? 13 : 12,
                                 color: Colors.grey,
                               ),
                             ),
@@ -434,7 +449,7 @@ class _OrderCardState extends State<_OrderCard> {
                   formatCurrency(order.totalAmount),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: isDesktop ? 17.5 : 16,
                     color: theme.colorScheme.primary,
                   ),
                 ),
@@ -449,32 +464,102 @@ class _OrderCardState extends State<_OrderCard> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 OrderStatusBadge(status: order.orderStatus),
+                // Payment Method Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 2.5,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 8 : 7,
+                    vertical: isDesktop ? 3 : 2.5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: order.isPaid
+                        ? (order.isUpi
+                              ? Colors.indigo.withValues(alpha: 0.12)
+                              : Colors.teal.withValues(alpha: 0.12))
+                        : Colors.grey.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        order.isUpi
+                            ? Icons.qr_code_2
+                            : (order.isCash
+                                  ? Icons.payments_outlined
+                                  : Icons.help_outline),
+                        size: isDesktop ? 13 : 11,
+                        color: order.isPaid
+                            ? (order.isUpi
+                                  ? Colors.indigo.shade800
+                                  : Colors.teal.shade800)
+                            : Colors.grey.shade700,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Payment: ${order.paymentMethodDisplay}',
+                        style: TextStyle(
+                          fontSize: isDesktop ? 11.5 : 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: order.isPaid
+                              ? (order.isUpi
+                                    ? Colors.indigo.shade800
+                                    : Colors.teal.shade800)
+                              : Colors.grey.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Payment Status Badge
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 8 : 7,
+                    vertical: isDesktop ? 3 : 2.5,
                   ),
                   decoration: BoxDecoration(
                     color: order.isPaid
                         ? Colors.green.withValues(alpha: 0.12)
-                        : Colors.orange.withValues(alpha: 0.12),
+                        : (order.isPaymentFailed
+                              ? Colors.red.withValues(alpha: 0.12)
+                              : Colors.orange.withValues(alpha: 0.12)),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(
-                    order.isPaid ? 'PAID' : 'PAYMENT PENDING',
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.bold,
-                      color: order.isPaid
-                          ? Colors.green.shade800
-                          : Colors.orange.shade900,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        order.isPaid
+                            ? Icons.check_circle_outline
+                            : (order.isPaymentFailed
+                                  ? Icons.error_outline
+                                  : Icons.schedule),
+                        size: isDesktop ? 13 : 11,
+                        color: order.isPaid
+                            ? Colors.green.shade800
+                            : (order.isPaymentFailed
+                                  ? Colors.red.shade800
+                                  : Colors.orange.shade900),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Status: ${order.paymentStatusDisplay.toUpperCase()}',
+                        style: TextStyle(
+                          fontSize: isDesktop ? 11.5 : 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: order.isPaid
+                              ? Colors.green.shade800
+                              : (order.isPaymentFailed
+                                    ? Colors.red.shade800
+                                    : Colors.orange.shade900),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 2.5,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 8 : 7,
+                    vertical: isDesktop ? 3 : 2.5,
                   ),
                   decoration: BoxDecoration(
                     color: order.isSelfPickup
@@ -489,7 +574,7 @@ class _OrderCardState extends State<_OrderCard> {
                         order.isSelfPickup
                             ? Icons.storefront_outlined
                             : Icons.local_shipping_outlined,
-                        size: 12,
+                        size: isDesktop ? 14 : 12,
                         color: order.isSelfPickup
                             ? Colors.blue.shade800
                             : Colors.teal.shade800,
@@ -498,7 +583,7 @@ class _OrderCardState extends State<_OrderCard> {
                       Text(
                         order.isSelfPickup ? 'Self Pickup' : 'Delivery',
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: isDesktop ? 11.5 : 10.5,
                           fontWeight: FontWeight.w600,
                           color: order.isSelfPickup
                               ? Colors.blue.shade800
@@ -511,6 +596,41 @@ class _OrderCardState extends State<_OrderCard> {
               ],
             ),
 
+            if (order.isCancelled) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.cancel_outlined,
+                      size: isDesktop ? 16 : 14,
+                      color: Colors.red.shade700,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Cancelled${order.cancellationReason != null ? ": ${order.cancellationReason}" : ""}${order.cancelledAt != null ? " (${DateFormat('dd MMM, hh:mm a').format(order.cancelledAt!)})" : ""}',
+                        style: TextStyle(
+                          fontSize: isDesktop ? 13 : 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.red.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             if (_isLoading) ...[
               const SizedBox(height: 10),
               const LinearProgressIndicator(),
@@ -518,88 +638,251 @@ class _OrderCardState extends State<_OrderCard> {
 
             const Divider(height: 20),
 
-            // Bottom action row: Items button, View Details, Confirm/Advance, Cancel
-            Row(
-              children: [
-                // Quick items dialog button
-                IconButton.outlined(
-                  key: Key('order-items-btn-${order.id}'),
-                  icon: const Icon(Icons.shopping_bag_outlined, size: 18),
-                  visualDensity: VisualDensity.compact,
-                  tooltip: 'View ordered items (${order.itemCount})',
-                  onPressed: () => OrderItemsPreviewDialog.show(context, order),
-                ),
-                const SizedBox(width: 8),
-
-                // View Details Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: Key('order-details-btn-${order.id}'),
-                    icon: const Icon(Icons.visibility_outlined, size: 16),
-                    label: const Text(
-                      'View Details',
-                      style: TextStyle(fontSize: 12.5),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    onPressed: () => context.push(
-                      AppRoutes.adminOrderDetailsPath(order.id),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // Main forward action: Mark Confirmed or next stage
-                if (order.orderStatus == OrderStatus.pending) ...[
-                  FilledButton(
-                    key: Key('order-advance-${order.id}'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.green.shade700,
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                    onPressed: _isLoading ? null : () => _confirmOrder(context),
-                    child: const Text(
-                      'Confirm',
-                      style: TextStyle(fontSize: 12.5),
-                    ),
-                  ),
-                ] else if (next != null) ...[
-                  FilledButton.tonal(
-                    key: Key('order-advance-${order.id}'),
-                    style: FilledButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                    ),
-                    onPressed: _isLoading
-                        ? null
-                        : () => _advance(context, next),
-                    child: Text(
-                      orderStatusLabel(context, next),
-                      style: const TextStyle(fontSize: 12.5),
-                    ),
-                  ),
-                ],
-
-                // Cancel button
-                if (cancellable) ...[
-                  const SizedBox(width: 6),
-                  IconButton(
-                    key: Key('order-cancel-${order.id}'),
+            // Bottom action row: Responsive desktop vs mobile layout
+            if (isDesktop) ...[
+              Row(
+                children: [
+                  // Quick items dialog button
+                  IconButton.outlined(
+                    key: Key('order-items-btn-${order.id}'),
                     icon: Icon(
-                      Icons.cancel_outlined,
-                      size: 20,
-                      color: theme.colorScheme.error,
+                      Icons.shopping_bag_outlined,
+                      size: isDesktop ? 20 : 18,
                     ),
                     visualDensity: VisualDensity.compact,
-                    tooltip: 'Cancel Order',
-                    onPressed: _isLoading ? null : () => _confirmCancel(context),
+                    tooltip: 'View ordered items (${order.itemCount})',
+                    onPressed: () =>
+                        OrderItemsPreviewDialog.show(context, order),
                   ),
+                  const SizedBox(width: 8),
+
+                  // View Details Button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: Key('order-details-btn-${order.id}'),
+                      icon: Icon(
+                        Icons.visibility_outlined,
+                        size: isDesktop ? 18 : 16,
+                      ),
+                      label: Text(
+                        'View Details',
+                        style: TextStyle(fontSize: isDesktop ? 13.5 : 12.5),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () => context.push(
+                        AppRoutes.adminOrderDetailsPath(order.id),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Quick payment verification button
+                  if (!order.isPaid && !order.isCancelled) ...[
+                    FilledButton.tonalIcon(
+                      key: Key('order-verify-payment-${order.id}'),
+                      icon: Icon(
+                        Icons.payments_outlined,
+                        size: isDesktop ? 16 : 14,
+                      ),
+                      label: Text(
+                        'Confirm Payment',
+                        style: TextStyle(fontSize: isDesktop ? 13 : 12),
+                      ),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 10 : 8,
+                        ),
+                      ),
+                      onPressed: _isLoading
+                          ? null
+                          : () =>
+                                PaymentVerificationDialog.show(context, order),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+
+                  // Main forward action: Mark Confirmed or next stage
+                  if (order.orderStatus == OrderStatus.pending) ...[
+                    FilledButton(
+                      key: Key('order-advance-${order.id}'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.green.shade700,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 14 : 12,
+                        ),
+                      ),
+                      onPressed: _isLoading
+                          ? null
+                          : () => _confirmOrder(context),
+                      child: Text(
+                        'Confirm',
+                        style: TextStyle(fontSize: isDesktop ? 13.5 : 12.5),
+                      ),
+                    ),
+                  ] else if (next != null) ...[
+                    FilledButton.tonal(
+                      key: Key('order-advance-${order.id}'),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 12 : 10,
+                        ),
+                      ),
+                      onPressed: _isLoading
+                          ? null
+                          : () => _advance(context, next),
+                      child: Text(
+                        orderStatusLabel(context, next),
+                        style: TextStyle(fontSize: isDesktop ? 13.5 : 12.5),
+                      ),
+                    ),
+                  ],
+
+                  // Cancel button
+                  if (cancellable) ...[
+                    const SizedBox(width: 6),
+                    IconButton(
+                      key: Key('order-cancel-${order.id}'),
+                      icon: Icon(
+                        Icons.cancel_outlined,
+                        size: isDesktop ? 22 : 20,
+                        color: theme.colorScheme.error,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Cancel Order',
+                      onPressed: _isLoading
+                          ? null
+                          : () => _confirmCancel(context),
+                    ),
+                  ],
                 ],
+              ),
+            ] else ...[
+              // Mobile / Compact Layout
+              Row(
+                children: [
+                  IconButton.outlined(
+                    key: Key('order-items-btn-${order.id}'),
+                    icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'View ordered items (${order.itemCount})',
+                    onPressed: () =>
+                        OrderItemsPreviewDialog.show(context, order),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: Key('order-details-btn-${order.id}'),
+                      icon: const Icon(Icons.visibility_outlined, size: 16),
+                      label: const Text(
+                        'View Details',
+                        style: TextStyle(fontSize: 12.5),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      onPressed: () => context.push(
+                        AppRoutes.adminOrderDetailsPath(order.id),
+                      ),
+                    ),
+                  ),
+                  if (cancellable) ...[
+                    const SizedBox(width: 6),
+                    IconButton(
+                      key: Key('order-cancel-${order.id}'),
+                      icon: Icon(
+                        Icons.cancel_outlined,
+                        size: 20,
+                        color: theme.colorScheme.error,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Cancel Order',
+                      onPressed: _isLoading
+                          ? null
+                          : () => _confirmCancel(context),
+                    ),
+                  ],
+                ],
+              ),
+              if ((!order.isPaid && !order.isCancelled) ||
+                  order.orderStatus == OrderStatus.pending ||
+                  next != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    if (!order.isPaid && !order.isCancelled) ...[
+                      Expanded(
+                        child: FilledButton.tonalIcon(
+                          key: Key('order-verify-payment-${order.id}'),
+                          icon: const Icon(Icons.payments_outlined, size: 15),
+                          label: const Text(
+                            'Confirm Payment',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          style: FilledButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                          ),
+                          onPressed: _isLoading
+                              ? null
+                              : () => PaymentVerificationDialog.show(
+                                  context,
+                                  order,
+                                ),
+                        ),
+                      ),
+                    ],
+                    if (!order.isPaid &&
+                        !order.isCancelled &&
+                        (order.orderStatus == OrderStatus.pending ||
+                            next != null))
+                      const SizedBox(width: 8),
+                    if (order.orderStatus == OrderStatus.pending) ...[
+                      Expanded(
+                        child: FilledButton(
+                          key: Key('order-advance-${order.id}'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.green.shade700,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          onPressed: _isLoading
+                              ? null
+                              : () => _confirmOrder(context),
+                          child: const Text(
+                            'Confirm',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ] else if (next != null) ...[
+                      Expanded(
+                        child: FilledButton.tonal(
+                          key: Key('order-advance-${order.id}'),
+                          style: FilledButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          onPressed: _isLoading
+                              ? null
+                              : () => _advance(context, next),
+                          child: Text(
+                            orderStatusLabel(context, next),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
-            ),
+            ],
           ],
         ),
       ),
@@ -620,7 +903,9 @@ class _OrderCardState extends State<_OrderCard> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.green.shade700),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Confirm'),
           ),
@@ -660,11 +945,7 @@ class _OrderCardState extends State<_OrderCard> {
   Future<void> _advance(BuildContext context, String next) async {
     setState(() => _isLoading = true);
     try {
-      await repo.updateOrderStatus(
-        order.id,
-        next,
-        companyId: order.companyId,
-      );
+      await repo.updateOrderStatus(order.id, next, companyId: order.companyId);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -766,7 +1047,6 @@ class _OrderCardState extends State<_OrderCard> {
     }
   }
 }
-
 
 class _CenteredMessage extends StatelessWidget {
   final IconData icon;

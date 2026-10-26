@@ -12,6 +12,8 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
 import 'widgets/product_assignment_picker.dart';
+import '../qr/widgets/entity_qr_dialog.dart';
+import '../../../core/services/qr_deep_link_service.dart';
 
 /// Screen for creating and editing a Category with dual-panel product assignment.
 ///
@@ -454,6 +456,35 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
                   }
                 },
               ),
+              actions: [
+                if (isEditMode)
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_2_rounded),
+                    tooltip: 'QR Code & Share Link',
+                    onPressed: () {
+                      final catId =
+                          widget.categoryId ?? widget.category?.id ?? '';
+                      final catName = _nameCtrl.text.trim().isNotEmpty
+                          ? _nameCtrl.text.trim()
+                          : (widget.category?.name ?? 'Category');
+                      final shopId =
+                          widget.category?.companyId.isNotEmpty == true
+                          ? widget.category!.companyId
+                          : (_companyId.isNotEmpty
+                                ? _companyId
+                                : 'masala-mart');
+                      showEntityQrDialog(
+                        context: context,
+                        type: QrEntityType.category,
+                        title: catName,
+                        shopId: shopId,
+                        shopName: shopId,
+                        categoryId: catId,
+                        subtitle: 'Category ID: $catId · Shop: $shopId',
+                      );
+                    },
+                  ),
+              ],
             ),
             body: Center(
               child: ConstrainedBox(

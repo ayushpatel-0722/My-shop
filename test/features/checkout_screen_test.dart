@@ -52,21 +52,27 @@ void main() {
     stockQty: 25,
   );
 
-  Future<void> openCheckout(WidgetTester tester, {AppUser? user}) =>
-      pumpTestApp(
-        tester,
-        const CheckoutScreen(),
-        user: user ?? TestHarness.shopperWithAddresses,
-        cartCubit: cart,
-      );
+  Future<void> openCheckout(WidgetTester tester, {AppUser? user}) async {
+    tester.view.physicalSize = const Size(1200, 3000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    await pumpTestApp(
+      tester,
+      const CheckoutScreen(),
+      user: user ?? TestHarness.shopperWithAddresses,
+      cartCubit: cart,
+    );
+    await tester.pumpAndSettle();
+  }
 
   /// Selects the saved home address (12 Market Street, pincode 380001).
   /// The checkout reads saved addresses from the profile — the default one
   /// is pre-selected, the tap makes the test explicit about which is used.
   Future<void> useSavedAddress(WidgetTester tester) async {
-    await tester.ensureVisible(
-      find.byKey(const Key('address-card-addr_home')),
-    );
+    await tester.ensureVisible(find.byKey(const Key('address-card-addr_home')));
     await tester.tap(find.byKey(const Key('address-card-addr_home')));
     await tester.pumpAndSettle();
   }
@@ -449,6 +455,12 @@ void main() {
         qty: 1,
       );
 
+      tester.view.physicalSize = const Size(1200, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       await pumpTestApp(
         tester,
         CheckoutScreen(directItems: [directItem]),
@@ -505,8 +517,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text(
-        'Please complete your profile (name & mobile) before placing an order.',
+      find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.text(
+          'Please complete your profile (name & mobile) before placing an order.',
+        ),
       ),
       findsOneWidget,
     );
@@ -581,5 +596,4 @@ void main() {
     expect(order.pickupShop, isNull);
     expect(order.customerName, 'Asha Shopper');
   });
-
 }

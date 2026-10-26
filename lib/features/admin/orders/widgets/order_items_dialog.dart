@@ -70,6 +70,86 @@ class OrderItemsPreviewDialog extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1.5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: order.hasPaymentMethod
+                                    ? (order.isUpi
+                                          ? Colors.indigo.withValues(alpha: 0.1)
+                                          : Colors.teal.withValues(alpha: 0.1))
+                                    : Colors.grey.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    order.isUpi
+                                        ? Icons.qr_code_2
+                                        : (order.isCash
+                                              ? Icons.payments_outlined
+                                              : Icons.help_outline),
+                                    size: 11,
+                                    color: order.hasPaymentMethod
+                                        ? (order.isUpi
+                                              ? Colors.indigo.shade800
+                                              : Colors.teal.shade800)
+                                        : Colors.grey.shade700,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    order.paymentMethodDisplay,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: order.hasPaymentMethod
+                                          ? (order.isUpi
+                                                ? Colors.indigo.shade800
+                                                : Colors.teal.shade800)
+                                          : Colors.grey.shade800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1.5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: order.isPaid
+                                    ? Colors.green.withValues(alpha: 0.1)
+                                    : (order.isPaymentFailed
+                                          ? Colors.red.withValues(alpha: 0.1)
+                                          : Colors.orange.withValues(
+                                              alpha: 0.1,
+                                            )),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                order.paymentStatusDisplay.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: order.isPaid
+                                      ? Colors.green.shade800
+                                      : (order.isPaymentFailed
+                                            ? Colors.red.shade800
+                                            : Colors.orange.shade900),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -150,7 +230,9 @@ class OrderItemsPreviewDialog extends StatelessWidget {
                           label: const Text('Full Details'),
                           onPressed: () {
                             Navigator.of(context).pop();
-                            context.push(AppRoutes.adminOrderDetailsPath(order.id));
+                            context.push(
+                              AppRoutes.adminOrderDetailsPath(order.id),
+                            );
                           },
                         ),
                       ),
@@ -185,7 +267,9 @@ class _OrderItemRow extends StatelessWidget {
           child: Container(
             width: 54,
             height: 54,
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             child: item.image.isNotEmpty
                 ? Image.network(
                     item.image,
@@ -221,17 +305,27 @@ class _OrderItemRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.name.isNotEmpty ? item.name : 'Product (${item.productId})',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                item.name.isNotEmpty
+                    ? item.name
+                    : 'Product (${item.productId})',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               if (variantLabel.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                    color: theme.colorScheme.secondaryContainer.withValues(
+                      alpha: 0.5,
+                    ),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

@@ -21,25 +21,25 @@ class AdBanner {
   });
 
   factory AdBanner.fromMap(String id, Map<String, dynamic> map) => AdBanner(
-        id: id,
-        image: map['image'] ?? '',
-        actionType: _actionFrom(map['actionType']),
-        actionTarget: map['actionTarget'] ?? '',
-        startDate: map['startDate'] != null
-            ? DateTime.tryParse(map['startDate'].toString())
-            : null,
-        endDate: map['endDate'] != null
-            ? DateTime.tryParse(map['endDate'].toString())
-            : null,
-        priority: map['priority'] ?? 0,
-      );
+    id: id,
+    image: map['image'] ?? '',
+    actionType: _actionFrom(map['actionType']),
+    actionTarget: map['actionTarget'] ?? '',
+    startDate: map['startDate'] != null
+        ? DateTime.tryParse(map['startDate'].toString())
+        : null,
+    endDate: map['endDate'] != null
+        ? DateTime.tryParse(map['endDate'].toString())
+        : null,
+    priority: map['priority'] ?? 0,
+  );
 
   static BannerActionType _actionFrom(String s) => switch (s) {
-        'category' => BannerActionType.category,
-        'company_page' => BannerActionType.companyPage,
-        'external_url' => BannerActionType.externalUrl,
-        _ => BannerActionType.product,
-      };
+    'category' => BannerActionType.category,
+    'company_page' => BannerActionType.companyPage,
+    'external_url' => BannerActionType.externalUrl,
+    _ => BannerActionType.product,
+  };
 }
 
 class OfferBanner {
@@ -65,7 +65,8 @@ class OfferBanner {
     this.priority = 0,
   });
 
-  factory OfferBanner.fromMap(String id, Map<String, dynamic> map) => OfferBanner(
+  factory OfferBanner.fromMap(String id, Map<String, dynamic> map) =>
+      OfferBanner(
         id: id,
         companyId: map['companyId'] ?? '',
         image: map['image'] ?? '',
@@ -74,8 +75,8 @@ class OfferBanner {
         actionType: map['actionType'] == 'category'
             ? BannerActionType.category
             : map['actionType'] == 'external_url'
-                ? BannerActionType.externalUrl
-                : BannerActionType.product,
+            ? BannerActionType.externalUrl
+            : BannerActionType.product,
         startDate: map['startDate'] != null
             ? DateTime.tryParse(map['startDate'].toString())
             : null,

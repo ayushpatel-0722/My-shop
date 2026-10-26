@@ -65,13 +65,12 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
             TextField(
               controller: _messageCtrl,
               maxLines: 3,
-              decoration: InputDecoration(hintText: AppLocalizations.of(context).writeAShortMessage),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).writeAShortMessage,
+              ),
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _submit,
-              child: Text(l10n.submit),
-            ),
+            FilledButton(onPressed: _submit, child: Text(l10n.submit)),
           ],
         ),
       ),
@@ -80,15 +79,17 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
 
   Future<void> _submit() async {
     final user = context.read<AuthCubit>().currentUser;
-    await repo.submitReview(Review(
-      id: '',
-      orderId: widget.orderId,
-      userId: user?.id ?? 'guest',
-      userName: user?.name ?? AppLocalizations.of(context).customer,
-      companyId: widget.orderCompanyId,
-      rating: _rating,
-      message: _messageCtrl.text.trim(),
-    ));
+    await repo.submitReview(
+      Review(
+        id: '',
+        orderId: widget.orderId,
+        userId: user?.id ?? 'guest',
+        userName: user?.name ?? AppLocalizations.of(context).customer,
+        companyId: widget.orderCompanyId,
+        rating: _rating,
+        message: _messageCtrl.text.trim(),
+      ),
+    );
     if (!mounted) return;
     context.go(AppRoutes.orders);
   }

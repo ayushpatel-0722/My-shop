@@ -33,10 +33,8 @@ void main() {
   }
 
   /// The Dismissible card that contains [name].
-  Finder rowOf(String name) => find.ancestor(
-    of: find.text(name),
-    matching: find.byType(Dismissible),
-  );
+  Finder rowOf(String name) =>
+      find.ancestor(of: find.text(name), matching: find.byType(Dismissible));
 
   testWidgets('an empty cart invites shopping', (tester) async {
     await pumpTestApp(tester, const CartScreen(), user: TestHarness.shopper);
@@ -54,18 +52,21 @@ void main() {
       wishlistCubit: wishlist,
     );
 
-    // One 500 g step at qty 1 …
+    // One 500 g step at qty 1 shows count '1' and variant info in item details.
     expect(find.byKey(const Key('stepper-qty-p_tomato')), findsOneWidget);
-    expect(find.text('× 500 g'), findsOneWidget);
+    expect(find.byKey(const Key('stepper-unit-p_tomato')), findsNothing);
 
     // … and "Total: 1 kg" after a single increment (2 × 500 g).
     await tester.tap(
-      find.descendant(of: rowOf('Fresh Tomatoes'), matching: find.byIcon(Icons.add)),
+      find.descendant(
+        of: rowOf('Fresh Tomatoes'),
+        matching: find.byIcon(Icons.add),
+      ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Total: 1 kg'), findsOneWidget);
-    expect(find.text('× 500 g'), findsOneWidget);
+    expect(find.byKey(const Key('stepper-unit-p_tomato')), findsNothing);
   });
 
   testWidgets('quantity-based lines step in plain counts', (tester) async {
@@ -89,7 +90,9 @@ void main() {
     expect(find.byKey(const Key('stepper-unit-p_milk')), findsNothing);
   });
 
-  testWidgets('the line subtotal updates live with the stepper', (tester) async {
+  testWidgets('the line subtotal updates live with the stepper', (
+    tester,
+  ) async {
     await seedCart();
     await pumpTestApp(
       tester,
@@ -104,7 +107,10 @@ void main() {
     expect(find.text('₹48'), findsOneWidget);
 
     await tester.tap(
-      find.descendant(of: rowOf('Fresh Tomatoes'), matching: find.byIcon(Icons.add)),
+      find.descendant(
+        of: rowOf('Fresh Tomatoes'),
+        matching: find.byIcon(Icons.add),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -140,7 +146,10 @@ void main() {
     );
 
     await tester.tap(
-      find.descendant(of: rowOf('Set Curd (Dahi)'), matching: find.byIcon(Icons.close)),
+      find.descendant(
+        of: rowOf('Set Curd (Dahi)'),
+        matching: find.byIcon(Icons.close),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -260,7 +269,10 @@ void main() {
     expect(find.text('Out of stock'), findsOneWidget);
 
     await tester.tap(
-      find.descendant(of: rowOf('Sold Out Kale'), matching: find.byIcon(Icons.add)),
+      find.descendant(
+        of: rowOf('Sold Out Kale'),
+        matching: find.byIcon(Icons.add),
+      ),
       warnIfMissed: false,
     );
     await tester.pumpAndSettle();
