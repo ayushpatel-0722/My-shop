@@ -15,7 +15,7 @@ void main() {
   setUp(() {
     mockRepo = MockAppRepository();
     ServiceLocator.instance.repository = mockRepo;
-    AuthSession.currentUser = AppUser(
+    AuthSession.currentUser = const AppUser(
       id: 'a_1',
       companyId: 'c_organic',
       companyName: 'GreenLeaf Organics',

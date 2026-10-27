@@ -7,6 +7,7 @@ import '../../../app/routes/app_router.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/utils/auth_guard.dart';
 import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../checkout/cart/cart_cubit.dart';
 
 /// Sticky desktop web header (≥1024 px).
@@ -153,6 +154,9 @@ class _WebHeaderState extends State<WebHeader> {
 
                 const SizedBox(width: 20),
 
+                // Admins previewing the shopper app get a way back.
+                const BackToAdminButton(),
+
                 // ── Right: Nav links + Cart + Account ───────────────────
                 _NavActions(
                   currentIndex: widget.currentIndex,
@@ -221,12 +225,12 @@ class _LogoSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
+                const Text(
                   'MyShop',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
-                    color: const Color(0xFFFF5247),
+                    color: Color(0xFFFF5247),
                     letterSpacing: -0.4,
                   ),
                 ),

@@ -7318,6 +7318,396 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n, plural, =1{1 product selected} other{{n} products selected}}'**
   String productsSelected(num n);
+
+  /// No description provided for @shopSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop Settings'**
+  String get shopSettings;
+
+  /// No description provided for @shopSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Description, hours & delivery'**
+  String get shopSettingsSubtitle;
+
+  /// No description provided for @shopNoShopLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'No shop is linked to this account.'**
+  String get shopNoShopLinked;
+
+  /// No description provided for @shopNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop not found.'**
+  String get shopNotFound;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load shop details: {error}'**
+  String shopCouldNotLoad(String error);
+
+  /// No description provided for @shopDetailsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop details saved.'**
+  String get shopDetailsSaved;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save: {error}'**
+  String shopCouldNotSave(String error);
+
+  /// No description provided for @shopFixFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fix the highlighted fields.'**
+  String get shopFixFields;
+
+  /// No description provided for @shopDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop details'**
+  String get shopDetailsTitle;
+
+  /// No description provided for @shopDetailsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What shoppers read about your shop.'**
+  String get shopDetailsSubtitle;
+
+  /// No description provided for @shopNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop name'**
+  String get shopNameLabel;
+
+  /// No description provided for @shopNameHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'This is also your admin login, so it can only be changed by support.'**
+  String get shopNameHelper;
+
+  /// No description provided for @shopCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Store category'**
+  String get shopCategoryLabel;
+
+  /// No description provided for @shopCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Furniture and Home Decor'**
+  String get shopCategoryHint;
+
+  /// No description provided for @shopPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact phone'**
+  String get shopPhoneLabel;
+
+  /// No description provided for @shopPhoneHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown on pickup cards'**
+  String get shopPhoneHelper;
+
+  /// No description provided for @shopDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get shopDescriptionLabel;
+
+  /// No description provided for @shopDescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a short description of your shop'**
+  String get shopDescriptionRequired;
+
+  /// No description provided for @shopAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get shopAddressLabel;
+
+  /// No description provided for @shopAddressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Address is required'**
+  String get shopAddressRequired;
+
+  /// No description provided for @shopMapLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Map link (Google Maps)'**
+  String get shopMapLabel;
+
+  /// No description provided for @shopHoursTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get shopHoursTitle;
+
+  /// No description provided for @shopHoursSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoppers see whether you are open right now.'**
+  String get shopHoursSubtitle;
+
+  /// No description provided for @shopOpenNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open now'**
+  String get shopOpenNow;
+
+  /// No description provided for @shopClosedNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed now'**
+  String get shopClosedNow;
+
+  /// No description provided for @shopDayClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get shopDayClosed;
+
+  /// No description provided for @shopTo.
+  ///
+  /// In en, this message translates to:
+  /// **'to'**
+  String get shopTo;
+
+  /// No description provided for @shopOpen24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 hours'**
+  String get shopOpen24Hours;
+
+  /// No description provided for @shopClosesNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'closes next day'**
+  String get shopClosesNextDay;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Apply {day} hours to every day'**
+  String shopApplyHoursToAll(String day);
+
+  /// No description provided for @shopDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery & orders'**
+  String get shopDeliveryTitle;
+
+  /// No description provided for @shopDeliverySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How shoppers can receive their orders.'**
+  String get shopDeliverySubtitle;
+
+  /// No description provided for @shopSelfPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-pickup from the shop'**
+  String get shopSelfPickup;
+
+  /// No description provided for @shopHomeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Home delivery'**
+  String get shopHomeDelivery;
+
+  /// No description provided for @shopChooseDeliveryOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one delivery option.'**
+  String get shopChooseDeliveryOption;
+
+  /// No description provided for @shopMinOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum order for delivery'**
+  String get shopMinOrderLabel;
+
+  /// No description provided for @shopMinOrderHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'0 means no minimum'**
+  String get shopMinOrderHelper;
+
+  /// No description provided for @shopCurrencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get shopCurrencyLabel;
+
+  /// No description provided for @shopCurrencyHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed once the shop is created'**
+  String get shopCurrencyHelper;
+
+  /// No description provided for @shopHandlingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing time (minutes)'**
+  String get shopHandlingLabel;
+
+  /// No description provided for @shopHandlingHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for the order ETA'**
+  String get shopHandlingHelper;
+
+  /// No description provided for @shopDeliveryMinutesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery time (minutes)'**
+  String get shopDeliveryMinutesLabel;
+
+  /// No description provided for @shopDeliveryMinutesHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Once the parcel leaves the shop'**
+  String get shopDeliveryMinutesHelper;
+
+  /// No description provided for @shopBrandingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Branding images'**
+  String get shopBrandingTitle;
+
+  /// No description provided for @shopBrandingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an image link; tap a preview to see it full screen.'**
+  String get shopBrandingSubtitle;
+
+  /// No description provided for @shopLogoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo'**
+  String get shopLogoLabel;
+
+  /// No description provided for @shopBannerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner'**
+  String get shopBannerLabel;
+
+  /// No description provided for @shopStorefrontLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Storefront image'**
+  String get shopStorefrontLabel;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{label} (image link)'**
+  String shopImageLinkLabel(String label);
+
+  /// No description provided for @shopMapLinkInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The map link must start with http:// or https://'**
+  String get shopMapLinkInvalid;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'The {label} link must start with http:// or https://'**
+  String shopImageLinkInvalid(String label);
+
+  /// No description provided for @shopPhoneChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Use digits, spaces, + or - only'**
+  String get shopPhoneChars;
+
+  /// No description provided for @shopPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get shopPhoneInvalid;
+
+  /// No description provided for @shopMoneyInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 0 or a positive amount'**
+  String get shopMoneyInvalid;
+
+  /// No description provided for @shopMinutesInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'1 - 1440 minutes'**
+  String get shopMinutesInvalid;
+
+  /// No description provided for @shopUnsavedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes'**
+  String get shopUnsavedChanges;
+
+  /// No description provided for @shopAllSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'All changes saved'**
+  String get shopAllSaved;
+
+  /// No description provided for @shopDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get shopDiscard;
+
+  /// No description provided for @shopSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get shopSaveChanges;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{day}: enter valid opening and closing times.'**
+  String shopHoursInvalidTime(String day);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{day}: opening and closing time cannot be the same.'**
+  String shopHoursSameTime(String day);
+
+  /// No description provided for @shopHoursNoOpenDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep at least one day open.'**
+  String get shopHoursNoOpenDay;
+
+  /// No description provided for @shopStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get shopStatusActive;
+
+  /// No description provided for @shopStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get shopStatusSuspended;
+
+  /// No description provided for @shopStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get shopStatusInactive;
 }
 
 class _AppLocalizationsDelegate

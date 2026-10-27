@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/services/admin_company_name.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/catalog.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
+import '../../../core/services/qr_deep_link_service.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
@@ -13,10 +16,8 @@ import '../../../core/widgets/app_product_image.dart';
 import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
-import '../../../core/services/qr_deep_link_service.dart';
 import '../admin_shell.dart';
 import '../qr/widgets/entity_qr_dialog.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Product management for the signed-in store.
 ///
@@ -60,7 +61,10 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       type: QrEntityType.product,
       title: product.name,
       shopId: effectiveShopId,
-      shopName: effectiveShopId,
+      shopName: AdminCompanyName.instance.displayName(
+        AuthSession.currentUser,
+        fallback: effectiveShopId,
+      ),
       productId: product.id,
       subtitle: 'Product ID: ${product.id} · Shop: $effectiveShopId',
     );
@@ -117,7 +121,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Shop: ${_companyId.isNotEmpty ? _companyId : 'Masala Mart'}',
+              'Shop: ${AdminCompanyName.instance.displayName(AuthSession.currentUser)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
@@ -361,7 +365,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                 if (list.isEmpty) {
                   return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(28),
+                      padding: const EdgeInsets.all(28),
                       child: Text(
                         AppLocalizations.of(
                           context,
@@ -982,12 +986,12 @@ class _EmptyProducts extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).noProductsFound,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Text(
             AppLocalizations.of(context).addYourFirstProductToStartSelling,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(

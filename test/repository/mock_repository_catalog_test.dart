@@ -140,7 +140,7 @@ void main() {
 
     test('search matches SKUs as well as names', () async {
       await repo.saveProduct(
-        Product(
+        const Product(
           id: 'p_sku',
           companyId: 'c_organic',
           categoryId: 'cat_veg',

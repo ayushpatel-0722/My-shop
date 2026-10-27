@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -8,7 +9,6 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Screen for creating and editing an Employee (Section 6.3 & 17.1).
 ///
@@ -421,7 +421,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             hintText: AppLocalizations.of(
                               context,
                             ).eGRameshKumar,
-                            prefixIcon: Icon(Icons.badge_outlined),
+                            prefixIcon: const Icon(Icons.badge_outlined),
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? AppLocalizations.of(context).fullNameIsRequired
@@ -436,7 +436,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             hintText: AppLocalizations.of(
                               context,
                             ).eGRameshCompanyCom,
-                            prefixIcon: Icon(Icons.email_outlined),
+                            prefixIcon: const Icon(Icons.email_outlined),
                           ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
@@ -464,7 +464,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                               hintText: AppLocalizations.of(
                                 context,
                               ).minimum6Characters,
-                              prefixIcon: Icon(Icons.lock_outline),
+                              prefixIcon: const Icon(Icons.lock_outline),
                             ),
                             validator: (v) {
                               if (!isEditMode &&
@@ -486,7 +486,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             labelText: AppLocalizations.of(
                               context,
                             ).designationRole,
-                            prefixIcon: Icon(Icons.work_outline),
+                            prefixIcon: const Icon(Icons.work_outline),
                           ),
                           items: _roles.map((r) {
                             return DropdownMenuItem(value: r, child: Text(r));
@@ -538,8 +538,8 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                               labelText: AppLocalizations.of(
                                 context,
                               ).dateOfBirth,
-                              prefixIcon: Icon(Icons.cake_outlined),
-                              suffixIcon: Icon(
+                              prefixIcon: const Icon(Icons.cake_outlined),
+                              suffixIcon: const Icon(
                                 Icons.calendar_today_outlined,
                                 size: 18,
                               ),
@@ -569,7 +569,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             hintText: AppLocalizations.of(
                               context,
                             ).streetAreaCityPincode,
-                            prefixIcon: Icon(Icons.home_outlined),
+                            prefixIcon: const Icon(Icons.home_outlined),
                             alignLabelWithHint: true,
                           ),
                         ),
@@ -584,7 +584,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             hintText: AppLocalizations.of(
                               context,
                             ).emergencyContactCertificationsQualifications,
-                            prefixIcon: Icon(Icons.notes_outlined),
+                            prefixIcon: const Icon(Icons.notes_outlined),
                             alignLabelWithHint: true,
                           ),
                         ),
@@ -638,7 +638,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                               context,
                             ).salaryAmount,
                             hintText: AppLocalizations.of(context).eG25000,
-                            prefixIcon: Icon(
+                            prefixIcon: const Icon(
                               Icons.account_balance_wallet_outlined,
                             ),
                           ),
@@ -779,7 +779,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             AppLocalizations.of(
                               context,
                             ).accessPackingHubToVerifyItemsAndMarkOrdersAsPacked,
-                            style: TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 12),
                           ),
                           onChanged: (v) =>
                               setState(() => _canPack = v ?? false),
@@ -797,7 +797,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             AppLocalizations.of(
                               context,
                             ).assignDeliveryRidersAndDispatchOrdersForFulfillment,
-                            style: TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 12),
                           ),
                           onChanged: (v) =>
                               setState(() => _canDispatch = v ?? false),
@@ -815,7 +815,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             AppLocalizations.of(
                               context,
                             ).viewAndUpdateStockCountsAndWarehouseAlerts,
-                            style: TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 12),
                           ),
                           onChanged: (v) =>
                               setState(() => _canManageInventory = v ?? false),
@@ -833,7 +833,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                             AppLocalizations.of(
                               context,
                             ).viewDailyEmployeeActivityAndOperationsLogs,
-                            style: TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 12),
                           ),
                           onChanged: (v) =>
                               setState(() => _canViewReports = v ?? false),

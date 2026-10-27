@@ -14,10 +14,6 @@ class CartState {
   int get totalItems => items.fold(0, (sum, e) => sum + e.qty);
   double get totalAmount => items.fold(0.0, (sum, e) => sum + e.lineTotal);
 
-  /// Sum of the (strikethrough) MRP totals of every line.
-  double get totalMrpAmount =>
-      items.fold(0.0, (sum, e) => sum + e.lineMrpTotal);
-
   /// Items grouped by company (Section 3 / multi-company cart).
   Map<String, List<CartItem>> get byCompany {
     final map = <String, List<CartItem>>{};
@@ -26,10 +22,6 @@ class CartState {
     }
     return map;
   }
-
-  double subtotalFor(String companyId) => items
-      .where((e) => e.companyId == companyId)
-      .fold(0.0, (sum, e) => sum + e.lineTotal);
 
   CartState copyWith({List<CartItem>? items, bool? isLoading}) => CartState(
     items: items ?? this.items,

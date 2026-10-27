@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 
-import '../../firebase_options_uat.dart';
 import '../../firebase_options_prod.dart';
+import '../../firebase_options_uat.dart';
 
 /// The two environments the app can run under.
 enum AppEnvironment { uat, prod }
@@ -38,16 +38,6 @@ class EnvironmentConfig {
         return UatFirebaseOptions.currentPlatform;
       case AppEnvironment.prod:
         return ProdFirebaseOptions.currentPlatform;
-    }
-  }
-
-  /// Base URL for backend APIs (if applicable).
-  static String get apiBaseUrl {
-    switch (_current) {
-      case AppEnvironment.uat:
-        return 'https://uat-api.example.com';
-      case AppEnvironment.prod:
-        return 'https://api.example.com';
     }
   }
 

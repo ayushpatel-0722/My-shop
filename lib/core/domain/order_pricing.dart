@@ -106,9 +106,6 @@ class OrderBill {
 
   bool get hasVoucher => voucher != null;
 
-  /// True when the voucher only removed the shipping fee.
-  bool get isShippingOnlyDiscount => discount <= 0 && deliveryCharge == 0;
-
   double get totalSavings => roundMoney(discount + _shippingSaved);
 
   /// How much of the raw delivery fee the voucher paid for.

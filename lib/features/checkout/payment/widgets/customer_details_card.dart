@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-import 'package:myshop/app/routes/app_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/routes/app_router.dart';
 
 /// Read-only "Customer Details" card (name, email, mobile).
 ///
@@ -102,7 +101,7 @@ class CustomerDetailsCard extends StatelessWidget {
                         AppLocalizations.of(
                           context,
                         ).pleaseCompleteYourProfileNameMobileBeforePlacingAnOrder,
-                        style: TextStyle(fontSize: 12.5),
+                        style: const TextStyle(fontSize: 12.5),
                       ),
                     ),
                     TextButton(

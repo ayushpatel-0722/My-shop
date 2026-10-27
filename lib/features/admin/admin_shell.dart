@@ -6,6 +6,8 @@ import 'package:myshop/app/theme/app_theme.dart';
 import 'package:myshop/core/models/app_user.dart';
 
 import '../../app/routes/app_router.dart';
+import '../../core/config/app_config.dart';
+import '../../core/services/admin_company_name.dart';
 import '../../core/services/auth_session.dart';
 import '../auth/auth_cubit.dart';
 
@@ -45,10 +47,13 @@ class AdminShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: AuthSession.instance,
+      animation: Listenable.merge([
+        AuthSession.instance,
+        AdminCompanyName.instance,
+      ]),
       builder: (context, _) {
         final user = AuthSession.currentUser;
-        final companyName = user?.companyName ?? '';
+        final companyName = AdminCompanyName.instance.nameFor(user);
 
         // Only block while we genuinely have nobody to show. Widget tests and
         // deep links set the session without a restoring phase, and they must
@@ -253,10 +258,15 @@ List<_AdminNavItemData> _getAdminNavItems(BuildContext context) {
 
     // STOREFRONT
     _AdminNavItemData(
+      icon: Icons.storefront,
+      label: l10n.shopSettings,
+      route: AppRoutes.adminShopSettings,
+      section: 'STOREFRONT CONFIG',
+    ),
+    _AdminNavItemData(
       icon: Icons.image,
       label: l10n.banners,
       route: AppRoutes.adminBanners,
-      section: 'STOREFRONT CONFIG',
     ),
     const _AdminNavItemData(
       icon: Icons.grid_view_rounded,
@@ -737,7 +747,7 @@ class _AdminDesktopAppBar extends StatelessWidget
               ),
               const SizedBox(width: 7),
               Text(
-                companyName.isNotEmpty ? companyName : 'Masala Mart',
+                companyName.isNotEmpty ? companyName : AppConfig.appName,
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

@@ -4,8 +4,8 @@ import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/order.dart';
 import 'package:myshop/core/models/voucher.dart';
 import 'package:myshop/features/admin/orders/admin_orders_screen.dart';
-import 'package:myshop/features/checkout/tracking/orders_screen.dart';
 import 'package:myshop/features/checkout/tracking/order_tracking_screen.dart';
+import 'package:myshop/features/checkout/tracking/orders_screen.dart';
 
 import '../helpers/test_harness.dart';
 
@@ -261,7 +261,7 @@ void main() {
     );
 
     test('Voucher usage is released upon order cancellation', () async {
-      final voucher = Voucher(
+      const voucher = Voucher(
         id: 'v_cancel_test',
         companyId: 'c_organic',
         code: 'CANCELTEST',

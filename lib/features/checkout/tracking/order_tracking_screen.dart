@@ -8,9 +8,9 @@ import '../../../core/domain/order_status.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
-import '../../../core/utils/responsive_extensions.dart';
 import '../../auth/auth_cubit.dart';
 
 /// Pizza-tracker-style order timeline (Section 17.3 / Section 11).
@@ -868,7 +868,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   }
 
   Widget _timeline(BuildContext context, Order order) {
-    final chain = OrderStatus.trackerChain;
+    const chain = OrderStatus.trackerChain;
     final cancelled = order.isCancelled;
     final currentIndex = OrderStatusRules.trackerIndex(order.orderStatus);
 

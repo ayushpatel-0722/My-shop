@@ -1,7 +1,7 @@
+import '../../app/l10n/l10n_service.dart';
 import '../models/category.dart';
 import '../models/product.dart';
 import '../models/voucher.dart';
-import '../../app/l10n/l10n_service.dart';
 
 /// Field name -> first error message. Empty means "valid".
 ///

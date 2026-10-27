@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../core/models/customer.dart';
 import '../auth_cubit.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Multi-step Bottom Sheet that handles guest authentication:
 /// 1. Google Sign-In
@@ -349,7 +349,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               context,
             ).byContinuingYouAgreeToOurTermsPrivacyPolicy,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 11, color: Colors.black45),
+            style: const TextStyle(fontSize: 11, color: Colors.black45),
           ),
         ),
       ],
@@ -601,7 +601,10 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                   )
                 : Text(
                     AppLocalizations.of(context).saveAddressContinue,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
           ),
         ],

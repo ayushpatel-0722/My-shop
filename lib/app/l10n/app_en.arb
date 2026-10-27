@@ -2854,5 +2854,126 @@
         "type": "num"
       }
     }
-  }
+  },
+  "shopSettings": "Shop Settings",
+  "shopSettingsSubtitle": "Description, hours & delivery",
+  "shopNoShopLinked": "No shop is linked to this account.",
+  "shopNotFound": "Shop not found.",
+  "shopCouldNotLoad": "Could not load shop details: {error}",
+  "@shopCouldNotLoad": {
+    "description": "",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shopDetailsSaved": "Shop details saved.",
+  "shopCouldNotSave": "Could not save: {error}",
+  "@shopCouldNotSave": {
+    "description": "",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shopFixFields": "Please fix the highlighted fields.",
+  "shopDetailsTitle": "Shop details",
+  "shopDetailsSubtitle": "What shoppers read about your shop.",
+  "shopNameLabel": "Shop name",
+  "shopNameHelper": "This is also your admin login, so it can only be changed by support.",
+  "shopCategoryLabel": "Store category",
+  "shopCategoryHint": "e.g. Furniture and Home Decor",
+  "shopPhoneLabel": "Contact phone",
+  "shopPhoneHelper": "Shown on pickup cards",
+  "shopDescriptionLabel": "Description",
+  "shopDescriptionRequired": "Add a short description of your shop",
+  "shopAddressLabel": "Address",
+  "shopAddressRequired": "Address is required",
+  "shopMapLabel": "Map link (Google Maps)",
+  "shopHoursTitle": "Opening hours",
+  "shopHoursSubtitle": "Shoppers see whether you are open right now.",
+  "shopOpenNow": "Open now",
+  "shopClosedNow": "Closed now",
+  "shopDayClosed": "Closed",
+  "shopTo": "to",
+  "shopOpen24Hours": "Open 24 hours",
+  "shopClosesNextDay": "closes next day",
+  "shopApplyHoursToAll": "Apply {day} hours to every day",
+  "@shopApplyHoursToAll": {
+    "description": "",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "shopDeliveryTitle": "Delivery & orders",
+  "shopDeliverySubtitle": "How shoppers can receive their orders.",
+  "shopSelfPickup": "Self-pickup from the shop",
+  "shopHomeDelivery": "Home delivery",
+  "shopChooseDeliveryOption": "Choose at least one delivery option.",
+  "shopMinOrderLabel": "Minimum order for delivery",
+  "shopMinOrderHelper": "0 means no minimum",
+  "shopCurrencyLabel": "Currency",
+  "shopCurrencyHelper": "Fixed once the shop is created",
+  "shopHandlingLabel": "Packing time (minutes)",
+  "shopHandlingHelper": "Used for the order ETA",
+  "shopDeliveryMinutesLabel": "Delivery time (minutes)",
+  "shopDeliveryMinutesHelper": "Once the parcel leaves the shop",
+  "shopBrandingTitle": "Branding images",
+  "shopBrandingSubtitle": "Paste an image link; tap a preview to see it full screen.",
+  "shopLogoLabel": "Logo",
+  "shopBannerLabel": "Banner",
+  "shopStorefrontLabel": "Storefront image",
+  "shopImageLinkLabel": "{label} (image link)",
+  "@shopImageLinkLabel": {
+    "description": "",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "shopMapLinkInvalid": "The map link must start with http:// or https://",
+  "shopImageLinkInvalid": "The {label} link must start with http:// or https://",
+  "@shopImageLinkInvalid": {
+    "description": "",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "shopPhoneChars": "Use digits, spaces, + or - only",
+  "shopPhoneInvalid": "Enter a valid phone number",
+  "shopMoneyInvalid": "Enter 0 or a positive amount",
+  "shopMinutesInvalid": "1 - 1440 minutes",
+  "shopUnsavedChanges": "You have unsaved changes",
+  "shopAllSaved": "All changes saved",
+  "shopDiscard": "Discard",
+  "shopSaveChanges": "Save changes",
+  "shopHoursInvalidTime": "{day}: enter valid opening and closing times.",
+  "@shopHoursInvalidTime": {
+    "description": "",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "shopHoursSameTime": "{day}: opening and closing time cannot be the same.",
+  "@shopHoursSameTime": {
+    "description": "",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "shopHoursNoOpenDay": "Keep at least one day open.",
+  "shopStatusActive": "Active",
+  "shopStatusSuspended": "Suspended",
+  "shopStatusInactive": "Inactive"
 }

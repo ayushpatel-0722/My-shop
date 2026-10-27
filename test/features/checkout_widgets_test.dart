@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/models/company.dart';
 import 'package:myshop/core/models/customer.dart';
 import 'package:myshop/core/models/order.dart';
@@ -76,8 +76,8 @@ void main() {
   });
 
   group('AddressSelector', () {
-    final home = TestHarness.homeAddress;
-    final work = TestHarness.workAddress;
+    const home = TestHarness.homeAddress;
+    const work = TestHarness.workAddress;
 
     testWidgets(
       'lists saved addresses as selectable cards with an add button',

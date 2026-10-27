@@ -96,14 +96,6 @@ Map<String, int> asIntMap(dynamic value) {
   return out;
 }
 
-/// Reads [value] as `Map<String, String>`.
-Map<String, String> asStringMap(dynamic value) {
-  if (value is! Map) return const <String, String>{};
-  return value.map(
-    (key, val) => MapEntry(key.toString(), val?.toString() ?? ''),
-  );
-}
-
 /// Parses an ISO-8601 string (or an int epoch) into a [DateTime].
 DateTime? asDateTime(dynamic value) {
   if (value == null) return null;

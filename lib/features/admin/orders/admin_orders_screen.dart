@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/order_status.dart';
@@ -12,7 +13,6 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 import 'widgets/order_items_dialog.dart';
 import 'widgets/payment_verification_dialog.dart';
 
@@ -344,10 +344,10 @@ class _PipelineColumn extends StatelessWidget {
           const SizedBox(height: 8),
           if (orders.isEmpty)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 AppLocalizations.of(context).nothingHere,
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
             )
           else

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/app/theme/app_theme.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';
@@ -14,7 +14,7 @@ import 'package:myshop/features/admin/categories/widgets/product_assignment_pick
 void main() {
   group('Category Model Tests', () {
     test('serializes toMap and deserializes fromMap accurately', () {
-      final category = Category(
+      const category = Category(
         id: 'cat_electronics',
         companyId: 'company_123',
         name: 'Electronics',
@@ -46,7 +46,7 @@ void main() {
     });
 
     test('copyWith modifies fields and supports clearing parentId', () {
-      final original = Category(
+      const original = Category(
         id: 'cat_1',
         name: 'Dairy',
         companyId: 'c1',
@@ -224,7 +224,7 @@ void main() {
     ) async {
       final mockRepo = MockAppRepository();
       ServiceLocator.instance.repository = mockRepo;
-      AuthSession.currentUser = AppUser(
+      AuthSession.currentUser = const AppUser(
         id: 'a_1',
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/services/admin_company_name.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/category_tree.dart';
 import '../../../core/models/category.dart';
+import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
+import '../../../core/services/qr_deep_link_service.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/copyable_id_badge.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
-import '../../../core/services/qr_deep_link_service.dart';
 import '../admin_shell.dart';
 import '../qr/widgets/entity_qr_dialog.dart';
 
@@ -66,7 +68,10 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       type: QrEntityType.category,
       title: cat.name,
       shopId: effectiveShopId,
-      shopName: effectiveShopId,
+      shopName: AdminCompanyName.instance.displayName(
+        AuthSession.currentUser,
+        fallback: effectiveShopId,
+      ),
       categoryId: cat.id,
       subtitle: 'Category ID: ${cat.id} · Shop: $effectiveShopId',
     );
@@ -85,22 +90,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           tooltip: _reorderMode
               ? AppLocalizations.of(context).doneReordering
               : AppLocalizations.of(context).reorder,
-          onPressed: () {
-            if (_searchCtrl.text.trim().isNotEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    AppLocalizations.of(context).clearSearchToReorder,
-                  ),
-                ),
-              );
-              return;
-            }
-            setState(() {
-              _reorderMode = !_reorderMode;
-              _reorderParentId = '';
-            });
-          },
+          onPressed: _toggleReorder,
         ),
         IconButton(
           key: const Key('category-backfill-order'),
@@ -143,12 +133,12 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           ),
           if (_searchCtrl.text.trim().isNotEmpty)
             Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   AppLocalizations.of(context).clearSearchToReorder,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11.5,
                     fontStyle: FontStyle.italic,
                     color: Colors.grey,
@@ -157,140 +147,187 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
               ),
             ),
           Expanded(
-            child: StreamBuilder<List<Category>>(
-              stream: repo.categories(companyId: _companyId),
-              builder: (context, snap) {
-                final categories = snap.data ?? const <Category>[];
-
-                if (snap.connectionState == ConnectionState.waiting &&
-                    categories.isEmpty) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: 5,
-                    itemBuilder: (_, _) => const M3ListTileSkeleton(),
-                  );
-                }
-                if (categories.isEmpty) {
-                  return _EmptyCategories(
-                    onAdd: () => context.push(AppRoutes.adminAddCategory),
-                  );
-                }
-
-                final query = _searchCtrl.text.trim().toLowerCase();
-                final effective = _applyPending(categories);
-                final tree = CategoryTree.build(effective);
-
-                if (_reorderMode && query.isEmpty) {
-                  return _CategoryReorderView(
-                    tree: tree,
-                    parentId: _reorderParentId,
-                    categories: effective,
-                    onEnterLevel: (id) => setState(() => _reorderParentId = id),
-                    onExitLevel: (id) => setState(() {
-                      final node = tree
-                          .flatten()
-                          .where((n) => n.id == id)
-                          .firstOrNull;
-                      _reorderParentId = node?.category.parentId ?? '';
-                    }),
-                    onReorder: _reorderLevel,
-                  );
-                }
-
-                if (query.isNotEmpty) {
-                  // Flat, filtered view: a tree would hide matches.
-                  final matches = tree
-                      .flatten()
-                      .where((node) => node.name.toLowerCase().contains(query))
-                      .toList();
-                  if (matches.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(28),
-                        child: Text(
-                          AppLocalizations.of(
-                            context,
-                          ).noCategoriesMatchThisSearch,
-                        ),
-                      ),
-                    );
+            child: StreamBuilder<List<Product>>(
+              stream: repo.products(companyId: _companyId),
+              builder: (context, productSnap) {
+                final productImages = <String, String>{
+                  for (final p in productSnap.data ?? const <Product>[])
+                    if (p.images.isNotEmpty) p.id: p.images.first,
+                };
+                String? coverFor(Category c) {
+                  for (final id in c.productList) {
+                    final url = productImages[id];
+                    if (url != null) return url;
                   }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                    itemCount: matches.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, i) => _CategoryTile(
-                      node: matches[i],
-                      indent: 0,
-                      pathLabel: CategoryHierarchy.pathLabel(
-                        matches[i].id,
-                        categories,
-                      ),
-                      onEdit: () => context.push(
-                        AppRoutes.adminEditCategoryPath(matches[i].id),
-                        extra: matches[i].category,
-                      ),
-                      onQr: () => _showQrForCategory(matches[i].category),
-                      onDelete: () =>
-                          _confirmDelete(matches[i].category, categories),
-                    ),
-                  );
+                  return null;
                 }
 
-                final expandedIds = tree
-                    .flatten()
-                    .where(
-                      (node) =>
-                          node.children.isNotEmpty &&
-                          !_collapsed.contains(node.id),
-                    )
-                    .map((node) => node.id)
-                    .toSet();
-                final rows = tree.visibleRows(expandedIds);
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1100),
+                    child: StreamBuilder<List<Category>>(
+                      stream: repo.categories(companyId: _companyId),
+                      builder: (context, snap) {
+                        final categories = snap.data ?? const <Category>[];
 
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                  children: [
-                    _SummaryRow(
-                      total: categories.length,
-                      roots: tree.roots.length,
-                      products: tree.roots.fold<int>(
-                        0,
-                        (sum, node) => sum + node.totalProductCount,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    for (final node in rows) ...[
-                      _CategoryTile(
-                        node: node,
-                        indent: node.depth * 20.0,
-                        collapsed: _collapsed.contains(node.id),
-                        onToggle: node.isLeaf
-                            ? null
-                            : () => setState(() {
-                                if (_collapsed.contains(node.id)) {
-                                  _collapsed.remove(node.id);
-                                } else {
-                                  _collapsed.add(node.id);
-                                }
-                              }),
-                        pathLabel: node.depth == 0
-                            ? ''
-                            : CategoryHierarchy.pathLabel(
-                                node.category.parentId ?? node.id,
+                        if (snap.connectionState == ConnectionState.waiting &&
+                            categories.isEmpty) {
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: 5,
+                            itemBuilder: (_, _) => const M3ListTileSkeleton(),
+                          );
+                        }
+                        if (categories.isEmpty) {
+                          return _EmptyCategories(
+                            onAdd: () =>
+                                context.push(AppRoutes.adminAddCategory),
+                          );
+                        }
+
+                        final query = _searchCtrl.text.trim().toLowerCase();
+                        final effective = _applyPending(categories);
+                        final tree = CategoryTree.build(effective);
+
+                        if (_reorderMode && query.isEmpty) {
+                          return _CategoryReorderView(
+                            tree: tree,
+                            parentId: _reorderParentId,
+                            categories: effective,
+                            onEnterLevel: (id) =>
+                                setState(() => _reorderParentId = id),
+                            onExitLevel: (id) => setState(() {
+                              final node = tree
+                                  .flatten()
+                                  .where((n) => n.id == id)
+                                  .firstOrNull;
+                              _reorderParentId = node?.category.parentId ?? '';
+                            }),
+                            onReorder: _reorderLevel,
+                            coverFor: coverFor,
+                          );
+                        }
+
+                        if (query.isNotEmpty) {
+                          // Flat, filtered view: a tree would hide matches.
+                          final matches = tree
+                              .flatten()
+                              .where(
+                                (node) =>
+                                    node.name.toLowerCase().contains(query),
+                              )
+                              .toList();
+                          if (matches.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(28),
+                                child: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).noCategoriesMatchThisSearch,
+                                ),
+                              ),
+                            );
+                          }
+                          return ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                            itemCount: matches.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (context, i) => _CategoryTile(
+                              node: matches[i],
+                              coverUrl: coverFor(matches[i].category),
+                              indent: 0,
+                              pathLabel: CategoryHierarchy.pathLabel(
+                                matches[i].id,
                                 categories,
                               ),
-                        onEdit: () => context.push(
-                          AppRoutes.adminEditCategoryPath(node.id),
-                          extra: node.category,
-                        ),
-                        onQr: () => _showQrForCategory(node.category),
-                        onDelete: () =>
-                            _confirmDelete(node.category, categories),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ],
+                              onEdit: () => context.push(
+                                AppRoutes.adminEditCategoryPath(matches[i].id),
+                                extra: matches[i].category,
+                              ),
+                              onQr: () =>
+                                  _showQrForCategory(matches[i].category),
+                              onDelete: () => _confirmDelete(
+                                matches[i].category,
+                                categories,
+                              ),
+                            ),
+                          );
+                        }
+
+                        final expandedIds = tree
+                            .flatten()
+                            .where(
+                              (node) =>
+                                  node.children.isNotEmpty &&
+                                  !_collapsed.contains(node.id),
+                            )
+                            .map((node) => node.id)
+                            .toSet();
+                        final rows = tree.visibleRows(expandedIds);
+
+                        return ListView(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                          children: [
+                            _SummaryRow(
+                              total: categories.length,
+                              roots: tree.roots.length,
+                              products: tree.roots.fold<int>(
+                                0,
+                                (sum, node) => sum + node.totalProductCount,
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                key: const Key('category-arrange-button'),
+                                onPressed: categories.length > 1
+                                    ? _toggleReorder
+                                    : null,
+                                icon: const Icon(Icons.swap_vert, size: 18),
+                                label: Text(
+                                  AppLocalizations.of(context).reorder,
+                                ),
+                              ),
+                            ),
+                            for (final node in rows) ...[
+                              _CategoryTile(
+                                node: node,
+                                coverUrl: coverFor(node.category),
+                                indent: node.depth * 20.0,
+                                collapsed: _collapsed.contains(node.id),
+                                onToggle: node.isLeaf
+                                    ? null
+                                    : () => setState(() {
+                                        if (_collapsed.contains(node.id)) {
+                                          _collapsed.remove(node.id);
+                                        } else {
+                                          _collapsed.add(node.id);
+                                        }
+                                      }),
+                                pathLabel: node.depth == 0
+                                    ? ''
+                                    : CategoryHierarchy.pathLabel(
+                                        node.category.parentId ?? node.id,
+                                        categories,
+                                      ),
+                                onEdit: () => context.push(
+                                  AppRoutes.adminEditCategoryPath(node.id),
+                                  extra: node.category,
+                                ),
+                                onQr: () => _showQrForCategory(node.category),
+                                onDelete: () =>
+                                    _confirmDelete(node.category, categories),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 );
               },
             ),
@@ -311,6 +348,22 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     ];
   }
 
+  /// Enters or leaves manual ordering (disabled while a search is active).
+  void _toggleReorder() {
+    if (_searchCtrl.text.trim().isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).clearSearchToReorder),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _reorderMode = !_reorderMode;
+      _reorderParentId = '';
+    });
+  }
+
   /// Saves a new sibling order (0, 1, 2, …) after an optimistic update.
   Future<void> _reorderLevel(List<Category> orderedSiblings) async {
     final previous = Map<String, int>.from(_pendingSortOrders);
@@ -320,10 +373,15 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       }
     });
     try {
-      await repo.reorderCategories([
-        for (var i = 0; i < orderedSiblings.length; i++)
-          orderedSiblings[i].copyWith(sortOrder: i),
-      ]);
+      // Pass the siblings untouched: each still carries its *current*
+      // sortOrder, which is how the repository finds the ones that changed.
+      await repo.reorderCategories(orderedSiblings);
+      if (!mounted) return;
+      setState(() {
+        for (final c in orderedSiblings) {
+          _pendingSortOrders.remove(c.id);
+        }
+      });
     } catch (e) {
       // Roll back to the previous order and explain.
       if (!mounted) return;
@@ -531,6 +589,9 @@ class _CategoryTile extends StatelessWidget {
   final VoidCallback onQr;
   final String pathLabel;
 
+  /// Photo of the category's first product that has an image (optional).
+  final String? coverUrl;
+
   const _CategoryTile({
     required this.node,
     required this.indent,
@@ -540,6 +601,7 @@ class _CategoryTile extends StatelessWidget {
     this.collapsed = false,
     this.onToggle,
     this.pathLabel = '',
+    this.coverUrl,
   });
 
   @override
@@ -590,7 +652,7 @@ class _CategoryTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
               ],
-              _CategoryGlyph(category: node.category),
+              _CategoryGlyph(category: node.category, coverUrl: coverUrl),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -738,7 +800,7 @@ class _CategoryTile extends StatelessWidget {
 
     return ModernCard(
       key: Key('category-tile-${node.id}'),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       onTap: onEdit,
       child: Row(
         children: [
@@ -758,8 +820,8 @@ class _CategoryTile extends StatelessWidget {
           else
             const SizedBox(width: 40),
           const SizedBox(width: 4),
-          _CategoryGlyph(category: node.category),
-          const SizedBox(width: 14),
+          _CategoryGlyph(category: node.category, coverUrl: coverUrl, size: 64),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -826,6 +888,20 @@ class _CategoryTile extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+                if (node.category.details.trim().isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    node.category.details.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.85,
+                      ),
+                    ),
+                  ),
+                ],
                 if (pathLabel.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
@@ -875,24 +951,32 @@ class _CategoryTile extends StatelessWidget {
 class _CategoryGlyph extends StatelessWidget {
   final Category category;
 
-  const _CategoryGlyph({required this.category});
+  /// Product photo used when the category has no image icon of its own.
+  final String? coverUrl;
+  final double size;
+
+  const _CategoryGlyph({required this.category, this.coverUrl, this.size = 46});
 
   @override
   Widget build(BuildContext context) {
     final icon = category.iconUrl.trim();
-    if (category.hasImageIcon) {
+    final image = category.hasImageIcon
+        ? icon
+        : ((coverUrl ?? '').isNotEmpty ? coverUrl! : '');
+    final radius = size * 0.24;
+    if (image.isNotEmpty) {
       return Container(
-        width: 46,
-        height: 46,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(radius),
           border: Border.all(color: Colors.grey.shade200, width: 1),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(radius - 1),
           child: Image.network(
-            icon,
+            image,
             fit: BoxFit.cover,
             loadingBuilder: (_, child, progress) {
               if (progress == null) return child;
@@ -906,10 +990,10 @@ class _CategoryGlyph extends StatelessWidget {
             },
             errorBuilder: (_, _, _) => Container(
               color: Colors.grey.shade100,
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.category_outlined,
-                  size: 22,
+                  size: size * 0.48,
                   color: Colors.grey,
                 ),
               ),
@@ -919,11 +1003,11 @@ class _CategoryGlyph extends StatelessWidget {
       );
     }
     return Container(
-      width: 46,
-      height: 46,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
           width: 1,
@@ -931,8 +1015,8 @@ class _CategoryGlyph extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          icon.isNotEmpty ? icon : '📁',
-          style: const TextStyle(fontSize: 22),
+          icon.isNotEmpty ? icon : '\u{1F4C1}',
+          style: TextStyle(fontSize: size * 0.48),
         ),
       ),
     );
@@ -954,14 +1038,14 @@ class _EmptyCategories extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).noCategoriesFound,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             AppLocalizations.of(
               context,
             ).createYourFirstCategoryAndAssignProductsToOrganizeYourStore,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -990,6 +1074,9 @@ class _CategoryReorderView extends StatelessWidget {
   final ValueChanged<String> onExitLevel;
   final ValueChanged<List<Category>> onReorder;
 
+  /// Cover photo for a category (its first product that has an image).
+  final String? Function(Category) coverFor;
+
   const _CategoryReorderView({
     required this.tree,
     required this.parentId,
@@ -997,6 +1084,7 @@ class _CategoryReorderView extends StatelessWidget {
     required this.onEnterLevel,
     required this.onExitLevel,
     required this.onReorder,
+    required this.coverFor,
   });
 
   List<CategoryNode> get _siblings {
@@ -1017,6 +1105,10 @@ class _CategoryReorderView extends StatelessWidget {
     siblings.insert(newIndex, moved);
     onReorder(siblings);
   }
+
+  /// Moves the item at [index] one place up ([delta] -1) or down (+1).
+  void _move(int index, int delta) =>
+      _handleReorder(index, delta > 0 ? index + 2 : index - 1);
 
   @override
   Widget build(BuildContext context) {
@@ -1062,10 +1154,10 @@ class _CategoryReorderView extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text(
             AppLocalizations.of(context).dragTheHandleToSetTheOrderCustomersSee,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11.5,
               fontStyle: FontStyle.italic,
               color: Colors.grey,
@@ -1076,7 +1168,7 @@ class _CategoryReorderView extends StatelessWidget {
           child: siblings.isEmpty
               ? Center(
                   child: Padding(
-                    padding: EdgeInsets.all(28),
+                    padding: const EdgeInsets.all(28),
                     child: Text(
                       AppLocalizations.of(context).noCategoriesAtThisLevel,
                     ),
@@ -1114,24 +1206,53 @@ class _CategoryReorderView extends StatelessWidget {
                           children: [
                             ReorderableDragStartListener(
                               index: i,
-                              child: Tooltip(
-                                message: AppLocalizations.of(
+                              // No Tooltip here: a tooltip's overlay cannot follow a
+                              // row that jumps position in a ReorderableListView.
+                              child: Semantics(
+                                label: AppLocalizations.of(
                                   context,
                                 ).dragToReorder,
-                                child: Container(
-                                  key: Key('category-drag-handle-${cat.id}'),
-                                  padding: const EdgeInsets.all(6),
-                                  child: Icon(
-                                    Icons.drag_handle,
-                                    size: 20,
-                                    color: theme.colorScheme.onSurface
-                                        .withValues(alpha: 0.45),
+                                child: MouseRegion(
+                                  cursor: SystemMouseCursors.grab,
+                                  child: Container(
+                                    key: Key('category-drag-handle-${cat.id}'),
+                                    padding: const EdgeInsets.all(6),
+                                    child: Icon(
+                                      Icons.drag_handle,
+                                      size: 20,
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.45),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
+                            Container(
+                              key: Key('category-position-${cat.id}'),
+                              width: 26,
+                              height: 26,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.12,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '${i + 1}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
                             const SizedBox(width: 8),
-                            _CategoryGlyph(category: cat),
+                            _CategoryGlyph(
+                              category: cat,
+                              coverUrl: coverFor(cat),
+                              size: 52,
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
@@ -1161,6 +1282,28 @@ class _CategoryReorderView extends StatelessWidget {
                                     ),
                                   ),
                                 ],
+                              ),
+                            ),
+                            Semantics(
+                              label: AppLocalizations.of(context).moveUp,
+                              button: true,
+                              child: IconButton(
+                                key: Key('category-move-up-${cat.id}'),
+                                visualDensity: VisualDensity.compact,
+                                icon: const Icon(Icons.keyboard_arrow_up),
+                                onPressed: i > 0 ? () => _move(i, -1) : null,
+                              ),
+                            ),
+                            Semantics(
+                              label: AppLocalizations.of(context).moveDown,
+                              button: true,
+                              child: IconButton(
+                                key: Key('category-move-down-${cat.id}'),
+                                visualDensity: VisualDensity.compact,
+                                icon: const Icon(Icons.keyboard_arrow_down),
+                                onPressed: i < siblings.length - 1
+                                    ? () => _move(i, 1)
+                                    : null,
                               ),
                             ),
                             if (node.children.isNotEmpty)

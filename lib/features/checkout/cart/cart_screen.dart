@@ -12,6 +12,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/app_product_image.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../marketplace/widgets/web_header.dart';
@@ -76,6 +77,7 @@ class CartScreen extends StatelessWidget {
                     }
                   },
                 ),
+                actions: const [BackToAdminButton()],
               ),
         body: BlocBuilder<CartCubit, CartState>(
           builder: (context, state) {
@@ -291,7 +293,7 @@ class CartScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               AppLocalizations.of(context).signInToViewCart,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E2229),
@@ -303,7 +305,7 @@ class CartScreen extends StatelessWidget {
                 context,
               ).addProductsToYourCartAfterSigningInToContinueCheckout,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -328,7 +330,10 @@ class CartScreen extends StatelessWidget {
               icon: const Icon(Icons.login),
               label: Text(
                 AppLocalizations.of(context).continueWithGoogle,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
               ),
             ),
           ],
@@ -734,10 +739,10 @@ class _CartLineCard extends StatelessWidget {
 
                   if (!item.isInStock)
                     Padding(
-                      padding: EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         AppLocalizations.of(context).outOfStock,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
                           color: Colors.redAccent,
                           fontWeight: FontWeight.bold,

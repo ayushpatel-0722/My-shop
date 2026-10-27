@@ -1,10 +1,10 @@
-import '../../../app/routes/app_router.dart';
 import 'package:flutter/material.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
+import '../../../app/routes/app_router.dart';
 import '../../../core/models/recommendation.dart';
 import '../../../core/services/service_locator.dart';
 import '../admin_shell.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Recommended products manager — pin a product, else auto best-seller
 /// fallback (Section 13.3).
@@ -32,7 +32,7 @@ class AdminRecommendationsScreen extends StatelessWidget {
             children: [
               Card(
                 child: ListTile(
-                  leading: Icon(Icons.auto_awesome),
+                  leading: const Icon(Icons.auto_awesome),
                   title: Text(AppLocalizations.of(context).fallbackStrategy),
                   subtitle: Text(
                     AppLocalizations.of(
@@ -44,7 +44,7 @@ class AdminRecommendationsScreen extends StatelessWidget {
               const SizedBox(height: 8),
               if (list.isEmpty)
                 Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Center(
                     child: Text(
                       AppLocalizations.of(
@@ -112,7 +112,7 @@ class _PinProductSheetState extends State<_PinProductSheet> {
         children: [
           Text(
             AppLocalizations.of(context).pinAProduct,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           TextField(

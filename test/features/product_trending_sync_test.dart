@@ -4,11 +4,11 @@ import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/app/theme/app_theme.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';
+import 'package:myshop/core/models/company.dart';
 import 'package:myshop/core/models/home_trending_item.dart';
 import 'package:myshop/core/models/product.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/core/services/service_locator.dart';
-import 'package:myshop/core/models/company.dart';
 import 'package:myshop/core/widgets/app_product_image.dart';
 import 'package:myshop/features/admin/home_config/admin_trending_now_screen.dart';
 import 'package:myshop/features/admin/products/admin_add_product_screen.dart';
@@ -252,7 +252,7 @@ void main() {
         const shopId = 'store_farm';
         const productId = 'prod_mango';
 
-        AuthSession.currentUser = AppUser(
+        AuthSession.currentUser = const AppUser(
           id: 'admin_1',
           companyId: shopId,
           companyName: 'Farm Fresh Store',
@@ -402,7 +402,7 @@ void main() {
         );
         await mockRepo.createCompany(shop);
 
-        AuthSession.currentUser = AppUser(
+        AuthSession.currentUser = const AppUser(
           id: 'admin_1',
           companyId: shopId,
           companyName: 'Organic Life Store',
@@ -461,7 +461,7 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             theme: AppTheme.light(),
-            home: Scaffold(body: ProductCard(product: mangoProduct)),
+            home: const Scaffold(body: ProductCard(product: mangoProduct)),
           ),
         );
         await tester.pumpAndSettle();

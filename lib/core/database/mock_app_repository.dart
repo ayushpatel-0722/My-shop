@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../app/l10n/l10n_service.dart';
 import '../domain/category_tree.dart';
 import '../domain/order_status.dart';
 import '../models/admin.dart';
@@ -23,7 +24,6 @@ import '../models/voucher.dart';
 import '../repositories/app_repository.dart';
 import '../services/auth_session.dart';
 import 'mock_data.dart';
-import '../../app/l10n/l10n_service.dart';
 
 /// In-memory implementation of [AppRepository].
 ///
@@ -101,7 +101,7 @@ class MockAppRepository implements AppRepository {
           label: L10n.current.home,
           isDefault: true,
         ),
-        AddressEntry(
+        const AddressEntry(
           id: 'addr_2',
           name: 'Demo User',
           phone: '9876543210',
@@ -446,6 +446,16 @@ class MockAppRepository implements AppRepository {
   Future<AppUser?> resolveCurrentUser() async => _currentUser;
 
   // ---- Reads ----
+  @override
+  Future<void> updateCompanyDetails(Company company) async {
+    final i = _companies.indexWhere((c) => c.id == company.id);
+    if (i == -1) {
+      throw StateError('Company ${company.id} not found.');
+    }
+    _companies[i] = _companies[i].withEditableFieldsFrom(company);
+    _pushCompanies();
+  }
+
   @override
   Stream<List<Company>> companies() =>
       _live(_companiesCtrl, () => List.unmodifiable(_companies));
@@ -1386,7 +1396,7 @@ class MockAppRepository implements AppRepository {
     String shopId = '',
     bool activeOnly = false,
   }) {
-    Stream<List<HomeExploreCategory>> stream = _homeExploreCtrl.stream;
+    final Stream<List<HomeExploreCategory>> stream = _homeExploreCtrl.stream;
     final initial = _filterHomeExplore(shopId: shopId, activeOnly: activeOnly);
     return Stream<List<HomeExploreCategory>>.multi((controller) {
       controller.add(initial);
@@ -1464,7 +1474,7 @@ class MockAppRepository implements AppRepository {
     String shopId = '',
     bool activeOnly = false,
   }) {
-    Stream<List<HomeTrendingItem>> stream = _homeTrendingCtrl.stream;
+    final Stream<List<HomeTrendingItem>> stream = _homeTrendingCtrl.stream;
     final initial = _filterHomeTrending(shopId: shopId, activeOnly: activeOnly);
     return Stream<List<HomeTrendingItem>>.multi((controller) {
       controller.add(initial);

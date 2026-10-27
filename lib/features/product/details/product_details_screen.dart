@@ -12,8 +12,9 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
-import '../../../core/widgets/collapsible_section.dart';
 import '../../../core/widgets/app_product_image.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
+import '../../../core/widgets/collapsible_section.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
@@ -205,7 +206,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   const SizedBox(height: 12),
                   Text(
                     AppLocalizations.of(context).productNotFound,
-                    style: TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 18),
                   ),
                   const SizedBox(height: 8),
                   TextButton(
@@ -233,14 +234,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return wrapWithPopScope(
       Scaffold(
         appBar: isDesktop
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(64),
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(64),
                 child: WebHeader(currentIndex: -1),
               )
             : AppBar(
                 leading: BackButton(onPressed: handleBack),
                 backgroundColor: Colors.white,
                 elevation: 0,
+                actions: const [BackToAdminButton()],
               ),
         body: isDesktop
             ? SingleChildScrollView(
@@ -887,7 +889,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             : null,
                       ),
                       child: url.isEmpty
-                          ? Icon(
+                          ? const Icon(
                               Icons.image_outlined,
                               color: Colors.grey,
                               size: 20,
@@ -1397,9 +1399,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               context.go(AppRoutes.home);
             }
           },
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Icon(
                 Icons.arrow_back_rounded,
                 size: 16,

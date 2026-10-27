@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/app/theme/app_theme.dart';
+import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/core/services/service_locator.dart';
-import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/features/admin/admin_shell.dart';
 import 'package:myshop/features/admin/dashboard/admin_dashboard_screen.dart';
 
@@ -153,7 +153,7 @@ void main() {
 
         // Verify Store Modules section
         expect(find.text('Store Modules'), findsOneWidget);
-        expect(find.text('14 modules available'), findsOneWidget);
+        expect(find.text('15 modules available'), findsOneWidget);
 
         // Check key modules and their supporting subtitles
         expect(find.text('Orders Pipeline'), findsWidgets);
@@ -411,7 +411,7 @@ void main() {
 
       expect(find.text("Today's Orders"), findsOneWidget);
       expect(find.text("Today's Revenue"), findsOneWidget);
-      expect(find.text("Order Pipeline"), findsOneWidget);
+      expect(find.text('Order Pipeline'), findsOneWidget);
     });
   });
 }

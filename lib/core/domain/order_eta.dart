@@ -1,7 +1,7 @@
+import '../../app/l10n/l10n_service.dart';
 import '../models/company.dart';
 import '../models/order.dart';
 import 'order_status.dart';
-import '../../app/l10n/l10n_service.dart';
 
 /// Delivery-estimate copy for the order history cards.
 ///

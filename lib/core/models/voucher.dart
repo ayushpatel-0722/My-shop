@@ -1,5 +1,5 @@
-import '../utils/type_utils.dart';
 import '../../app/l10n/l10n_service.dart';
+import '../utils/type_utils.dart';
 
 /// The three ways a voucher can reduce the payable amount.
 class VoucherType {
@@ -186,9 +186,6 @@ class Voucher {
   /// True once [expiryDate] has passed (relative to [now]).
   bool isExpiredAt(DateTime now) =>
       expiryDate != null && now.isAfter(expiryDate!);
-
-  /// Kept for callers that do not care about the clock; prefer passing one.
-  bool get isExpired => isExpiredAt(DateTime.now());
 
   /// Enabled **and** not expired.
   bool isLiveAt(DateTime now) => isActive && !isExpiredAt(now);

@@ -115,7 +115,7 @@ class _UserSignupScreenState extends State<UserSignupScreen> {
                         decoration: InputDecoration(
                           labelText: AppLocalizations.of(context).otp,
                           hintText: '------',
-                          prefixIcon: Icon(Icons.pin_outlined),
+                          prefixIcon: const Icon(Icons.pin_outlined),
                           errorText: _otpError,
                           helperText: AppLocalizations.of(
                             context,

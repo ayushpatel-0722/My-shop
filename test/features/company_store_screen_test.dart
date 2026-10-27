@@ -338,7 +338,7 @@ void main() {
       // ((968 + 12) / (250 + 12)).ceil() = ceil(980 / 262) = 4 columns.
       expect(delegate.crossAxisCount, 4);
 
-      final cardWidth = (968 - (4 - 1) * 12) / 4;
+      const cardWidth = (968 - (4 - 1) * 12) / 4;
       expect(cardWidth, lessThanOrEqualTo(250.0));
     },
   );

@@ -1,7 +1,7 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
-import '../config/app_config.dart';
 import '../../app/l10n/l10n_service.dart';
+import '../config/app_config.dart';
 
 /// Force-update / feature-flag controller (Section 18.2).
 class RemoteConfigService {

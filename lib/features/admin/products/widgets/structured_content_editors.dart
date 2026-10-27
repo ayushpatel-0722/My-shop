@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../../core/models/product.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Editors for the two structured product content blocks (Flipkart style):
 ///
@@ -193,7 +193,7 @@ class HighlightRowEditor extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context).title,
                     isDense: true,
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   onChanged: (v) => onChanged(item.copyWith(title: v)),
                 ),
@@ -667,7 +667,7 @@ class _DetailSectionEditorState extends State<DetailSectionEditor> {
                     isDense: true,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).sectionType,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     items: [
                       DropdownMenuItem(

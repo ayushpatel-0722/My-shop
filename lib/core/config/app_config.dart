@@ -6,8 +6,9 @@ class AppConfig {
 
   /// Set `true` to run the app against the in-memory mock repository without
   /// any Firebase backend (useful for UI-only demos). Defaults to `false` so
-  /// the app uses the real Firebase backend.
-  static const bool useMockData = false;
+  /// the app uses the real Firebase backend. Override at build time with
+  /// `--dart-define=USE_MOCK_DATA=true` (see `make run-mock`).
+  static const bool useMockData = bool.fromEnvironment('USE_MOCK_DATA');
 
   /// Minimum app version enforced via Firebase Remote Config. Bump this to
   /// trigger the blocking "Update Required" screen on older builds.

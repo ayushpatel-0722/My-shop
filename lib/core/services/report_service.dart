@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import '../../app/l10n/l10n_service.dart';
 import '../models/order.dart';
 import '../models/product.dart';
 
@@ -454,44 +453,6 @@ class ReportService {
         ),
       ],
     );
-  }
-
-  /// Single order invoice PDF (Section 17.1).
-  Future<Uint8List> buildInvoicePdf(Order order) async {
-    final doc = pw.Document();
-    doc.addPage(
-      pw.MultiPage(
-        build: (context) => [
-          pw.Text(
-            L10n.current.invoice,
-            style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 8),
-          pw.Text(L10n.current.order(order.id.toUpperCase())),
-          pw.Text(L10n.current.company2(order.companyName)),
-          pw.SizedBox(height: 16),
-          pw.TableHelper.fromTextArray(
-            headers: const ['Item', 'Qty', 'Unit Price', 'Total'],
-            data: order.items
-                .map(
-                  (e) => [
-                    e.name,
-                    '${e.qty}',
-                    '₹${e.unitPrice}',
-                    '₹${e.itemTotal}',
-                  ],
-                )
-                .toList(),
-          ),
-          pw.SizedBox(height: 16),
-          pw.Text(
-            L10n.current.total('${order.totalAmount}'),
-            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-    return doc.save();
   }
 
   // ---------------------------------------------------------------- Save ---

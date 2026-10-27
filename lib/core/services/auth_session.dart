@@ -21,11 +21,6 @@ class AuthSession with ChangeNotifier {
     instance.notifyListeners();
   }
 
-  static void setRestoring(bool restoring) {
-    isRestoring = restoring;
-    instance.notifyListeners();
-  }
-
   static void markBootCompleted() {
     hasCompletedInitialBoot = true;
   }

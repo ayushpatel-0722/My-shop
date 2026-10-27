@@ -1,16 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../app/l10n/l10n_service.dart';
 import '../../core/models/admin.dart';
 import '../../core/models/app_user.dart';
 import '../../core/models/company.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/services/secure_session_cache.dart';
 import '../../core/services/service_locator.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
-import '../../app/l10n/l10n_service.dart';
 
 enum AuthStatus { unauthenticated, authenticating, authenticated, error }
 
@@ -571,7 +571,4 @@ class AuthCubit extends Cubit<AuthState> {
     AuthSession.set(null, restoring: false);
     emit(const AuthState(status: AuthStatus.unauthenticated, restoring: false));
   }
-
-  void clearError() =>
-      emit(state.copyWith(error: null, status: AuthStatus.unauthenticated));
 }

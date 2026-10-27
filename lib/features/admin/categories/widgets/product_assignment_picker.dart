@@ -464,7 +464,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   ),
                   child: Text(
                     AppLocalizations.of(context).addAll,
-                    style: TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
               if (isAssignedPanel && onRemoveAll != null)
@@ -477,7 +477,7 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
                   ),
                   child: Text(
                     AppLocalizations.of(context).clearAll,
-                    style: TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
             ],
@@ -596,17 +596,22 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
               position: positionOf[products[i].id],
               dragHandle: ReorderableDragStartListener(
                 index: i,
-                child: Tooltip(
-                  message: AppLocalizations.of(context).dragToReorder,
-                  child: Container(
-                    key: Key('drag-handle-${products[i].id}'),
-                    padding: const EdgeInsets.all(6),
-                    child: Icon(
-                      Icons.drag_handle,
-                      size: 18,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.45),
+                // No Tooltip: its overlay cannot follow a row that jumps position
+                // in a ReorderableListView (throws a LayoutBuilder assertion).
+                child: Semantics(
+                  label: AppLocalizations.of(context).dragToReorder,
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.grab,
+                    child: Container(
+                      key: Key('drag-handle-${products[i].id}'),
+                      padding: const EdgeInsets.all(6),
+                      child: Icon(
+                        Icons.drag_handle,
+                        size: 18,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.45),
+                      ),
                     ),
                   ),
                 ),
@@ -747,11 +752,15 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
               onPressed: () => _addProduct(product.id),
             )
           else
-            IconButton(
-              icon: const Icon(Icons.remove_circle, color: Colors.redAccent),
-              tooltip: AppLocalizations.of(context).removeFromCategory,
-              visualDensity: VisualDensity.compact,
-              onPressed: () => _removeProduct(product.id),
+            // Assigned rows live in a ReorderableListView, so no Tooltip here.
+            Semantics(
+              label: AppLocalizations.of(context).removeFromCategory,
+              button: true,
+              child: IconButton(
+                icon: const Icon(Icons.remove_circle, color: Colors.redAccent),
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _removeProduct(product.id),
+              ),
             ),
         ],
       ),
@@ -773,11 +782,11 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
           ),
           child: Row(
             children: [
-              Icon(Icons.add_circle, color: Colors.white, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.add_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context).assign,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
@@ -805,14 +814,14 @@ class _ProductAssignmentPickerState extends State<ProductAssignmentPicker> {
             children: [
               Text(
                 AppLocalizations.of(context).remove,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
               ),
-              SizedBox(width: 8),
-              Icon(Icons.remove_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              const Icon(Icons.remove_circle, color: Colors.white, size: 20),
             ],
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -12,12 +13,12 @@ import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/product_card.dart';
 import '../widgets/web_header.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Category explorer screen.
 ///
@@ -85,9 +86,9 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
           InkWell(
             onTap: onBack,
             borderRadius: BorderRadius.circular(4),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Icon(
                   Icons.arrow_back_rounded,
                   size: 16,
@@ -217,6 +218,7 @@ class _CategoryViewScreenState extends State<CategoryViewScreen> {
                   ),
                 ),
                 actions: [
+                  const BackToAdminButton(),
                   IconButton(
                     icon: const Icon(
                       Icons.search_rounded,
@@ -571,7 +573,7 @@ class _Toolbar extends StatelessWidget {
             children: [
               Text(
                 AppLocalizations.of(context).inStock2,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: Color(0xFF4B5563),
@@ -638,8 +640,8 @@ class _EmptyCategory extends StatelessWidget {
             Container(
               width: 80,
               height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEA),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFEBEA),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -664,7 +666,7 @@ class _EmptyCategory extends StatelessWidget {
                 context,
               ).productsAssignedToThisCategoryOrItsSubCategoriesWillShowUpHere,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
+              style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
             ),
             if (hasStockFilter) ...[
               const SizedBox(height: 16),

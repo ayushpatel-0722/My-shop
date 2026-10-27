@@ -4298,4 +4298,217 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get shopSettings => 'Shop Settings';
+
+  @override
+  String get shopSettingsSubtitle => 'Description, hours & delivery';
+
+  @override
+  String get shopNoShopLinked => 'No shop is linked to this account.';
+
+  @override
+  String get shopNotFound => 'Shop not found.';
+
+  @override
+  String shopCouldNotLoad(String error) {
+    return 'Could not load shop details: $error';
+  }
+
+  @override
+  String get shopDetailsSaved => 'Shop details saved.';
+
+  @override
+  String shopCouldNotSave(String error) {
+    return 'Could not save: $error';
+  }
+
+  @override
+  String get shopFixFields => 'Please fix the highlighted fields.';
+
+  @override
+  String get shopDetailsTitle => 'Shop details';
+
+  @override
+  String get shopDetailsSubtitle => 'What shoppers read about your shop.';
+
+  @override
+  String get shopNameLabel => 'Shop name';
+
+  @override
+  String get shopNameHelper =>
+      'This is also your admin login, so it can only be changed by support.';
+
+  @override
+  String get shopCategoryLabel => 'Store category';
+
+  @override
+  String get shopCategoryHint => 'e.g. Furniture and Home Decor';
+
+  @override
+  String get shopPhoneLabel => 'Contact phone';
+
+  @override
+  String get shopPhoneHelper => 'Shown on pickup cards';
+
+  @override
+  String get shopDescriptionLabel => 'Description';
+
+  @override
+  String get shopDescriptionRequired => 'Add a short description of your shop';
+
+  @override
+  String get shopAddressLabel => 'Address';
+
+  @override
+  String get shopAddressRequired => 'Address is required';
+
+  @override
+  String get shopMapLabel => 'Map link (Google Maps)';
+
+  @override
+  String get shopHoursTitle => 'Opening hours';
+
+  @override
+  String get shopHoursSubtitle =>
+      'Shoppers see whether you are open right now.';
+
+  @override
+  String get shopOpenNow => 'Open now';
+
+  @override
+  String get shopClosedNow => 'Closed now';
+
+  @override
+  String get shopDayClosed => 'Closed';
+
+  @override
+  String get shopTo => 'to';
+
+  @override
+  String get shopOpen24Hours => 'Open 24 hours';
+
+  @override
+  String get shopClosesNextDay => 'closes next day';
+
+  @override
+  String shopApplyHoursToAll(String day) {
+    return 'Apply $day hours to every day';
+  }
+
+  @override
+  String get shopDeliveryTitle => 'Delivery & orders';
+
+  @override
+  String get shopDeliverySubtitle => 'How shoppers can receive their orders.';
+
+  @override
+  String get shopSelfPickup => 'Self-pickup from the shop';
+
+  @override
+  String get shopHomeDelivery => 'Home delivery';
+
+  @override
+  String get shopChooseDeliveryOption => 'Choose at least one delivery option.';
+
+  @override
+  String get shopMinOrderLabel => 'Minimum order for delivery';
+
+  @override
+  String get shopMinOrderHelper => '0 means no minimum';
+
+  @override
+  String get shopCurrencyLabel => 'Currency';
+
+  @override
+  String get shopCurrencyHelper => 'Fixed once the shop is created';
+
+  @override
+  String get shopHandlingLabel => 'Packing time (minutes)';
+
+  @override
+  String get shopHandlingHelper => 'Used for the order ETA';
+
+  @override
+  String get shopDeliveryMinutesLabel => 'Delivery time (minutes)';
+
+  @override
+  String get shopDeliveryMinutesHelper => 'Once the parcel leaves the shop';
+
+  @override
+  String get shopBrandingTitle => 'Branding images';
+
+  @override
+  String get shopBrandingSubtitle =>
+      'Paste an image link; tap a preview to see it full screen.';
+
+  @override
+  String get shopLogoLabel => 'Logo';
+
+  @override
+  String get shopBannerLabel => 'Banner';
+
+  @override
+  String get shopStorefrontLabel => 'Storefront image';
+
+  @override
+  String shopImageLinkLabel(String label) {
+    return '$label (image link)';
+  }
+
+  @override
+  String get shopMapLinkInvalid =>
+      'The map link must start with http:// or https://';
+
+  @override
+  String shopImageLinkInvalid(String label) {
+    return 'The $label link must start with http:// or https://';
+  }
+
+  @override
+  String get shopPhoneChars => 'Use digits, spaces, + or - only';
+
+  @override
+  String get shopPhoneInvalid => 'Enter a valid phone number';
+
+  @override
+  String get shopMoneyInvalid => 'Enter 0 or a positive amount';
+
+  @override
+  String get shopMinutesInvalid => '1 - 1440 minutes';
+
+  @override
+  String get shopUnsavedChanges => 'You have unsaved changes';
+
+  @override
+  String get shopAllSaved => 'All changes saved';
+
+  @override
+  String get shopDiscard => 'Discard';
+
+  @override
+  String get shopSaveChanges => 'Save changes';
+
+  @override
+  String shopHoursInvalidTime(String day) {
+    return '$day: enter valid opening and closing times.';
+  }
+
+  @override
+  String shopHoursSameTime(String day) {
+    return '$day: opening and closing time cannot be the same.';
+  }
+
+  @override
+  String get shopHoursNoOpenDay => 'Keep at least one day open.';
+
+  @override
+  String get shopStatusActive => 'Active';
+
+  @override
+  String get shopStatusSuspended => 'Suspended';
+
+  @override
+  String get shopStatusInactive => 'Inactive';
 }

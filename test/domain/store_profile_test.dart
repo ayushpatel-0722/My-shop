@@ -145,7 +145,7 @@ void main() {
   });
 
   group('OrderEta', () {
-    final company = Company(
+    const company = Company(
       id: 'c_1',
       name: 'Test Shop',
       slug: 'test-shop',

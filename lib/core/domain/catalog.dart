@@ -1,7 +1,7 @@
+import '../../app/l10n/l10n_service.dart';
 import '../models/category.dart';
 import '../models/company.dart';
 import '../models/product.dart';
-import '../../app/l10n/l10n_service.dart';
 
 /// Stock health of a product, shared by the admin list and the store front.
 enum StockStatus {
@@ -343,31 +343,6 @@ class Catalog {
   /// Distinct category ids present in [products].
   static Set<String> usedCategoryIds(Iterable<Product> products) =>
       products.map((p) => p.categoryId).where((id) => id.isNotEmpty).toSet();
-
-  /// Sorts [products] by their position inside a category's ordered
-  /// `productList` (array position = display order).
-  ///
-  /// Products missing from the array keep their relative order at the end.
-  static List<Product> orderByAssignment(
-    Iterable<Product> products,
-    List<String> productList,
-  ) {
-    final rank = <String, int>{};
-    for (var i = 0; i < productList.length; i++) {
-      rank.putIfAbsent(productList[i], () => i);
-    }
-    final list = products.toList();
-    final originalIndex = <String, int>{
-      for (var i = 0; i < list.length; i++) list[i].id: i,
-    };
-    list.sort((a, b) {
-      final ra = rank[a.id] ?? 1 << 30;
-      final rb = rank[b.id] ?? 1 << 30;
-      if (ra != rb) return ra.compareTo(rb);
-      return (originalIndex[a.id] ?? 0).compareTo(originalIndex[b.id] ?? 0);
-    });
-    return list;
-  }
 
   /// Products that will disappear from the store front soon.
   static List<Product> lowStock(

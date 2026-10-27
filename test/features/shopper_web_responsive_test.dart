@@ -135,7 +135,7 @@ void main() {
 
         await tester.pumpWidget(
           buildTestWidget(
-            child: SizedBox(
+            child: const SizedBox(
               width: 300,
               child: ProductCard(product: testProduct, company: testCompany),
             ),
@@ -158,7 +158,7 @@ void main() {
         tester.view.physicalSize = const Size(375, 667);
         await tester.pumpWidget(
           buildTestWidget(
-            child: SizedBox(
+            child: const SizedBox(
               width: 180,
               child: ProductCard(product: testProduct, company: testCompany),
             ),
@@ -191,7 +191,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestWidget(
-          child: Center(
+          child: const Center(
             child: SizedBox(
               width: 250,
               child: ProductCard(product: testProduct, company: testCompany),
@@ -421,7 +421,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestWidget(
-          child: SizedBox(
+          child: const SizedBox(
             width: 240,
             child: ProductCard(product: testProduct, company: testCompany),
           ),

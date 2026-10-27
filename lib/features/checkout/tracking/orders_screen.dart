@@ -13,9 +13,10 @@ import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/app_product_image.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
-import '../../../core/widgets/app_product_image.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
@@ -117,8 +118,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
       child: Scaffold(
         backgroundColor: AppTheme.backgroundLight,
         appBar: context.isDesktop
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(64),
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(64),
                 child: WebHeader(currentIndex: 2),
               )
             : AppBar(
@@ -133,6 +134,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 backgroundColor: Colors.white,
                 elevation: 0,
                 scrolledUnderElevation: 1,
+                actions: const [BackToAdminButton()],
               ),
         body: !isLoggedIn
             ? _buildGuestView(context)
@@ -473,7 +475,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             const SizedBox(height: 20),
             Text(
               AppLocalizations.of(context).signInToViewOrders,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E2229),
@@ -485,7 +487,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 context,
               ).keepTrackOfYourActiveDeliveriesAndPastPurchases,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -508,7 +510,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
               icon: const Icon(Icons.login),
               label: Text(
                 AppLocalizations.of(context).continueWithGoogle,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
               ),
             ),
           ],
@@ -539,7 +544,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             const SizedBox(height: 20),
             Text(
               AppLocalizations.of(context).noOrdersYet,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E2229),
@@ -551,7 +556,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 context,
               ).exploreProductsAndPlaceYourFirstOrderToday,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -570,7 +575,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
               onPressed: () => context.go(AppRoutes.home),
               child: Text(
                 AppLocalizations.of(context).startShopping,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
               ),
             ),
           ],
@@ -1822,7 +1830,7 @@ class _ReorderButton extends StatelessWidget {
           content: Text(
             AppLocalizations.of(context).theseProductsAreNoLongerAvailable,
           ),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );

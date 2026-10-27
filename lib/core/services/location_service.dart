@@ -54,7 +54,7 @@ class LocationService {
     }
 
     // Default fallback
-    return AddressEntry(
+    return const AddressEntry(
       id: 'current_gps',
       name: 'Current Location',
       address: 'Satellite, SG Highway',

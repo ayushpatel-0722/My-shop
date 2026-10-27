@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../core/models/company.dart';
 import '../../../core/models/customer.dart';
@@ -10,7 +11,6 @@ import '../../../core/services/service_locator.dart';
 import '../../account/widgets/add_edit_address_dialog.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Flipkart / Amazon style Location & Address Selector Bottom Sheet.
 class LocationPickerSheet extends StatefulWidget {
@@ -196,7 +196,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
         messenger.showSnackBar(
           SnackBar(
             content: Text(l10n.addressDeleted),
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -263,7 +263,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                     children: [
                       Text(
                         AppLocalizations.of(context).selectDeliveryLocation,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1E2229),
@@ -273,7 +273,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                         AppLocalizations.of(
                           context,
                         ).selectAnAddressToSeeProductAvailabilityAndDeliveryFees,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11.5,
                           color: Color(0xFF6B7280),
                         ),
@@ -321,13 +321,15 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                         hintText: AppLocalizations.of(
                           context,
                         ).enter6DigitDeliveryPincode,
-                        hintStyle: TextStyle(
+                        hintStyle: const TextStyle(
                           color: Color(0xFF94A3B8),
                           fontSize: 13,
                         ),
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
                       ),
                       onSubmitted: _applyPincode,
                     ),
@@ -340,7 +342,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                     ),
                     child: Text(
                       AppLocalizations.of(context).apply,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13.5,
                       ),
@@ -403,7 +405,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                     children: [
                       Text(
                         AppLocalizations.of(context).savedAddresses,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.8,
@@ -734,7 +736,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                     icon: const Icon(Icons.edit_outlined, size: 16),
                     label: Text(
                       AppLocalizations.of(context).edit,
-                      style: TextStyle(fontSize: 12.5),
+                      style: const TextStyle(fontSize: 12.5),
                     ),
                     onPressed: onEdit,
                   ),
@@ -749,7 +751,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
                     icon: const Icon(Icons.delete_outline, size: 16),
                     label: Text(
                       AppLocalizations.of(context).delete,
-                      style: TextStyle(fontSize: 12.5),
+                      style: const TextStyle(fontSize: 12.5),
                     ),
                     onPressed: onDelete,
                   ),
@@ -774,11 +776,11 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.storefront, size: 14, color: Color(0xFFE65100)),
-            SizedBox(width: 6),
+            const Icon(Icons.storefront, size: 14, color: Color(0xFFE65100)),
+            const SizedBox(width: 6),
             Text(
               AppLocalizations.of(context).storeOnlySupportsSelfPickup,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFFE65100),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/category.dart';
 import 'package:myshop/core/models/product.dart';
@@ -92,7 +92,59 @@ void main() {
       final a = cats.firstWhere((c) => c.id == 'cat_a');
       final b = cats.firstWhere((c) => c.id == 'cat_b');
       expect(b.sortOrder, lessThan(a.sortOrder), reason: 'Bakery is now first');
-      expect([b.sortOrder, a.sortOrder], [0, 1], reason: 'densely renumbered');
+      expect(a.sortOrder, b.sortOrder + 1, reason: 'now neighbours');
+      // The whole top level stays densely numbered 0..n-1 (the mock data
+      // seeds other categories, so the absolute numbers are not fixed).
+      final roots =
+          cats.where((c) => c.parentId == null).map((c) => c.sortOrder).toList()
+            ..sort();
+      expect(roots, [for (var i = 0; i < roots.length; i++) i]);
+    });
+
+    testWidgets('the Reorder button on the list opens the drag view', (
+      tester,
+    ) async {
+      await seedTwo();
+      await pumpTestApp(tester, const AdminCategoriesScreen());
+
+      expect(find.byKey(const Key('category-drag-handle-cat_a')), findsNothing);
+      await tester.tap(find.byKey(const Key('category-arrange-button')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('category-drag-handle-cat_a')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('move up / move down buttons change and save the sequence', (
+      tester,
+    ) async {
+      await seedTwo();
+      await pumpTestApp(tester, const AdminCategoriesScreen());
+      await tester.tap(find.byKey(const Key('category-reorder-toggle')));
+      await tester.pumpAndSettle();
+
+      Future<void> tap(String key) async {
+        final f = find.byKey(Key(key));
+        await tester.ensureVisible(f);
+        await tester.pumpAndSettle();
+        await tester.tap(f);
+        await tester.pumpAndSettle();
+      }
+
+      // Apparel sits just above Bakery; move it down below Bakery...
+      await tap('category-move-down-cat_a');
+      var cats = await repo.categories(companyId: 'c_organic').first;
+      var a = cats.firstWhere((c) => c.id == 'cat_a');
+      var b = cats.firstWhere((c) => c.id == 'cat_b');
+      expect(b.sortOrder, lessThan(a.sortOrder));
+
+      // ...and back up again.
+      await tap('category-move-up-cat_a');
+      cats = await repo.categories(companyId: 'c_organic').first;
+      a = cats.firstWhere((c) => c.id == 'cat_a');
+      b = cats.firstWhere((c) => c.id == 'cat_b');
+      expect(a.sortOrder, lessThan(b.sortOrder));
     });
 
     testWidgets('search text disables reordering with a hint', (tester) async {

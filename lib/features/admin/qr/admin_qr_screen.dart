@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/core/services/admin_company_name.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../app/routes/app_router.dart';
@@ -41,9 +42,7 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
     _shopId = user?.companyId.isNotEmpty == true
         ? user!.companyId
         : 'masala-mart';
-    _shopName = user?.companyName.isNotEmpty == true
-        ? user!.companyName
-        : 'Masala Mart';
+    _shopName = AdminCompanyName.instance.displayName(user);
     _selectedShop = Company(id: _shopId, name: _shopName, slug: _shopId);
   }
 

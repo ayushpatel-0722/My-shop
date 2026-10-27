@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/app/theme/app_theme.dart';
+import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/core/services/service_locator.dart';
-import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/widgets/app_product_image.dart';
 import 'package:myshop/features/admin/dashboard/admin_dashboard_screen.dart';
 
 void main() {
   setUp(() {
     ServiceLocator.instance.repository = MockAppRepository();
-    AuthSession.currentUser = AppUser(
+    AuthSession.currentUser = const AppUser(
       id: 'admin_test',
       companyId: 'masala-mart',
       companyName: 'Masala Mart',

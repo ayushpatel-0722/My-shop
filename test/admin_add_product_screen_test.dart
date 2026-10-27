@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/theme/app_theme.dart';
+import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';
+import 'package:myshop/core/models/product.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/core/services/service_locator.dart';
-import 'package:myshop/core/database/mock_app_repository.dart';
-import 'package:myshop/app/theme/app_theme.dart';
-import 'package:myshop/core/models/product.dart';
 import 'package:myshop/features/admin/categories/admin_add_category_screen.dart';
 import 'package:myshop/features/admin/products/admin_add_product_screen.dart';
 import 'package:myshop/features/admin/products/admin_products_screen.dart';
@@ -19,7 +19,7 @@ void main() {
   testWidgets(
     'renders AdminAddProductScreen with mobile width without any errors',
     (tester) async {
-      AuthSession.currentUser = AppUser(
+      AuthSession.currentUser = const AppUser(
         id: 'a_1',
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',
@@ -58,7 +58,7 @@ void main() {
   testWidgets(
     'renders AdminAddProductScreen on desktop, adds image and variant',
     (tester) async {
-      AuthSession.currentUser = AppUser(
+      AuthSession.currentUser = const AppUser(
         id: 'a_1',
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',
@@ -122,7 +122,7 @@ void main() {
   testWidgets('category creation requires at least one product assignment', (
     tester,
   ) async {
-    AuthSession.currentUser = AppUser(
+    AuthSession.currentUser = const AppUser(
       id: 'a_1',
       companyId: 'c_organic',
       companyName: 'GreenLeaf Organics',
@@ -163,7 +163,7 @@ void main() {
   ) async {
     final mockRepo = MockAppRepository();
     ServiceLocator.instance.repository = mockRepo;
-    AuthSession.currentUser = AppUser(
+    AuthSession.currentUser = const AppUser(
       id: 'a_1',
       companyId: 'c_organic',
       companyName: 'GreenLeaf Organics',
@@ -223,7 +223,7 @@ void main() {
     (tester) async {
       final mockRepo = MockAppRepository();
       ServiceLocator.instance.repository = mockRepo;
-      AuthSession.currentUser = AppUser(
+      AuthSession.currentUser = const AppUser(
         id: 'a_1',
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',
@@ -294,7 +294,7 @@ void main() {
     (tester) async {
       final mockRepo = MockAppRepository();
       ServiceLocator.instance.repository = mockRepo;
-      AuthSession.currentUser = AppUser(
+      AuthSession.currentUser = const AppUser(
         id: 'a_1',
         companyId: 'c_organic',
         companyName: 'GreenLeaf Organics',
@@ -437,7 +437,7 @@ void main() {
   ) async {
     final mockRepo = MockAppRepository();
     ServiceLocator.instance.repository = mockRepo;
-    AuthSession.currentUser = AppUser(
+    AuthSession.currentUser = const AppUser(
       id: 'a_1',
       companyId: 'c_organic',
       companyName: 'GreenLeaf Organics',

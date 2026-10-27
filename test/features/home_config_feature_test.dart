@@ -45,7 +45,7 @@ void main() {
     });
 
     test('copyWith updates fields as expected', () {
-      final item = HomeExploreCategory(
+      const item = HomeExploreCategory(
         id: '1',
         shopId: 'masala-mart',
         categoryId: 'cat-1',
@@ -72,7 +72,7 @@ void main() {
     test(
       'creates and serializes product and category trending items correctly',
       () {
-        final prodItem = HomeTrendingItem(
+        const prodItem = HomeTrendingItem(
           id: 'trend-prod-1',
           shopId: 'masala-mart',
           shopName: 'Masala Mart',
@@ -98,7 +98,7 @@ void main() {
         expect(reconstructedProd.isProduct, true);
         expect(reconstructedProd.productId, 'prod-turmeric');
 
-        final catItem = HomeTrendingItem(
+        const catItem = HomeTrendingItem(
           id: 'trend-cat-1',
           shopId: 'masala-mart',
           itemType: 'category',
@@ -136,7 +136,7 @@ void main() {
         expect(initial, isEmpty);
 
         // Save 3 categories
-        final cat1 = HomeExploreCategory(
+        const cat1 = HomeExploreCategory(
           id: 'cat_entry_1',
           shopId: 'masala-mart',
           categoryId: 'cat-whole-spices',
@@ -144,7 +144,7 @@ void main() {
           displayOrder: 0,
           isActive: true,
         );
-        final cat2 = HomeExploreCategory(
+        const cat2 = HomeExploreCategory(
           id: 'cat_entry_2',
           shopId: 'masala-mart',
           categoryId: 'cat-masala-powders',
@@ -152,7 +152,7 @@ void main() {
           displayOrder: 1,
           isActive: false, // inactive
         );
-        final cat3 = HomeExploreCategory(
+        const cat3 = HomeExploreCategory(
           id: 'cat_entry_3',
           shopId: 'coffee-house',
           categoryId: 'cat-coffee-beans',
@@ -215,7 +215,7 @@ void main() {
         expect(initial, isEmpty);
 
         // Save mixed product and category items
-        final item1 = HomeTrendingItem(
+        const item1 = HomeTrendingItem(
           id: 'trend_1',
           shopId: 'masala-mart',
           itemType: 'product',
@@ -224,7 +224,7 @@ void main() {
           displayOrder: 0,
           isActive: true,
         );
-        final item2 = HomeTrendingItem(
+        const item2 = HomeTrendingItem(
           id: 'trend_2',
           shopId: 'masala-mart',
           itemType: 'category',
@@ -233,7 +233,7 @@ void main() {
           displayOrder: 1,
           isActive: true,
         );
-        final item3 = HomeTrendingItem(
+        const item3 = HomeTrendingItem(
           id: 'trend_3',
           shopId: 'masala-mart',
           itemType: 'product',
@@ -303,18 +303,18 @@ void main() {
       return cat.productList.contains(p.id);
     }
 
-    final catWholeSpices = Category(
+    const catWholeSpices = Category(
       id: 'cat-whole-spices',
       companyId: 'masala-mart',
       name: 'Whole Spices',
-      productList: const ['prod-cardamom'],
+      productList: ['prod-cardamom'],
     );
 
-    final catPowderedSpices = Category(
+    const catPowderedSpices = Category(
       id: 'cat-powdered-spices',
       companyId: 'masala-mart',
       name: 'Powdered Spices',
-      productList: const [],
+      productList: [],
     );
 
     final products = [
@@ -435,7 +435,7 @@ void main() {
 
     test('prevents duplicates for products already added in trending', () {
       final existingEntries = [
-        HomeTrendingItem(
+        const HomeTrendingItem(
           id: 'masala-mart_product_prod-pepper',
           shopId: 'masala-mart',
           itemType: 'product',

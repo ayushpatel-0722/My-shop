@@ -81,8 +81,6 @@ class Category {
 
   // --------------------------------------------------------------- Derived --
 
-  bool get isRoot => parentId == null || parentId!.isEmpty;
-  bool get isGlobal => companyId.isEmpty;
   int get productCount => productList.length;
   bool get hasIcon => iconUrl.trim().isNotEmpty;
 

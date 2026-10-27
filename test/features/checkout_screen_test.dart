@@ -448,7 +448,7 @@ void main() {
       );
 
       // Open checkout with directItems (e.g. buying a phone directly)
-      final directItem = CartItem(
+      const directItem = CartItem(
         companyId: 'c_techtronics',
         companyName: 'TechTronics Hub',
         product: phone,
@@ -463,7 +463,7 @@ void main() {
       });
       await pumpTestApp(
         tester,
-        CheckoutScreen(directItems: [directItem]),
+        const CheckoutScreen(directItems: [directItem]),
         user: TestHarness.shopperWithAddresses,
         cartCubit: cart,
       );

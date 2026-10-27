@@ -1,6 +1,6 @@
+import '../../app/l10n/l10n_service.dart';
 import '../models/cart_item.dart';
 import '../models/voucher.dart';
-import '../../app/l10n/l10n_service.dart';
 
 /// Why a voucher could not be applied to the current cart.
 ///

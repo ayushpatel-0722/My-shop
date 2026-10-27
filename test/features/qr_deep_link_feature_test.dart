@@ -19,7 +19,7 @@ void main() {
   setUp(() {
     TestHarness.setupPlatformChannels();
     mockRepo = TestHarness.useMockRepository();
-    AuthSession.currentUser = AppUser(
+    AuthSession.currentUser = const AppUser(
       id: 'admin_test',
       companyId: 'masala-mart',
       companyName: 'Masala Mart',

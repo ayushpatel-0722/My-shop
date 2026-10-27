@@ -1,6 +1,6 @@
+import '../../app/l10n/l10n_service.dart';
 import '../models/company.dart';
 import '../models/review.dart';
-import '../../app/l10n/l10n_service.dart';
 
 /// Weekly-opening-hours maths for the store front.
 ///

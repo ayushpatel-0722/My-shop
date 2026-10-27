@@ -68,11 +68,4 @@ class DeliveryCharge {
       estimatedDays: estimatedDays ?? this.estimatedDays,
     );
   }
-
-  double calculateCharge(double orderSubtotal) {
-    if (!isServiceable) return 0;
-    if (isFree || charge <= 0) return 0;
-    if (freeAboveAmount > 0 && orderSubtotal >= freeAboveAmount) return 0;
-    return charge;
-  }
 }

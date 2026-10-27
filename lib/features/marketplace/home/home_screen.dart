@@ -8,8 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
-import '../../../core/models/banner.dart';
 import '../../../core/domain/category_tree.dart';
+import '../../../core/models/banner.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/home_explore_category.dart';
@@ -23,6 +23,7 @@ import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/app_product_image.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
@@ -132,8 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppTheme.backgroundLight,
       // Desktop sticky header replaces the mobile coral header
       appBar: isDesktop
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(64),
+          ? const PreferredSize(
+              preferredSize: Size.fromHeight(64),
               child: WebHeader(currentIndex: 0),
             )
           : null,
@@ -300,6 +301,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
+
+                      // Admins previewing the shopper app get a way back.
+                      const BackToAdminButton(color: Colors.white),
 
                       // Notification Icon with Badge
                       IconButton(
@@ -564,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: Text(
                               AppLocalizations.of(context).limitedTimeOffer,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 9,
@@ -575,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 6),
                           Text(
                             AppLocalizations.of(context).grandFestiveMegaSale,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
@@ -584,7 +588,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 2),
                           Text(
                             AppLocalizations.of(context).flat50OffFreeDelivery,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFFFFEBEA),
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -603,8 +607,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       context,
                                     ).promoCodeFestive50CopiedToClipboard,
                                   ),
-                                  backgroundColor: Color(0xFF1E8F66),
-                                  duration: Duration(seconds: 2),
+                                  backgroundColor: const Color(0xFF1E8F66),
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                             },
@@ -627,15 +631,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       AppLocalizations.of(
                                         context,
                                       ).codeFestive50,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
-                                    SizedBox(width: 4),
-                                    Icon(
+                                    const SizedBox(width: 4),
+                                    const Icon(
                                       Icons.copy,
                                       size: 11,
                                       color: Colors.white,
@@ -666,7 +670,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () => context.push(AppRoutes.search),
                   child: Text(
                     AppLocalizations.of(context).shopNow,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
@@ -750,7 +757,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return StreamBuilder<List<Category>>(
       stream: categories,
       builder: (context, catSnap) {
-        if (catSnap.connectionState == ConnectionState.waiting && !catSnap.hasData) {
+        if (catSnap.connectionState == ConnectionState.waiting &&
+            !catSnap.hasData) {
           return const M3CategoryRailSkeleton();
         }
         final allCategories = catSnap.data ?? const <Category>[];
@@ -818,8 +826,8 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final itemWidth = 100.0;
-            final spacing = 16.0;
+            const itemWidth = 100.0;
+            const spacing = 16.0;
             final cols =
                 ((constraints.maxWidth + spacing) / (itemWidth + spacing))
                     .floor()
@@ -1097,11 +1105,8 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SectionHeader(
                 title: AppLocalizations.of(context).storeVouchersDeals,
-                onViewAll: () => _showAllVouchersSheet(
-                  context,
-                  vouchers,
-                  initialList: list,
-                ),
+                onViewAll: () =>
+                    _showAllVouchersSheet(context, vouchers, initialList: list),
               ),
             ),
             const SizedBox(height: 10),
@@ -1213,15 +1218,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: isClaimed
                           ? const Color(0xFFEFFAF5)
                           : (isDark
-                              ? const Color(0xFF2E3E55)
-                              : const Color(0xFFF9FAFB)),
+                                ? const Color(0xFF2E3E55)
+                                : const Color(0xFFF9FAFB)),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
                         color: isClaimed
                             ? const Color(0xFF1E8F66).withValues(alpha: 0.3)
                             : (isDark
-                                ? const Color(0xFF3B4F6C)
-                                : const Color(0xFFE5E7EB)),
+                                  ? const Color(0xFF3B4F6C)
+                                  : const Color(0xFFE5E7EB)),
                         width: 0.8,
                       ),
                     ),
@@ -1577,7 +1582,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return StreamBuilder<List<Product>>(
       stream: products,
       builder: (context, prodSnap) {
-        if (prodSnap.connectionState == ConnectionState.waiting && !prodSnap.hasData) {
+        if (prodSnap.connectionState == ConnectionState.waiting &&
+            !prodSnap.hasData) {
           return const M3ProductGridSkeleton(itemCount: 4);
         }
         final allProducts = prodSnap.data ?? const <Product>[];
@@ -1774,9 +1780,8 @@ class _HomeScreenState extends State<HomeScreen> {
               if (entry.isProduct && entry.product != null) {
                 return ProductCard(
                   product: entry.product!,
-                  onTap: () => context.push(
-                    AppRoutes.productPath(entry.product!.id),
-                  ),
+                  onTap: () =>
+                      context.push(AppRoutes.productPath(entry.product!.id)),
                 );
               } else if (entry.category != null) {
                 return _TrendingCategoryCard(
@@ -1842,9 +1847,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, i) {
               return ProductCard(
                 product: list[i],
-                onTap: () => context.push(
-                  AppRoutes.productPath(list[i].id),
-                ),
+                onTap: () => context.push(AppRoutes.productPath(list[i].id)),
               );
             },
           );
@@ -1873,7 +1876,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return StreamBuilder<List<Product>>(
       stream: allProducts,
       builder: (context, snapAll) {
-        if (snapAll.connectionState == ConnectionState.waiting && !snapAll.hasData) {
+        if (snapAll.connectionState == ConnectionState.waiting &&
+            !snapAll.hasData) {
           return const M3ProductGridSkeleton(itemCount: 4);
         }
         final allList = snapAll.data ?? const <Product>[];
@@ -1964,7 +1968,10 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (ctx) => Dialog(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 32,
+          ),
           child: Container(
             constraints: BoxConstraints(
               maxWidth: 580,
@@ -2005,7 +2012,9 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (_, scrollController) => Container(
             decoration: BoxDecoration(
               color: isDark ? AppTheme.surfaceDark : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
               boxShadow: const [
                 BoxShadow(
                   color: Color.fromRGBO(0, 0, 0, 0.12),
@@ -2084,7 +2093,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontSize: isDesktop ? 20 : 18,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF1E2229),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1E2229),
                             letterSpacing: -0.3,
                           ),
                           maxLines: 1,
@@ -2095,7 +2106,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           'Tap copy to apply code at checkout',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? Colors.white60 : const Color(0xFF6B7280),
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF6B7280),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -2223,7 +2236,10 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (ctx) => Dialog(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 32,
+          ),
           child: Container(
             constraints: BoxConstraints(
               maxWidth: 600,
@@ -2263,7 +2279,9 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (sheetContext, scrollController) => Container(
             decoration: BoxDecoration(
               color: isDark ? AppTheme.surfaceDark : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
               boxShadow: const [
                 BoxShadow(
                   color: Color.fromRGBO(0, 0, 0, 0.12),
@@ -2365,8 +2383,7 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context, snap) {
               final list = (snap.data ?? initialList)
                   .where(
-                    (c) =>
-                        c.status != 'inactive' && c.status != 'suspended',
+                    (c) => c.status != 'inactive' && c.status != 'suspended',
                   )
                   .toList();
               if (list.isEmpty) {
@@ -2392,11 +2409,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       horizontal: 14,
                       vertical: 8,
                     ),
-                    tileColor: isDark ? AppTheme.surfaceContainerDark : Colors.white,
+                    tileColor: isDark
+                        ? AppTheme.surfaceContainerDark
+                        : Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                       side: BorderSide(
-                        color: isDark ? Colors.white12 : const Color(0xFFE5E7EB),
+                        color: isDark
+                            ? Colors.white12
+                            : const Color(0xFFE5E7EB),
                       ),
                     ),
                     leading: Container(
@@ -2429,7 +2450,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.5,
-                              color: isDark ? Colors.white : const Color(0xFF1E2229),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1E2229),
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -2447,17 +2470,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (c.category.isNotEmpty ||
-                              c.details.isNotEmpty)
+                          if (c.category.isNotEmpty || c.details.isNotEmpty)
                             Text(
-                              c.category.isNotEmpty
-                                  ? c.category
-                                  : c.details,
+                              c.category.isNotEmpty ? c.category : c.details,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: isDark ? Colors.white70 : const Color(0xFF64748B),
+                                color: isDark
+                                    ? Colors.white70
+                                    : const Color(0xFF64748B),
                               ),
                             ),
                           const SizedBox(height: 2),
@@ -2472,9 +2494,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                isOpen
-                                    ? l10n.openNow2
-                                    : l10n.closed,
+                                isOpen ? l10n.openNow2 : l10n.closed,
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   color: isOpen
@@ -2514,7 +2534,9 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final user = context.read<AuthCubit>().currentUser;
       // Only prompt for signed-in customers without a mobile number
-      if (user == null || !user.isUser || (user.mobileNumber).trim().isNotEmpty) {
+      if (user == null ||
+          !user.isUser ||
+          (user.mobileNumber).trim().isNotEmpty) {
         return;
       }
     } catch (_) {
@@ -2686,7 +2708,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           )
                         : Text(
                             AppLocalizations.of(context).saveMobileNumber,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -2701,7 +2723,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     child: Text(
                       AppLocalizations.of(context).maybeLater,
-                      style: TextStyle(color: Colors.black54),
+                      style: const TextStyle(color: Colors.black54),
                     ),
                   ),
                 ],

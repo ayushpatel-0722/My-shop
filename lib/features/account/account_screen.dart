@@ -8,6 +8,7 @@ import '../../app/routes/app_router.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/utils/auth_guard.dart';
 import '../../core/utils/responsive_extensions.dart';
+import '../../core/widgets/back_to_admin_button.dart';
 import '../auth/auth_cubit.dart';
 import '../auth/widgets/auth_bottom_sheet.dart';
 import '../marketplace/widgets/location_picker_sheet.dart';
@@ -95,7 +96,7 @@ class AccountScreen extends StatelessWidget {
               onPressed: onViewAll,
               child: Text(
                 AppLocalizations.of(context).view,
-                style: TextStyle(color: Color(0xFFFF5247)),
+                style: const TextStyle(color: Color(0xFFFF5247)),
               ),
             ),
         ],
@@ -118,19 +119,23 @@ class AccountScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppTheme.backgroundLight,
         appBar: context.isDesktop
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(64),
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(64),
                 child: WebHeader(currentIndex: 3),
               )
             : AppBar(
                 title: Text(
                   AppLocalizations.of(context).account,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 19,
+                  ),
                 ),
                 automaticallyImplyLeading: false,
                 backgroundColor: Colors.white,
                 elevation: 0,
                 scrolledUnderElevation: 1,
+                actions: const [BackToAdminButton()],
               ),
         body: ListView(
           padding: EdgeInsets.symmetric(
@@ -213,7 +218,7 @@ class AccountScreen extends StatelessWidget {
                             icon: const Icon(Icons.login, size: 16),
                             label: Text(
                               AppLocalizations.of(context).signIn,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -231,7 +236,7 @@ class AccountScreen extends StatelessWidget {
                             ),
                             child: Text(
                               AppLocalizations.of(context).verifiedMember,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xFF1E8F66),
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -480,7 +485,10 @@ class AccountScreen extends StatelessWidget {
                 icon: const Icon(Icons.logout),
                 label: Text(
                   AppLocalizations.of(context).logOut,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
               ),
             const SizedBox(height: 32),

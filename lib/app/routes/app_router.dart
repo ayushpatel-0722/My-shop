@@ -7,6 +7,7 @@ import '../../core/models/employee.dart';
 import '../../core/models/product.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/utils/app_route_logger.dart';
+import '../../features/account/account_screen.dart';
 import '../../features/admin/admins/admin_admins_screen.dart';
 import '../../features/admin/banners/admin_banners_screen.dart';
 import '../../features/admin/categories/admin_add_category_screen.dart';
@@ -26,6 +27,7 @@ import '../../features/admin/qr/admin_qr_screen.dart';
 import '../../features/admin/recommendations/admin_recommendations_screen.dart';
 import '../../features/admin/reports/admin_reports_screen.dart';
 import '../../features/admin/reviews/admin_reviews_screen.dart';
+import '../../features/admin/shop/admin_shop_settings_screen.dart';
 import '../../features/admin/vouchers/admin_vouchers_screen.dart';
 import '../../features/auth/admin_login/admin_login_screen.dart';
 import '../../features/auth/employee_login/employee_login_screen.dart';
@@ -39,14 +41,13 @@ import '../../features/checkout/tracking/orders_screen.dart';
 import '../../features/company_onboarding/company_onboarding_screen.dart';
 import '../../features/employee/order_queue/employee_order_queue_screen.dart';
 import '../../features/employee/packing/packing_screen.dart';
+import '../../features/help_support/contact_support_screen.dart';
+import '../../features/help_support/help_support_screen.dart';
 import '../../features/marketplace/categories/categories_screen.dart';
 import '../../features/marketplace/category_view/category_view_screen.dart';
 import '../../features/marketplace/company_store/company_store_screen.dart';
 import '../../features/marketplace/home/home_screen.dart';
-import '../../features/help_support/contact_support_screen.dart';
-import '../../features/help_support/help_support_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
-import '../../features/account/account_screen.dart';
 import '../../features/product/details/product_details_screen.dart';
 import '../../features/product/search/search_screen.dart';
 import '../../features/qr/qr_scanner_screen.dart';
@@ -100,6 +101,7 @@ class AppRoutes {
   static const adminAddDelivery = '/admin/delivery-charges/add';
   static const adminEditDelivery = '/admin/delivery-charges/edit/:pincode';
   static const adminBanners = '/admin/banners';
+  static const adminShopSettings = '/admin/shop-settings';
   static const adminReviews = '/admin/reviews';
   static const adminRecommendations = '/admin/recommendations';
   static const adminReports = '/admin/reports';
@@ -115,12 +117,6 @@ class AppRoutes {
   static const shop = '/shop/:shopId';
   static const shopCategory = '/shop/:shopId/category/:categoryId';
   static const shopProduct = '/shop/:shopId/product/:productId';
-
-  static String shopPath(String shopId) => '/shop/$shopId';
-  static String shopCategoryPath(String shopId, String categoryId) =>
-      '/shop/$shopId/category/$categoryId';
-  static String shopProductPath(String shopId, String productId) =>
-      '/shop/$shopId/product/$productId';
 
   static String companyPath(String slug) => '/company/$slug';
   static String productPath(String id) => '/product/$id';
@@ -463,6 +459,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.adminAdmins,
       builder: (_, s) => const AdminAdminsScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.adminShopSettings,
+      builder: (_, s) => const AdminShopSettingsScreen(),
     ),
     GoRoute(
       path: AppRoutes.adminDelivery,

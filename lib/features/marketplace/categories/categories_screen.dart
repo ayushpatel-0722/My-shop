@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/domain/category_tree.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/order.dart' show DeliveryType;
-import '../../../core/domain/category_tree.dart';
-import '../../../core/services/service_locator.dart';
 import '../../../core/services/auth_session.dart';
+import '../../../core/services/service_locator.dart';
+import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/section_header.dart';
 import '../widgets/web_header.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
-import '../../../core/utils/responsive_extensions.dart';
 
 /// Categories Screen displaying All Shops and All Shop Categories with rich styling.
 class CategoriesScreen extends StatelessWidget {
@@ -73,8 +74,8 @@ class CategoriesScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppTheme.backgroundLight,
         appBar: context.isDesktop
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(64),
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(64),
                 child: WebHeader(currentIndex: 1),
               )
             : AppBar(
@@ -97,6 +98,7 @@ class CategoriesScreen extends StatelessWidget {
                   ),
                 ),
                 actions: [
+                  const BackToAdminButton(),
                   IconButton(
                     icon: const Icon(Icons.search, color: Color(0xFF1E2229)),
                     onPressed: () => context.push(AppRoutes.search),
@@ -166,17 +168,17 @@ class CategoriesScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.search,
                             color: Color(0xFFFF5247),
                             size: 20,
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
                             AppLocalizations.of(
                               context,
                             ).searchCategoriesBrandsOrShops,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF9CA3AF),
                               fontSize: 14,
                             ),
@@ -249,8 +251,8 @@ class CategoriesScreen extends StatelessWidget {
                 crossAxisSpacing: 12,
                 childAspectRatio: 0.76,
               ),
-              itemBuilder: (context, i) => Column(
-                children: const [
+              itemBuilder: (context, i) => const Column(
+                children: [
                   M3ShadowCardContainer(
                     padding: EdgeInsets.zero,
                     width: 62,
@@ -454,11 +456,11 @@ class CategoriesScreen extends StatelessWidget {
         if (list.isEmpty) {
           return SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(32),
+              padding: const EdgeInsets.all(32),
               child: Center(
                 child: Text(
                   AppLocalizations.of(context).noShopsRegisteredYet,
-                  style: TextStyle(color: Colors.black54),
+                  style: const TextStyle(color: Colors.black54),
                 ),
               ),
             ),

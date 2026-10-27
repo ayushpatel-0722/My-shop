@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -9,7 +10,6 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../admin_shell.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Employee management screen — list staff, view status & permissions, navigate to add/edit.
 class AdminEmployeesScreen extends StatelessWidget {
@@ -101,14 +101,17 @@ class AdminEmployeesScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     AppLocalizations.of(context).noEmployeesProvisioned,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     AppLocalizations.of(
                       context,
                     ).provisionStaffAccountsWithCustomDesignationsSalaryAndOperationalAccess,
-                    style: TextStyle(color: Colors.grey),
+                    style: const TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   FilledButton.icon(

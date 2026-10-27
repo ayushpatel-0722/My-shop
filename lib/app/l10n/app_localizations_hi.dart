@@ -4304,4 +4304,219 @@ class AppLocalizationsHi extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get shopSettings => 'दुकान सेटिंग्स';
+
+  @override
+  String get shopSettingsSubtitle => 'विवरण, समय और डिलीवरी';
+
+  @override
+  String get shopNoShopLinked => 'इस खाते से कोई दुकान जुड़ी नहीं है।';
+
+  @override
+  String get shopNotFound => 'दुकान नहीं मिली।';
+
+  @override
+  String shopCouldNotLoad(String error) {
+    return 'दुकान का विवरण लोड नहीं हो सका: $error';
+  }
+
+  @override
+  String get shopDetailsSaved => 'दुकान का विवरण सहेजा गया।';
+
+  @override
+  String shopCouldNotSave(String error) {
+    return 'सहेजा नहीं जा सका: $error';
+  }
+
+  @override
+  String get shopFixFields => 'कृपया चिह्नित फ़ील्ड ठीक करें।';
+
+  @override
+  String get shopDetailsTitle => 'दुकान का विवरण';
+
+  @override
+  String get shopDetailsSubtitle =>
+      'ग्राहक आपकी दुकान के बारे में क्या पढ़ते हैं।';
+
+  @override
+  String get shopNameLabel => 'दुकान का नाम';
+
+  @override
+  String get shopNameHelper =>
+      'यह आपका एडमिन लॉगिन भी है, इसलिए इसे केवल सपोर्ट बदल सकता है।';
+
+  @override
+  String get shopCategoryLabel => 'दुकान की श्रेणी';
+
+  @override
+  String get shopCategoryHint => 'जैसे फ़र्नीचर और होम डेकोर';
+
+  @override
+  String get shopPhoneLabel => 'संपर्क फ़ोन';
+
+  @override
+  String get shopPhoneHelper => 'पिकअप कार्ड पर दिखाया जाता है';
+
+  @override
+  String get shopDescriptionLabel => 'विवरण';
+
+  @override
+  String get shopDescriptionRequired => 'अपनी दुकान का संक्षिप्त विवरण जोड़ें';
+
+  @override
+  String get shopAddressLabel => 'पता';
+
+  @override
+  String get shopAddressRequired => 'पता आवश्यक है';
+
+  @override
+  String get shopMapLabel => 'मैप लिंक (गूगल मैप्स)';
+
+  @override
+  String get shopHoursTitle => 'खुलने का समय';
+
+  @override
+  String get shopHoursSubtitle =>
+      'ग्राहक देखते हैं कि आप अभी खुले हैं या नहीं।';
+
+  @override
+  String get shopOpenNow => 'अभी खुला है';
+
+  @override
+  String get shopClosedNow => 'अभी बंद है';
+
+  @override
+  String get shopDayClosed => 'बंद';
+
+  @override
+  String get shopTo => 'से';
+
+  @override
+  String get shopOpen24Hours => '24 घंटे खुला';
+
+  @override
+  String get shopClosesNextDay => 'अगले दिन बंद होता है';
+
+  @override
+  String shopApplyHoursToAll(String day) {
+    return '$day का समय सभी दिनों पर लागू करें';
+  }
+
+  @override
+  String get shopDeliveryTitle => 'डिलीवरी और ऑर्डर';
+
+  @override
+  String get shopDeliverySubtitle =>
+      'ग्राहक अपने ऑर्डर कैसे प्राप्त कर सकते हैं।';
+
+  @override
+  String get shopSelfPickup => 'दुकान से स्वयं पिकअप';
+
+  @override
+  String get shopHomeDelivery => 'होम डिलीवरी';
+
+  @override
+  String get shopChooseDeliveryOption => 'कम से कम एक डिलीवरी विकल्प चुनें।';
+
+  @override
+  String get shopMinOrderLabel => 'डिलीवरी के लिए न्यूनतम ऑर्डर';
+
+  @override
+  String get shopMinOrderHelper => '0 का मतलब कोई न्यूनतम नहीं';
+
+  @override
+  String get shopCurrencyLabel => 'मुद्रा';
+
+  @override
+  String get shopCurrencyHelper => 'दुकान बनने के बाद बदला नहीं जा सकता';
+
+  @override
+  String get shopHandlingLabel => 'पैकिंग समय (मिनट)';
+
+  @override
+  String get shopHandlingHelper => 'ऑर्डर के अनुमानित समय के लिए उपयोग होता है';
+
+  @override
+  String get shopDeliveryMinutesLabel => 'डिलीवरी समय (मिनट)';
+
+  @override
+  String get shopDeliveryMinutesHelper => 'पार्सल दुकान से निकलने के बाद';
+
+  @override
+  String get shopBrandingTitle => 'ब्रांडिंग चित्र';
+
+  @override
+  String get shopBrandingSubtitle =>
+      'चित्र का लिंक पेस्ट करें; पूर्वावलोकन पर टैप करके उसे फ़ुल स्क्रीन में देखें।';
+
+  @override
+  String get shopLogoLabel => 'लोगो';
+
+  @override
+  String get shopBannerLabel => 'बैनर';
+
+  @override
+  String get shopStorefrontLabel => 'दुकान के सामने का चित्र';
+
+  @override
+  String shopImageLinkLabel(String label) {
+    return '$label (चित्र लिंक)';
+  }
+
+  @override
+  String get shopMapLinkInvalid =>
+      'मैप लिंक http:// या https:// से शुरू होना चाहिए';
+
+  @override
+  String shopImageLinkInvalid(String label) {
+    return '$label लिंक http:// या https:// से शुरू होना चाहिए';
+  }
+
+  @override
+  String get shopPhoneChars => 'केवल अंक, स्पेस, + या - का उपयोग करें';
+
+  @override
+  String get shopPhoneInvalid => 'मान्य फ़ोन नंबर दर्ज करें';
+
+  @override
+  String get shopMoneyInvalid => '0 या धनात्मक राशि दर्ज करें';
+
+  @override
+  String get shopMinutesInvalid => '1 - 1440 मिनट';
+
+  @override
+  String get shopUnsavedChanges => 'आपके बदलाव सहेजे नहीं गए हैं';
+
+  @override
+  String get shopAllSaved => 'सभी बदलाव सहेजे गए';
+
+  @override
+  String get shopDiscard => 'रद्द करें';
+
+  @override
+  String get shopSaveChanges => 'बदलाव सहेजें';
+
+  @override
+  String shopHoursInvalidTime(String day) {
+    return '$day: खुलने और बंद होने का मान्य समय दर्ज करें।';
+  }
+
+  @override
+  String shopHoursSameTime(String day) {
+    return '$day: खुलने और बंद होने का समय एक जैसा नहीं हो सकता।';
+  }
+
+  @override
+  String get shopHoursNoOpenDay => 'कम से कम एक दिन खुला रखें।';
+
+  @override
+  String get shopStatusActive => 'सक्रिय';
+
+  @override
+  String get shopStatusSuspended => 'निलंबित';
+
+  @override
+  String get shopStatusInactive => 'निष्क्रिय';
 }

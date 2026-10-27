@@ -146,12 +146,6 @@ class AppTheme {
   // Centralized Admin Responsive Typography & Component Tokens
   // ---------------------------------------------------------------------------
 
-  /// Card internal padding: 14 on mobile, 18 on desktop
-  static EdgeInsets adminCardPadding(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    return width >= 1024 ? const EdgeInsets.all(18) : const EdgeInsets.all(14);
-  }
-
   /// Responsive page title style
   static TextStyle adminPageTitle(BuildContext context) {
     final isDesktop = MediaQuery.sizeOf(context).width >= 1024;
@@ -252,17 +246,6 @@ class AppTheme {
   static const double shopperMaxContentWidth = 1200.0;
   static const double shopperNarrowMaxContentWidth = 1000.0;
 
-  /// Responsive page title for shopper screens (22 Mobile | 26 Tablet | 32 Desktop | 36 Large Desktop)
-  static TextStyle shopperPageTitle(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextStyle(
-      fontSize: context.titleSize,
-      fontWeight: FontWeight.w800,
-      letterSpacing: -0.4,
-      color: theme.colorScheme.onSurface,
-    );
-  }
-
   /// Responsive section heading for shopper screens (18 Mobile | 21 Tablet | 26 Desktop | 28 Large Desktop)
   static TextStyle shopperSectionHeading(BuildContext context) {
     final theme = Theme.of(context);
@@ -271,58 +254,6 @@ class AppTheme {
       fontWeight: FontWeight.w800,
       letterSpacing: -0.3,
       color: theme.colorScheme.onSurface,
-    );
-  }
-
-  /// Responsive subsection heading (16 Mobile | 18 Tablet | 21 Desktop | 24 Large Desktop)
-  static TextStyle shopperSubSectionHeading(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextStyle(
-      fontSize: context.subSectionHeadingSize,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.2,
-      color: theme.colorScheme.onSurface,
-    );
-  }
-
-  /// Responsive product title on cards & listings (14 Mobile | 16 Tablet | 18 Desktop | 20 Large Desktop)
-  static TextStyle shopperProductTitle(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextStyle(
-      fontSize: context.productNameSize,
-      fontWeight: FontWeight.w700,
-      color: theme.colorScheme.onSurface,
-    );
-  }
-
-  /// Responsive price text (16 Mobile | 18 Tablet | 22 Desktop | 24 Large Desktop)
-  static TextStyle shopperPrice(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextStyle(
-      fontSize: context.productPriceSize,
-      fontWeight: FontWeight.w800,
-      color: theme.colorScheme.onSurface,
-    );
-  }
-
-  /// Responsive body text for shopper screens (14 Mobile | 15 Tablet | 16 Desktop | 17 Large Desktop)
-  static TextStyle shopperBody(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextStyle(
-      fontSize: context.bodyTextSize,
-      fontWeight: FontWeight.w400,
-      height: 1.45,
-      color: theme.colorScheme.onSurface,
-    );
-  }
-
-  /// Responsive small secondary text for shopper screens (12 Mobile | 13 Tablet | 14 Desktop | 15 Large Desktop)
-  static TextStyle shopperBodySmall(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextStyle(
-      fontSize: context.supportingTextSize,
-      fontWeight: FontWeight.w500,
-      color: theme.colorScheme.onSurfaceVariant,
     );
   }
 

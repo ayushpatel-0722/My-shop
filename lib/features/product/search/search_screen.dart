@@ -9,6 +9,7 @@ import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../marketplace/widgets/product_card.dart';
 import '../../marketplace/widgets/web_header.dart';
@@ -236,6 +237,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                 ),
+                actions: const [BackToAdminButton()],
               ),
         body: Column(
           children: [
@@ -447,9 +449,9 @@ class _SearchScreenState extends State<SearchScreen> {
               InkWell(
                 onTap: _handleBack,
                 borderRadius: BorderRadius.circular(4),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Icon(
                       Icons.arrow_back_rounded,
                       size: 16,
@@ -639,14 +641,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   InkWell(
                     onTap: _clearCompanyScope,
                     borderRadius: BorderRadius.circular(4),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 2,
-                      ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Icon(Icons.close, size: 14, color: Color(0xFF6366F1)),
                           SizedBox(width: 3),
                           Text(

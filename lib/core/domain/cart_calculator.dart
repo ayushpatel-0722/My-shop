@@ -1,5 +1,3 @@
-import 'package:myshop/core/models/product.dart';
-
 import '../models/cart_item.dart';
 import 'order_pricing.dart' show roundMoney;
 
@@ -140,8 +138,4 @@ class CartCalculator {
     if (t == 'l' || t == 'litre' || t == 'liters') return 'l';
     return t;
   }
-
-  /// "≥1000g → kg, ≥1000ml → l" display conversion, e.g. 1500g -> "1.5 kg".
-  static String formatMeasured(double amount, String unitType) =>
-      CartUnit.format(amount, unitType);
 }

@@ -57,7 +57,7 @@ class EmployeeOrderQueueScreen extends StatelessWidget {
           if (orders.isEmpty) {
             return Center(
               child: Padding(
-                padding: EdgeInsets.all(28),
+                padding: const EdgeInsets.all(28),
                 child: Text(
                   AppLocalizations.of(context).noPackingTasksAssigned,
                 ),

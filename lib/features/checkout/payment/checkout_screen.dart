@@ -1633,15 +1633,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ],
           ),
           const SizedBox(height: 6),
-          Row(
+          const Row(
             children: [
-              const Icon(
-                Icons.store_outlined,
-                size: 16,
-                color: Color(0xFF3D38D9),
-              ),
-              const SizedBox(width: 8),
-              const Expanded(
+              Icon(Icons.store_outlined, size: 16, color: Color(0xFF3D38D9)),
+              SizedBox(width: 8),
+              Expanded(
                 child: Text(
                   'Verified Quality Products',
                   style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),

@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/services/admin_company_name.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/auth_session.dart';
+import '../../../core/services/qr_deep_link_service.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/app_product_image.dart';
+import '../../../core/widgets/full_screen_image_viewer.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
-import 'widgets/structured_content_editors.dart';
 import '../qr/widgets/entity_qr_dialog.dart';
-import '../../../core/services/qr_deep_link_service.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
+import 'widgets/structured_content_editors.dart';
 
 /// Full-screen form for creating and editing a Product with Dynamic Variant Generation.
 ///
@@ -490,7 +492,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).clothingSizeSMLXlXxl,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).size;
@@ -503,7 +505,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).weight1kg2kg5kg10kg,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
@@ -515,7 +517,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).weight500g1kg2kg5kg,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
@@ -527,7 +529,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).weight250g500g1kg,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
@@ -540,7 +542,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).weight50g100g250g500g,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
@@ -552,7 +554,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).weight100g200g500g1000g,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
@@ -565,7 +567,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).weight50mg100mg250mg500mg,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
@@ -580,7 +582,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).weight1lb2lb5lb10lb,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).weight;
@@ -593,7 +595,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).box1Box2Boxes5Boxes10Boxes,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).box;
@@ -608,7 +610,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).pack1Pack2Packs5Packs10Packs,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).pack;
@@ -623,7 +625,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         ActionChip(
           label: Text(
             AppLocalizations.of(context).bottle1Bottle2Bottles4Bottles6Bottles,
-            style: TextStyle(fontSize: 11),
+            style: const TextStyle(fontSize: 11),
           ),
           onPressed: () {
             nameCtrl.text = AppLocalizations.of(context).bottle;
@@ -640,7 +642,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       ActionChip(
         label: Text(
           AppLocalizations.of(context).colorRedBlueBlackWhiteGreen,
-          style: TextStyle(fontSize: 11),
+          style: const TextStyle(fontSize: 11),
         ),
         onPressed: () {
           nameCtrl.text = AppLocalizations.of(context).color;
@@ -652,7 +654,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       ActionChip(
         label: Text(
           AppLocalizations.of(context).colorNavyCrimsonOliveGold,
-          style: TextStyle(fontSize: 11),
+          style: const TextStyle(fontSize: 11),
         ),
         onPressed: () {
           nameCtrl.text = AppLocalizations.of(context).color;
@@ -673,7 +675,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             AppLocalizations.of(
               context,
             ).pleaseCompleteTheRequiredProductDetailsAboveBeforeConfiguringOptions(
-              _missingBaseFields.join(", "),
+              _missingBaseFields.join(', '),
             ),
           ),
           backgroundColor: Colors.orange.shade800,
@@ -738,7 +740,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).optionName,
                   hintText: AppLocalizations.of(context).eGQuantitySizeColor,
-                  prefixIcon: Icon(Icons.tune),
+                  prefixIcon: const Icon(Icons.tune),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1154,7 +1156,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             AppLocalizations.of(
               context,
             ).pleaseCompleteTheRequiredProductDetailsAboveBeforeGeneratingMatrix(
-              _missingBaseFields.join(", "),
+              _missingBaseFields.join(', '),
             ),
           ),
           backgroundColor: Colors.orange.shade800,
@@ -1307,7 +1309,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             AppLocalizations.of(
               context,
             ).pleaseCompleteTheRequiredProductDetailsAboveBeforeAddingVariants(
-              _missingBaseFields.join(", "),
+              _missingBaseFields.join(', '),
             ),
           ),
           backgroundColor: Colors.orange.shade800,
@@ -1416,7 +1418,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       hintText: AppLocalizations.of(
                         context,
                       ).eGRedMidnightBlueBlack,
-                      prefixIcon: Icon(Icons.palette_outlined),
+                      prefixIcon: const Icon(Icons.palette_outlined),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1442,7 +1444,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).sku2,
                       hintText: AppLocalizations.of(context).eGSku500g01,
-                      prefixIcon: Icon(Icons.qr_code_2),
+                      prefixIcon: const Icon(Icons.qr_code_2),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1461,7 +1463,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       AppLocalizations.of(context).unlimitedInventory,
-                      style: TextStyle(fontSize: 13),
+                      style: const TextStyle(fontSize: 13),
                     ),
                     value: variantUnlimited,
                     onChanged: (val) =>
@@ -1474,7 +1476,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context).stockQuantity,
-                        prefixIcon: Icon(Icons.warehouse_outlined),
+                        prefixIcon: const Icon(Icons.warehouse_outlined),
                       ),
                     ),
                   ],
@@ -1683,7 +1685,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       hintText: AppLocalizations.of(
                         context,
                       ).eGRedMidnightBlueBlack,
-                      prefixIcon: Icon(Icons.palette_outlined),
+                      prefixIcon: const Icon(Icons.palette_outlined),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1693,7 +1695,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     controller: skuCtrl,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).sku,
-                      prefixIcon: Icon(Icons.qr_code_2),
+                      prefixIcon: const Icon(Icons.qr_code_2),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1712,7 +1714,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       AppLocalizations.of(context).unlimitedInventory,
-                      style: TextStyle(fontSize: 13),
+                      style: const TextStyle(fontSize: 13),
                     ),
                     value: variantUnlimited,
                     onChanged: (val) =>
@@ -1725,7 +1727,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: AppLocalizations.of(context).stockQuantity,
-                        prefixIcon: Icon(Icons.warehouse_outlined),
+                        prefixIcon: const Icon(Icons.warehouse_outlined),
                       ),
                     ),
                   ],
@@ -2112,7 +2114,10 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     type: QrEntityType.product,
                     title: p.name,
                     shopId: shopId,
-                    shopName: shopId,
+                    shopName: AdminCompanyName.instance.displayName(
+                      AuthSession.currentUser,
+                      fallback: shopId,
+                    ),
                     productId: p.id,
                     subtitle: 'Product ID: ${p.id} · Shop: $shopId',
                   );
@@ -2120,263 +2125,266 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
               ),
           ],
         ),
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 24,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            // Full width of the screen; a little more side padding on
+            // wide screens so fields don't touch the window edge.
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.sizeOf(context).width >= 900 ? 32 : 20,
+              vertical: 24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Page Header Title & Company Scope Pill
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Page Header Title & Company Scope Pill
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(
-                                  context,
-                                ).productSpecification,
-                                style: theme.textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                isEditMode
-                                    ? AppLocalizations.of(
-                                        context,
-                                      ).updateCatalogItemDetailsPricingImagesVariantsAndSpecifications
-                                    : AppLocalizations.of(
-                                        context,
-                                      ).createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: isDark
-                                      ? AppTheme.textSecondaryDark
-                                      : AppTheme.textSecondaryLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.1,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.3,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.store,
-                                size: 16,
-                                color: theme.colorScheme.primary,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                _companyName.isNotEmpty
-                                    ? _companyName
-                                    : (_companyId.isNotEmpty
-                                          ? AppLocalizations.of(
-                                              context,
-                                            ).companyScope
-                                          : AppLocalizations.of(
-                                              context,
-                                            ).globalScope),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // ==========================================
-                    // Step 1: Basic Information
-                    // ==========================================
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.inventory_2_outlined,
-                                color: theme.colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  AppLocalizations.of(context).basicInformation,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _nameCtrl,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(
-                                context,
-                              ).productTitle,
-                              hintText: AppLocalizations.of(
-                                context,
-                              ).eGOrganicHassAvocadoChanderiSilkSaree15In1SweetsBox,
-                              prefixIcon: Icon(Icons.title),
+                          Text(
+                            AppLocalizations.of(context).productSpecification,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                            validator: (v) => (v == null || v.trim().isEmpty)
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isEditMode
                                 ? AppLocalizations.of(
                                     context,
-                                  ).productTitleIsRequired2
-                                : null,
-                          ),
-                          const SizedBox(height: 16),
-                          HighlightsEditor(
-                            value: _highlights,
-                            showErrors: _contentShowErrors,
-                            onChanged: (rows) =>
-                                setState(() => _highlights = rows),
-                          ),
-                          const SizedBox(height: 20),
-                          AllDetailsEditor(
-                            value: _allDetails,
-                            showErrors: _contentShowErrors,
-                            onChanged: (sections) =>
-                                setState(() => _allDetails = sections),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ==========================================
-                    // Step 2: Media Upload & Gallery
-                    // ==========================================
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.photo_library_outlined,
-                                color: theme.colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  AppLocalizations.of(context).productGallery,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                AppLocalizations.of(
-                                  context,
-                                ).added('${_images.length}'),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isDark
-                                      ? AppTheme.textSecondaryDark
-                                      : AppTheme.textSecondaryLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                                  ).updateCatalogItemDetailsPricingImagesVariantsAndSpecifications
+                                : AppLocalizations.of(
+                                    context,
+                                  ).createNewCatalogItemsWithDynamicVariantsCustomOptionsGalleryAndInventoryControls,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               color: isDark
                                   ? AppTheme.textSecondaryDark
                                   : AppTheme.textSecondaryLight,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _imageUrlCtrl,
-                                  decoration: InputDecoration(
-                                    labelText: AppLocalizations.of(
-                                      context,
-                                    ).imageUrl,
-                                    hintText: AppLocalizations.of(
-                                      context,
-                                    ).httpsImagesUnsplashCom,
-                                    prefixIcon: Icon(Icons.link),
-                                  ),
-                                  onFieldSubmitted: (_) => _addImageUrl(),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              FilledButton.tonalIcon(
-                                onPressed: _addImageUrl,
-                                icon: const Icon(
-                                  Icons.add_photo_alternate,
-                                  size: 18,
-                                ),
-                                label: Text(AppLocalizations.of(context).add),
-                              ),
-                            ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
                           ),
-                          if (_images.isNotEmpty) ...[
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              height: 110,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _images.length,
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(width: 12),
-                                itemBuilder: (context, idx) {
-                                  final url = _images[idx];
-                                  final isHero = idx == 0;
-                                  return SizedBox(
-                                    width: 105,
-                                    height: 110,
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.store,
+                            size: 16,
+                            color: theme.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _companyName.isNotEmpty
+                                ? _companyName
+                                : (_companyId.isNotEmpty
+                                      ? AppLocalizations.of(
+                                          context,
+                                        ).companyScope
+                                      : AppLocalizations.of(
+                                          context,
+                                        ).globalScope),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // ==========================================
+                // Step 1: Basic Information
+                // ==========================================
+                ModernCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context).basicInformation,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _nameCtrl,
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).productTitle,
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).eGOrganicHassAvocadoChanderiSilkSaree15In1SweetsBox,
+                          prefixIcon: const Icon(Icons.title),
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? AppLocalizations.of(
+                                context,
+                              ).productTitleIsRequired2
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      HighlightsEditor(
+                        value: _highlights,
+                        showErrors: _contentShowErrors,
+                        onChanged: (rows) => setState(() => _highlights = rows),
+                      ),
+                      const SizedBox(height: 20),
+                      AllDetailsEditor(
+                        value: _allDetails,
+                        showErrors: _contentShowErrors,
+                        onChanged: (sections) =>
+                            setState(() => _allDetails = sections),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==========================================
+                // Step 2: Media Upload & Gallery
+                // ==========================================
+                ModernCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.photo_library_outlined,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context).productGallery,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).added('${_images.length}'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? AppTheme.textSecondaryDark
+                                  : AppTheme.textSecondaryLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).addMultipleImageUrlsTheFirstImageWillAutomaticallyActAsTheHeroMainProductImage,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppTheme.textSecondaryDark
+                              : AppTheme.textSecondaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _imageUrlCtrl,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(
+                                  context,
+                                ).imageUrl,
+                                hintText: AppLocalizations.of(
+                                  context,
+                                ).httpsImagesUnsplashCom,
+                                prefixIcon: const Icon(Icons.link),
+                              ),
+                              onFieldSubmitted: (_) => _addImageUrl(),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton.tonalIcon(
+                            onPressed: _addImageUrl,
+                            icon: const Icon(
+                              Icons.add_photo_alternate,
+                              size: 18,
+                            ),
+                            label: Text(AppLocalizations.of(context).add),
+                          ),
+                        ],
+                      ),
+                      if (_images.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 110,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _images.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 12),
+                            itemBuilder: (context, idx) {
+                              final url = _images[idx];
+                              final isHero = idx == 0;
+                              return SizedBox(
+                                width: 105,
+                                height: 110,
+                                child: Stack(
+                                  children: [
+                                    // Tap the photo to view it full screen.
+                                    GestureDetector(
+                                      key: Key('product-image-thumb-$idx'),
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () => showFullScreenImages(
+                                        context,
+                                        urls: _images,
+                                        initialIndex: idx,
+                                      ),
+                                      child: MouseRegion(
+                                        cursor: SystemMouseCursors.click,
+                                        child: ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
@@ -2418,1127 +2426,269 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                             ),
                                           ),
                                         ),
-                                        // Remove button
-                                        Positioned(
-                                          top: 4,
-                                          right: 4,
-                                          child: InkWell(
-                                            onTap: () => _removeImage(idx),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              decoration: const BoxDecoration(
-                                                color: Colors.black54,
-                                                shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    // Remove button
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: InkWell(
+                                        onTap: () => _removeImage(idx),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.close,
+                                            size: 14,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    // Hero badge or Set as Hero button
+                                    Positioned(
+                                      bottom: 4,
+                                      left: 4,
+                                      child: isHero
+                                          ? Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    theme.colorScheme.primary,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
                                               ),
-                                              child: const Icon(
-                                                Icons.close,
-                                                size: 14,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        // Hero badge or Set as Hero button
-                                        Positioned(
-                                          bottom: 4,
-                                          left: 4,
-                                          child: isHero
-                                              ? Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 2,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: theme
-                                                        .colorScheme
-                                                        .primary,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    AppLocalizations.of(
-                                                      context,
-                                                    ).heroMain,
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                )
-                                              : InkWell(
-                                                  onTap: () =>
-                                                      _setHeroImage(idx),
-                                                  child: Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 6,
-                                                          vertical: 2,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.black54,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            4,
-                                                          ),
-                                                    ),
-                                                    child: Text(
-                                                      AppLocalizations.of(
-                                                        context,
-                                                      ).makeHero,
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 10,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ==========================================
-                    // Step 3: Pricing & Base Inventory
-                    // ==========================================
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
-                      child: LayoutBuilder(
-                        builder: (context, cardConstraints) {
-                          final isNarrow = cardConstraints.maxWidth < 480;
-
-                          final mrpField = TextFormField(
-                            controller: _priceCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(
-                                context,
-                              ).mrpOriginalPrice,
-                              hintText: AppLocalizations.of(context).eG99900,
-                              prefixIcon: Icon(Icons.currency_rupee),
-                            ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return AppLocalizations.of(context).enterPrice;
-                              }
-                              if (double.tryParse(v) == null) {
-                                return AppLocalizations.of(context).validNumber;
-                              }
-                              return null;
-                            },
-                          );
-
-                          final sellingPriceField = TextFormField(
-                            controller: _discountPriceCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(
-                                context,
-                              ).sellingDiscountedPrice,
-                              hintText: AppLocalizations.of(context).eG79900,
-                              prefixIcon: const Icon(
-                                Icons.local_offer_outlined,
-                              ),
-                              suffix: hasDiscount
-                                  ? Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green.shade600,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        AppLocalizations.of(
-                                          context,
-                                        ).off('$discountPercent'),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                          );
-
-                          final skuField = TextFormField(
-                            controller: _baseSkuCtrl,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(
-                                context,
-                              ).baseSkuProductCode,
-                              hintText: AppLocalizations.of(
-                                context,
-                              ).eGProdHoney01,
-                              prefixIcon: Icon(Icons.qr_code_2),
-                            ),
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? AppLocalizations.of(context).msgRequired
-                                : null,
-                          );
-
-                          final colorField = TextFormField(
-                            controller: _colorCtrl,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(
-                                context,
-                              ).productBaseColorOptional,
-                              hintText: AppLocalizations.of(
-                                context,
-                              ).eGRedMidnightBlueMatteBlack,
-                              prefixIcon: Icon(Icons.palette_outlined),
-                            ),
-                          );
-
-                          final stockField = TextFormField(
-                            controller: _stockCtrl,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(
-                                context,
-                              ).stockQuantity,
-                              hintText: AppLocalizations.of(
-                                context,
-                              ).availableInventoryUnits,
-                              prefixIcon: Icon(Icons.warehouse_outlined),
-                            ),
-                            validator: (v) {
-                              if (_stockMode == 'specific') {
-                                if (v == null || v.trim().isEmpty) {
-                                  return AppLocalizations.of(
-                                    context,
-                                  ).enterInventoryCount;
-                                }
-                                if (int.tryParse(v) == null) {
-                                  return AppLocalizations.of(
-                                    context,
-                                  ).validInteger;
-                                }
-                              }
-                              return null;
-                            },
-                          );
-
-                          final unitValField = TextFormField(
-                            controller: _unitCtrl,
-                            onChanged: (_) => setState(() {}),
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).unitValue,
-                              hintText: AppLocalizations.of(context).eG1Or500,
-                            ),
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? AppLocalizations.of(context).msgRequired
-                                : null,
-                          );
-
-                          final unitTypeField = DropdownButtonFormField<String>(
-                            key: ValueKey(
-                              'unit_type_${_measurementType}_${_unitTypeCtrl.text}',
-                            ),
-                            initialValue:
-                                _currentUnitTypes.contains(
-                                  _unitTypeCtrl.text.trim().toLowerCase(),
-                                )
-                                ? _unitTypeCtrl.text.trim().toLowerCase()
-                                : _currentUnitTypes.first,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(context).unitType,
-                              prefixIcon: Icon(Icons.straighten),
-                            ),
-                            items: _currentUnitTypes.map((u) {
-                              return DropdownMenuItem<String>(
-                                value: u,
-                                child: Text(u),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                _syncUnitTypeToVariantsAndOptions(val);
-                              }
-                            },
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? AppLocalizations.of(context).msgRequired
-                                : null,
-                          );
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.monetization_on_outlined,
-                                    color: theme.colorScheme.primary,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      ).pricingMeasurement,
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              if (isNarrow) ...[
-                                mrpField,
-                                const SizedBox(height: 14),
-                                sellingPriceField,
-                              ] else
-                                Row(
-                                  children: [
-                                    Expanded(child: mrpField),
-                                    const SizedBox(width: 16),
-                                    Expanded(child: sellingPriceField),
-                                  ],
-                                ),
-                              const SizedBox(height: 16),
-                              if (isNarrow) ...[
-                                skuField,
-                                const SizedBox(height: 14),
-                                colorField,
-                              ] else
-                                Row(
-                                  children: [
-                                    Expanded(child: skuField),
-                                    const SizedBox(width: 16),
-                                    Expanded(child: colorField),
-                                  ],
-                                ),
-                              const SizedBox(height: 20),
-
-                              // Stock Availability Selection (Specific Count / Unlimited / Finished)
-                              Text(
-                                AppLocalizations.of(
-                                  context,
-                                ).stockAvailabilityInventoryMode,
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                width: double.infinity,
-                                child: SegmentedButton<String>(
-                                  showSelectedIcon: !isNarrow,
-                                  segments: [
-                                    ButtonSegment<String>(
-                                      value: 'specific',
-                                      label: Text(
-                                        isNarrow
-                                            ? AppLocalizations.of(context).count
-                                            : AppLocalizations.of(
-                                                context,
-                                              ).specificCount,
-                                      ),
-                                      icon: const Icon(
-                                        Icons.format_list_numbered,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    ButtonSegment<String>(
-                                      value: 'unlimited',
-                                      label: Text(
-                                        isNarrow
-                                            ? AppLocalizations.of(
-                                                context,
-                                              ).unlimited
-                                            : AppLocalizations.of(
-                                                context,
-                                              ).unlimitedStock,
-                                      ),
-                                      icon: const Icon(
-                                        Icons.all_inclusive,
-                                        size: 18,
-                                      ),
-                                    ),
-                                    ButtonSegment<String>(
-                                      value: 'out_of_stock',
-                                      label: Text(
-                                        isNarrow
-                                            ? AppLocalizations.of(
-                                                context,
-                                              ).outOfStock2
-                                            : AppLocalizations.of(
-                                                context,
-                                              ).finishedOutOfStock,
-                                      ),
-                                      icon: const Icon(Icons.block, size: 18),
-                                    ),
-                                  ],
-                                  selected: {_stockMode},
-                                  onSelectionChanged: (set) => setState(() {
-                                    _stockMode = set.first;
-                                    if (_stockMode == 'out_of_stock') {
-                                      _stockCtrl.text = '0';
-                                    } else if (_stockMode == 'specific' &&
-                                        (_stockCtrl.text.isEmpty ||
-                                            _stockCtrl.text == '0')) {
-                                      _stockCtrl.text = '10';
-                                    }
-                                  }),
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-
-                              if (_stockMode == 'specific') ...[
-                                stockField,
-                              ] else if (_stockMode == 'unlimited') ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: Colors.green.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.all_inclusive,
-                                        color: Colors.green,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          ).unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.green.shade800,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ] else ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: Colors.red.withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.warning_amber_rounded,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          ).outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.red.shade800,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-
-                              const SizedBox(height: 20),
-                              Text(
-                                AppLocalizations.of(
-                                  context,
-                                ).baseMeasurementType,
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                width: double.infinity,
-                                child: SegmentedButton<String>(
-                                  showSelectedIcon: !isNarrow,
-                                  segments: [
-                                    ButtonSegment<String>(
-                                      value: 'quantity_based',
-                                      label: Text(
-                                        isNarrow
-                                            ? AppLocalizations.of(
-                                                context,
-                                              ).quantity
-                                            : AppLocalizations.of(
-                                                context,
-                                              ).quantityBased2,
-                                      ),
-                                      icon: const Icon(Icons.tag, size: 18),
-                                    ),
-                                    ButtonSegment<String>(
-                                      value: 'weight_based',
-                                      label: Text(
-                                        isNarrow
-                                            ? AppLocalizations.of(
-                                                context,
-                                              ).weight
-                                            : AppLocalizations.of(
-                                                context,
-                                              ).weightBased2,
-                                      ),
-                                      icon: const Icon(Icons.scale, size: 18),
-                                    ),
-                                  ],
-                                  selected: {_measurementType},
-                                  onSelectionChanged: (set) => setState(() {
-                                    _measurementType = set.first;
-                                    final available = _currentUnitTypes;
-                                    final targetUnit =
-                                        available.contains(
-                                          _unitTypeCtrl.text
-                                              .trim()
-                                              .toLowerCase(),
-                                        )
-                                        ? _unitTypeCtrl.text
-                                              .trim()
-                                              .toLowerCase()
-                                        : available.first;
-                                    _syncUnitTypeToVariantsAndOptions(
-                                      targetUnit,
-                                    );
-                                  }),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              if (isNarrow) ...[
-                                unitValField,
-                                const SizedBox(height: 14),
-                                unitTypeField,
-                              ] else
-                                Row(
-                                  children: [
-                                    Expanded(child: unitValField),
-                                    const SizedBox(width: 16),
-                                    Expanded(child: unitTypeField),
-                                  ],
-                                ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
-                                children: _currentUnitTypes.map((u) {
-                                  return ActionChip(
-                                    label: Text(
-                                      u,
-                                      style: const TextStyle(fontSize: 11),
-                                    ),
-                                    onPressed: () =>
-                                        _syncUnitTypeToVariantsAndOptions(u),
-                                  );
-                                }).toList(),
-                              ),
-                              const SizedBox(height: 16),
-                              Material(
-                                color: Colors.transparent,
-                                child: SwitchListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  title: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).featuredRecommendation,
-                                  ),
-                                  subtitle: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).flagThisProductToAppearInTheRecommendationsEngineCarousel,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isDark
-                                          ? AppTheme.textSecondaryDark
-                                          : AppTheme.textSecondaryLight,
-                                    ),
-                                  ),
-                                  value: _isRecommended,
-                                  onChanged: (val) =>
-                                      setState(() => _isRecommended = val),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ==========================================
-                    // Step 4: Dynamic Variants Architecture (Core Feature)
-                    // ==========================================
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
-                            alignment: WrapAlignment.spaceBetween,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 8,
-                                runSpacing: 4,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.tune,
-                                        color: _isVariantSectionEnabled
-                                            ? theme.colorScheme.primary
-                                            : Colors.grey,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        AppLocalizations.of(
-                                          context,
-                                        ).variantMatrix,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (_isVariantSectionEnabled)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green.withValues(
-                                          alpha: 0.12,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.green.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            Icons.check_circle_outline,
-                                            size: 13,
-                                            color: Colors.green,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            AppLocalizations.of(context).ready,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.green.shade800,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  else
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.amber.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.amber.withValues(
-                                            alpha: 0.4,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.lock_outline,
-                                            size: 13,
-                                            color: Colors.amber.shade900,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            AppLocalizations.of(context).locked,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.amber.shade900,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 6,
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: _isVariantSectionEnabled
-                                        ? _showAddOptionDialog
-                                        : null,
-                                    icon: const Icon(Icons.add, size: 16),
-                                    label: Text(
-                                      AppLocalizations.of(context).addOption,
-                                    ),
-                                  ),
-                                  FilledButton.icon(
-                                    onPressed: _isVariantSectionEnabled
-                                        ? _generateVariantMatrix
-                                        : null,
-                                    icon: const Icon(
-                                      Icons.auto_awesome,
-                                      size: 16,
-                                    ),
-                                    label: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      ).generateMatrix,
-                                    ),
-                                  ),
-                                  FilledButton.tonalIcon(
-                                    onPressed: _isVariantSectionEnabled
-                                        ? _showAddManualVariantDialog
-                                        : null,
-                                    icon: const Icon(Icons.add, size: 16),
-                                    label: Text(
-                                      AppLocalizations.of(context).addVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark
-                                  ? AppTheme.textSecondaryDark
-                                  : AppTheme.textSecondaryLight,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          if (!_isVariantSectionEnabled) ...[
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: Colors.amber.withValues(alpha: 0.35),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.lock_outline,
-                                        size: 16,
-                                        color: Colors.amber.shade900,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          AppLocalizations.of(
-                                            context,
-                                          ).variantConfigurationLocked,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.amber.shade900,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.amber.shade900,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 6,
-                                    runSpacing: 6,
-                                    children: _missingBaseFields.map((field) {
-                                      return Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber.shade100,
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.amber.shade400,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.arrow_upward,
-                                              size: 10,
-                                              color: Colors.amber.shade900,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              field,
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
-                                                color: Colors.amber.shade900,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-
-                          // Option Types List
-                          if (_options.isNotEmpty) ...[
-                            Text(
-                              AppLocalizations.of(context).configuredOptionSets,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: List.generate(_options.length, (idx) {
-                                final opt = _options[idx];
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.primary.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: theme.colorScheme.primary
-                                          .withValues(alpha: 0.25),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '${opt.name}: ',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                          color: theme.colorScheme.primary,
-                                        ),
-                                      ),
-                                      Text(
-                                        opt.values.join(', '),
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      InkWell(
-                                        onTap: () => _removeOption(idx),
-                                        child: const Icon(
-                                          Icons.close,
-                                          size: 14,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-
-                          // Variant Combinations Table / Rows
-                          if (_variants.isEmpty)
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainerHighest
-                                    .withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isDark
-                                      ? AppTheme.borderDark
-                                      : AppTheme.borderLight,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  ).noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isDark
-                                        ? AppTheme.textSecondaryDark
-                                        : AppTheme.textSecondaryLight,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )
-                          else
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  ).variantCombinations('${_variants.length}'),
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                for (
-                                  int idx = 0;
-                                  idx < _variants.length;
-                                  idx++
-                                ) ...[
-                                  if (idx > 0) const SizedBox(height: 8),
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? AppTheme.surfaceContainerDark
-                                          : AppTheme.surfaceContainerLight,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: isDark
-                                            ? AppTheme.borderDark
-                                            : AppTheme.borderLight,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.qr_code, size: 18),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Flexible(
-                                                    child: Text(
-                                                      _variants[idx]
-                                                              .title
-                                                              .isNotEmpty
-                                                          ? _variants[idx].title
-                                                          : _variants[idx].sku,
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 13,
-                                                      ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 6,
-                                                          vertical: 1,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.grey
-                                                          .withValues(
-                                                            alpha: 0.2,
-                                                          ),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            4,
-                                                          ),
-                                                    ),
-                                                    child: Text(
-                                                      _variants[idx].sku,
-                                                      style: const TextStyle(
-                                                        fontSize: 10,
-                                                        fontFamily: 'monospace',
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
+                                              child: Text(
                                                 AppLocalizations.of(
                                                   context,
-                                                ).unitStock(
-                                                  '${_variants[idx].unitValue > 0 ? (_variants[idx].unitValue == _variants[idx].unitValue.roundToDouble() ? _variants[idx].unitValue.toInt() : _variants[idx].unitValue) : (_variants[idx].size.isNotEmpty ? _variants[idx].size : "1")}',
-                                                  _variants[idx]
-                                                          .unitType
-                                                          .isNotEmpty
-                                                      ? _variants[idx].unitType
-                                                      : _unitTypeCtrl.text
-                                                            .trim(),
-                                                  '${_variants[idx].isUnlimitedStock ? AppLocalizations.of(context).unlimited : _variants[idx].stockQty}',
-                                                  _variants[idx].priceOverride >
-                                                          0
-                                                      ? AppLocalizations.of(
-                                                          context,
-                                                        ).price2(
-                                                          '${_variants[idx].priceOverride % 1 == 0 ? _variants[idx].priceOverride.toInt() : _variants[idx].priceOverride.toStringAsFixed(2)}',
-                                                        )
-                                                      : AppLocalizations.of(
-                                                          context,
-                                                        ).basePrice,
-                                                  _variants[idx]
-                                                          .attributes
-                                                          .isNotEmpty
-                                                      ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}"
-                                                      : "",
-                                                ),
-                                                style: TextStyle(
-                                                  fontSize: 11,
-                                                  color: isDark
-                                                      ? AppTheme
-                                                            .textSecondaryDark
-                                                      : AppTheme
-                                                            .textSecondaryLight,
+                                                ).heroMain,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                            ],
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            size: 18,
-                                          ),
-                                          tooltip: AppLocalizations.of(
-                                            context,
-                                          ).editStockPriceOverride,
-                                          onPressed: () => _editVariant(idx),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            size: 18,
-                                          ),
-                                          tooltip: AppLocalizations.of(
-                                            context,
-                                          ).remove,
-                                          onPressed: () => _removeVariant(idx),
-                                        ),
-                                      ],
+                                            )
+                                          : InkWell(
+                                              onTap: () => _setHeroImage(idx),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black54,
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  ).makeHero,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==========================================
+                // Step 3: Pricing & Base Inventory
+                // ==========================================
+                ModernCard(
+                  padding: const EdgeInsets.all(20),
+                  child: LayoutBuilder(
+                    builder: (context, cardConstraints) {
+                      final isNarrow = cardConstraints.maxWidth < 480;
+
+                      final mrpField = TextFormField(
+                        controller: _priceCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).mrpOriginalPrice,
+                          hintText: AppLocalizations.of(context).eG99900,
+                          prefixIcon: const Icon(Icons.currency_rupee),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return AppLocalizations.of(context).enterPrice;
+                          }
+                          if (double.tryParse(v) == null) {
+                            return AppLocalizations.of(context).validNumber;
+                          }
+                          return null;
+                        },
+                      );
+
+                      final sellingPriceField = TextFormField(
+                        controller: _discountPriceCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).sellingDiscountedPrice,
+                          hintText: AppLocalizations.of(context).eG79900,
+                          prefixIcon: const Icon(Icons.local_offer_outlined),
+                          suffix: hasDiscount
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade600,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).off('$discountPercent'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
+                                )
+                              : null,
+                        ),
+                      );
 
-                    const SizedBox(height: 20),
+                      final skuField = TextFormField(
+                        controller: _baseSkuCtrl,
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).baseSkuProductCode,
+                          hintText: AppLocalizations.of(context).eGProdHoney01,
+                          prefixIcon: const Icon(Icons.qr_code_2),
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? AppLocalizations.of(context).msgRequired
+                            : null,
+                      );
 
-                    // ==========================================
-                    // Step 5: Specifications & Policies
-                    // ==========================================
-                    ModernCard(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
+                      final colorField = TextFormField(
+                        controller: _colorCtrl,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).productBaseColorOptional,
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).eGRedMidnightBlueMatteBlack,
+                          prefixIcon: const Icon(Icons.palette_outlined),
+                        ),
+                      );
+
+                      final stockField = TextFormField(
+                        controller: _stockCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).stockQuantity,
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).availableInventoryUnits,
+                          prefixIcon: const Icon(Icons.warehouse_outlined),
+                        ),
+                        validator: (v) {
+                          if (_stockMode == 'specific') {
+                            if (v == null || v.trim().isEmpty) {
+                              return AppLocalizations.of(
+                                context,
+                              ).enterInventoryCount;
+                            }
+                            if (int.tryParse(v) == null) {
+                              return AppLocalizations.of(context).validInteger;
+                            }
+                          }
+                          return null;
+                        },
+                      );
+
+                      final unitValField = TextFormField(
+                        controller: _unitCtrl,
+                        onChanged: (_) => setState(() {}),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).unitValue,
+                          hintText: AppLocalizations.of(context).eG1Or500,
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? AppLocalizations.of(context).msgRequired
+                            : null,
+                      );
+
+                      final unitTypeField = DropdownButtonFormField<String>(
+                        key: ValueKey(
+                          'unit_type_${_measurementType}_${_unitTypeCtrl.text}',
+                        ),
+                        initialValue:
+                            _currentUnitTypes.contains(
+                              _unitTypeCtrl.text.trim().toLowerCase(),
+                            )
+                            ? _unitTypeCtrl.text.trim().toLowerCase()
+                            : _currentUnitTypes.first,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).unitType,
+                          prefixIcon: const Icon(Icons.straighten),
+                        ),
+                        items: _currentUnitTypes.map((u) {
+                          return DropdownMenuItem<String>(
+                            value: u,
+                            child: Text(u),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            _syncUnitTypeToVariantsAndOptions(val);
+                          }
+                        },
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? AppLocalizations.of(context).msgRequired
+                            : null,
+                      );
+
+                      return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
                               Icon(
-                                Icons.fact_check_outlined,
+                                Icons.monetization_on_outlined,
                                 color: theme.colorScheme.primary,
                                 size: 20,
                               ),
@@ -3547,123 +2697,921 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                                 child: Text(
                                   AppLocalizations.of(
                                     context,
-                                  ).specificationsPolicies,
+                                  ).pricingMeasurement,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              TextButton.icon(
-                                onPressed: _addSpecRow,
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          if (isNarrow) ...[
+                            mrpField,
+                            const SizedBox(height: 14),
+                            sellingPriceField,
+                          ] else
+                            Row(
+                              children: [
+                                Expanded(child: mrpField),
+                                const SizedBox(width: 16),
+                                Expanded(child: sellingPriceField),
+                              ],
+                            ),
+                          const SizedBox(height: 16),
+                          if (isNarrow) ...[
+                            skuField,
+                            const SizedBox(height: 14),
+                            colorField,
+                          ] else
+                            Row(
+                              children: [
+                                Expanded(child: skuField),
+                                const SizedBox(width: 16),
+                                Expanded(child: colorField),
+                              ],
+                            ),
+                          const SizedBox(height: 20),
+
+                          // Stock Availability Selection (Specific Count / Unlimited / Finished)
+                          Text(
+                            AppLocalizations.of(
+                              context,
+                            ).stockAvailabilityInventoryMode,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: SegmentedButton<String>(
+                              showSelectedIcon: !isNarrow,
+                              segments: [
+                                ButtonSegment<String>(
+                                  value: 'specific',
+                                  label: Text(
+                                    isNarrow
+                                        ? AppLocalizations.of(context).count
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).specificCount,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.format_list_numbered,
+                                    size: 18,
+                                  ),
+                                ),
+                                ButtonSegment<String>(
+                                  value: 'unlimited',
+                                  label: Text(
+                                    isNarrow
+                                        ? AppLocalizations.of(context).unlimited
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).unlimitedStock,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.all_inclusive,
+                                    size: 18,
+                                  ),
+                                ),
+                                ButtonSegment<String>(
+                                  value: 'out_of_stock',
+                                  label: Text(
+                                    isNarrow
+                                        ? AppLocalizations.of(
+                                            context,
+                                          ).outOfStock2
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).finishedOutOfStock,
+                                  ),
+                                  icon: const Icon(Icons.block, size: 18),
+                                ),
+                              ],
+                              selected: {_stockMode},
+                              onSelectionChanged: (set) => setState(() {
+                                _stockMode = set.first;
+                                if (_stockMode == 'out_of_stock') {
+                                  _stockCtrl.text = '0';
+                                } else if (_stockMode == 'specific' &&
+                                    (_stockCtrl.text.isEmpty ||
+                                        _stockCtrl.text == '0')) {
+                                  _stockCtrl.text = '10';
+                                }
+                              }),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          if (_stockMode == 'specific') ...[
+                            stockField,
+                          ] else if (_stockMode == 'unlimited') ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: Colors.green.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.all_inclusive,
+                                    color: Colors.green,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).unlimitedInventoryProductWillAlwaysAppearInStockForCustomersIdealForDigitalGoodsOrMadeToOrderItems,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.green.shade800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: Colors.red.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.red,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).outOfStockFinishedProductWillShowAsSoldOutOnTheStorefrontUntilRestocked,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.red.shade800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+
+                          const SizedBox(height: 20),
+                          Text(
+                            AppLocalizations.of(context).baseMeasurementType,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: SegmentedButton<String>(
+                              showSelectedIcon: !isNarrow,
+                              segments: [
+                                ButtonSegment<String>(
+                                  value: 'quantity_based',
+                                  label: Text(
+                                    isNarrow
+                                        ? AppLocalizations.of(context).quantity
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).quantityBased2,
+                                  ),
+                                  icon: const Icon(Icons.tag, size: 18),
+                                ),
+                                ButtonSegment<String>(
+                                  value: 'weight_based',
+                                  label: Text(
+                                    isNarrow
+                                        ? AppLocalizations.of(context).weight
+                                        : AppLocalizations.of(
+                                            context,
+                                          ).weightBased2,
+                                  ),
+                                  icon: const Icon(Icons.scale, size: 18),
+                                ),
+                              ],
+                              selected: {_measurementType},
+                              onSelectionChanged: (set) => setState(() {
+                                _measurementType = set.first;
+                                final available = _currentUnitTypes;
+                                final targetUnit =
+                                    available.contains(
+                                      _unitTypeCtrl.text.trim().toLowerCase(),
+                                    )
+                                    ? _unitTypeCtrl.text.trim().toLowerCase()
+                                    : available.first;
+                                _syncUnitTypeToVariantsAndOptions(targetUnit);
+                              }),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (isNarrow) ...[
+                            unitValField,
+                            const SizedBox(height: 14),
+                            unitTypeField,
+                          ] else
+                            Row(
+                              children: [
+                                Expanded(child: unitValField),
+                                const SizedBox(width: 16),
+                                Expanded(child: unitTypeField),
+                              ],
+                            ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: _currentUnitTypes.map((u) {
+                              return ActionChip(
+                                label: Text(
+                                  u,
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                                onPressed: () =>
+                                    _syncUnitTypeToVariantsAndOptions(u),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+                          Material(
+                            color: Colors.transparent,
+                            child: SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).featuredRecommendation,
+                              ),
+                              subtitle: Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).flagThisProductToAppearInTheRecommendationsEngineCarousel,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppTheme.textSecondaryDark
+                                      : AppTheme.textSecondaryLight,
+                                ),
+                              ),
+                              value: _isRecommended,
+                              onChanged: (val) =>
+                                  setState(() => _isRecommended = val),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==========================================
+                // Step 4: Dynamic Variants Architecture (Core Feature)
+                // ==========================================
+                ModernCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.tune,
+                                    color: _isVariantSectionEnabled
+                                        ? theme.colorScheme.primary
+                                        : Colors.grey,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    AppLocalizations.of(context).variantMatrix,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              if (_isVariantSectionEnabled)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.green.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle_outline,
+                                        size: 13,
+                                        color: Colors.green,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        AppLocalizations.of(context).ready,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.amber.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.lock_outline,
+                                        size: 13,
+                                        color: Colors.amber.shade900,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        AppLocalizations.of(context).locked,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber.shade900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              OutlinedButton.icon(
+                                onPressed: _isVariantSectionEnabled
+                                    ? _showAddOptionDialog
+                                    : null,
                                 icon: const Icon(Icons.add, size: 16),
                                 label: Text(
-                                  AppLocalizations.of(context).addSpec,
-                                  style: TextStyle(fontSize: 12),
+                                  AppLocalizations.of(context).addOption,
+                                ),
+                              ),
+                              FilledButton.icon(
+                                onPressed: _isVariantSectionEnabled
+                                    ? _generateVariantMatrix
+                                    : null,
+                                icon: const Icon(Icons.auto_awesome, size: 16),
+                                label: Text(
+                                  AppLocalizations.of(context).generateMatrix,
+                                ),
+                              ),
+                              FilledButton.tonalIcon(
+                                onPressed: _isVariantSectionEnabled
+                                    ? _showAddManualVariantDialog
+                                    : null,
+                                icon: const Icon(Icons.add, size: 16),
+                                label: Text(
+                                  AppLocalizations.of(context).addVariant,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark
-                                  ? AppTheme.textSecondaryDark
-                                  : AppTheme.textSecondaryLight,
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).configureCustomizableOptionTypesEGSizeColorWeightStorageAndAutomaticallyGenerateCartesianCombinationsWithDistinctSkuStockAndPriceOverrides,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppTheme.textSecondaryDark
+                              : AppTheme.textSecondaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      if (!_isVariantSectionEnabled) ...[
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.amber.withValues(alpha: 0.35),
                             ),
                           ),
-                          const SizedBox(height: 16),
-
-                          // Specifications List
-                          if (_specControllers.isNotEmpty) ...[
-                            for (
-                              int i = 0;
-                              i < _specControllers.length;
-                              i++
-                            ) ...[
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Row(
                                 children: [
+                                  Icon(
+                                    Icons.lock_outline,
+                                    size: 16,
+                                    color: Colors.amber.shade900,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Expanded(
-                                    flex: 2,
-                                    child: TextFormField(
-                                      controller: _specControllers[i].key,
-                                      decoration: InputDecoration(
-                                        labelText: AppLocalizations.of(
-                                          context,
-                                        ).specKey,
-                                        hintText: AppLocalizations.of(
-                                          context,
-                                        ).eGFabricShelfLife,
+                                    child: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      ).variantConfigurationLocked,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.amber.shade900,
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    flex: 3,
-                                    child: TextFormField(
-                                      controller: _specControllers[i].value,
-                                      decoration: InputDecoration(
-                                        labelText: AppLocalizations.of(
-                                          context,
-                                        ).specValue,
-                                        hintText: AppLocalizations.of(
-                                          context,
-                                        ).eGPureSilk30Days,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close, size: 18),
-                                    onPressed: () => _removeSpecRow(i),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 6),
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).pleaseEnterTheRequiredPrimaryProductDetailsAboveToUnlockVariantOptionsAndMatrixGeneration,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.amber.shade900,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: _missingBaseFields.map((field) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.shade100,
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: Colors.amber.shade400,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.arrow_upward,
+                                          size: 10,
+                                          color: Colors.amber.shade900,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          field,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.amber.shade900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ],
-                            const SizedBox(height: 8),
-                          ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
 
-                          // Return & Delivery Policy
-                          TextFormField(
-                            controller: _policyCtrl,
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              labelText: AppLocalizations.of(
+                      // Option Types List
+                      if (_options.isNotEmpty) ...[
+                        Text(
+                          AppLocalizations.of(context).configuredOptionSets,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: List.generate(_options.length, (idx) {
+                            final opt = _options[idx];
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.08,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.25,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '${opt.name}: ',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    opt.values.join(', '),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  InkWell(
+                                    onTap: () => _removeOption(idx),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Variant Combinations Table / Rows
+                      if (_variants.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppTheme.borderDark
+                                  : AppTheme.borderLight,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              AppLocalizations.of(
                                 context,
-                              ).deliveryReturnPolicy,
-                              hintText: AppLocalizations.of(
+                              ).noVariantsConfiguredSingleStandardSkuTapAddOptionToDefineDimensionsThenGenerateMatrix,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppTheme.textSecondaryDark
+                                    : AppTheme.textSecondaryLight,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      else
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(
                                 context,
-                              ).eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts,
-                              alignLabelWithHint: true,
-                              prefixIcon: Icon(Icons.local_shipping_outlined),
+                              ).variantCombinations('${_variants.length}'),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            for (
+                              int idx = 0;
+                              idx < _variants.length;
+                              idx++
+                            ) ...[
+                              if (idx > 0) const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? AppTheme.surfaceContainerDark
+                                      : AppTheme.surfaceContainerLight,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? AppTheme.borderDark
+                                        : AppTheme.borderLight,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.qr_code, size: 18),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  _variants[idx]
+                                                          .title
+                                                          .isNotEmpty
+                                                      ? _variants[idx].title
+                                                      : _variants[idx].sku,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 1,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey.withValues(
+                                                    alpha: 0.2,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  _variants[idx].sku,
+                                                  style: const TextStyle(
+                                                    fontSize: 10,
+                                                    fontFamily: 'monospace',
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            ).unitStock(
+                                              '${_variants[idx].unitValue > 0 ? (_variants[idx].unitValue == _variants[idx].unitValue.roundToDouble() ? _variants[idx].unitValue.toInt() : _variants[idx].unitValue) : (_variants[idx].size.isNotEmpty ? _variants[idx].size : "1")}',
+                                              _variants[idx].unitType.isNotEmpty
+                                                  ? _variants[idx].unitType
+                                                  : _unitTypeCtrl.text.trim(),
+                                              '${_variants[idx].isUnlimitedStock ? AppLocalizations.of(context).unlimited : _variants[idx].stockQty}',
+                                              _variants[idx].priceOverride > 0
+                                                  ? AppLocalizations.of(
+                                                      context,
+                                                    ).price2(
+                                                      '${_variants[idx].priceOverride % 1 == 0 ? _variants[idx].priceOverride.toInt() : _variants[idx].priceOverride.toStringAsFixed(2)}',
+                                                    )
+                                                  : AppLocalizations.of(
+                                                      context,
+                                                    ).basePrice,
+                                              _variants[idx]
+                                                      .attributes
+                                                      .isNotEmpty
+                                                  ? " • ${_variants[idx].attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ")}"
+                                                  : '',
+                                            ),
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: isDark
+                                                  ? AppTheme.textSecondaryDark
+                                                  : AppTheme.textSecondaryLight,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.edit_outlined,
+                                        size: 18,
+                                      ),
+                                      tooltip: AppLocalizations.of(
+                                        context,
+                                      ).editStockPriceOverride,
+                                      onPressed: () => _editVariant(idx),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete_outline,
+                                        size: 18,
+                                      ),
+                                      tooltip: AppLocalizations.of(
+                                        context,
+                                      ).remove,
+                                      onPressed: () => _removeVariant(idx),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==========================================
+                // Step 5: Specifications & Policies
+                // ==========================================
+                ModernCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.fact_check_outlined,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).specificationsPolicies,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: _addSpecRow,
+                            icon: const Icon(Icons.add, size: 16),
+                            label: Text(
+                              AppLocalizations.of(context).addSpec,
+                              style: const TextStyle(fontSize: 12),
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).addDynamicKeyValueSpecificationsEGFabricShelfLifeProcessorStorageOriginAndReturnDeliveryPolicies,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppTheme.textSecondaryDark
+                              : AppTheme.textSecondaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
-                    const SizedBox(height: 32),
+                      // Specifications List
+                      if (_specControllers.isNotEmpty) ...[
+                        for (int i = 0; i < _specControllers.length; i++) ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller: _specControllers[i].key,
+                                  decoration: InputDecoration(
+                                    labelText: AppLocalizations.of(
+                                      context,
+                                    ).specKey,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    ).eGFabricShelfLife,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  controller: _specControllers[i].value,
+                                  decoration: InputDecoration(
+                                    labelText: AppLocalizations.of(
+                                      context,
+                                    ).specValue,
+                                    hintText: AppLocalizations.of(
+                                      context,
+                                    ).eGPureSilk30Days,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close, size: 18),
+                                onPressed: () => _removeSpecRow(i),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        const SizedBox(height: 8),
+                      ],
 
-                    // ==========================================
-                    // Save / Publish Action
-                    // ==========================================
-                    ModernButton(
-                      text: isEditMode
-                          ? AppLocalizations.of(context).updateProduct
-                          : AppLocalizations.of(context).createProduct,
-                      icon: const Icon(Icons.check, size: 20),
-                      isLoading: _isSaving,
-                      height: 52,
-                      width: double.infinity,
-                      onPressed: _isSaving ? null : _handleSave,
-                    ),
-
-                    const SizedBox(height: 40),
-                  ],
+                      // Return & Delivery Policy
+                      TextFormField(
+                        controller: _policyCtrl,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).deliveryReturnPolicy,
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).eGFreeShippingOnOrdersAbove499Easy7DayHassleFreeReplacementForDefectiveProducts,
+                          alignLabelWithHint: true,
+                          prefixIcon: const Icon(Icons.local_shipping_outlined),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+
+                const SizedBox(height: 32),
+
+                // ==========================================
+                // Save / Publish Action
+                // ==========================================
+                ModernButton(
+                  text: isEditMode
+                      ? AppLocalizations.of(context).updateProduct
+                      : AppLocalizations.of(context).createProduct,
+                  icon: const Icon(Icons.check, size: 20),
+                  isLoading: _isSaving,
+                  height: 52,
+                  width: double.infinity,
+                  onPressed: _isSaving ? null : _handleSave,
+                ),
+
+                const SizedBox(height: 40),
+              ],
             ),
           ),
         ),

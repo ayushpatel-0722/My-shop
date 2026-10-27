@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/models/delivery_charge.dart';
@@ -9,7 +10,6 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../admin_shell.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 enum DeliveryPricingType { paid, free }
 
@@ -166,7 +166,7 @@ class _AdminAddDeliveryChargeScreenState
                       children: [
                         Text(
                           AppLocalizations.of(context).pincodeInformation,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -211,7 +211,7 @@ class _AdminAddDeliveryChargeScreenState
                           contentPadding: EdgeInsets.zero,
                           title: Text(
                             AppLocalizations.of(context).serviceableArea,
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           subtitle: Text(
                             _isServiceable
@@ -237,7 +237,7 @@ class _AdminAddDeliveryChargeScreenState
                       children: [
                         Text(
                           AppLocalizations.of(context).pricingChargeRules,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -278,8 +278,8 @@ class _AdminAddDeliveryChargeScreenState
                                 context,
                               ).standardDeliveryCharge,
                               hintText: AppLocalizations.of(context).eG40,
-                              prefixIcon: Icon(Icons.currency_rupee),
-                              border: OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.currency_rupee),
+                              border: const OutlineInputBorder(),
                             ),
                             validator: (val) {
                               if (_pricingType == DeliveryPricingType.paid) {
@@ -313,8 +313,8 @@ class _AdminAddDeliveryChargeScreenState
                               hintText: AppLocalizations.of(
                                 context,
                               ).eG499LeaveBlankIfNoFreeTier,
-                              prefixIcon: Icon(Icons.card_giftcard),
-                              border: OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.card_giftcard),
+                              border: const OutlineInputBorder(),
                               helperText: AppLocalizations.of(
                                 context,
                               ).customersGet0DeliveryFeeWhenOrderSubtotalMeetsThisAmount,
@@ -332,17 +332,17 @@ class _AdminAddDeliveryChargeScreenState
                             ),
                             child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.check_circle_outline,
                                   color: Colors.green,
                                 ),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     AppLocalizations.of(
                                       context,
                                     ).deliveryWillAlwaysBeFree0ForAllOrdersToThisPincode,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.green,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
@@ -364,7 +364,7 @@ class _AdminAddDeliveryChargeScreenState
                       children: [
                         Text(
                           AppLocalizations.of(context).estimatedDeliveryTimeEta,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -379,8 +379,8 @@ class _AdminAddDeliveryChargeScreenState
                             hintText: AppLocalizations.of(
                               context,
                             ).eG12DaysSameDay3045Mins,
-                            prefixIcon: Icon(Icons.timer_outlined),
-                            border: OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.timer_outlined),
+                            border: const OutlineInputBorder(),
                             helperText: AppLocalizations.of(
                               context,
                             ).displayedToCustomersOnCheckoutProductPages,

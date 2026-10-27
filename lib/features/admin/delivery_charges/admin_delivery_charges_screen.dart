@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/models/delivery_charge.dart';
@@ -10,7 +11,6 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Pincode → delivery charge mapping, with full-screen CRUD and bulk CSV import.
 class AdminDeliveryChargesScreen extends StatefulWidget {
@@ -104,7 +104,7 @@ class _AdminDeliveryChargesScreenState
                 if (filtered.isEmpty) {
                   return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(28),
+                      padding: const EdgeInsets.all(28),
                       child: Text(
                         AppLocalizations.of(
                           context,
@@ -140,7 +140,7 @@ class _AdminDeliveryChargesScreenState
 
   void _importCsv(BuildContext context) {
     // CSV format: `pincode,charge` or `pincode,charge,minOrderAmount,freeAboveAmount`
-    final csv = '380003,50\n380004,45\n380006,0';
+    const csv = '380003,50\n380004,45\n380006,0';
     final charges = csv.split('\n').map((line) {
       final parts = line.split(',');
       final pincode = parts[0].trim();
@@ -318,7 +318,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                             ),
                             child: Text(
                               AppLocalizations.of(context).freeDelivery,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
@@ -489,7 +489,7 @@ class _DeliveryChargeTile extends StatelessWidget {
                         ),
                         child: Text(
                           AppLocalizations.of(context).freeDelivery,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
                             fontSize: 11,
@@ -602,14 +602,14 @@ class _EmptyDeliveryCharges extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).noDeliveryPincodesConfigured,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             AppLocalizations.of(
               context,
             ).addPincodesToDefineDeliveryFeesFreeDeliveryRulesOrMinimumOrderLimits,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),

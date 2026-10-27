@@ -239,7 +239,7 @@ class _EmptyAddress extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             AppLocalizations.of(context).noSavedAddressesYet,
-            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           FilledButton.icon(

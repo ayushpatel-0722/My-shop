@@ -134,6 +134,44 @@ class Company {
     'minOrderAmount': minOrderAmount,
   };
 
+  /// The only fields a shop admin may change from "Shop settings".
+  ///
+  /// Identity (name, slug, password), status, rating and counters are
+  /// deliberately left out, so an edit can never overwrite them.
+  Map<String, dynamic> toEditableMap() => {
+    'details': details,
+    'address': address,
+    'phone': phone,
+    'location': location,
+    'category': category,
+    'logoUrl': logoUrl,
+    'bannerUrl': bannerUrl,
+    'profileImageUrl': profileImageUrl,
+    'deliveryTypes': deliveryTypes,
+    'weeklyHours': weeklyHours.map((e) => e.toMap()).toList(),
+    'handlingMinutes': handlingMinutes,
+    'deliveryMinutes': deliveryMinutes,
+    'minOrderAmount': minOrderAmount,
+  };
+
+  /// This company with the editable fields (see [toEditableMap]) taken from
+  /// [edited]; everything else stays as it is.
+  Company withEditableFieldsFrom(Company edited) => copyWith(
+    details: edited.details,
+    address: edited.address,
+    phone: edited.phone,
+    location: edited.location,
+    category: edited.category,
+    logoUrl: edited.logoUrl,
+    bannerUrl: edited.bannerUrl,
+    profileImageUrl: edited.profileImageUrl,
+    deliveryTypes: edited.deliveryTypes,
+    weeklyHours: edited.weeklyHours,
+    handlingMinutes: edited.handlingMinutes,
+    deliveryMinutes: edited.deliveryMinutes,
+    minOrderAmount: edited.minOrderAmount,
+  );
+
   Company copyWith({
     String? id,
     String? name,

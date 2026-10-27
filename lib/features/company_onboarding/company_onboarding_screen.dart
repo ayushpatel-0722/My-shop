@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart' show FirebaseDatabase;
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../app/routes/app_router.dart';
@@ -11,6 +11,7 @@ import '../../core/models/admin.dart';
 import '../../core/models/app_user.dart';
 import '../../core/models/company.dart';
 import '../../core/repositories/app_repository.dart';
+import '../../core/services/company_password.dart';
 import '../auth/auth_cubit.dart';
 
 /// Company onboarding wizard (Section 8): basic details, weekly hours,
@@ -162,8 +163,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               key: const Key('store_category_field'),
               controller: _categoryCtrl,
               onChanged: (v) {
-                if (_categoryError != null)
+                if (_categoryError != null) {
                   setState(() => _categoryError = null);
+                }
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).storeCategory} *',
@@ -335,8 +337,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _passwordCtrl,
               obscureText: true,
               onChanged: (v) {
-                if (_passwordError != null)
+                if (_passwordError != null) {
                   setState(() => _passwordError = null);
+                }
               },
               decoration: InputDecoration(
                 labelText: '${l10n.companyPassword} *',
@@ -370,8 +373,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _bannerUrlCtrl,
               keyboardType: TextInputType.url,
               onChanged: (v) {
-                if (_bannerUrlError != null)
+                if (_bannerUrlError != null) {
                   setState(() => _bannerUrlError = null);
+                }
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).companyBannerUrl} *',
@@ -414,8 +418,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               key: const Key('admin_name_field'),
               controller: _adminNameCtrl,
               onChanged: (v) {
-                if (_adminNameError != null)
+                if (_adminNameError != null) {
                   setState(() => _adminNameError = null);
+                }
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).adminName} *',
@@ -429,8 +434,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _adminEmailCtrl,
               keyboardType: TextInputType.emailAddress,
               onChanged: (v) {
-                if (_adminEmailError != null)
+                if (_adminEmailError != null) {
                   setState(() => _adminEmailError = null);
+                }
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).adminEmail} *',
@@ -461,8 +467,9 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
               controller: _adminPassCtrl,
               obscureText: true,
               onChanged: (v) {
-                if (_adminPassError != null)
+                if (_adminPassError != null) {
                   setState(() => _adminPassError = null);
+                }
               },
               decoration: InputDecoration(
                 labelText: '${AppLocalizations.of(context).password} *',
@@ -729,7 +736,8 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
         id: companyId,
         name: companyName,
         slug: companyName.toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
-        companyPassword: companyPass,
+        // Stored as a salted hash, never as plain text.
+        companyPassword: CompanyPassword.hash(companyPass),
         details: _detailsCtrl.text.trim(),
         category: _categoryCtrl.text.trim(),
         address: _addressCtrl.text.trim(),

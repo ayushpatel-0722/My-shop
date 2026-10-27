@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -23,6 +24,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
@@ -31,7 +33,6 @@ import '../widgets/location_picker_sheet.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/product_card.dart';
 import '../widgets/web_header.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Company micro-storefront, restructured into clear "aisles":
 ///
@@ -225,11 +226,11 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
             },
           ),
         ),
-        body: SafeArea(
+        body: const SafeArea(
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 SizedBox(height: 12),
                 M3BannerSkeleton(),
                 SizedBox(height: 18),
@@ -271,11 +272,11 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
           builder: (context, productSnap) {
             if (productSnap.connectionState == ConnectionState.waiting &&
                 !productSnap.hasData) {
-              return SafeArea(
+              return const SafeArea(
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       SizedBox(height: 12),
                       M3BannerSkeleton(),
                       SizedBox(height: 18),
@@ -377,6 +378,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         ),
       ),
       actions: [
+        const BackToAdminButton(),
         IconButton(
           icon: const Icon(Icons.search, color: Color(0xFF1E2229)),
           tooltip: AppLocalizations.of(context).searchInThisStore,
@@ -461,9 +463,9 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
                       context.go(AppRoutes.home);
                     }
                   },
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(
                         Icons.arrow_back_rounded,
                         size: 16,
@@ -795,7 +797,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
               const SizedBox(width: 6),
               Text(
                 AppLocalizations.of(context).trendingNow,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF1E2229),
@@ -961,21 +963,21 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
 
         if (allProducts.isEmpty)
           Padding(
-            padding: EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
             child: Center(
               child: Text(
                 AppLocalizations.of(context).thisStoreHasNoProductsYet,
-                style: TextStyle(color: Color(0xFF94A3B8)),
+                style: const TextStyle(color: Color(0xFF94A3B8)),
               ),
             ),
           )
         else if (visible.isEmpty)
           Padding(
-            padding: EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
             child: Center(
               child: Text(
                 AppLocalizations.of(context).noProductsMatchTheseFilters,
-                style: TextStyle(color: Color(0xFF94A3B8)),
+                style: const TextStyle(color: Color(0xFF94A3B8)),
               ),
             ),
           )
@@ -1201,15 +1203,15 @@ class _ShopDetailsBlock extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle_rounded,
                         size: 12,
                         color: Colors.white,
                       ),
-                      SizedBox(width: 3),
+                      const SizedBox(width: 3),
                       Text(
                         AppLocalizations.of(context).verified,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10.5,
                           fontWeight: FontWeight.w800,
@@ -1630,7 +1632,7 @@ class _OfferCarousel extends StatelessWidget {
                   ),
                   child: Text(
                     AppLocalizations.of(context).specialOffer,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
@@ -1986,18 +1988,18 @@ class _StoreCouponsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.confirmation_number_outlined,
                 color: Color(0xFFB3261E),
                 size: 18,
               ),
-              SizedBox(width: 6),
+              const SizedBox(width: 6),
               Text(
                 AppLocalizations.of(context).offersFromThisStore,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF1E2229),
@@ -2129,7 +2131,7 @@ class _StoreCouponCard extends StatelessWidget {
               ),
               child: Text(
                 AppLocalizations.of(context).apply,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFFB3261E),

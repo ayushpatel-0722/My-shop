@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
+import '../../../core/services/company_password.dart';
 import '../auth_cubit.dart';
 
 /// Two-step Admin login (Section 5.1):
@@ -240,7 +241,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         }
 
         final passMatch = docs.any(
-          (d) => (d.data()['companyPassword'] ?? '') == companyPass,
+          (d) => CompanyPassword.verify(
+            companyPass,
+            (d.data()['companyPassword'] ?? '').toString(),
+          ),
         );
         if (!passMatch) {
           setState(() {

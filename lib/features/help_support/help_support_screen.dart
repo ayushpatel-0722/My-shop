@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../app/routes/app_router.dart';
 import '../../app/theme/app_theme.dart';
 import 'models/faq_item.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -56,7 +56,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context).helpSupport,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -85,7 +85,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               icon: const Icon(Icons.help_outline, size: 18),
               label: Text(
                 AppLocalizations.of(context).help,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
@@ -265,7 +268,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   onPressed: () => context.push(AppRoutes.contactSupport),
                   child: Text(
                     AppLocalizations.of(context).writeToUs,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -278,7 +284,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             children: [
               Text(
                 AppLocalizations.of(context).frequentlyAskedQuestions,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1E2229),
@@ -313,7 +319,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   const SizedBox(height: 12),
                   Text(
                     AppLocalizations.of(context).noMatchingFaqsFound,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF374151),
@@ -325,7 +331,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       context,
                     ).tryAdjustingYourSearchTermsOrSubmitAQueryToOurSupportStaff,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF6B7280),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(

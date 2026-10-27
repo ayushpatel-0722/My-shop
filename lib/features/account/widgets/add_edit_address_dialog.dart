@@ -279,7 +279,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                       // Contact Info
                       Text(
                         AppLocalizations.of(context).contactDetails,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF6B7280),
@@ -359,7 +359,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                       // Address Info
                       Text(
                         AppLocalizations.of(context).addressDetails,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF6B7280),
@@ -397,10 +397,11 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                                     context,
                                   ).enterPincode;
                                 }
-                                if (v.trim().length < 6)
+                                if (v.trim().length < 6) {
                                   return AppLocalizations.of(
                                     context,
                                   ).msg6Digits;
+                                }
                                 return null;
                               },
                             ),
@@ -505,7 +506,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                       // Address Type (Home / Work / Other)
                       Text(
                         AppLocalizations.of(context).saveAddressAs,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF6B7280),
@@ -567,7 +568,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
                           AppLocalizations.of(
                             context,
                           ).setAsDefaultDeliveryAddress,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),

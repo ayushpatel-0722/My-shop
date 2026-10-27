@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../app/theme/app_theme.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/services/email_service.dart';
 import '../auth/auth_cubit.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 class ContactSupportScreen extends StatefulWidget {
   final String? initialCategory;
@@ -144,7 +144,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
             Text(
               AppLocalizations.of(context).querySubmittedEmailSent,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E2229),
@@ -213,7 +213,10 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               },
               child: Text(
                 AppLocalizations.of(context).paymentDone,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
               ),
             ),
           ),
@@ -289,7 +292,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context).contactSupport,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -338,18 +341,18 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                             AppLocalizations.of(
                               context,
                             ).supportHelplineAyush123GmailCom,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1E2229),
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             AppLocalizations.of(
                               context,
                             ).submittingThisFormTriggersAnEmailToAyush123GmailComWithYourMessageAndAccountDetailsAttached,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF6B7280),
                               height: 1.35,
@@ -366,7 +369,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
               // Category dropdown
               Text(
                 AppLocalizations.of(context).issueCategory,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF374151),
@@ -547,11 +550,11 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.send_rounded, size: 18),
-                            SizedBox(width: 8),
+                            const Icon(Icons.send_rounded, size: 18),
+                            const SizedBox(width: 8),
                             Text(
                               AppLocalizations.of(context).submitQuerySendEmail,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),

@@ -183,9 +183,9 @@ class M3ProductCardSkeleton extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           // Price and add button row
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               ModernShimmer.rectangular(
                 width: 50,
                 height: 16,
@@ -253,12 +253,12 @@ class M3BannerSkeleton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          M3ShadowCardContainer(
+          const M3ShadowCardContainer(
             padding: EdgeInsets.zero,
             borderRadius: 16,
             height: 155,
             width: double.infinity,
-            child: const ClipRRect(
+            child: ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(16)),
               child: ModernShimmer(width: double.infinity, height: 155),
             ),
@@ -300,8 +300,8 @@ class M3CategoryRailSkeleton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 6,
         separatorBuilder: (_, _) => const SizedBox(width: 14),
-        itemBuilder: (_, _) => Column(
-          children: const [
+        itemBuilder: (_, _) => const Column(
+          children: [
             M3ShadowCardContainer(
               padding: EdgeInsets.zero,
               width: 58,
@@ -338,23 +338,23 @@ class M3VoucherRailSkeleton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 3,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (_, _) => M3ShadowCardContainer(
+        itemBuilder: (_, _) => const M3ShadowCardContainer(
           width: 275,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           borderRadius: 14,
           child: Row(
             children: [
-              const ModernShimmer.rectangular(
+              ModernShimmer.rectangular(
                 width: 40,
                 height: 40,
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     ModernShimmer.rectangular(
                       width: 80,
                       height: 12,
@@ -369,8 +369,8 @@ class M3VoucherRailSkeleton extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              const ModernShimmer.rectangular(
+              SizedBox(width: 8),
+              ModernShimmer.rectangular(
                 width: 48,
                 height: 24,
                 borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -389,22 +389,22 @@ class M3ShopCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3ShadowCardContainer(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+    return const M3ShadowCardContainer(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(12),
       borderRadius: 16,
       child: Row(
         children: [
-          const ModernShimmer.rectangular(
+          ModernShimmer.rectangular(
             width: 72,
             height: 72,
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 ModernShimmer.rectangular(
                   width: 140,
                   height: 15,
@@ -437,16 +437,16 @@ class M3OrderCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3ShadowCardContainer(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
+    return const M3ShadowCardContainer(
+      margin: EdgeInsets.only(bottom: 14),
+      padding: EdgeInsets.all(16),
       borderRadius: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               ModernShimmer.rectangular(
                 width: 100,
                 height: 14,
@@ -459,21 +459,21 @@ class M3OrderCardSkeleton extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: Color(0xFFF0F2F5)),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
+          Divider(height: 1, color: Color(0xFFF0F2F5)),
+          SizedBox(height: 12),
           Row(
             children: [
-              const ModernShimmer.rectangular(
+              ModernShimmer.rectangular(
                 width: 50,
                 height: 50,
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     ModernShimmer.rectangular(
                       width: 120,
                       height: 13,
@@ -488,7 +488,7 @@ class M3OrderCardSkeleton extends StatelessWidget {
                   ],
                 ),
               ),
-              const ModernShimmer.rectangular(
+              ModernShimmer.rectangular(
                 width: 60,
                 height: 15,
                 borderRadius: BorderRadius.all(Radius.circular(4)),
@@ -507,18 +507,18 @@ class M3ListTileSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return M3ShadowCardContainer(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    return const M3ShadowCardContainer(
+      margin: EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       borderRadius: 14,
       child: Row(
         children: [
-          const ModernShimmer.circular(size: 40),
-          const SizedBox(width: 14),
+          ModernShimmer.circular(size: 40),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 ModernShimmer.rectangular(
                   width: double.infinity,
                   height: 14,
@@ -533,8 +533,8 @@ class M3ListTileSkeleton extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          const ModernShimmer.rectangular(
+          SizedBox(width: 10),
+          ModernShimmer.rectangular(
             width: 20,
             height: 20,
             borderRadius: BorderRadius.all(Radius.circular(4)),
@@ -563,34 +563,34 @@ class M3ProductDetailSkeleton extends StatelessWidget {
             color: const Color(0xFFF9FAFB),
             child: const ModernShimmer(width: double.infinity, height: 280),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
+          const Padding(
+            padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Category pill
-                const ModernShimmer.rectangular(
+                ModernShimmer.rectangular(
                   width: 70,
                   height: 12,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 // Title
-                const ModernShimmer.rectangular(
+                ModernShimmer.rectangular(
                   width: double.infinity,
                   height: 22,
                   borderRadius: BorderRadius.all(Radius.circular(6)),
                 ),
-                const SizedBox(height: 8),
-                const ModernShimmer.rectangular(
+                SizedBox(height: 8),
+                ModernShimmer.rectangular(
                   width: 180,
                   height: 18,
                   borderRadius: BorderRadius.all(Radius.circular(6)),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 // Price & Badge
                 Row(
-                  children: const [
+                  children: [
                     ModernShimmer.rectangular(
                       width: 90,
                       height: 26,
@@ -604,18 +604,18 @@ class M3ProductDetailSkeleton extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                const Divider(height: 1, color: Color(0xFFF0F2F5)),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
+                Divider(height: 1, color: Color(0xFFF0F2F5)),
+                SizedBox(height: 20),
                 // Variants title & chips
-                const ModernShimmer.rectangular(
+                ModernShimmer.rectangular(
                   width: 110,
                   height: 14,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Row(
-                  children: const [
+                  children: [
                     ModernShimmer.rectangular(
                       width: 70,
                       height: 34,
@@ -635,27 +635,27 @@ class M3ProductDetailSkeleton extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 // Description block
-                const ModernShimmer.rectangular(
+                ModernShimmer.rectangular(
                   width: 90,
                   height: 14,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                const SizedBox(height: 10),
-                const ModernShimmer.rectangular(
+                SizedBox(height: 10),
+                ModernShimmer.rectangular(
                   width: double.infinity,
                   height: 12,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                const SizedBox(height: 6),
-                const ModernShimmer.rectangular(
+                SizedBox(height: 6),
+                ModernShimmer.rectangular(
                   width: double.infinity,
                   height: 12,
                   borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                const SizedBox(height: 6),
-                const ModernShimmer.rectangular(
+                SizedBox(height: 6),
+                ModernShimmer.rectangular(
                   width: 220,
                   height: 12,
                   borderRadius: BorderRadius.all(Radius.circular(4)),

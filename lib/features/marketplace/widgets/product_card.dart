@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/features/auth/widgets/auth_bottom_sheet.dart';
-import '../../checkout/cart/cart_cubit.dart';
-import '../../checkout/cart/wishlist_cubit.dart';
 
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
@@ -12,6 +10,8 @@ import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/app_product_image.dart';
+import '../../checkout/cart/cart_cubit.dart';
+import '../../checkout/cart/wishlist_cubit.dart';
 
 /// Product card styled to match the Vibrant Marketplace design system.
 ///
@@ -60,7 +60,7 @@ class _ProductCardState extends State<ProductCard> {
     final onSurface = theme.colorScheme.onSurface;
     final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
 
-    Widget card = MouseRegion(
+    final Widget card = MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) {
         if (isDesktop && mounted) setState(() => _isHovered = true);
@@ -87,10 +87,10 @@ class _ProductCardState extends State<ProductCard> {
           ),
           boxShadow: (_isHovered && isDesktop)
               ? [
-                  BoxShadow(
-                    color: const Color.fromRGBO(30, 34, 41, 0.12),
+                  const BoxShadow(
+                    color: Color.fromRGBO(30, 34, 41, 0.12),
                     blurRadius: 18,
-                    offset: const Offset(0, 8),
+                    offset: Offset(0, 8),
                   ),
                 ]
               : const [

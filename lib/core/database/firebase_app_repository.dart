@@ -7,6 +7,9 @@ import 'package:firebase_database/firebase_database.dart' show FirebaseDatabase;
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:uuid/uuid.dart';
 
+import '../../app/l10n/l10n_service.dart';
+import '../domain/category_tree.dart';
+import '../domain/order_status.dart';
 import '../models/admin.dart';
 import '../models/app_user.dart';
 import '../models/banner.dart';
@@ -22,13 +25,11 @@ import '../models/product.dart';
 import '../models/recommendation.dart';
 import '../models/review.dart';
 import '../models/voucher.dart';
-import '../domain/category_tree.dart';
-import '../domain/order_status.dart';
 import '../repositories/app_repository.dart';
 import '../services/auth_session.dart';
+import '../services/company_password.dart';
 import '../services/secure_session_cache.dart';
 import '../utils/type_utils.dart';
-import '../../app/l10n/l10n_service.dart';
 
 /// Firestore / Auth / RTDB implementation of [AppRepository].
 ///
@@ -329,7 +330,10 @@ class FirebaseAppRepository implements AppRepository {
     }
     if (matches.isNotEmpty) {
       for (final d in matches) {
-        if ((d.data()['companyPassword'] ?? '') == companyPassword.trim()) {
+        if (CompanyPassword.verify(
+          companyPassword,
+          (d.data()['companyPassword'] ?? '').toString(),
+        )) {
           companyDoc = d;
           break;
         }
@@ -414,8 +418,19 @@ class FirebaseAppRepository implements AppRepository {
         .toLowerCase();
 
     // 4. Verify company password
-    if (registeredPass != companyPassword.trim()) {
+    if (!CompanyPassword.verify(companyPassword, registeredPass)) {
       throw Exception(L10n.current.incorrectCompanyPassword);
+    }
+
+    // A password saved as plain text before hashing existed is re-saved as a
+    // salted hash now that the admin has proved they know it. Best effort: if
+    // it cannot be written, the next login simply tries again.
+    if (CompanyPassword.needsUpgrade(registeredPass)) {
+      try {
+        await companyDoc.reference.update({
+          'companyPassword': CompanyPassword.hash(companyPassword),
+        });
+      } catch (_) {}
     }
 
     // 5. Verify company association
@@ -683,7 +698,7 @@ class FirebaseAppRepository implements AppRepository {
     if (uid.isEmpty) return;
     final doc = await _db.collection('users').doc(uid).get();
     if (!doc.exists || doc.data()?['addresses'] is! List) return;
-    List<dynamic> list = List.from(doc.data()!['addresses']);
+    final List<dynamic> list = List.from(doc.data()!['addresses']);
     list.removeWhere((e) => e is Map && e['id'] == addressId);
     if (list.isNotEmpty &&
         !list.any((e) => e is Map && e['isDefault'] == true)) {
@@ -740,6 +755,18 @@ class FirebaseAppRepository implements AppRepository {
       await _rtdb.ref('companies/$id').set(doc.toMap());
     } catch (_) {}
     return doc;
+  }
+
+  @override
+  Future<void> updateCompanyDetails(Company company) async {
+    if (company.id.isEmpty) {
+      throw ArgumentError('A company id is required to save shop details.');
+    }
+    final fields = company.toEditableMap();
+    await _companiesCol().doc(company.id).update(fields);
+    try {
+      await _rtdb.ref('companies/${company.id}').update(fields);
+    } catch (_) {}
   }
 
   @override

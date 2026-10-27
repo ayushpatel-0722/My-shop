@@ -1,6 +1,7 @@
 import 'dart:convert';
-import '../utils/type_utils.dart';
+
 import '../../app/l10n/l10n_service.dart';
+import '../utils/type_utils.dart';
 
 /// How a product is measured and sold.
 class ProductType {
@@ -257,7 +258,6 @@ class ProductVariant {
   final String id;
   final String sku;
   final String title;
-  String get displayTitle => title.isNotEmpty ? title : label;
   final Map<String, String> attributes;
   final int stockQty;
   final bool isUnlimitedStock;

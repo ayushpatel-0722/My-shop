@@ -11,33 +11,33 @@ import '../helpers/test_harness.dart';
 void main() {
   late MockAppRepository repo;
 
-  final company1 = const Company(
+  const company1 = Company(
     id: 'c_spices',
     name: 'Spice King',
     slug: 'spice-king',
     companyPassword: 'pass',
   );
 
-  final company2 = const Company(
+  const company2 = Company(
     id: 'c_organic',
     name: 'GreenLeaf Organics',
     slug: 'greenleaf-organics',
     companyPassword: 'pass',
   );
 
-  final categorySpices = const Category(
+  const categorySpices = Category(
     id: 'cat_spices',
     name: 'Spices',
     companyId: 'c_spices',
   );
 
-  final categoryVeg = const Category(
+  const categoryVeg = Category(
     id: 'cat_veg',
     name: 'Vegetables',
     companyId: 'c_organic',
   );
 
-  final prodTurmeric = const Product(
+  const prodTurmeric = Product(
     id: 'prod_turmeric',
     companyId: 'c_spices',
     categoryId: 'cat_spices',
@@ -47,7 +47,7 @@ void main() {
     stockQty: 50,
   );
 
-  final prodChilli = const Product(
+  const prodChilli = Product(
     id: 'prod_chilli',
     companyId: 'c_spices',
     categoryId: 'cat_spices',
@@ -57,7 +57,7 @@ void main() {
     stockQty: 0, // Out of stock
   );
 
-  final prodTomato = const Product(
+  const prodTomato = Product(
     id: 'prod_tomato',
     companyId: 'c_organic',
     categoryId: 'cat_veg',

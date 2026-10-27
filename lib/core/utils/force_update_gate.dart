@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../services/remote_config_service.dart';
 import '../../app/l10n/l10n_service.dart';
+import '../services/remote_config_service.dart';
 
 /// Blocking "Update Required" screen (Section 18.2) shown when the installed
 /// version is below the Remote Config minimum and `forceUpdate` is enabled.

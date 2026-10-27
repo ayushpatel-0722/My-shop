@@ -5,6 +5,7 @@ import '../../../core/models/company.dart';
 import '../../../core/models/home_explore_category.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
+import '../../../core/widgets/category_cover_builder.dart';
 import '../admin_shell.dart';
 import 'widgets/shop_selector_bar.dart';
 
@@ -125,109 +126,114 @@ class _AdminExploreCategoriesScreenState
                   constraints: BoxConstraints(
                     maxHeight: MediaQuery.of(context).size.height * 0.60,
                   ),
-                  child: StreamBuilder<List<Category>>(
-                    stream: repo.categories(companyId: shop.id),
-                    builder: (context, snap) {
-                      if (snap.connectionState == ConnectionState.waiting &&
-                          !snap.hasData) {
-                        return const SizedBox(
-                          height: 200,
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-
-                      final categories = snap.data ?? const <Category>[];
-                      if (categories.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 40),
-                          child: Center(
-                            child: Text(
-                              'No categories found for this shop.\nPlease add categories first in Category Management.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Color(0xFF64748B)),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: categories.length,
-                        separatorBuilder: (_, _) => const Divider(height: 1),
-                        itemBuilder: (context, i) {
-                          final cat = categories[i];
-                          final isAlreadyConfigured = existingCategoryIds
-                              .contains(cat.id);
-
-                          return ListTile(
-                            leading: Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: _buildCategoryIcon(cat),
-                              ),
-                            ),
-                            title: Text(
-                              cat.name,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: isAlreadyConfigured
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF1E2229),
-                              ),
-                            ),
-                            subtitle: Text(
-                              'ID: ${cat.id}',
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                            trailing: isAlreadyConfigured
-                                ? Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFE2E8F0),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Text(
-                                      'Already Added',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  )
-                                : ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFF5247),
-                                      foregroundColor: Colors.white,
-                                      elevation: 0,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 6,
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      Navigator.pop(ctx);
-                                      await _addCategory(
-                                        shop,
-                                        cat,
-                                        existing.length,
-                                      );
-                                    },
-                                    child: const Text('Add'),
-                                  ),
+                  child: CategoryCoverBuilder(
+                    companyId: shop.id,
+                    builder: (context, coverFor) => StreamBuilder<List<Category>>(
+                      stream: repo.categories(companyId: shop.id),
+                      builder: (context, snap) {
+                        if (snap.connectionState == ConnectionState.waiting &&
+                            !snap.hasData) {
+                          return const SizedBox(
+                            height: 200,
+                            child: Center(child: CircularProgressIndicator()),
                           );
-                        },
-                      );
-                    },
+                        }
+
+                        final categories = snap.data ?? const <Category>[];
+                        if (categories.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 40),
+                            child: Center(
+                              child: Text(
+                                'No categories found for this shop.\nPlease add categories first in Category Management.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Color(0xFF64748B)),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: categories.length,
+                          separatorBuilder: (_, _) => const Divider(height: 1),
+                          itemBuilder: (context, i) {
+                            final cat = categories[i];
+                            final isAlreadyConfigured = existingCategoryIds
+                                .contains(cat.id);
+
+                            return ListTile(
+                              leading: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: _buildCategoryIcon(cat, coverFor(cat)),
+                                ),
+                              ),
+                              title: Text(
+                                cat.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isAlreadyConfigured
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF1E2229),
+                                ),
+                              ),
+                              subtitle: Text(
+                                'ID: ${cat.id}',
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                              trailing: isAlreadyConfigured
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE2E8F0),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        'Already Added',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF64748B),
+                                        ),
+                                      ),
+                                    )
+                                  : ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(
+                                          0xFFFF5247,
+                                        ),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 6,
+                                        ),
+                                      ),
+                                      onPressed: () async {
+                                        Navigator.pop(ctx);
+                                        await _addCategory(
+                                          shop,
+                                          cat,
+                                          existing.length,
+                                        );
+                                      },
+                                      child: const Text('Add'),
+                                    ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -300,11 +306,15 @@ class _AdminExploreCategoriesScreenState
     }
   }
 
-  Widget _buildCategoryIcon(Category cat) {
-    if (cat.iconUrl.startsWith('http://') ||
-        cat.iconUrl.startsWith('https://')) {
+  /// The category's own image, else the photo of its first product that has
+  /// one ([coverUrl]), else its emoji / a generic icon.
+  Widget _buildCategoryIcon(Category cat, String? coverUrl) {
+    final isImageIcon =
+        cat.iconUrl.startsWith('http://') || cat.iconUrl.startsWith('https://');
+    final image = isImageIcon ? cat.iconUrl : (coverUrl ?? '');
+    if (image.isNotEmpty) {
       return Image.network(
-        cat.iconUrl,
+        image,
         width: 44,
         height: 44,
         fit: BoxFit.cover,
@@ -411,202 +421,209 @@ class _AdminExploreCategoriesScreenState
                 final entries =
                     configSnap.data ?? const <HomeExploreCategory>[];
 
-                return StreamBuilder<List<Category>>(
-                  stream: repo.categories(companyId: shop.id),
-                  builder: (context, catSnap) {
-                    final categories = catSnap.data ?? const <Category>[];
-                    final catMap = {for (final c in categories) c.id: c};
+                return CategoryCoverBuilder(
+                  companyId: shop.id,
+                  builder: (context, coverFor) => StreamBuilder<List<Category>>(
+                    stream: repo.categories(companyId: shop.id),
+                    builder: (context, catSnap) {
+                      final categories = catSnap.data ?? const <Category>[];
+                      final catMap = {for (final c in categories) c.id: c};
 
-                    if (entries.isEmpty) {
-                      return _buildEmptyState(context, shop, entries);
-                    }
+                      if (entries.isEmpty) {
+                        return _buildEmptyState(context, shop, entries);
+                      }
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                          child: Row(
-                            children: [
-                              Text(
-                                '${entries.length} Configured Categories',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF475569),
-                                ),
-                              ),
-                              const Spacer(),
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFF5247),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                            child: Row(
+                              children: [
+                                Text(
+                                  '${entries.length} Configured Categories',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Color(0xFF475569),
                                   ),
                                 ),
-                                icon: const Icon(Icons.add, size: 18),
-                                label: const Text('Add Category'),
-                                onPressed: () => _showAddCategorySheet(
-                                  context,
-                                  shop,
-                                  entries,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Expanded(
-                          child: ReorderableListView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                            itemCount: entries.length,
-                            onReorderItem: (oldIndex, target) async {
-                              final list = List<HomeExploreCategory>.from(
-                                entries,
-                              );
-                              final moved = list.removeAt(oldIndex);
-                              list.insert(target, moved);
-                              await repo.reorderHomeExploreCategories(list);
-                            },
-                            itemBuilder: (context, index) {
-                              final entry = entries[index];
-                              final resolvedCat = catMap[entry.categoryId];
-                              final displayName =
-                                  resolvedCat?.name ??
-                                  (entry.categoryName.isNotEmpty
-                                      ? entry.categoryName
-                                      : entry.categoryId);
-
-                              return Container(
-                                key: ValueKey(entry.id),
-                                margin: const EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: entry.isActive
-                                        ? const Color(0xFFE2E8F0)
-                                        : const Color(0xFFCBD5E1),
-                                  ),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Color.fromRGBO(0, 0, 0, 0.02),
-                                      blurRadius: 4,
-                                      offset: Offset(0, 2),
+                                const Spacer(),
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF5247),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
                                     ),
-                                  ],
-                                ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
-                                  leading: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 26,
-                                        height: 26,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF1F5F9),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
+                                  icon: const Icon(Icons.add, size: 18),
+                                  label: const Text('Add Category'),
+                                  onPressed: () => _showAddCategorySheet(
+                                    context,
+                                    shop,
+                                    entries,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Expanded(
+                            child: ReorderableListView.builder(
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+                              itemCount: entries.length,
+                              onReorderItem: (oldIndex, target) async {
+                                final list = List<HomeExploreCategory>.from(
+                                  entries,
+                                );
+                                final moved = list.removeAt(oldIndex);
+                                list.insert(target, moved);
+                                await repo.reorderHomeExploreCategories(list);
+                              },
+                              itemBuilder: (context, index) {
+                                final entry = entries[index];
+                                final resolvedCat = catMap[entry.categoryId];
+                                final displayName =
+                                    resolvedCat?.name ??
+                                    (entry.categoryName.isNotEmpty
+                                        ? entry.categoryName
+                                        : entry.categoryId);
+
+                                return Container(
+                                  key: ValueKey(entry.id),
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: entry.isActive
+                                          ? const Color(0xFFE2E8F0)
+                                          : const Color(0xFFCBD5E1),
+                                    ),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color.fromRGBO(0, 0, 0, 0.02),
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
+                                    leading: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 26,
+                                          height: 26,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF1F5F9),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '#${index + 1}',
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF64748B),
+                                          child: Center(
+                                            child: Text(
+                                              '#${index + 1}',
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF64748B),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFEBEA),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
+                                        const SizedBox(width: 10),
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFEBEA),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            child: resolvedCat != null
+                                                ? _buildCategoryIcon(
+                                                    resolvedCat,
+                                                    coverFor(resolvedCat),
+                                                  )
+                                                : const Icon(
+                                                    Icons.category_outlined,
+                                                    color: Color(0xFFFF5247),
+                                                  ),
                                           ),
                                         ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
+                                      ],
+                                    ),
+                                    title: Text(
+                                      displayName,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: entry.isActive
+                                            ? const Color(0xFF1E2229)
+                                            : const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'Category ID: ${entry.categoryId}',
+                                      style: const TextStyle(
+                                        fontSize: 11.5,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Switch.adaptive(
+                                          value: entry.isActive,
+                                          activeThumbColor: const Color(
+                                            0xFFFF5247,
                                           ),
-                                          child: resolvedCat != null
-                                              ? _buildCategoryIcon(resolvedCat)
-                                              : const Icon(
-                                                  Icons.category_outlined,
-                                                  color: Color(0xFFFF5247),
-                                                ),
+                                          onChanged: (val) async {
+                                            await repo.saveHomeExploreCategory(
+                                              entry.copyWith(isActive: val),
+                                            );
+                                          },
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  title: Text(
-                                    displayName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: entry.isActive
-                                          ? const Color(0xFF1E2229)
-                                          : const Color(0xFF94A3B8),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                            color: Color(0xFFDC2626),
+                                            size: 20,
+                                          ),
+                                          tooltip: 'Remove',
+                                          onPressed: () =>
+                                              _deleteCategory(entry),
+                                        ),
+                                        const Icon(
+                                          Icons.drag_handle,
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  subtitle: Text(
-                                    'Category ID: ${entry.categoryId}',
-                                    style: const TextStyle(
-                                      fontSize: 11.5,
-                                      color: Color(0xFF64748B),
-                                    ),
-                                  ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Switch.adaptive(
-                                        value: entry.isActive,
-                                        activeThumbColor: const Color(
-                                          0xFFFF5247,
-                                        ),
-                                        onChanged: (val) async {
-                                          await repo.saveHomeExploreCategory(
-                                            entry.copyWith(isActive: val),
-                                          );
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: Color(0xFFDC2626),
-                                          size: 20,
-                                        ),
-                                        tooltip: 'Remove',
-                                        onPressed: () => _deleteCategory(entry),
-                                      ),
-                                      const Icon(
-                                        Icons.drag_handle,
-                                        color: Color(0xFF94A3B8),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 );
               },
             ),

@@ -7,6 +7,7 @@ import '../../app/routes/app_router.dart';
 import '../../core/models/notification.dart';
 import '../../core/services/service_locator.dart';
 import '../../core/utils/responsive_extensions.dart';
+import '../../core/widgets/back_to_admin_button.dart';
 import '../../core/widgets/modern_shimmer.dart';
 import '../auth/auth_cubit.dart';
 import '../marketplace/widgets/web_header.dart';
@@ -35,6 +36,7 @@ class NotificationsScreen extends StatelessWidget {
                   }
                 },
               ),
+              actions: const [BackToAdminButton()],
             ),
       body: Builder(
         builder: (context) {

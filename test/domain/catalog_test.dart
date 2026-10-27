@@ -96,7 +96,7 @@ void main() {
     test('filters by company', () {
       final result = Catalog.apply(
         products,
-        CatalogQuery(companyIds: {'c_organic'}),
+        const CatalogQuery(companyIds: {'c_organic'}),
       );
       expect(result.map((e) => e.id), isNot(contains('p4')));
     });
@@ -104,7 +104,7 @@ void main() {
     test('filters by category', () {
       final result = Catalog.apply(
         products,
-        CatalogQuery(categoryIds: {'cat_veg2'}),
+        const CatalogQuery(categoryIds: {'cat_veg2'}),
       );
       expect(result.single.id, 'p3');
     });
@@ -112,13 +112,16 @@ void main() {
     test('filters to discounted items only', () {
       final result = Catalog.apply(
         products,
-        CatalogQuery(discountedOnly: true),
+        const CatalogQuery(discountedOnly: true),
       );
       expect(result.single.id, 'p2');
     });
 
     test('filters to items in stock only', () {
-      final result = Catalog.apply(products, CatalogQuery(inStockOnly: true));
+      final result = Catalog.apply(
+        products,
+        const CatalogQuery(inStockOnly: true),
+      );
       expect(result.map((e) => e.id), isNot(contains('p5')));
     });
 
@@ -126,20 +129,20 @@ void main() {
       expect(
         Catalog.apply(
           products,
-          CatalogQuery(sort: ProductSort.nameAsc),
+          const CatalogQuery(sort: ProductSort.nameAsc),
         ).map((e) => e.name).toList().sublist(0, 4),
         ['Apple', 'Banana', 'Carrot', 'Zucchini'],
       );
       expect(
         Catalog.apply(
           products,
-          CatalogQuery(sort: ProductSort.priceDesc),
+          const CatalogQuery(sort: ProductSort.priceDesc),
         ).first.name,
         'Zucchini',
       );
       final cheapestFirst = Catalog.apply(
         products,
-        CatalogQuery(sort: ProductSort.priceAsc),
+        const CatalogQuery(sort: ProductSort.priceAsc),
       );
       expect(cheapestFirst.first.name, 'Carrot');
       expect(cheapestFirst.last.name, 'Sold out bread');
@@ -160,15 +163,15 @@ void main() {
       final source = <Product>[p('a', name: 'Zzz'), p('b', name: 'Aaa')];
       final sorted = Catalog.apply(
         source,
-        CatalogQuery(sort: ProductSort.nameAsc),
+        const CatalogQuery(sort: ProductSort.nameAsc),
       );
       expect(sorted.first.name, 'Aaa');
       expect(source.first.name, 'Zzz');
     });
 
     test('an identity query keeps everything', () {
-      expect(CatalogQuery().isIdentity, isTrue);
-      expect(CatalogQuery(search: 'x').isIdentity, isFalse);
+      expect(const CatalogQuery().isIdentity, isTrue);
+      expect(const CatalogQuery(search: 'x').isIdentity, isFalse);
       expect(
         Catalog.apply(products, const CatalogQuery()).length,
         products.length,

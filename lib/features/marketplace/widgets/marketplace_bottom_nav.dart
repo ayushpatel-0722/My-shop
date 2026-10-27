@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/utils/auth_guard.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Reusable 4-item bottom navigation bar for the shopper / marketplace experience:
 /// 1. Home

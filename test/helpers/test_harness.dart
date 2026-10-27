@@ -3,11 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-
-import 'package:myshop/app/routes/app_router.dart';
-
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/app/l10n/locale_cubit.dart';
+import 'package:myshop/app/routes/app_router.dart';
 import 'package:myshop/app/theme/app_theme.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';

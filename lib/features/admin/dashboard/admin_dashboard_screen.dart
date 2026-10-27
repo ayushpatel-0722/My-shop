@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:myshop/core/services/admin_company_name.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -9,10 +10,10 @@ import '../../../core/models/order.dart';
 import '../../../core/models/product.dart';
 import '../../../core/models/review.dart';
 import '../../../core/services/auth_session.dart';
+import '../../../core/services/qr_deep_link_service.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
-import '../../../core/services/qr_deep_link_service.dart';
 import '../admin_shell.dart';
 import '../orders/widgets/order_items_dialog.dart';
 import '../orders/widgets/payment_verification_dialog.dart';
@@ -49,9 +50,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             final shopId = user?.companyId.isNotEmpty == true
                 ? user!.companyId
                 : 'masala-mart';
-            final shopName = user?.companyName.isNotEmpty == true
-                ? user!.companyName
-                : 'Masala Mart';
+            final shopName = AdminCompanyName.instance.displayName(user);
             showEntityQrDialog(
               context: context,
               type: QrEntityType.shop,
@@ -1166,6 +1165,13 @@ class _OperationalHub extends StatelessWidget {
         subtitle: 'Pincode delivery fees',
         route: AppRoutes.adminDelivery,
         color: Colors.blueGrey.shade700,
+      ),
+      _HubItem(
+        icon: Icons.storefront,
+        title: AppLocalizations.of(context).shopSettings,
+        subtitle: AppLocalizations.of(context).shopSettingsSubtitle,
+        route: AppRoutes.adminShopSettings,
+        color: Colors.indigo.shade700,
       ),
       _HubItem(
         icon: Icons.image,

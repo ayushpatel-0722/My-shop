@@ -198,7 +198,7 @@ void main() {
 
   group('HomeTrendingItem Image and Price Persistence Tests', () {
     test('HomeTrendingItem serializes and deserializes imageUrl and price', () {
-      final item = HomeTrendingItem(
+      const item = HomeTrendingItem(
         id: 'c1_p1',
         shopId: 'c1',
         itemType: 'product',
@@ -293,10 +293,10 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: const Scaffold(
+          home: Scaffold(
             body: Center(
               child: SizedBox(
                 width: 200,

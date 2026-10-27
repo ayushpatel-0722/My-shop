@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/models/company.dart';
 import 'package:myshop/core/models/order.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// "Delivery Type" selector for one shop's order block.
 ///
@@ -46,13 +46,13 @@ class DeliveryTypeSelector extends StatelessWidget {
               ButtonSegment(
                 value: DeliveryType.homeDelivery,
                 label: Text(AppLocalizations.of(context).homeDelivery2),
-                icon: Icon(Icons.local_shipping_outlined, size: 18),
+                icon: const Icon(Icons.local_shipping_outlined, size: 18),
               ),
             if (allowsPickup)
               ButtonSegment(
                 value: DeliveryType.selfPickup,
                 label: Text(AppLocalizations.of(context).selfPickup),
-                icon: Icon(Icons.storefront_outlined, size: 18),
+                icon: const Icon(Icons.storefront_outlined, size: 18),
               ),
           ],
           selected: {effective},

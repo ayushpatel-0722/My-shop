@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/validators.dart';
@@ -12,7 +13,6 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../admin_shell.dart';
-import 'package:myshop/app/l10n/app_localizations.dart';
 
 /// Voucher engine — create, edit, pause and audit per-store coupon codes.
 ///
@@ -1047,7 +1047,7 @@ class _CategoryPickerState extends State<_CategoryPicker> {
         children: [
           Text(
             AppLocalizations.of(context).categories,
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
           ),
           const SizedBox(height: 6),
           StreamBuilder<List<Category>>(
@@ -1057,7 +1057,7 @@ class _CategoryPickerState extends State<_CategoryPicker> {
               if (list.isEmpty) {
                 return Text(
                   AppLocalizations.of(context).noCategoriesFoundForThisStore,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 );
               }
               return Wrap(
@@ -1132,7 +1132,7 @@ class _ProductPickerState extends State<_ProductPicker> {
         children: [
           Text(
             AppLocalizations.of(context).products,
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
           ),
           const SizedBox(height: 6),
           StreamBuilder<List<Product>>(
@@ -1142,7 +1142,7 @@ class _ProductPickerState extends State<_ProductPicker> {
               if (list.isEmpty) {
                 return Text(
                   AppLocalizations.of(context).noProductsFoundForThisStore,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 );
               }
               return Wrap(

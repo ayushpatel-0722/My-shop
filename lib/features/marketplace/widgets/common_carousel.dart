@@ -157,7 +157,7 @@ class _CommonCarouselState extends State<CommonCarousel> {
         ? screenHeight * widget.maxHeightFactor!
         : double.infinity;
 
-    Widget carouselBody = NotificationListener<ScrollNotification>(
+    final Widget carouselBody = NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification is ScrollStartNotification &&
             notification.dragDetails != null) {

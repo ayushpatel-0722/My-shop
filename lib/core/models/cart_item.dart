@@ -1,5 +1,5 @@
-import 'product.dart';
 import '../../app/l10n/l10n_service.dart';
+import 'product.dart';
 
 /// Frozen copy of the variant the shopper actually picked.
 ///
@@ -364,10 +364,6 @@ class CartItem {
 
   /// Middle label of the "–  x  +" stepper: the quantity of packs.
   String get stepperLabel => '$qty';
-
-  /// "500 grams" -> "500 g"; "1500 grams" -> "1.5 kg"; "2 pieces" -> "2 pieces".
-  static String formatAmount(double amount, String unitType) =>
-      CartUnit.format(amount, unitType);
 
   CartItem copyWith({int? qty, VariantSnapshot? variant}) => CartItem(
     companyId: companyId,

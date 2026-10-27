@@ -59,9 +59,7 @@ void main() {
           tester.view.resetDevicePixelRatio();
         });
 
-        await tester.pumpWidget(
-          buildTestWidget(child: const HomeScreen()),
-        );
+        await tester.pumpWidget(buildTestWidget(child: const HomeScreen()));
         await tester.pumpAndSettle();
 
         // 1. Verify "Store Vouchers & Deals" section exists
@@ -101,20 +99,24 @@ void main() {
 
         // Verify the container has surface/white decoration, NOT black/empty
         final sheetContainer = tester.widget<Container>(
-          find.descendant(
-            of: find.byType(DraggableScrollableSheet),
-            matching: find.byType(Container),
-          ).first,
+          find
+              .descendant(
+                of: find.byType(DraggableScrollableSheet),
+                matching: find.byType(Container),
+              )
+              .first,
         );
         final decoration = sheetContainer.decoration as BoxDecoration?;
         expect(decoration, isNotNull);
         expect(decoration!.color, equals(Colors.white));
 
         // 4. Test Copy button interaction inside sheet
-        final copyButtonInSheet = find.descendant(
-          of: find.byType(DraggableScrollableSheet),
-          matching: find.text('COPY'),
-        ).first;
+        final copyButtonInSheet = find
+            .descendant(
+              of: find.byType(DraggableScrollableSheet),
+              matching: find.text('COPY'),
+            )
+            .first;
         await tester.tap(copyButtonInSheet);
         await tester.pumpAndSettle();
 
@@ -148,9 +150,7 @@ void main() {
           tester.view.resetDevicePixelRatio();
         });
 
-        await tester.pumpWidget(
-          buildTestWidget(child: const HomeScreen()),
-        );
+        await tester.pumpWidget(buildTestWidget(child: const HomeScreen()));
         await tester.pumpAndSettle();
 
         // 1. Verify "Store Vouchers & Deals" section exists
@@ -187,10 +187,12 @@ void main() {
 
         // Verify Dialog container is constrained to maxWidth 580
         final dialogContainer = tester.widget<Container>(
-          find.descendant(
-            of: find.byType(Dialog),
-            matching: find.byType(Container),
-          ).first,
+          find
+              .descendant(
+                of: find.byType(Dialog),
+                matching: find.byType(Container),
+              )
+              .first,
         );
         expect(dialogContainer.constraints?.maxWidth, equals(580));
         final decoration = dialogContainer.decoration as BoxDecoration?;

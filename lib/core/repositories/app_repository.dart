@@ -60,6 +60,10 @@ abstract class AppRepository {
   Future<void> deleteUserAddress(String userId, String addressId);
   Future<void> setDefaultAddress(String userId, String addressId);
   Future<Company> createCompany(Company company);
+
+  /// Saves the editable shop details (see [Company.toEditableMap]) of
+  /// [company]. Name, slug, password, status and ratings are never changed.
+  Future<void> updateCompanyDetails(Company company);
   Future<Admin> createAdminAccount(Admin admin, {required String password});
   Future<Employee> createEmployeeAccount(
     Employee employee, {
@@ -267,18 +271,6 @@ class MediaUrlPayload {
     'videoUrl': videoUrl,
     'updatedAt': updatedAt,
   };
-}
-
-String? sanitizeMediaUrl(String raw) {
-  final value = raw.trim();
-  if (value.isEmpty) return null;
-
-  final uri = Uri.tryParse(value);
-  if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
-    return null;
-  }
-
-  return uri.toString();
 }
 
 Future<void> saveMediaToFirestore(MediaUrlPayload media) async {
