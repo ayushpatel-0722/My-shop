@@ -8,12 +8,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'app/app.dart';
 import 'app/l10n/locale_cubit.dart';
 import 'core/config/app_config.dart';
+import 'core/config/environment.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/service_locator.dart';
 import 'features/auth/auth_cubit.dart';
 import 'features/checkout/cart/cart_cubit.dart';
 import 'features/checkout/cart/wishlist_cubit.dart';
-import 'core/config/environment.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,7 +62,7 @@ Future<void> main() async {
   } catch (e) {
     debugPrint(
       '!! Firebase is not configured yet — running in MOCK mode.\n'
-      '   Run `flutterfire configure` (see SETUP.md). Error: $e',
+      '   Run `flutterfire configure` (see README.md). Error: $e',
     );
     firebaseReady = false;
   }
@@ -88,7 +88,7 @@ Future<void> main() async {
 }
 
 Future<void> _initAppCheck() async {
-  if (kIsWeb) return; // Web App Check uses reCAPTCHA — see SETUP.md.
+  if (kIsWeb) return; // Web App Check uses reCAPTCHA — see README.md.
   try {
     if (defaultTargetPlatform == TargetPlatform.android &&
         AppConfig.appCheckDebugTokenAndroid.isNotEmpty) {
