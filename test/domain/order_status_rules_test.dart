@@ -23,6 +23,10 @@ void main() {
       );
       expect(
         OrderStatusRules.nextStage(OrderStatus.onTheWay),
+        OrderStatus.delivered,
+      );
+      expect(
+        OrderStatusRules.nextStage(OrderStatus.delivered),
         OrderStatus.completed,
       );
       expect(OrderStatusRules.nextStage(OrderStatus.completed), isNull);
@@ -160,7 +164,8 @@ void main() {
 
     test('tracker index follows the customer facing chain', () {
       expect(OrderStatusRules.trackerIndex(OrderStatus.pending), 0);
-      expect(OrderStatusRules.trackerIndex(OrderStatus.completed), 5);
+      expect(OrderStatusRules.trackerIndex(OrderStatus.delivered), 5);
+      expect(OrderStatusRules.trackerIndex(OrderStatus.completed), 6);
       expect(
         OrderStatusRules.trackerIndex(OrderStatus.cancelled),
         -1,

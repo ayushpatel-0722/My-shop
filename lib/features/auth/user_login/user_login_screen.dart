@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -40,6 +41,13 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         listener: (context, state) {
           if (state.status == AuthStatus.authenticated) {
             context.go(AppRoutes.home);
+          }
+          if (state.status == AuthStatus.error && state.error != null) {
+            AppToast.error(
+              context,
+              AppLocalizations.of(context).signInFailedPleaseTryAgain,
+              detail: state.error,
+            );
           }
         },
         builder: (context, state) {
@@ -231,7 +239,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       setState(() {
         _mobileError = AppLocalizations.of(context).pleaseEnterYourMobileNumber;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).pleaseEnterYourMobileNumber,
@@ -246,7 +254,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
           context,
         ).enterAValid10DigitIndianMobileNumberEG9876543210;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -270,7 +278,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
           _notFound = true;
           _mobileError = AppLocalizations.of(context).noAccountFound;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(AppLocalizations.of(context).noAccountFound),
             action: SnackBarAction(
@@ -285,14 +293,14 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       if (!mounted) return;
       if (ok) {
         setState(() => _otpSent = true);
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(AppLocalizations.of(context).otpSentTo(mobile)),
             duration: const Duration(seconds: 4),
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(
@@ -304,7 +312,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(
@@ -326,7 +334,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
     try {
       final ok = await context.read<AuthCubit>().sendOtp(mobile);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               ok
@@ -338,7 +346,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(content: Text(AppLocalizations.of(context).error('$e'))),
         );
       }
@@ -353,7 +361,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       setState(() {
         _otpError = AppLocalizations.of(context).pleaseEnterThe6DigitOtp;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).pleaseEnterThe6DigitOtp),
         ),
@@ -367,7 +375,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         otp,
       );
       if (!ok && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(
@@ -379,7 +387,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(

@@ -123,7 +123,7 @@
   "assign": "સોંપો",
   "assignAnExistingParentCategoryInTheSameCompanyForNesting": "નેસ્ટિંગ માટે તે જ કંપનીમાં કોઈ હાલની પેરેન્ટ શ્રેણી સોંપો.",
   "assignDeliveryRidersAndDispatchOrdersForFulfillment": "ડિલિવરી રાઇડર સોંપો અને પૂર્તિ માટે ઓર્ડર મોકલો.",
-  "assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges": "વર્કફ્લો જવાબદારીઓ સોંપો. નોંધ: સ્ટાફ પરવાનગીઓમાં મેન્યુઅલ ઓર્ડર સ્થિતિ ફેરફારો સામેલ નથી.",
+  "assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges": "પેકિંગ અને ડિસ્પેચથી સ્ટાફ ઓર્ડરનું ફક્ત પોતાનું પગલું કરી શકે છે. કન્ફર્મ, રદ, ચુકવણી અને પેક ઓર્ડરને Ready કરવાનું એડમિન પાસે રહે છે.",
   "availableInventoryUnits": "ઉપલબ્ધ ઇન્વેન્ટરી એકમો",
   "backfillOrderingForOldCategories": "જૂની શ્રેણીઓ માટે ક્રમ ભરો",
   "baseMeasurementType": "આધાર માપ પ્રકાર",
@@ -1252,5 +1252,137 @@
   "shopHoursNoOpenDay": "ઓછામાં ઓછો એક દિવસ ખુલ્લો રાખો.",
   "shopStatusActive": "સક્રિય",
   "shopStatusSuspended": "સસ્પેન્ડ",
-  "shopStatusInactive": "નિષ્ક્રિય"
+  "shopStatusInactive": "નિષ્ક્રિય",
+  "reviewRateProductTitle": "આ ઉત્પાદનને રેટ કરો",
+  "reviewEditTitle": "તમારી સમીક્ષા સંપાદિત કરો",
+  "reviewYourRating": "તમારું રેટિંગ",
+  "reviewMessageLabel": "તમારી સમીક્ષા (વૈકલ્પિક)",
+  "reviewSubmitButton": "સમીક્ષા સબમિટ કરો",
+  "reviewUpdateButton": "સમીક્ષા અપડેટ કરો",
+  "reviewThanks": "તમારી સમીક્ષા માટે આભાર!",
+  "reviewUpdated": "તમારી સમીક્ષા અપડેટ કરવામાં આવી.",
+  "reviewCouldNotSubmit": "તમારી સમીક્ષા સબમિટ થઈ શકી નથી: {error}",
+  "reviewSignInRequired": "સમીક્ષા લખવા માટે કૃપા કરીને સાઇન ઇન કરો.",
+  "reviewOnlyAfterDelivery": "ઓર્ડર ડિલિવર થયા પછી જ તમે સમીક્ષા કરી શકો છો.",
+  "reviewOrderNotFound": "આ ઓર્ડર મળ્યો નથી.",
+  "reviewNotYourOrder": "આ ઓર્ડર બીજા ખાતાનો છે.",
+  "reviewItemNotInOrder": "આ ઉત્પાદન તે ઓર્ડરનો ભાગ નથી.",
+  "reviewRateYourItems": "તમારા ઉત્પાદનોને રેટ કરો",
+  "reviewWrite": "સમીક્ષા લખો",
+  "reviewEdit": "સમીક્ષા સંપાદિત કરો",
+  "reviewCouldNotLoad": "તમારી સમીક્ષાઓ લોડ થઈ શકી નથી.",
+  "productNoReviewsYet": "હજી કોઈ સમીક્ષા નથી",
+  "productRatingsAndReviews": "{count, plural, =1{1 રેટિંગ અને સમીક્ષા} other{{count} રેટિંગ અને સમીક્ષાઓ}}",
+  "shopContactTitle": "દુકાનનો સંપર્ક કરો",
+  "shopCallShop": "દુકાનને કૉલ કરો",
+  "shopPhoneCopied": "ફોન નંબર કૉપિ કર્યો",
+  "cartItemsInCart": "{count, plural, =1{તમારા કાર્ટમાં 1 આઇટમ} other{તમારા કાર્ટમાં {count} આઇટમ}}",
+  "@cartItemsInCart": {
+    "description": "Second line of the add-to-cart toast",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empDashboardTitle": "પેકિંગ ડેશબોર્ડ",
+  "empStageToPack": "પેક કરવાના",
+  "empStageInProgress": "ચાલુ છે",
+  "empStagePacked": "પેક થયા",
+  "empStageHandedOver": "સોંપાયા",
+  "empTotalOrders": "કુલ ઓર્ડર",
+  "empSearchHint": "ઓર્ડર અથવા ગ્રાહકથી શોધો",
+  "empNoOrdersInStage": "હાલમાં અહીં કોઈ ઓર્ડર નથી",
+  "empLoadError": "ઓર્ડર લોડ થઈ શક્યા નહીં. કનેક્શન અથવા પરવાનગી તપાસી ફરી પ્રયાસ કરો.",
+  "empRetry": "ફરી પ્રયાસ કરો",
+  "empNoShop": "તમારું ખાતું કોઈ દુકાન સાથે જોડાયેલું નથી. તમારા એડમિનને પ્રોફાઇલ તપાસવા કહો.",
+  "empViewDetails": "વિગતો જુઓ",
+  "empStartPacking": "પેકિંગ શરૂ કરો",
+  "empMarkPacked": "પેક થયું તરીકે ચિહ્નિત કરો",
+  "empItemsCount": "{count, plural, =1{1 આઇટમ} other{{count} આઇટમ}}",
+  "@empItemsCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empOrderItems": "પેક કરવાની આઇટમ",
+  "empOrderInfo": "ઓર્ડરની માહિતી",
+  "empCustomer": "ગ્રાહક",
+  "empPlaced": "મૂક્યો",
+  "empPackedProgress": "{total} માંથી {done} આઇટમ તપાસી",
+  "@empPackedProgress": {
+    "description": "",
+    "placeholders": {
+      "done": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "empSku": "SKU: {sku}",
+  "@empSku": {
+    "description": "",
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      }
+    }
+  },
+  "empQty": "જથ્થો",
+  "empNoItems": "આ ઓર્ડરમાં કોઈ આઇટમ નથી.",
+  "empActionFailed": "ઓર્ડર અપડેટ થઈ શક્યો નહીં. કૃપા કરીને ફરી પ્રયાસ કરો.",
+  "empPackingStarted": "પેકિંગ શરૂ થયું",
+  "empWaitingForAdmin": "પેક થયું — એડમિન દ્વારા સોંપવાની રાહ.",
+  "empNotAllowed": "આ ઓર્ડર તમારા માટે ઉપલબ્ધ નથી.",
+  "empStartDelivery": "ડિલિવરી શરૂ કરો",
+  "empMarkDelivered": "ડિલિવર થયું તરીકે ચિહ્નિત કરો",
+  "empStageToDispatch": "મોકલવા માટે તૈયાર",
+  "empStageOutForDelivery": "ડિલિવરી માટે નીકળ્યા",
+  "empStageDelivered": "ડિલિવર થયા",
+  "empNoAccess": "તમારી ભૂમિકામાં હજુ કોઈ ઓર્ડર કાર્ય નથી. તમારા એડમિનને પેકિંગ અથવા ડિસ્પેચ ચાલુ કરવા કહો.",
+  "switchRole": "ભૂમિકા બદલો",
+  "switchRoleSubtitle": "ભૂમિકા પસંદગી સ્ક્રીન પર પાછા જાઓ",
+  "switchRoleConfirm": "તમે આ ખાતામાંથી સાઇન આઉટ થઈ જશો. ચાલુ રાખો?",
+  "empSelectAll": "બધા પસંદ કરો",
+  "empClearAll": "બધા દૂર કરો",
+  "empCheckAllToFinish": "પેકિંગ પૂરું કરવા દરેક આઇટમ તપાસો",
+  "empStartToCheck": "આઇટમ તપાસવા પેકિંગ શરૂ કરો",
+  "empMoreItems": "+{count} વધુ",
+  "@empMoreItems": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empOpenToPack": "ખોલો અને પેક કરો",
+  "empAllPacked": "બધી આઇટમ પેક થઈ",
+  "empOrderProgress": "ઓર્ડરની પ્રગતિ",
+  "empYourStep": "તમારું પગલું",
+  "empDeliveryAddress": "ડિલિવરી સરનામું",
+  "empPhone": "ફોન",
+  "empCopied": "કૉપી થયું",
+  "empConfirmDelivered": "આ ઓર્ડરને ડિલિવર થયો તરીકે ચિહ્નિત કરો? આને પાછું ફેરવી શકાશે નહીં.",
+  "empDeliveryStarted": "ડિલિવરી શરૂ થઈ",
+  "empDeliveredDone": "ઓર્ડર ડિલિવર થયો તરીકે ચિહ્નિત",
+  "empUpdated": "છેલ્લું અપડેટ",
+  "empBackToDashboard": "ડેશબોર્ડ પર પાછા",
+  "empCancel": "રદ કરો",
+  "empConfirm": "પુષ્ટિ કરો",
+  "empTotalPieces": "કુલ નંગ",
+  "empMarkedReady": "ઓર્ડર ડિલિવરી માટે તૈયાર તરીકે ચિહ્નિત થયો",
+  "employeeRoleManager": "મેનેજર",
+  "employeeRoleOrderPacker": "ઓર્ડર પેકર",
+  "employeeRoleOrderDelivery": "ઓર્ડર ડિલિવરી",
+  "employeeRoleManagerDesc": "બધા ઓર્ડર સ્ટેટસનું સંચાલન",
+  "employeeRoleOrderPackerDesc": "કન્ફર્મથી તૈયાર સુધીના ઓર્ડર",
+  "employeeRoleOrderDeliveryDesc": "ડિલિવરી માટે તૈયારથી ડિલિવર સુધીના ઓર્ડર",
+  "employeeRoleLabel": "ભૂમિકા",
+  "employeeConsole": "કર્મચારી કન્સોલ"
 }

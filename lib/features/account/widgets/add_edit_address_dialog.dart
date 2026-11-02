@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../core/models/customer.dart';
 import '../../../core/services/auth_session.dart';
@@ -154,7 +155,7 @@ class _AddEditAddressSheetState extends State<AddEditAddressSheet> {
     if (ok) {
       Navigator.of(context).pop(entry);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToSaveAddressPleaseTryAgain,

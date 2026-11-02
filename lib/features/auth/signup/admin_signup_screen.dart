@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -138,7 +139,7 @@ class _AdminSignupScreenState extends State<AdminSignupScreen> {
       }
     }
     if (effectiveCompanyId.isEmpty) {
-      messenger.showSnackBar(
+      messenger.showAppToast(
         SnackBar(
           content: Text(
             l10n.noCompanyIdentifiedPleaseEnsureYouAreLoggedInToYourCompany,
@@ -164,7 +165,7 @@ class _AdminSignupScreenState extends State<AdminSignupScreen> {
       context.go(AppRoutes.admin);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(context).errorCreatingAdmin('$e'),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -44,7 +45,10 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.status == AuthStatus.authenticated) {
-            context.go(AppRoutes.employeeHome);
+            final user = state.user;
+            context.go(
+              user == null ? AppRoutes.employeeHome : employeeHomeFor(user),
+            );
           } else if (state.status == AuthStatus.error) {
             final msg =
                 state.error != null &&
@@ -54,7 +58,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
                 : l10n.invalidCredentials;
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(msg)));
+            ).showAppToast(SnackBar(content: Text(msg)));
           }
         },
         builder: (context, state) {
@@ -160,7 +164,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
       });
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.invalidCredentials)));
+      ).showAppToast(SnackBar(content: Text(l10n.invalidCredentials)));
       return;
     }
 

@@ -126,6 +126,7 @@ void main() {
       OrderStatus.packing,
       OrderStatus.ready,
       OrderStatus.onTheWay,
+      OrderStatus.delivered,
       OrderStatus.completed,
     ]) {
       await repo.updateOrderStatus(order.id, status);

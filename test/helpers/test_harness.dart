@@ -247,6 +247,7 @@ GoRouter buildTestRouter(
         body: Center(
           child: Text(
             'Leave review ${state.pathParameters['orderId']} '
+            'product=${state.uri.queryParameters['productId'] ?? ''} '
             'rating=${state.uri.queryParameters['rating'] ?? ''}',
           ),
         ),
@@ -283,6 +284,7 @@ Widget buildTestApp(
   WishlistCubit? wishlistCubit,
   Size size = const Size(1200, 2400),
   bool withRouter = true,
+  List<GoRoute> extraRoutes = const <GoRoute>[],
 }) {
   final shell = MediaQuery(
     data: MediaQueryData(size: size),
@@ -309,7 +311,7 @@ Widget buildTestApp(
       locale: const Locale('en'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      routerConfig: buildTestRouter(shell),
+      routerConfig: buildTestRouter(shell, extraRoutes: extraRoutes),
     );
   }
 

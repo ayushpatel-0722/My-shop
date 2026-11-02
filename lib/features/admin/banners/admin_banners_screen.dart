@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -302,12 +303,12 @@ class _BannerCard extends StatelessWidget {
     try {
       await repo.deleteBanner(banner.id, companyId: companyId);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         const SnackBar(content: Text('Banner deleted successfully.')),
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text('Failed to delete banner: $e'),
           backgroundColor: Colors.red,
@@ -530,7 +531,7 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
   void _saveBanner() async {
     final url = _imageUrlCtrl.text.trim();
     if (url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         const SnackBar(content: Text('Please enter a valid image URL.')),
       );
       return;
@@ -557,14 +558,14 @@ class _CreateBannerSheetState extends State<_CreateBannerSheet> {
       );
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         const SnackBar(content: Text('Banner saved successfully.')),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Failed to save banner: $e')));
+      ).showAppToast(SnackBar(content: Text('Failed to save banner: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }

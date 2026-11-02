@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myshop/core/services/admin_company_name.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../app/routes/app_router.dart';
@@ -128,7 +129,7 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Row(
               children: [

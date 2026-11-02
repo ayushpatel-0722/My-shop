@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/order_status.dart';
 import '../../../core/models/order.dart';
+import '../../../core/models/review.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
@@ -65,7 +67,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return AdminShell(
-      showBack: true,
+      showBack: false,
       backRoute: AppRoutes.admin,
       title: AppLocalizations.of(context).ordersPipeline,
       child: Column(
@@ -379,8 +381,15 @@ class _OrderCardState extends State<_OrderCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDesktop = context.isDesktop;
-    final next = OrderStatusRules.nextStage(order.orderStatus);
-    final cancellable = OrderStatusRules.isCancellable(order.orderStatus);
+    final perms = AuthSession.orderPermissions;
+    final rawNext = OrderStatusRules.nextStage(order.orderStatus);
+    final next = rawNext != null && perms.canMove(order.orderStatus, rawNext)
+        ? rawNext
+        : null;
+    final cancellable =
+        perms.canCancel && OrderStatusRules.isCancellable(order.orderStatus);
+    final canVerifyPayment = perms.canVerifyPayment;
+    final canConfirm = order.orderStatus == OrderStatus.pending && next != null;
     final dateStr = order.createdAt != null
         ? DateFormat('dd MMM, hh:mm a').format(order.createdAt!)
         : '';
@@ -631,6 +640,39 @@ class _OrderCardState extends State<_OrderCard> {
               ),
             ],
 
+            if (order.items.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 15,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '${order.itemCount} item${order.itemCount == 1 ? '' : 's'}'
+                      ' · ${order.items.map((i) => i.name).join(', ')}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: isDesktop ? 13 : 12,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            if (order.canBeReviewed ||
+                order.orderStatus == OrderStatus.completed)
+              _OrderReviewSummary(
+                key: Key('order-review-${order.id}'),
+                order: order,
+              ),
+
             if (_isLoading) ...[
               const SizedBox(height: 10),
               const LinearProgressIndicator(),
@@ -680,7 +722,9 @@ class _OrderCardState extends State<_OrderCard> {
                   const SizedBox(width: 8),
 
                   // Quick payment verification button
-                  if (!order.isPaid && !order.isCancelled) ...[
+                  if (canVerifyPayment &&
+                      !order.isPaid &&
+                      !order.isCancelled) ...[
                     FilledButton.tonalIcon(
                       key: Key('order-verify-payment-${order.id}'),
                       icon: Icon(
@@ -706,7 +750,7 @@ class _OrderCardState extends State<_OrderCard> {
                   ],
 
                   // Main forward action: Mark Confirmed or next stage
-                  if (order.orderStatus == OrderStatus.pending) ...[
+                  if (canConfirm) ...[
                     FilledButton(
                       key: Key('order-advance-${order.id}'),
                       style: FilledButton.styleFrom(
@@ -811,12 +855,14 @@ class _OrderCardState extends State<_OrderCard> {
                 ],
               ),
               if ((!order.isPaid && !order.isCancelled) ||
-                  order.orderStatus == OrderStatus.pending ||
+                  canConfirm ||
                   next != null) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    if (!order.isPaid && !order.isCancelled) ...[
+                    if (canVerifyPayment &&
+                        !order.isPaid &&
+                        !order.isCancelled) ...[
                       Expanded(
                         child: FilledButton.tonalIcon(
                           key: Key('order-verify-payment-${order.id}'),
@@ -840,10 +886,9 @@ class _OrderCardState extends State<_OrderCard> {
                     ],
                     if (!order.isPaid &&
                         !order.isCancelled &&
-                        (order.orderStatus == OrderStatus.pending ||
-                            next != null))
+                        (canConfirm || next != null))
                       const SizedBox(width: 8),
-                    if (order.orderStatus == OrderStatus.pending) ...[
+                    if (canConfirm) ...[
                       Expanded(
                         child: FilledButton(
                           key: Key('order-advance-${order.id}'),
@@ -923,7 +968,7 @@ class _OrderCardState extends State<_OrderCard> {
         companyId: order.companyId,
       );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text('Order ${order.reference} marked as Confirmed!'),
           backgroundColor: Colors.green.shade800,
@@ -931,7 +976,7 @@ class _OrderCardState extends State<_OrderCard> {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).couldNotUpdateOrder('$e')),
           backgroundColor: Colors.red,
@@ -947,7 +992,7 @@ class _OrderCardState extends State<_OrderCard> {
     try {
       await repo.updateOrderStatus(order.id, next, companyId: order.companyId);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -958,7 +1003,7 @@ class _OrderCardState extends State<_OrderCard> {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).couldNotUpdateOrder('$e')),
           backgroundColor: Colors.red,
@@ -1028,7 +1073,7 @@ class _OrderCardState extends State<_OrderCard> {
         reason: reason,
       );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text('Order ${order.reference} cancelled.'),
           backgroundColor: Colors.orange.shade800,
@@ -1036,7 +1081,7 @@ class _OrderCardState extends State<_OrderCard> {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).couldNotCancelOrder('$e')),
           backgroundColor: Colors.red,
@@ -1081,6 +1126,135 @@ class _CenteredMessage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The review(s) the customer sent for a delivered / completed order, shown on
+/// the order card so the shop sees feedback without opening the order.
+class _OrderReviewSummary extends StatefulWidget {
+  final Order order;
+  const _OrderReviewSummary({super.key, required this.order});
+
+  @override
+  State<_OrderReviewSummary> createState() => _OrderReviewSummaryState();
+}
+
+class _OrderReviewSummaryState extends State<_OrderReviewSummary> {
+  late final Future<List<Review>> _reviews = _load();
+
+  Future<List<Review>> _load() async {
+    try {
+      return await repo.orderReviews(
+        widget.order.id,
+        companyId: widget.order.companyId,
+      );
+    } catch (_) {
+      return const <Review>[];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return FutureBuilder<List<Review>>(
+      future: _reviews,
+      builder: (context, snap) {
+        if (snap.connectionState != ConnectionState.done) {
+          return const SizedBox.shrink();
+        }
+        final reviews = snap.data ?? const <Review>[];
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: reviews.isEmpty
+                  ? theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    )
+                  : Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: reviews.isEmpty
+                    ? theme.colorScheme.outlineVariant
+                    : Colors.amber.withValues(alpha: 0.4),
+              ),
+            ),
+            child: reviews.isEmpty
+                ? Row(
+                    children: [
+                      Icon(
+                        Icons.rate_review_outlined,
+                        size: 15,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Waiting for customer review',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [for (final r in reviews) _line(theme, r)],
+                  ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _line(ThemeData theme, Review r) {
+    final when = r.createdAt != null
+        ? DateFormat('dd MMM, hh:mm a').format(r.createdAt!.toLocal())
+        : '';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              for (var i = 1; i <= 5; i++)
+                Icon(
+                  i <= r.rating
+                      ? Icons.star_rounded
+                      : Icons.star_border_rounded,
+                  size: 16,
+                  color: Colors.amber.shade700,
+                ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  [
+                    if (r.productName.isNotEmpty) r.productName,
+                    if (when.isNotEmpty) when,
+                  ].join(' · '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11.5, color: Colors.grey),
+                ),
+              ),
+            ],
+          ),
+          if (r.message.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                r.message,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12.5),
+              ),
+            ),
+        ],
       ),
     );
   }

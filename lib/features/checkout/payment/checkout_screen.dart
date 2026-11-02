@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -345,7 +346,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(l10n.voucherApplied)));
+    ).showAppToast(SnackBar(content: Text(l10n.voucherApplied)));
   }
 
   void _removeVoucher(String companyId) {
@@ -548,7 +549,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.orderPlaced)));
+      ).showAppToast(SnackBar(content: Text(l10n.orderPlaced)));
       if (saved.length == 1) {
         context.go(
           AppRoutes.orderPath(saved.first.id, companyId: saved.first.companyId),
@@ -566,7 +567,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _snack(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showAppToast(SnackBar(content: Text(message)));
   }
 
   // ---------------------------------------------------------------- UI ----

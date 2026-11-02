@@ -399,7 +399,7 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String
   get assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges =>
-      'વર્કફ્લો જવાબદારીઓ સોંપો. નોંધ: સ્ટાફ પરવાનગીઓમાં મેન્યુઅલ ઓર્ડર સ્થિતિ ફેરફારો સામેલ નથી.';
+      'પેકિંગ અને ડિસ્પેચથી સ્ટાફ ઓર્ડરનું ફક્ત પોતાનું પગલું કરી શકે છે. કન્ફર્મ, રદ, ચુકવણી અને પેક ઓર્ડરને Ready કરવાનું એડમિન પાસે રહે છે.';
 
   @override
   String get availableInventoryUnits => 'ઉપલબ્ધ ઇન્વેન્ટરી એકમો';
@@ -4516,4 +4516,311 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get shopStatusInactive => 'નિષ્ક્રિય';
+
+  @override
+  String get reviewRateProductTitle => 'આ ઉત્પાદનને રેટ કરો';
+
+  @override
+  String get reviewEditTitle => 'તમારી સમીક્ષા સંપાદિત કરો';
+
+  @override
+  String get reviewYourRating => 'તમારું રેટિંગ';
+
+  @override
+  String get reviewMessageLabel => 'તમારી સમીક્ષા (વૈકલ્પિક)';
+
+  @override
+  String get reviewSubmitButton => 'સમીક્ષા સબમિટ કરો';
+
+  @override
+  String get reviewUpdateButton => 'સમીક્ષા અપડેટ કરો';
+
+  @override
+  String get reviewThanks => 'તમારી સમીક્ષા માટે આભાર!';
+
+  @override
+  String get reviewUpdated => 'તમારી સમીક્ષા અપડેટ કરવામાં આવી.';
+
+  @override
+  String reviewCouldNotSubmit(String error) {
+    return 'તમારી સમીક્ષા સબમિટ થઈ શકી નથી: $error';
+  }
+
+  @override
+  String get reviewSignInRequired =>
+      'સમીક્ષા લખવા માટે કૃપા કરીને સાઇન ઇન કરો.';
+
+  @override
+  String get reviewOnlyAfterDelivery =>
+      'ઓર્ડર ડિલિવર થયા પછી જ તમે સમીક્ષા કરી શકો છો.';
+
+  @override
+  String get reviewOrderNotFound => 'આ ઓર્ડર મળ્યો નથી.';
+
+  @override
+  String get reviewNotYourOrder => 'આ ઓર્ડર બીજા ખાતાનો છે.';
+
+  @override
+  String get reviewItemNotInOrder => 'આ ઉત્પાદન તે ઓર્ડરનો ભાગ નથી.';
+
+  @override
+  String get reviewRateYourItems => 'તમારા ઉત્પાદનોને રેટ કરો';
+
+  @override
+  String get reviewWrite => 'સમીક્ષા લખો';
+
+  @override
+  String get reviewEdit => 'સમીક્ષા સંપાદિત કરો';
+
+  @override
+  String get reviewCouldNotLoad => 'તમારી સમીક્ષાઓ લોડ થઈ શકી નથી.';
+
+  @override
+  String get productNoReviewsYet => 'હજી કોઈ સમીક્ષા નથી';
+
+  @override
+  String productRatingsAndReviews(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count રેટિંગ અને સમીક્ષાઓ',
+      one: '1 રેટિંગ અને સમીક્ષા',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shopContactTitle => 'દુકાનનો સંપર્ક કરો';
+
+  @override
+  String get shopCallShop => 'દુકાનને કૉલ કરો';
+
+  @override
+  String get shopPhoneCopied => 'ફોન નંબર કૉપિ કર્યો';
+
+  @override
+  String cartItemsInCart(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'તમારા કાર્ટમાં $count આઇટમ',
+      one: 'તમારા કાર્ટમાં 1 આઇટમ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get empDashboardTitle => 'પેકિંગ ડેશબોર્ડ';
+
+  @override
+  String get empStageToPack => 'પેક કરવાના';
+
+  @override
+  String get empStageInProgress => 'ચાલુ છે';
+
+  @override
+  String get empStagePacked => 'પેક થયા';
+
+  @override
+  String get empStageHandedOver => 'સોંપાયા';
+
+  @override
+  String get empTotalOrders => 'કુલ ઓર્ડર';
+
+  @override
+  String get empSearchHint => 'ઓર્ડર અથવા ગ્રાહકથી શોધો';
+
+  @override
+  String get empNoOrdersInStage => 'હાલમાં અહીં કોઈ ઓર્ડર નથી';
+
+  @override
+  String get empLoadError =>
+      'ઓર્ડર લોડ થઈ શક્યા નહીં. કનેક્શન અથવા પરવાનગી તપાસી ફરી પ્રયાસ કરો.';
+
+  @override
+  String get empRetry => 'ફરી પ્રયાસ કરો';
+
+  @override
+  String get empNoShop =>
+      'તમારું ખાતું કોઈ દુકાન સાથે જોડાયેલું નથી. તમારા એડમિનને પ્રોફાઇલ તપાસવા કહો.';
+
+  @override
+  String get empViewDetails => 'વિગતો જુઓ';
+
+  @override
+  String get empStartPacking => 'પેકિંગ શરૂ કરો';
+
+  @override
+  String get empMarkPacked => 'પેક થયું તરીકે ચિહ્નિત કરો';
+
+  @override
+  String empItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count આઇટમ',
+      one: '1 આઇટમ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get empOrderItems => 'પેક કરવાની આઇટમ';
+
+  @override
+  String get empOrderInfo => 'ઓર્ડરની માહિતી';
+
+  @override
+  String get empCustomer => 'ગ્રાહક';
+
+  @override
+  String get empPlaced => 'મૂક્યો';
+
+  @override
+  String empPackedProgress(num done, num total) {
+    return '$total માંથી $done આઇટમ તપાસી';
+  }
+
+  @override
+  String empSku(String sku) {
+    return 'SKU: $sku';
+  }
+
+  @override
+  String get empQty => 'જથ્થો';
+
+  @override
+  String get empNoItems => 'આ ઓર્ડરમાં કોઈ આઇટમ નથી.';
+
+  @override
+  String get empActionFailed =>
+      'ઓર્ડર અપડેટ થઈ શક્યો નહીં. કૃપા કરીને ફરી પ્રયાસ કરો.';
+
+  @override
+  String get empPackingStarted => 'પેકિંગ શરૂ થયું';
+
+  @override
+  String get empWaitingForAdmin => 'પેક થયું — એડમિન દ્વારા સોંપવાની રાહ.';
+
+  @override
+  String get empNotAllowed => 'આ ઓર્ડર તમારા માટે ઉપલબ્ધ નથી.';
+
+  @override
+  String get empStartDelivery => 'ડિલિવરી શરૂ કરો';
+
+  @override
+  String get empMarkDelivered => 'ડિલિવર થયું તરીકે ચિહ્નિત કરો';
+
+  @override
+  String get empStageToDispatch => 'મોકલવા માટે તૈયાર';
+
+  @override
+  String get empStageOutForDelivery => 'ડિલિવરી માટે નીકળ્યા';
+
+  @override
+  String get empStageDelivered => 'ડિલિવર થયા';
+
+  @override
+  String get empNoAccess =>
+      'તમારી ભૂમિકામાં હજુ કોઈ ઓર્ડર કાર્ય નથી. તમારા એડમિનને પેકિંગ અથવા ડિસ્પેચ ચાલુ કરવા કહો.';
+
+  @override
+  String get switchRole => 'ભૂમિકા બદલો';
+
+  @override
+  String get switchRoleSubtitle => 'ભૂમિકા પસંદગી સ્ક્રીન પર પાછા જાઓ';
+
+  @override
+  String get switchRoleConfirm => 'તમે આ ખાતામાંથી સાઇન આઉટ થઈ જશો. ચાલુ રાખો?';
+
+  @override
+  String get empSelectAll => 'બધા પસંદ કરો';
+
+  @override
+  String get empClearAll => 'બધા દૂર કરો';
+
+  @override
+  String get empCheckAllToFinish => 'પેકિંગ પૂરું કરવા દરેક આઇટમ તપાસો';
+
+  @override
+  String get empStartToCheck => 'આઇટમ તપાસવા પેકિંગ શરૂ કરો';
+
+  @override
+  String empMoreItems(num count) {
+    return '+$count વધુ';
+  }
+
+  @override
+  String get empOpenToPack => 'ખોલો અને પેક કરો';
+
+  @override
+  String get empAllPacked => 'બધી આઇટમ પેક થઈ';
+
+  @override
+  String get empOrderProgress => 'ઓર્ડરની પ્રગતિ';
+
+  @override
+  String get empYourStep => 'તમારું પગલું';
+
+  @override
+  String get empDeliveryAddress => 'ડિલિવરી સરનામું';
+
+  @override
+  String get empPhone => 'ફોન';
+
+  @override
+  String get empCopied => 'કૉપી થયું';
+
+  @override
+  String get empConfirmDelivered =>
+      'આ ઓર્ડરને ડિલિવર થયો તરીકે ચિહ્નિત કરો? આને પાછું ફેરવી શકાશે નહીં.';
+
+  @override
+  String get empDeliveryStarted => 'ડિલિવરી શરૂ થઈ';
+
+  @override
+  String get empDeliveredDone => 'ઓર્ડર ડિલિવર થયો તરીકે ચિહ્નિત';
+
+  @override
+  String get empUpdated => 'છેલ્લું અપડેટ';
+
+  @override
+  String get empBackToDashboard => 'ડેશબોર્ડ પર પાછા';
+
+  @override
+  String get empCancel => 'રદ કરો';
+
+  @override
+  String get empConfirm => 'પુષ્ટિ કરો';
+
+  @override
+  String get empTotalPieces => 'કુલ નંગ';
+
+  @override
+  String get empMarkedReady => 'ઓર્ડર ડિલિવરી માટે તૈયાર તરીકે ચિહ્નિત થયો';
+
+  @override
+  String get employeeRoleManager => 'મેનેજર';
+
+  @override
+  String get employeeRoleOrderPacker => 'ઓર્ડર પેકર';
+
+  @override
+  String get employeeRoleOrderDelivery => 'ઓર્ડર ડિલિવરી';
+
+  @override
+  String get employeeRoleManagerDesc => 'બધા ઓર્ડર સ્ટેટસનું સંચાલન';
+
+  @override
+  String get employeeRoleOrderPackerDesc => 'કન્ફર્મથી તૈયાર સુધીના ઓર્ડર';
+
+  @override
+  String get employeeRoleOrderDeliveryDesc =>
+      'ડિલિવરી માટે તૈયારથી ડિલિવર સુધીના ઓર્ડર';
+
+  @override
+  String get employeeRoleLabel => 'ભૂમિકા';
+
+  @override
+  String get employeeConsole => 'કર્મચારી કન્સોલ';
 }

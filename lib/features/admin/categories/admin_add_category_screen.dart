@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/services/admin_company_name.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -209,7 +210,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedProductIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -238,7 +239,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     });
 
     if (isDuplicate) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -254,7 +255,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
     // 2. Validate parentId cycle prevention
     if (currentCatId.isNotEmpty && _selectedParentId != null) {
       if (_selectedParentId == currentCatId) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(context).aCategoryCannotHaveItselfAsItsParent,
@@ -267,7 +268,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
       final descendants = _getDescendantIds(currentCatId, existingCategories);
       if (descendants.contains(_selectedParentId)) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(
@@ -301,7 +302,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
       if (!mounted) return;
       _baseline = _snapshot();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             isEditMode
@@ -323,7 +324,7 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToSaveCategory('$e'),

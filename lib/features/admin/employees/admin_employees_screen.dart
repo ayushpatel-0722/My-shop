@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/domain/employee_roles.dart';
 import '../../../core/models/employee.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../admin_shell.dart';
+import 'employee_role_labels.dart';
 
 /// Employee management screen — list staff, view status & permissions, navigate to add/edit.
 class AdminEmployeesScreen extends StatelessWidget {
@@ -43,7 +46,7 @@ class AdminEmployeesScreen extends StatelessWidget {
       try {
         await repo.deleteEmployee(emp.companyId, emp.id);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showAppToast(
             SnackBar(
               content: Text(
                 AppLocalizations.of(context).employeeDeleted(emp.name),
@@ -54,7 +57,7 @@ class AdminEmployeesScreen extends StatelessWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showAppToast(
             SnackBar(
               content: Text(
                 AppLocalizations.of(context).failedToDeleteEmployee('$e'),
@@ -72,17 +75,21 @@ class AdminEmployeesScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final companyId = AuthSession.currentUser?.companyId ?? '';
+    // Only the admin sees full details and may add, edit or delete. Every
+    // employee role gets a short read-only list: name, role and shift.
+    final isAdmin = AuthSession.isAdmin;
 
     return AdminShell(
-      showBack: true,
+      showBack: false,
       backRoute: AppRoutes.admin,
       title: AppLocalizations.of(context).employees,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.person_add_outlined),
-          tooltip: AppLocalizations.of(context).provisionEmployee,
-          onPressed: () => context.push(AppRoutes.adminAddEmployee),
-        ),
+        if (isAdmin)
+          IconButton(
+            icon: const Icon(Icons.person_add_outlined),
+            tooltip: AppLocalizations.of(context).provisionEmployee,
+            onPressed: () => context.push(AppRoutes.adminAddEmployee),
+          ),
       ],
       child: StreamBuilder<List<Employee>>(
         stream: repo.employees(companyId),
@@ -114,11 +121,14 @@ class AdminEmployeesScreen extends StatelessWidget {
                     style: const TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
-                  FilledButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: Text(AppLocalizations.of(context).provisionEmployee),
-                    onPressed: () => context.push(AppRoutes.adminAddEmployee),
-                  ),
+                  if (isAdmin)
+                    FilledButton.icon(
+                      icon: const Icon(Icons.add),
+                      label: Text(
+                        AppLocalizations.of(context).provisionEmployee,
+                      ),
+                      onPressed: () => context.push(AppRoutes.adminAddEmployee),
+                    ),
                 ],
               ),
             );
@@ -135,10 +145,12 @@ class AdminEmployeesScreen extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(16),
-                    onTap: () => context.push(
-                      AppRoutes.adminEditEmployeePath(e.id),
-                      extra: e,
-                    ),
+                    onTap: !isAdmin
+                        ? null
+                        : () => context.push(
+                            AppRoutes.adminEditEmployeePath(e.id),
+                            extra: e,
+                          ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -217,7 +229,14 @@ class AdminEmployeesScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${e.role} • ${e.email}',
+                                      isAdmin
+                                          ? '${EmployeeRole.resolve(e.role, e.permissions).label(AppLocalizations.of(context))} • ${e.email}'
+                                          : EmployeeRole.resolve(
+                                              e.role,
+                                              e.permissions,
+                                            ).label(
+                                              AppLocalizations.of(context),
+                                            ),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: isDark
@@ -228,99 +247,92 @@ class AdminEmployeesScreen extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined, size: 20),
-                                tooltip: AppLocalizations.of(
-                                  context,
-                                ).editEmployee,
-                                onPressed: () => context.push(
-                                  AppRoutes.adminEditEmployeePath(e.id),
-                                  extra: e,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  size: 20,
-                                  color: Colors.redAccent,
-                                ),
-                                tooltip: AppLocalizations.of(
-                                  context,
-                                ).deleteEmployee,
-                                onPressed: () => _confirmDelete(context, e),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          const Divider(height: 1),
-                          const SizedBox(height: 10),
-
-                          // Salary & Permissions details row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Salary badge
-                              if (e.salary > 0)
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.currency_rupee,
-                                      size: 14,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                    Text(
-                                      '${formatCurrency(e.salary)} / ${e.salaryType}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.colorScheme.primary,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              else
-                                Text(
-                                  AppLocalizations.of(
+                              if (isAdmin)
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    size: 20,
+                                  ),
+                                  tooltip: AppLocalizations.of(
                                     context,
-                                  ).salaryNotSpecified,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isDark
-                                        ? AppTheme.textSecondaryDark
-                                        : AppTheme.textSecondaryLight,
+                                  ).editEmployee,
+                                  onPressed: () => context.push(
+                                    AppRoutes.adminEditEmployeePath(e.id),
+                                    extra: e,
                                   ),
                                 ),
-
-                              // Permissions Chips
-                              Wrap(
-                                spacing: 4,
-                                children: [
-                                  if (e.permissions['canPack'] == true)
-                                    _permissionChip(
-                                      AppLocalizations.of(context).pack,
-                                      Colors.blue,
-                                    ),
-                                  if (e.permissions['canDispatch'] == true)
-                                    _permissionChip(
-                                      AppLocalizations.of(context).dispatch,
-                                      Colors.orange,
-                                    ),
-                                  if (e.permissions['canManageInventory'] ==
-                                      true)
-                                    _permissionChip(
-                                      AppLocalizations.of(context).inventory,
-                                      Colors.purple,
-                                    ),
-                                  if (e.permissions['canViewReports'] == true)
-                                    _permissionChip(
-                                      AppLocalizations.of(context).reports,
-                                      Colors.teal,
-                                    ),
-                                ],
-                              ),
+                              if (isAdmin)
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    size: 20,
+                                    color: Colors.redAccent,
+                                  ),
+                                  tooltip: AppLocalizations.of(
+                                    context,
+                                  ).deleteEmployee,
+                                  onPressed: () => _confirmDelete(context, e),
+                                ),
                             ],
                           ),
+                          if (isAdmin) ...[
+                            const SizedBox(height: 12),
+                            const Divider(height: 1),
+                            const SizedBox(height: 10),
+
+                            // Salary & Permissions details row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Salary badge
+                                if (e.salary > 0)
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.currency_rupee,
+                                        size: 14,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                      Text(
+                                        '${formatCurrency(e.salary)} / ${e.salaryType}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                else
+                                  Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).salaryNotSpecified,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isDark
+                                          ? AppTheme.textSecondaryDark
+                                          : AppTheme.textSecondaryLight,
+                                    ),
+                                  ),
+
+                                // Role chip
+                                Builder(
+                                  builder: (context) {
+                                    final role = EmployeeRole.resolve(
+                                      e.role,
+                                      e.permissions,
+                                    );
+                                    return _permissionChip(
+                                      role.label(AppLocalizations.of(context)),
+                                      role.color,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),

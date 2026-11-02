@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/services/admin_company_name.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/catalog.dart';
@@ -460,7 +461,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
     try {
       await repo.deleteProduct(product.id, companyId: _companyId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).productDeleted(product.name),
@@ -469,7 +470,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToDeleteProduct('$e'),

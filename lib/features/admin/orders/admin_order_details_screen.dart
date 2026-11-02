@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/routes/app_router.dart';
@@ -12,6 +13,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
+import 'widgets/order_team_card.dart';
 import 'widgets/payment_verification_dialog.dart';
 
 class AdminOrderDetailsScreen extends StatefulWidget {
@@ -128,6 +130,10 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                     const SizedBox(height: 16),
                     _buildFulfillmentCard(context, order),
                     const SizedBox(height: 16),
+                    if (!order.isCancelled && AuthSession.isAdmin) ...[
+                      OrderTeamCard(order: order, companyId: _companyId),
+                      const SizedBox(height: 16),
+                    ],
                     _buildOrderedItemsCard(context, order),
                     const SizedBox(height: 16),
                     _buildAmountSummaryCard(context, order),
@@ -202,7 +208,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                           InkWell(
                             onTap: () {
                               Clipboard.setData(ClipboardData(text: order.id));
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context).showAppToast(
                                 const SnackBar(
                                   content: Text('Order ID copied to clipboard'),
                                   duration: Duration(seconds: 2),
@@ -1052,7 +1058,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                           Clipboard.setData(
                             ClipboardData(text: order.transactionRef!),
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showAppToast(
                             const SnackBar(
                               content: Text('Reference copied to clipboard!'),
                               duration: Duration(seconds: 1),
@@ -1142,14 +1148,20 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
 
   Widget _buildActionsBar(BuildContext context, Order order) {
     final theme = Theme.of(context);
-    final next = OrderStatusRules.nextStage(order.orderStatus);
-    final cancellable = OrderStatusRules.isCancellable(order.orderStatus);
+    final perms = AuthSession.orderPermissions;
+    final rawNext = OrderStatusRules.nextStage(order.orderStatus);
+    final next = rawNext != null && perms.canMove(order.orderStatus, rawNext)
+        ? rawNext
+        : null;
+    final cancellable =
+        perms.canCancel && OrderStatusRules.isCancellable(order.orderStatus);
+    final canVerifyPayment = perms.canVerifyPayment;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Admin Actions',
+          AuthSession.isAdmin ? 'Admin Actions' : 'Order Actions',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -1161,14 +1173,17 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
           children: [
             // Confirm Order (if pending)
             if (order.orderStatus == OrderStatus.pending) ...[
-              FilledButton.icon(
-                icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Mark as Confirmed'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.green.shade700,
+              if (next != null)
+                FilledButton.icon(
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Mark as Confirmed'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                  ),
+                  onPressed: _isActionLoading
+                      ? null
+                      : () => _confirmOrder(order),
                 ),
-                onPressed: _isActionLoading ? null : () => _confirmOrder(order),
-              ),
             ] else if (next != null) ...[
               // Advance to next forward stage
               FilledButton.icon(
@@ -1182,13 +1197,14 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
 
             // Payment verification button
             if (!order.isPaid && !order.isCancelled) ...[
-              FilledButton.tonalIcon(
-                icon: const Icon(Icons.payments_outlined),
-                label: const Text('Confirm Payment Received'),
-                onPressed: _isActionLoading
-                    ? null
-                    : () => _confirmPayment(order),
-              ),
+              if (canVerifyPayment)
+                FilledButton.tonalIcon(
+                  icon: const Icon(Icons.payments_outlined),
+                  label: const Text('Confirm Payment Received'),
+                  onPressed: _isActionLoading
+                      ? null
+                      : () => _confirmPayment(order),
+                ),
             ] else if (order.isPaid) ...[
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -1275,7 +1291,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
         companyId: order.companyId.isNotEmpty ? order.companyId : _companyId,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text('Order ${order.reference} marked as Confirmed!'),
             backgroundColor: Colors.green.shade800,
@@ -1284,7 +1300,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text('Failed to confirm order: $e'),
             backgroundColor: Colors.red,
@@ -1308,11 +1324,11 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Order moved to $statusLabel')));
+        ).showAppToast(SnackBar(content: Text('Order moved to $statusLabel')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text('Could not update status: $e'),
             backgroundColor: Colors.red,
@@ -1382,7 +1398,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
         reason: reason,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text('Order ${order.reference} cancelled.'),
             backgroundColor: Colors.orange.shade800,
@@ -1391,7 +1407,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text('Could not cancel order: $e'),
             backgroundColor: Colors.red,

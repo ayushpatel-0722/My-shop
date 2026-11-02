@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/validators.dart';
@@ -255,7 +256,7 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
     try {
       await repo.deleteVoucher(voucher.id, companyId: _companyId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).voucherDeleted(voucher.normalizedCode),
@@ -264,7 +265,7 @@ class _AdminVouchersScreenState extends State<AdminVouchersScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).couldNotDeleteVoucher('$e'),
@@ -762,7 +763,7 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
       await repo.saveVoucher(voucher);
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             _isEdit
@@ -778,7 +779,7 @@ class _VoucherEditorSheetState extends State<_VoucherEditorSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).couldNotSaveVoucher('$e')),
         ),

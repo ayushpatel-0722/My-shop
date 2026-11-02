@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:myshop/core/services/admin_company_name.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -914,7 +915,7 @@ class _CompactPreviewCard extends StatelessWidget {
         companyId: order.companyId,
       );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text('Order ${order.reference} confirmed!'),
           backgroundColor: Colors.green.shade800,
@@ -922,7 +923,7 @@ class _CompactPreviewCard extends StatelessWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
       );
     }

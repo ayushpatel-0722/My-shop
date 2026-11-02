@@ -104,6 +104,40 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
+  /// Back to the role selection screen. A signed-in shopper has to be signed
+  /// out first (the router keeps signed-in users off the login screens), so
+  /// that case asks for confirmation.
+  Future<void> _switchRole(
+    BuildContext context,
+    AuthCubit authCubit,
+    bool signedIn,
+  ) async {
+    if (signedIn) {
+      final l10n = AppLocalizations.of(context);
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.switchRole),
+          content: Text(l10n.switchRoleConfirm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              key: const Key('switch-role-confirm'),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.continueLabel),
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      await authCubit.signOut();
+    }
+    if (context.mounted) context.go(AppRoutes.role);
+  }
+
   @override
   Widget build(BuildContext context) {
     final authCubit = context.watch<AuthCubit>();
@@ -461,6 +495,17 @@ class AccountScreen extends StatelessWidget {
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push(AppRoutes.helpSupport),
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  ListTile(
+                    key: const Key('switch-role-tile'),
+                    leading: const Icon(Icons.swap_horiz),
+                    title: Text(AppLocalizations.of(context).switchRole),
+                    subtitle: Text(
+                      AppLocalizations.of(context).switchRoleSubtitle,
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _switchRole(context, authCubit, user != null),
                   ),
                 ],
               ),

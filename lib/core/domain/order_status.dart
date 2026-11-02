@@ -15,7 +15,9 @@ class OrderStatusRules {
     OrderStatus.confirmed: {OrderStatus.packing, OrderStatus.cancelled},
     OrderStatus.packing: {OrderStatus.ready, OrderStatus.cancelled},
     OrderStatus.ready: {OrderStatus.onTheWay, OrderStatus.cancelled},
-    OrderStatus.onTheWay: {OrderStatus.completed},
+    OrderStatus.onTheWay: {OrderStatus.delivered},
+    // Only the customer's review moves a delivered order to completed.
+    OrderStatus.delivered: {OrderStatus.completed},
     OrderStatus.completed: <String>{},
     OrderStatus.cancelled: <String>{},
   };
@@ -27,6 +29,7 @@ class OrderStatusRules {
     OrderStatus.packing,
     OrderStatus.ready,
     OrderStatus.onTheWay,
+    OrderStatus.delivered,
     OrderStatus.completed,
     OrderStatus.cancelled,
   ];
@@ -38,6 +41,7 @@ class OrderStatusRules {
     OrderStatus.packing,
     OrderStatus.ready,
     OrderStatus.onTheWay,
+    OrderStatus.delivered,
   ];
 
   static Set<String> allowedNext(String from) =>
@@ -83,8 +87,8 @@ class OrderStatusRules {
     if (status == OrderStatus.cancelled) {
       return 'This order has already been cancelled.';
     }
-    if (status == OrderStatus.completed) {
-      return 'This order has already been delivered and completed.';
+    if (status == OrderStatus.completed || status == OrderStatus.delivered) {
+      return 'This order has already been delivered.';
     }
     if (status == OrderStatus.confirmed ||
         status == OrderStatus.packing ||

@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart' show FirebaseDatabase;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../app/l10n/app_localizations.dart';
 import '../../app/routes/app_router.dart';
@@ -547,7 +548,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       });
 
       if (hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           const SnackBar(
             content: Text('Please fill in all required company fields'),
           ),
@@ -563,7 +564,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
 
   Future<void> _finish() async {
     if (_deliveryTypes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         const SnackBar(
           content: Text('Please select at least one delivery option'),
         ),
@@ -678,7 +679,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
     });
 
     if (hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         const SnackBar(
           content: Text('Please fill in all required fields correctly'),
         ),
@@ -834,7 +835,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (!mounted) return;
       context.read<AuthCubit>().setAuthenticatedUser(appUser);
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(l10n.companyRegisteredSuccessfully(companyName)),
         ),
@@ -863,7 +864,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(userMsg)));
+        ).showAppToast(SnackBar(content: Text(userMsg)));
       }
     } catch (e, st) {
       debugPrint('Unexpected error during onboarding: $e');
@@ -871,7 +872,7 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.error(e.toString()))));
+        ).showAppToast(SnackBar(content: Text(l10n.error(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);

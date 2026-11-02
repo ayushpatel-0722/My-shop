@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -25,7 +26,9 @@ import '../../../core/utils/cart_notification.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/back_to_admin_button.dart';
+import '../../../core/widgets/category_image.dart';
 import '../../../core/widgets/modern_shimmer.dart';
+import '../../../core/widgets/shop_phone.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/common_carousel.dart';
@@ -134,7 +137,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
     void doClaim() {
       Clipboard.setData(ClipboardData(text: code));
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).voucherCopiedToClipboard(code),
@@ -1373,6 +1376,48 @@ class _ShopDetailsBlock extends StatelessWidget {
           padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
           child: _buildDeliveryInfoPill(context, company),
         ),
+
+        // The phone number the shop admin entered in Shop Settings.
+        if (company.phone.trim().isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+            child: InkWell(
+              key: const Key('store-phone-row'),
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => callShop(context, company.phone),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.phone_outlined,
+                      size: 16,
+                      color: Color(0xFF475569),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      company.phone.trim(),
+                      key: const Key('store-phone-number'),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF334155),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      AppLocalizations.of(context).shopCallShop,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -1737,6 +1782,27 @@ class _CategoryShelf extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
+              // The shop's own picture for this category.
+              Container(
+                width: 44,
+                height: 44,
+                margin: const EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F3F6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CategoryImage(
+                    category: category,
+                    fallback: (_) => const Icon(
+                      Icons.category_outlined,
+                      size: 22,
+                      color: Color(0xFF8A94A6),
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: Text(
                   category.name,

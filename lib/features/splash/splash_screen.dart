@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (user.isAdmin) {
         context.go(AppRoutes.admin);
       } else if (user.isEmployee) {
-        context.go(AppRoutes.employeeHome);
+        context.go(employeeHomeFor(user));
       } else {
         context.go(AppRoutes.home);
       }

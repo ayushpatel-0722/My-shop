@@ -123,7 +123,7 @@
   "assign": "असाइन करें",
   "assignAnExistingParentCategoryInTheSameCompanyForNesting": "नेस्टिंग के लिए उसी कंपनी में कोई मौजूदा माता श्रेणी असाइन करें।",
   "assignDeliveryRidersAndDispatchOrdersForFulfillment": "डिलीवरी राइडर असाइन करें और पूर्ति के लिए ऑर्डर भेजें।",
-  "assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges": "वर्कफ़्लो जिम्मेदारियाँ असाइन करें। नोट: स्टाफ अनुमतियों में मैनुअल ऑर्डर स्थिति परिवर्तन शामिल नहीं हैं।",
+  "assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges": "पैकिंग और डिस्पैच से स्टाफ ऑर्डर का केवल अपना चरण कर सकता है। कन्फ़र्म, रद्द, भुगतान और पैक ऑर्डर को Ready करना एडमिन के पास रहता है।",
   "availableInventoryUnits": "उपलब्ध इन्वेंटरी इकाइयाँ",
   "backfillOrderingForOldCategories": "पुरानी श्रेणियों के लिए क्रम व्यवस्थित करें",
   "baseMeasurementType": "आधार माप प्रकार",
@@ -1252,5 +1252,137 @@
   "shopHoursNoOpenDay": "कम से कम एक दिन खुला रखें।",
   "shopStatusActive": "सक्रिय",
   "shopStatusSuspended": "निलंबित",
-  "shopStatusInactive": "निष्क्रिय"
+  "shopStatusInactive": "निष्क्रिय",
+  "reviewRateProductTitle": "इस उत्पाद को रेट करें",
+  "reviewEditTitle": "अपनी समीक्षा संपादित करें",
+  "reviewYourRating": "आपकी रेटिंग",
+  "reviewMessageLabel": "आपकी समीक्षा (वैकल्पिक)",
+  "reviewSubmitButton": "समीक्षा सबमिट करें",
+  "reviewUpdateButton": "समीक्षा अपडेट करें",
+  "reviewThanks": "आपकी समीक्षा के लिए धन्यवाद!",
+  "reviewUpdated": "आपकी समीक्षा अपडेट की गई।",
+  "reviewCouldNotSubmit": "आपकी समीक्षा सबमिट नहीं हो सकी: {error}",
+  "reviewSignInRequired": "समीक्षा लिखने के लिए कृपया साइन इन करें।",
+  "reviewOnlyAfterDelivery": "ऑर्डर डिलीवर होने के बाद ही आप समीक्षा कर सकते हैं।",
+  "reviewOrderNotFound": "यह ऑर्डर नहीं मिला।",
+  "reviewNotYourOrder": "यह ऑर्डर किसी अन्य खाते का है।",
+  "reviewItemNotInOrder": "यह उत्पाद उस ऑर्डर का हिस्सा नहीं है।",
+  "reviewRateYourItems": "अपने उत्पादों को रेट करें",
+  "reviewWrite": "समीक्षा लिखें",
+  "reviewEdit": "समीक्षा संपादित करें",
+  "reviewCouldNotLoad": "आपकी समीक्षाएँ लोड नहीं हो सकीं।",
+  "productNoReviewsYet": "अभी कोई समीक्षा नहीं",
+  "productRatingsAndReviews": "{count, plural, =1{1 रेटिंग और समीक्षा} other{{count} रेटिंग और समीक्षाएँ}}",
+  "shopContactTitle": "दुकान से संपर्क करें",
+  "shopCallShop": "दुकान को कॉल करें",
+  "shopPhoneCopied": "फ़ोन नंबर कॉपी किया गया",
+  "cartItemsInCart": "{count, plural, =1{आपके कार्ट में 1 आइटम} other{आपके कार्ट में {count} आइटम}}",
+  "@cartItemsInCart": {
+    "description": "Second line of the add-to-cart toast",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empDashboardTitle": "पैकिंग डैशबोर्ड",
+  "empStageToPack": "पैक करने हैं",
+  "empStageInProgress": "जारी है",
+  "empStagePacked": "पैक हो गए",
+  "empStageHandedOver": "सौंप दिए गए",
+  "empTotalOrders": "कुल ऑर्डर",
+  "empSearchHint": "ऑर्डर या ग्राहक से खोजें",
+  "empNoOrdersInStage": "अभी यहां कोई ऑर्डर नहीं",
+  "empLoadError": "ऑर्डर लोड नहीं हो सके। कनेक्शन या अनुमति जांचकर फिर कोशिश करें।",
+  "empRetry": "पुनः प्रयास करें",
+  "empNoShop": "आपका खाता किसी दुकान से जुड़ा नहीं है। अपने एडमिन से प्रोफ़ाइल जांचने को कहें।",
+  "empViewDetails": "विवरण देखें",
+  "empStartPacking": "पैकिंग शुरू करें",
+  "empMarkPacked": "पैक हुआ चिह्नित करें",
+  "empItemsCount": "{count, plural, =1{1 आइटम} other{{count} आइटम}}",
+  "@empItemsCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empOrderItems": "पैक करने के आइटम",
+  "empOrderInfo": "ऑर्डर की जानकारी",
+  "empCustomer": "ग्राहक",
+  "empPlaced": "दिया गया",
+  "empPackedProgress": "{total} में से {done} आइटम जांचे गए",
+  "@empPackedProgress": {
+    "description": "",
+    "placeholders": {
+      "done": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "empSku": "SKU: {sku}",
+  "@empSku": {
+    "description": "",
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      }
+    }
+  },
+  "empQty": "मात्रा",
+  "empNoItems": "इस ऑर्डर में कोई आइटम नहीं।",
+  "empActionFailed": "ऑर्डर अपडेट नहीं हो सका। कृपया फिर कोशिश करें।",
+  "empPackingStarted": "पैकिंग शुरू हुई",
+  "empWaitingForAdmin": "पैक हो गया — एडमिन द्वारा सौंपने की प्रतीक्षा।",
+  "empNotAllowed": "यह ऑर्डर आपके लिए उपलब्ध नहीं है।",
+  "empStartDelivery": "डिलीवरी शुरू करें",
+  "empMarkDelivered": "डिलीवर हुआ चिह्नित करें",
+  "empStageToDispatch": "भेजने के लिए तैयार",
+  "empStageOutForDelivery": "डिलीवरी के लिए निकले",
+  "empStageDelivered": "डिलीवर हुए",
+  "empNoAccess": "आपकी भूमिका में अभी कोई ऑर्डर कार्य नहीं है। अपने एडमिन से पैकिंग या डिस्पैच चालू करने को कहें।",
+  "switchRole": "भूमिका बदलें",
+  "switchRoleSubtitle": "भूमिका चयन स्क्रीन पर वापस जाएं",
+  "switchRoleConfirm": "आप इस खाते से साइन आउट हो जाएंगे। जारी रखें?",
+  "empSelectAll": "सभी चुनें",
+  "empClearAll": "सभी हटाएं",
+  "empCheckAllToFinish": "पैकिंग पूरी करने के लिए हर आइटम जांचें",
+  "empStartToCheck": "आइटम जांचने के लिए पैकिंग शुरू करें",
+  "empMoreItems": "+{count} और",
+  "@empMoreItems": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empOpenToPack": "खोलें और पैक करें",
+  "empAllPacked": "सभी आइटम पैक हो गए",
+  "empOrderProgress": "ऑर्डर की प्रगति",
+  "empYourStep": "आपका चरण",
+  "empDeliveryAddress": "डिलीवरी का पता",
+  "empPhone": "फ़ोन",
+  "empCopied": "कॉपी हो गया",
+  "empConfirmDelivered": "इस ऑर्डर को डिलीवर हुआ चिह्नित करें? इसे वापस नहीं किया जा सकता।",
+  "empDeliveryStarted": "डिलीवरी शुरू हुई",
+  "empDeliveredDone": "ऑर्डर डिलीवर हुआ चिह्नित",
+  "empUpdated": "आखिरी अपडेट",
+  "empBackToDashboard": "डैशबोर्ड पर वापस",
+  "empCancel": "रद्द करें",
+  "empConfirm": "पुष्टि करें",
+  "empTotalPieces": "कुल नग",
+  "empMarkedReady": "ऑर्डर डिलीवरी के लिए तैयार चिह्नित किया गया",
+  "employeeRoleManager": "मैनेजर",
+  "employeeRoleOrderPacker": "ऑर्डर पैकर",
+  "employeeRoleOrderDelivery": "ऑर्डर डिलीवरी",
+  "employeeRoleManagerDesc": "सभी ऑर्डर स्टेटस का प्रबंधन",
+  "employeeRoleOrderPackerDesc": "कन्फर्म से तैयार तक के ऑर्डर",
+  "employeeRoleOrderDeliveryDesc": "डिलीवरी के लिए तैयार से डिलीवर तक के ऑर्डर",
+  "employeeRoleLabel": "भूमिका",
+  "employeeConsole": "कर्मचारी कंसोल"
 }

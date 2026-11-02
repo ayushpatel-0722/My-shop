@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/services/admin_company_name.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -13,6 +14,7 @@ import '../../../core/widgets/app_product_image.dart';
 import '../../../core/widgets/full_screen_image_viewer.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
+import '../../reviews/widgets/product_reviews_list.dart';
 import '../qr/widgets/entity_qr_dialog.dart';
 import 'widgets/structured_content_editors.dart';
 
@@ -346,7 +348,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         .toList();
 
     if (urls.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).pleaseEnterAValidHttpOrHttpsImageUrl,
@@ -669,7 +671,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   // --- Step 4 Helpers: Dynamic Options & Cartesian Matrix Generator ---
   void _showAddOptionDialog() {
     if (!_isVariantSectionEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -817,7 +819,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                   .toList();
 
               if (conflictingUnits.contains(optName.toLowerCase())) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                ScaffoldMessenger.of(context).showAppToast(
                   SnackBar(
                     content: Text(
                       AppLocalizations.of(
@@ -1150,7 +1152,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   /// Computes the Cartesian Product matrix of all options with intelligent auto-pricing and locked unit type.
   void _generateVariantMatrix() {
     if (!_isVariantSectionEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -1166,7 +1168,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     }
 
     if (_options.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -1286,7 +1288,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       _variants.addAll(newVariants);
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showAppToast(
       SnackBar(
         content: Text(
           AppLocalizations.of(
@@ -1303,7 +1305,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
   void _showAddManualVariantDialog() {
     if (!_isVariantSectionEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -1833,7 +1835,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   // --- Form Submission ---
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).pleaseCheckAllRequiredFields,
@@ -1888,7 +1890,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           !AllDetailsEditor.isValid(allDetails)) {
         if (mounted) {
           setState(() => _contentShowErrors = true);
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showAppToast(
             SnackBar(
               content: Text(
                 AppLocalizations.of(
@@ -1956,7 +1958,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       if (!mounted) return;
 
       if (trendingCleanupFailed) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               '${AppLocalizations.of(context).productUpdatedSuccessfully(product.name)}, but removing from Trending Now failed: $trendingCleanupError',
@@ -1974,7 +1976,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     shopId: product.companyId,
                     productId: product.id,
                   );
-                  messenger.showSnackBar(
+                  messenger.showAppToast(
                     SnackBar(
                       content: Text(
                         retryCount > 0
@@ -1985,7 +1987,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     ),
                   );
                 } catch (retryErr) {
-                  messenger.showSnackBar(
+                  messenger.showAppToast(
                     SnackBar(
                       content: Text('Retry failed: $retryErr'),
                       backgroundColor: errColor,
@@ -2007,7 +2009,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                       context,
                     ).productCreatedSuccessfully(product.name));
 
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(successMsg),
             backgroundColor: Colors.green.shade700,
@@ -2024,7 +2026,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).failedToSaveProduct('$e')),
           backgroundColor: Theme.of(context).colorScheme.error,
@@ -3593,6 +3595,30 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                     ],
                   ),
                 ),
+
+                // ==========================================
+                // Customer reviews of this product (this shop only)
+                // ==========================================
+                if (isEditMode) ...[
+                  const SizedBox(height: 32),
+                  Text(
+                    'Customer reviews',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ProductReviewsList(
+                    key: ValueKey('admin-reviews-$_companyId'),
+                    productId:
+                        _loadedProductId ??
+                        widget.product?.id ??
+                        widget.productId ??
+                        '',
+                    companyId: _companyId,
+                    forStaff: true,
+                  ),
+                ],
 
                 const SizedBox(height: 32),
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -11,7 +12,9 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
+import '../../../core/widgets/shop_phone.dart';
 import '../../auth/auth_cubit.dart';
+import '../../reviews/widgets/order_review_section.dart';
 
 /// Pizza-tracker-style order timeline (Section 17.3 / Section 11).
 ///
@@ -275,6 +278,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                       ],
                       const SizedBox(height: 16),
                       _itemsCard(context, order),
+                      _reviewCard(order),
                       const SizedBox(height: 16),
                       _deliveryDetailsCard(context, order),
                     ],
@@ -291,6 +295,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                       const SizedBox(height: 12),
                       _storeInfoCard(order),
                       const SizedBox(height: 12),
+                      _shopContact(order),
                       _paymentStatusCard(context, order, l10n),
                       const SizedBox(height: 16),
                       _actionsCard(context, order, l10n),
@@ -326,6 +331,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         const SizedBox(height: 12),
         _storeInfoCard(order),
         const SizedBox(height: 12),
+        _shopContact(order),
         _paymentStatusCard(context, order, l10n),
         if (order.customerName.isNotEmpty ||
             order.customerPhone.isNotEmpty ||
@@ -335,10 +341,40 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         ],
         const SizedBox(height: 12),
         _itemsCard(context, order),
+        _reviewCard(order),
         const SizedBox(height: 20),
         _actionsCard(context, order, l10n),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  /// The shop's phone (from Shop Settings) with a call button; hidden when the
+  /// shop has no number.
+  Widget _shopContact(Order order) {
+    final card = ShopContactCard(
+      companyId: order.companyId,
+      fallbackPhone: order.pickupShop?.phone ?? '',
+    );
+    return Padding(padding: const EdgeInsets.only(bottom: 12), child: card);
+  }
+
+  /// "Rate your items" for a completed order.
+  Widget _reviewCard(Order order) {
+    if (!order.canBeReviewed) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: OrderReviewSection(order: order),
+        ),
+      ),
     );
   }
 
@@ -739,7 +775,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         userId: userId,
       );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text('Order ${order.reference} cancelled successfully.'),
           backgroundColor: Colors.green.shade800,
@@ -748,7 +784,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     } catch (e) {
       if (!context.mounted) return;
       final errorColor = Theme.of(context).colorScheme.error;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             e is StateError ? e.message : 'Could not cancel order: $e',

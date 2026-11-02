@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -22,6 +23,7 @@ import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../../marketplace/widgets/marketplace_bottom_nav.dart';
 import '../../marketplace/widgets/web_header.dart';
+import '../../reviews/widgets/order_review_section.dart';
 
 /// The shopper's order history.
 ///
@@ -77,7 +79,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         userId: userId,
       );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text('Order ${order.reference} cancelled successfully.'),
           backgroundColor: Colors.green.shade800,
@@ -86,7 +88,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     } catch (e) {
       if (!context.mounted) return;
       final errorColor = Theme.of(context).colorScheme.error;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             e is StateError ? e.message : 'Could not cancel order: $e',
@@ -589,7 +591,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Widget _orderCard(BuildContext context, Order order, AppLocalizations l10n) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final canReview = order.isCompleted && (order.reviewId ?? '').isEmpty;
+    final canReview = order.canBeReviewed;
     final userId = context.read<AuthCubit>().currentUser?.id ?? '';
 
     return Container(
@@ -851,7 +853,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                   ] else if (etaText != null) ...[
                     _etaLine(order, company),
-                  ] else if (order.isCompleted) ...[
+                  ] else if (order.canBeReviewed) ...[
                     const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -911,7 +913,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(
                     order.isCancelled
                         ? const Color(0xFFDC2626)
-                        : order.isCompleted
+                        : order.canBeReviewed
                         ? const Color(0xFF1E8F66)
                         : const Color(0xFFFF5247),
                   ),
@@ -1204,39 +1206,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
         // Review Stars on Completed Orders
         if (canReview) ...[
           const SizedBox(height: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Rate your order:',
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF64748B),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(5, (i) {
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => context.push(
-                      '${AppRoutes.leaveReview.replaceFirst(':orderId', order.id)}'
-                      '?companyId=${order.companyId}&rating=${i + 1}',
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: Icon(
-                        Icons.star_outline,
-                        size: 22,
-                        color: Colors.amber.shade700,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              key: Key('rate-items-${order.id}'),
+              onPressed: () => showOrderReviewSheet(context, order),
+              icon: Icon(Icons.star_outline, color: Colors.amber.shade700),
+              label: Text(AppLocalizations.of(context).reviewRateYourItems),
+            ),
           ),
         ],
       ],
@@ -1326,7 +1303,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(
                     order.isCancelled
                         ? const Color(0xFFDC2626)
-                        : order.isCompleted
+                        : order.canBeReviewed
                         ? const Color(0xFF1E8F66)
                         : const Color(0xFFFF5247),
                   ),
@@ -1424,7 +1401,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
     if (added > 0) {
-      messenger.showSnackBar(
+      messenger.showAppToast(
         SnackBar(
           content: Text(
             missing > 0
@@ -1442,7 +1419,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
       );
     } else {
-      messenger.showSnackBar(
+      messenger.showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).theseProductsAreNoLongerAvailable,
@@ -1486,7 +1463,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   /// Status-dependent actions: track, cancel, one-tap reorder, and the tappable
   /// star-rating shortcut on completed-but-unreviewed orders.
   Widget _actionRow(BuildContext context, Order order) {
-    final canReview = order.isCompleted && (order.reviewId ?? '').isEmpty;
+    final canReview = order.canBeReviewed;
     final userId = context.read<AuthCubit>().currentUser?.id ?? '';
 
     return Padding(
@@ -1565,25 +1542,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
           // Rate directly from the card: tapping a star opens the review
           // sheet pre-filled with that rating.
           if (canReview) ...[
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(5, (i) {
-                return InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () => context.push(
-                    '${AppRoutes.leaveReview.replaceFirst(':orderId', order.id)}'
-                    '?companyId=${order.companyId}&rating=${i + 1}',
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(3),
-                    child: Icon(
-                      Icons.star_outline,
-                      size: 22,
-                      color: Colors.amber.shade700,
-                    ),
-                  ),
-                );
-              }),
+            OutlinedButton.icon(
+              key: Key('rate-items-${order.id}'),
+              onPressed: () => showOrderReviewSheet(context, order),
+              icon: Icon(Icons.star_outline, color: Colors.amber.shade700),
+              label: Text(AppLocalizations.of(context).reviewRateYourItems),
             ),
             const SizedBox(width: 8),
           ],
@@ -1807,7 +1770,7 @@ class _ReorderButton extends StatelessWidget {
     if (!context.mounted) return;
     final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
     if (added > 0) {
-      messenger.showSnackBar(
+      messenger.showAppToast(
         SnackBar(
           content: Text(
             missing > 0
@@ -1825,7 +1788,7 @@ class _ReorderButton extends StatelessWidget {
         ),
       );
     } else {
-      messenger.showSnackBar(
+      messenger.showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).theseProductsAreNoLongerAvailable,

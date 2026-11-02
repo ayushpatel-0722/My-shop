@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../features/auth/auth_cubit.dart';
 import '../../features/auth/widgets/auth_bottom_sheet.dart';
@@ -44,7 +45,7 @@ class AuthGuard {
 
     if (message != null && message.trim().isNotEmpty) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(message),
           duration: const Duration(seconds: 3),

@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../core/models/app_user.dart';
 import '../../core/models/cart_item.dart';
 import '../../core/models/category.dart';
 import '../../core/models/delivery_charge.dart';
@@ -138,6 +139,17 @@ class AppRoutes {
 ///    - If user is NOT logged in: navigates to the main screen to choose role (/role).
 ///    - If user IS logged in: navigates to their respective home screen (/admin, /employee, or /home).
 /// 3. In-app navigation after boot: enforces role-based access control.
+/// Admin screens any employee may open: the order pipeline (its buttons
+/// follow the employee's role) and a read-only employee list. Adding and
+/// editing employees, and everything else in /admin, stays admin-only.
+bool _isEmployeeAdminRoute(String loc) =>
+    loc == AppRoutes.adminOrders ||
+    loc.startsWith('${AppRoutes.adminOrders}/') ||
+    loc == AppRoutes.adminEmployees;
+
+/// Where a signed-in employee lands: the shared orders pipeline.
+String employeeHomeFor(AppUser user) => AppRoutes.adminOrders;
+
 String? appRouteRedirect(String loc) {
   // While session is restoring on startup / browser reload, hold route
   if (AuthSession.isRestoring) {
@@ -186,7 +198,8 @@ String? appRouteRedirect(String loc) {
       if (AuthSession.isAdmin) {
         if (loc != AppRoutes.admin) return AppRoutes.admin;
       } else if (AuthSession.isEmployee) {
-        if (loc != AppRoutes.employeeHome) return AppRoutes.employeeHome;
+        final home = employeeHomeFor(AuthSession.currentUser!);
+        if (loc != home) return home;
       } else {
         if (loc != AppRoutes.home) return AppRoutes.home;
       }
@@ -202,7 +215,9 @@ String? appRouteRedirect(String loc) {
         loc == AppRoutes.adminLogin ||
         loc == AppRoutes.employeeLogin) {
       if (AuthSession.isAdmin) return AppRoutes.admin;
-      if (AuthSession.isEmployee) return AppRoutes.employeeHome;
+      if (AuthSession.isEmployee) {
+        return employeeHomeFor(AuthSession.currentUser!);
+      }
       return AppRoutes.home;
     }
   }
@@ -220,6 +235,9 @@ String? appRouteRedirect(String loc) {
   // admin-login route. Similarly protect only the employee area.
   if ((loc == AppRoutes.admin || loc.startsWith('${AppRoutes.admin}/')) &&
       !AuthSession.isAdmin) {
+    if (AuthSession.isEmployee) {
+      return _isEmployeeAdminRoute(loc) ? null : AppRoutes.adminOrders;
+    }
     return AppRoutes.role;
   }
   if ((loc == AppRoutes.employeeHome ||
@@ -371,6 +389,7 @@ final GoRouter appRouter = GoRouter(
       builder: (_, state) => LeaveReviewScreen(
         orderId: state.pathParameters['orderId'] ?? '',
         orderCompanyId: state.uri.queryParameters['companyId'] ?? '',
+        productId: state.uri.queryParameters['productId'] ?? '',
         initialRating:
             int.tryParse(state.uri.queryParameters['rating'] ?? '') ?? 5,
       ),

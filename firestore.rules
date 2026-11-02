@@ -5,8 +5,8 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
 
     function role() {
-      return request.auth.token.role != null
-        ? request.auth.token.role
+      return request.auth.token.get('role', null) != null
+        ? request.auth.token.get('role', null)
         : (exists(/databases/$(database)/documents/admins/$(request.auth.uid))
             ? 'admin'
             : (exists(/databases/$(database)/documents/employees/$(request.auth.uid))
@@ -26,21 +26,21 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.role == 'admin' ||
+        request.auth.token.get('role', '') == 'admin' ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
 
     function isEmployee() {
       return isSignedIn() && (
-        request.auth.token.role == 'employee' ||
+        request.auth.token.get('role', '') == 'employee' ||
         exists(/databases/$(database)/documents/employees/$(request.auth.uid))
       );
     }
 
     function isCompanyAdmin(cId) {
       return isSignedIn() && (
-        request.auth.token.role == 'admin' ||
+        request.auth.token.get('role', '') == 'admin' ||
         exists(/databases/$(database)/documents/companies/$(cId)/admins/$(request.auth.uid)) ||
         (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.companyId == cId)
@@ -49,11 +49,52 @@ service cloud.firestore {
 
     function isCompanyEmployee(cId) {
       return isSignedIn() && (
-        request.auth.token.role == 'employee' ||
+        request.auth.token.get('role', '') == 'employee' ||
         exists(/databases/$(database)/documents/companies/$(cId)/employees/$(request.auth.uid)) ||
         (exists(/databases/$(database)/documents/employees/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/employees/$(request.auth.uid)).data.companyId == cId)
       );
+    }
+
+    // Does this employee hold [key] in their profile's `permissions`
+    // (companies/{cId}/employees/{uid}, or the legacy flat employees/{uid})?
+    // A profile with no permissions saved (legacy) keeps packing access only.
+    function employeeProfile(cId) {
+      return exists(/databases/$(database)/documents/companies/$(cId)/employees/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/companies/$(cId)/employees/$(request.auth.uid)).data
+        : get(/databases/$(database)/documents/employees/$(request.auth.uid)).data;
+    }
+
+    function employeeCan(cId, key) {
+      let emp = employeeProfile(cId);
+      return !('permissions' in emp) || emp.permissions.size() == 0
+        ? key == 'canPack'
+        : emp.permissions.get(key, false) == true;
+    }
+
+    // Manager role: every order status. Strict check:
+    // the legacy "no permissions saved means packer" fallback never applies.
+    function isCompanyManager(cId) {
+      return isCompanyEmployee(cId) && employeeCan(cId, 'canManageOrders');
+    }
+
+    // What a fulfilment employee may write to an order: one legal step of the
+    // pipeline their role covers, nothing else.
+    //   Order Packer   : confirmed -> packing -> ready   (canPack)
+    //   Order Delivery : ready -> on_the_way -> delivered (canDispatch)
+    // Payment, cancellation and assignment stay with admins and managers.
+    function isFulfilmentEmployeeUpdate(cId, before, after) {
+      return after.diff(before).affectedKeys()
+          .hasOnly(['orderStatus', 'statusHistory', 'updatedAt'])
+        && (after.orderStatus == before.orderStatus
+            || (before.orderStatus == 'confirmed' && after.orderStatus == 'packing'
+                && employeeCan(cId, 'canPack'))
+            || (before.orderStatus == 'packing' && after.orderStatus == 'ready'
+                && employeeCan(cId, 'canPack'))
+            || (before.orderStatus == 'ready' && after.orderStatus == 'on_the_way'
+                && employeeCan(cId, 'canDispatch'))
+            || (before.orderStatus == 'on_the_way' && after.orderStatus == 'delivered'
+                && employeeCan(cId, 'canDispatch')));
     }
 
     function isCompanyStaff(cId) {
@@ -119,11 +160,15 @@ service cloud.firestore {
       }
 
       // ---- /companies/{companyId}/employees/{employeeId} ---------------------
+      // Roles carry privileges, so only an admin may write here.
+      // The one exception is an employee's first login copying their own legacy
+      // profile in, which can never grant manager rights.
       match /employees/{employeeId} {
         allow read: if isSignedIn();
-        allow create: if isSignedIn();
-        allow update: if isSignedIn();
-        allow delete: if isCompanyAdmin(companyId);
+        allow create: if isCompanyAdmin(companyId)
+          || (request.auth.uid == employeeId
+              && request.resource.data.get('permissions', {}).get('canManageOrders', false) != true);
+        allow update, delete: if isCompanyAdmin(companyId);
       }
 
       // ---- /companies/{companyId}/categories/{categoryId} --------------------
@@ -158,7 +203,24 @@ service cloud.firestore {
             && (!('paymentStatus' in request.resource.data) || request.resource.data.paymentStatus != 'done')
           ))
           && isValidOrderPaymentVerification(request.resource.data);
-        allow update: if (isCompanyStaff(companyId) && isValidOrderPaymentVerification(request.resource.data)) || (
+        // Admins and managers manage the whole order. Other employees may only take the
+        // fulfilment steps their permissions allow (see
+        // isFulfilmentEmployeeUpdate); payment and cancellation are untouchable.
+        allow update: if ((isCompanyAdmin(companyId) || isCompanyManager(companyId))
+              && isValidOrderPaymentVerification(request.resource.data))
+          || (isCompanyEmployee(companyId)
+              && isFulfilmentEmployeeUpdate(companyId, resource.data, request.resource.data))
+          || (
+          isSignedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && resource.data.orderStatus == 'delivered'
+          && request.resource.data.orderStatus == 'completed'
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['orderStatus', 'reviewId', 'statusHistory', 'updatedAt'])
+          && exists(/databases/$(database)/documents/companies/$(companyId)/reviews/$(request.resource.data.reviewId))
+          && get(/databases/$(database)/documents/companies/$(companyId)/reviews/$(request.resource.data.reviewId)).data.userId == request.auth.uid
+        ) || (
           isSignedIn()
           && resource.data.userId == request.auth.uid
           && request.resource.data.userId == resource.data.userId
@@ -210,7 +272,12 @@ service cloud.firestore {
       // ---- /companies/{companyId}/reviews/{reviewId} ------------------------
       match /reviews/{reviewId} {
         allow read: if true;
-        allow create: if isSignedIn();
+        // A review is always written as the signed-in customer, for their own
+        // order of this shop (the order must exist and belong to them).
+        allow create: if isSignedIn()
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.companyId == companyId
+          && get(/databases/$(database)/documents/companies/$(companyId)/orders/$(request.resource.data.orderId)).data.userId == request.auth.uid;
         allow update: if isCompanyAdmin(companyId) || (isSignedIn() && resource.data.userId == request.auth.uid);
         allow delete: if isCompanyAdmin(companyId);
       }
@@ -296,7 +363,7 @@ service cloud.firestore {
       allow read: if true;
     }
     match /{path=**}/orders/{orderId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.token.role == 'admin' || request.auth.token.role == 'employee');
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.token.get('role', '') == 'admin' || request.auth.token.get('role', '') == 'employee');
     }
     match /{path=**}/vouchers/{voucherId} {
       allow read: if true;
@@ -323,8 +390,15 @@ service cloud.firestore {
     match /admins/{adminId} {
       allow read, write: if isSignedIn() && (adminId == request.auth.uid || isAdmin());
     }
+    // An employee may touch their own legacy profile but never their role,
+    // permissions or company: those decide what the profile is allowed to do.
     match /employees/{employeeId} {
-      allow read, write: if isSignedIn() && (employeeId == request.auth.uid || isAdmin());
+      allow read: if isSignedIn() && (employeeId == request.auth.uid || isAdmin());
+      allow create, delete: if isSignedIn() && isAdmin();
+      allow update: if isSignedIn() && (isAdmin()
+        || (employeeId == request.auth.uid
+            && !request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(['permissions', 'role', 'companyId'])));
     }
     match /categories/{categoryId} {
       allow read: if true;

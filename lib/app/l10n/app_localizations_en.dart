@@ -399,7 +399,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String
   get assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges =>
-      'Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.';
+      'Packing and dispatch let staff take only their own step of an order. Confirming, cancelling, payments and moving a packed order to Ready stay with admins.';
 
   @override
   String get availableInventoryUnits => 'Available inventory units';
@@ -4511,4 +4511,311 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shopStatusInactive => 'Inactive';
+
+  @override
+  String get reviewRateProductTitle => 'Rate this product';
+
+  @override
+  String get reviewEditTitle => 'Edit your review';
+
+  @override
+  String get reviewYourRating => 'Your rating';
+
+  @override
+  String get reviewMessageLabel => 'Your review (optional)';
+
+  @override
+  String get reviewSubmitButton => 'Submit review';
+
+  @override
+  String get reviewUpdateButton => 'Update review';
+
+  @override
+  String get reviewThanks => 'Thanks for your review!';
+
+  @override
+  String get reviewUpdated => 'Your review was updated.';
+
+  @override
+  String reviewCouldNotSubmit(String error) {
+    return 'Could not submit your review: $error';
+  }
+
+  @override
+  String get reviewSignInRequired => 'Please sign in to write a review.';
+
+  @override
+  String get reviewOnlyAfterDelivery =>
+      'You can review items once your order is delivered.';
+
+  @override
+  String get reviewOrderNotFound => 'We could not find this order.';
+
+  @override
+  String get reviewNotYourOrder => 'This order belongs to another account.';
+
+  @override
+  String get reviewItemNotInOrder => 'This product is not part of that order.';
+
+  @override
+  String get reviewRateYourItems => 'Rate your items';
+
+  @override
+  String get reviewWrite => 'Write a review';
+
+  @override
+  String get reviewEdit => 'Edit review';
+
+  @override
+  String get reviewCouldNotLoad => 'Could not load your reviews.';
+
+  @override
+  String get productNoReviewsYet => 'No reviews yet';
+
+  @override
+  String productRatingsAndReviews(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ratings & reviews',
+      one: '1 rating & review',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shopContactTitle => 'Contact the shop';
+
+  @override
+  String get shopCallShop => 'Call shop';
+
+  @override
+  String get shopPhoneCopied => 'Phone number copied';
+
+  @override
+  String cartItemsInCart(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items in your cart',
+      one: '1 item in your cart',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get empDashboardTitle => 'Packing dashboard';
+
+  @override
+  String get empStageToPack => 'To pack';
+
+  @override
+  String get empStageInProgress => 'In progress';
+
+  @override
+  String get empStagePacked => 'Packed';
+
+  @override
+  String get empStageHandedOver => 'Handed over';
+
+  @override
+  String get empTotalOrders => 'Total orders';
+
+  @override
+  String get empSearchHint => 'Search by order or customer';
+
+  @override
+  String get empNoOrdersInStage => 'No orders here right now';
+
+  @override
+  String get empLoadError =>
+      'Could not load orders. Check your connection or permissions and try again.';
+
+  @override
+  String get empRetry => 'Retry';
+
+  @override
+  String get empNoShop =>
+      'Your account is not linked to a shop. Ask your admin to check your profile.';
+
+  @override
+  String get empViewDetails => 'View details';
+
+  @override
+  String get empStartPacking => 'Start packing';
+
+  @override
+  String get empMarkPacked => 'Mark as packed';
+
+  @override
+  String empItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get empOrderItems => 'Items to pack';
+
+  @override
+  String get empOrderInfo => 'Order information';
+
+  @override
+  String get empCustomer => 'Customer';
+
+  @override
+  String get empPlaced => 'Placed';
+
+  @override
+  String empPackedProgress(num done, num total) {
+    return '$done of $total items checked';
+  }
+
+  @override
+  String empSku(String sku) {
+    return 'SKU: $sku';
+  }
+
+  @override
+  String get empQty => 'Qty';
+
+  @override
+  String get empNoItems => 'This order has no items.';
+
+  @override
+  String get empActionFailed => 'Could not update the order. Please try again.';
+
+  @override
+  String get empPackingStarted => 'Packing started';
+
+  @override
+  String get empWaitingForAdmin =>
+      'Packed — waiting for the admin to hand over.';
+
+  @override
+  String get empNotAllowed => 'This order is not available to you.';
+
+  @override
+  String get empStartDelivery => 'Start delivery';
+
+  @override
+  String get empMarkDelivered => 'Mark as delivered';
+
+  @override
+  String get empStageToDispatch => 'Ready to dispatch';
+
+  @override
+  String get empStageOutForDelivery => 'Out for delivery';
+
+  @override
+  String get empStageDelivered => 'Delivered';
+
+  @override
+  String get empNoAccess =>
+      'Your role has no order duties yet. Ask your admin to enable packing or dispatch for you.';
+
+  @override
+  String get switchRole => 'Switch role';
+
+  @override
+  String get switchRoleSubtitle => 'Back to the role selection screen';
+
+  @override
+  String get switchRoleConfirm =>
+      'You will be signed out of this account. Continue?';
+
+  @override
+  String get empSelectAll => 'Select all';
+
+  @override
+  String get empClearAll => 'Clear all';
+
+  @override
+  String get empCheckAllToFinish => 'Check every item to finish packing';
+
+  @override
+  String get empStartToCheck => 'Start packing to tick off items';
+
+  @override
+  String empMoreItems(num count) {
+    return '+$count more';
+  }
+
+  @override
+  String get empOpenToPack => 'Open & pack';
+
+  @override
+  String get empAllPacked => 'All items packed';
+
+  @override
+  String get empOrderProgress => 'Order progress';
+
+  @override
+  String get empYourStep => 'Your step';
+
+  @override
+  String get empDeliveryAddress => 'Delivery address';
+
+  @override
+  String get empPhone => 'Phone';
+
+  @override
+  String get empCopied => 'Copied';
+
+  @override
+  String get empConfirmDelivered =>
+      'Mark this order as delivered? This cannot be undone.';
+
+  @override
+  String get empDeliveryStarted => 'Delivery started';
+
+  @override
+  String get empDeliveredDone => 'Order marked as delivered';
+
+  @override
+  String get empUpdated => 'Last updated';
+
+  @override
+  String get empBackToDashboard => 'Back to dashboard';
+
+  @override
+  String get empCancel => 'Cancel';
+
+  @override
+  String get empConfirm => 'Confirm';
+
+  @override
+  String get empTotalPieces => 'Total pieces';
+
+  @override
+  String get empMarkedReady => 'Order marked ready for delivery';
+
+  @override
+  String get employeeRoleManager => 'Manager';
+
+  @override
+  String get employeeRoleOrderPacker => 'Order Packer';
+
+  @override
+  String get employeeRoleOrderDelivery => 'Order Delivery';
+
+  @override
+  String get employeeRoleManagerDesc => 'Manages every order status';
+
+  @override
+  String get employeeRoleOrderPackerDesc => 'Orders from Confirmed to Ready';
+
+  @override
+  String get employeeRoleOrderDeliveryDesc =>
+      'Orders from Ready for Delivery to Delivered';
+
+  @override
+  String get employeeRoleLabel => 'Role';
+
+  @override
+  String get employeeConsole => 'Employee Console';
 }

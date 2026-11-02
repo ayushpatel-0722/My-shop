@@ -11,6 +11,7 @@ const Map<String, String> _englishStatusLabels = {
   OrderStatus.packing: 'Packing',
   OrderStatus.ready: 'Ready',
   OrderStatus.onTheWay: 'On the way',
+  OrderStatus.delivered: 'Delivered',
   OrderStatus.completed: 'Completed',
   OrderStatus.cancelled: 'Cancelled',
 };
@@ -35,6 +36,8 @@ String orderStatusLabel(BuildContext context, String status) {
       return l10n.ready;
     case OrderStatus.onTheWay:
       return l10n.onTheWay;
+    case OrderStatus.delivered:
+      return l10n.empStageDelivered;
     case OrderStatus.completed:
       return l10n.completed;
     default:
@@ -52,6 +55,8 @@ Color orderStatusColor(String status) {
     case OrderStatus.ready:
     case OrderStatus.onTheWay:
       return const Color(0xFF7C3AED);
+    case OrderStatus.delivered:
+      return const Color(0xFF0E9AA7);
     case OrderStatus.completed:
       return const Color(0xFF1E8F66);
     case OrderStatus.cancelled:

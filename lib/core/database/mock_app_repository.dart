@@ -428,6 +428,7 @@ class MockAppRepository implements AppRepository {
       email: employee.email,
       role: 'employee',
       employeeRole: employee.role,
+      permissions: employee.permissions,
     );
     final i = _mockEmployees.indexWhere((e) => e.id == uid);
     if (i == -1) {
@@ -957,16 +958,28 @@ class MockAppRepository implements AppRepository {
   }
 
   @override
-  Future<void> setEmployeePackingDone(String orderId, bool done) async {
-    final i = _orders.indexWhere((o) => o.id == orderId);
+  Future<void> setEmployeePackingDone(
+    String orderId,
+    bool done, {
+    String companyId = '',
+  }) async {
+    final i = _orders.indexWhere(
+      (o) => o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
+    );
     if (i == -1) return;
     _orders[i] = _orders[i].copyWith(employeePackingDone: done);
     _pushOrders();
   }
 
   @override
-  Future<void> assignEmployee(String orderId, String employeeId) async {
-    final i = _orders.indexWhere((o) => o.id == orderId);
+  Future<void> assignEmployee(
+    String orderId,
+    String employeeId, {
+    String companyId = '',
+  }) async {
+    final i = _orders.indexWhere(
+      (o) => o.id == orderId && (companyId.isEmpty || o.companyId == companyId),
+    );
     if (i == -1) return;
     _orders[i] = _orders[i].copyWith(
       assignedEmployeeId: employeeId.isEmpty ? null : employeeId,
@@ -977,25 +990,92 @@ class MockAppRepository implements AppRepository {
 
   @override
   Future<void> submitReview(Review review) async {
-    _reviews.add(
-      Review(
-        id: review.id.isEmpty ? _uuid.v4() : review.id,
-        orderId: review.orderId,
-        userId: review.userId,
-        userName: review.userName,
-        companyId: review.companyId,
-        rating: review.rating,
-        message: review.message,
-        createdAt: DateTime.now(),
-      ),
+    if (review.companyId.trim().isEmpty) {
+      throw ArgumentError('A review must belong to a shop.');
+    }
+    if (review.orderId.trim().isEmpty) {
+      throw ArgumentError('A review must belong to an order.');
+    }
+    if (review.rating < 1 || review.rating > 5) {
+      throw ArgumentError('A rating must be between 1 and 5.');
+    }
+    final id = Review.idFor(
+      orderId: review.orderId,
+      productId: review.productId,
     );
-    final oi = _orders.indexWhere((o) => o.id == review.orderId);
-    if (oi != -1) {
-      _orders[oi] = _orders[oi].copyWith(reviewId: review.id);
-      _pushOrders();
+    // An order that exists must belong to the reviewer and be delivered
+    // (Firestore enforces the same). Standalone review fixtures that never
+    // placed an order are still accepted by the mock.
+    final oi = _orders.indexWhere(
+      (o) => o.id == review.orderId && o.companyId == review.companyId,
+    );
+    final order = oi == -1 ? null : _orders[oi];
+    if (order != null) {
+      if (order.userId != review.userId) {
+        throw StateError('You can only review your own order.');
+      }
+      if (!order.canBeReviewed) {
+        throw StateError(
+          'An order can be reviewed once it has been delivered.',
+        );
+      }
+    }
+    // Reviews live per shop (as in Firestore), so the same id in two shops
+    // never collides.
+    final i = _reviews.indexWhere(
+      (r) => r.id == id && r.companyId == review.companyId,
+    );
+    final old = i == -1 ? null : _reviews[i];
+    final saved = Review(
+      id: id,
+      orderId: review.orderId,
+      userId: review.userId,
+      userName: review.userName,
+      companyId: review.companyId,
+      productId: review.productId,
+      productName: review.productName,
+      rating: review.rating,
+      message: review.message,
+      // Editing keeps the shop's hidden/visible decision and the first date.
+      isVisible: old?.isVisible ?? true,
+      createdAt: old?.createdAt ?? DateTime.now(),
+    );
+    if (i == -1) {
+      _reviews.add(saved);
+    } else {
+      _reviews[i] = saved;
     }
     _pushReviews();
+
+    // The first review completes a delivered order.
+    if (order != null && order.isDelivered) {
+      _orders[oi] = _applyStatus(
+        order,
+        OrderStatus.completed,
+        note: 'Completed after the customer review',
+      ).copyWith(reviewId: id);
+      _pushOrders();
+    }
   }
+
+  @override
+  Future<List<Review>> orderReviews(
+    String orderId, {
+    required String companyId,
+  }) async => [
+    for (final r in _reviews)
+      if (r.orderId == orderId && r.companyId == companyId) r,
+  ];
+
+  @override
+  Future<List<Review>> productReviews(
+    String productId, {
+    required String companyId,
+  }) async => [
+    for (final r in _reviews)
+      if (r.productId == productId && r.companyId == companyId && r.isVisible)
+        r,
+  ];
 
   @override
   Future<void> markNotificationRead(String id) async {
@@ -1325,8 +1405,15 @@ class MockAppRepository implements AppRepository {
   }
 
   @override
-  Future<void> setReviewVisibility(String reviewId, bool visible) async {
-    final i = _reviews.indexWhere((r) => r.id == reviewId);
+  Future<void> setReviewVisibility(
+    String reviewId,
+    bool visible, {
+    String companyId = '',
+  }) async {
+    final i = _reviews.indexWhere(
+      (r) =>
+          r.id == reviewId && (companyId.isEmpty || r.companyId == companyId),
+    );
     if (i == -1) return;
     final r = _reviews[i];
     _reviews[i] = Review(
@@ -1335,6 +1422,8 @@ class MockAppRepository implements AppRepository {
       userId: r.userId,
       userName: r.userName,
       companyId: r.companyId,
+      productId: r.productId,
+      productName: r.productName,
       rating: r.rating,
       message: r.message,
       isVisible: visible,

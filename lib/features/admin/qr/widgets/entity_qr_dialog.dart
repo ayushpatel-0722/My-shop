@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../core/services/qr_deep_link_service.dart';
@@ -132,7 +133,7 @@ class _EntityQrShareDialogState extends State<EntityQrShareDialog> {
         fileName: fileName,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Row(
               children: [

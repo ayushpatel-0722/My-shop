@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../core/models/category.dart';
 import '../../../core/models/company.dart';
@@ -259,7 +260,7 @@ class _AdminExploreCategoriesScreenState
 
     await repo.saveHomeExploreCategory(entry);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showAppToast(
       SnackBar(
         content: Text('Added "${cat.name}" to Explore Categories.'),
         behavior: SnackBarBehavior.floating,
@@ -295,7 +296,7 @@ class _AdminExploreCategoriesScreenState
     if (confirmed == true && mounted) {
       await repo.deleteHomeExploreCategory(entry.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           const SnackBar(
             content: Text('Removed category from Explore Categories.'),
             behavior: SnackBarBehavior.floating,

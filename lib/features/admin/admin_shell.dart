@@ -7,9 +7,11 @@ import 'package:myshop/core/models/app_user.dart';
 
 import '../../app/routes/app_router.dart';
 import '../../core/config/app_config.dart';
+import '../../core/domain/employee_roles.dart';
 import '../../core/services/admin_company_name.dart';
 import '../../core/services/auth_session.dart';
 import '../auth/auth_cubit.dart';
+import 'employees/employee_role_labels.dart';
 
 /// Breakpoint at which the admin layout transitions from mobile/tablet drawer to
 /// a dedicated desktop sidebar layout (matches AppBreakpoints.tabletMax).
@@ -217,7 +219,19 @@ class _AdminNavItemData {
   });
 }
 
+/// An employee only sees the screens they may open (see the router).
 List<_AdminNavItemData> _getAdminNavItems(BuildContext context) {
+  final items = _allAdminNavItems(context);
+  if (AuthSession.isAdmin || !AuthSession.isEmployee) return items;
+  return [
+    for (final i in items)
+      if (i.route == AppRoutes.adminOrders ||
+          i.route == AppRoutes.adminEmployees)
+        i,
+  ];
+}
+
+List<_AdminNavItemData> _allAdminNavItems(BuildContext context) {
   final l10n = AppLocalizations.of(context);
   return [
     // MAIN
@@ -371,7 +385,7 @@ class _AdminDesktopSidebar extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          AppLocalizations.of(context).adminConsole,
+                          _consoleTitle(AppLocalizations.of(context)),
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -528,7 +542,7 @@ class _AdminDesktopSidebar extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                user?.role.toUpperCase() ?? 'ADMIN',
+                                _roleCaption(context, user),
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: theme.colorScheme.onSurfaceVariant,
@@ -844,7 +858,7 @@ class _AdminMobileDrawerContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                AppLocalizations.of(context).adminConsole,
+                _consoleTitle(AppLocalizations.of(context)),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -921,4 +935,18 @@ class _AdminMobileDrawerContent extends StatelessWidget {
       ],
     );
   }
+}
+
+String _consoleTitle(AppLocalizations l10n) =>
+    AuthSession.isEmployee ? l10n.employeeConsole : l10n.adminConsole;
+
+/// Under the name in the sidebar: "ADMIN", or the employee's role.
+String _roleCaption(BuildContext context, AppUser? user) {
+  if (user == null || !user.isEmployee) {
+    return user?.role.toUpperCase() ?? 'ADMIN';
+  }
+  return EmployeeRole.resolve(
+    user.employeeRole,
+    user.permissions,
+  ).label(AppLocalizations.of(context)).toUpperCase();
 }

@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../app/l10n/l10n_service.dart';
 import '../domain/category_tree.dart';
+import '../domain/employee_roles.dart';
 import '../domain/order_status.dart';
 import '../models/admin.dart';
 import '../models/app_user.dart';
@@ -595,6 +596,7 @@ class FirebaseAppRepository implements AppRepository {
       email: email.trim(),
       role: 'employee',
       employeeRole: empData['role'],
+      permissions: parsePermissions(empData['permissions']),
     );
   }
 
@@ -930,13 +932,19 @@ class FirebaseAppRepository implements AppRepository {
     await _employeesCol(
       targetCompanyId,
     ).doc(uid).set(empMap, SetOptions(merge: true));
-    await _db.collection('users').doc(uid).set({
-      'id': uid,
-      'role': 'employee',
-      'companyId': targetCompanyId,
-      'email': createdEmp.email,
-      'name': createdEmp.name,
-    }, SetOptions(merge: true));
+    // The `users/{uid}` pointer is only a shortcut for session restore: the
+    // rules let a company admin write it only when they also have a platform
+    // admin profile, and the employee's first login writes it themselves. A
+    // refusal here must not turn a created employee into a failed form.
+    try {
+      await _db.collection('users').doc(uid).set({
+        'id': uid,
+        'role': 'employee',
+        'companyId': targetCompanyId,
+        'email': createdEmp.email,
+        'name': createdEmp.name,
+      }, SetOptions(merge: true));
+    } catch (_) {}
     try {
       await _rtdb.ref('companies/$targetCompanyId/employees/$uid').set(empMap);
     } catch (_) {}
@@ -1424,30 +1432,35 @@ class FirebaseAppRepository implements AppRepository {
 
   @override
   Stream<List<Review>> reviews(String companyId) {
+    // No server-side orderBy: it would silently drop reviews that have no
+    // `createdAt`, and a collection-group orderBy needs an index that may not
+    // be deployed (the stream then fails and the list looks empty). Sorting
+    // the few documents here is cheap and always works.
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream =
         companyId.isNotEmpty
-        ? _reviewsCol(
-            companyId,
-          ).orderBy('createdAt', descending: true).snapshots()
-        : _db
-              .collectionGroup('reviews')
-              .orderBy('createdAt', descending: true)
-              .snapshots();
+        ? _reviewsCol(companyId).snapshots()
+        : _db.collectionGroup('reviews').snapshots();
 
-    return stream
-        .map(
-          (s) => s.docs.map((d) {
-            final map = _asMap(d.data());
-            final parentCompanyId = d.reference.parent.parent?.id ?? '';
-            if ((map['companyId'] == null ||
-                    (map['companyId'] as String).isEmpty) &&
-                parentCompanyId.isNotEmpty) {
-              map['companyId'] = parentCompanyId;
-            }
-            return Review.fromMap(d.id, map);
-          }).toList(),
-        )
-        .asBroadcastStream();
+    return stream.map((s) {
+      final list = s.docs.map((d) {
+        final map = _asMap(d.data());
+        final parentCompanyId = d.reference.parent.parent?.id ?? '';
+        if ((map['companyId'] == null ||
+                (map['companyId'] as String).isEmpty) &&
+            parentCompanyId.isNotEmpty) {
+          map['companyId'] = parentCompanyId;
+        }
+        return Review.fromMap(d.id, map);
+      }).toList();
+      list.sort((a, b) {
+        final x = a.createdAt, y = b.createdAt;
+        if (x == null && y == null) return 0;
+        if (x == null) return 1;
+        if (y == null) return -1;
+        return y.compareTo(x);
+      });
+      return list;
+    }).asBroadcastStream();
   }
 
   @override
@@ -1962,9 +1975,11 @@ class FirebaseAppRepository implements AppRepository {
     final updates = <String, dynamic>{
       'orderStatus': status,
       'updatedAt': now,
-      'cancelledAt': status == OrderStatus.cancelled ? now : null,
       'statusHistory': newHistory,
     };
+    // Only a cancellation touches `cancelledAt`, so ordinary fulfilment steps
+    // (including the employee ones the rules restrict) write nothing else.
+    if (status == OrderStatus.cancelled) updates['cancelledAt'] = now;
     if (status == OrderStatus.cancelled &&
         cancellationReason != null &&
         cancellationReason.isNotEmpty) {
@@ -2165,48 +2180,148 @@ class FirebaseAppRepository implements AppRepository {
   }
 
   @override
-  Future<void> setEmployeePackingDone(String orderId, bool done) async {
-    final ref = await _findOrderRef(orderId);
-    if (ref != null) {
-      await ref.update({'employeePackingDone': done});
-    } else {
-      await _db.collection('orders').doc(orderId).update({
-        'employeePackingDone': done,
+  Future<void> setEmployeePackingDone(
+    String orderId,
+    bool done, {
+    String companyId = '',
+  }) async {
+    // With a company id the order is addressed directly: no collection-group
+    // lookup, so the write stays inside the employee's own shop.
+    final ref = companyId.isNotEmpty
+        ? _ordersCol(companyId).doc(orderId)
+        : (await _findOrderRef(orderId) ??
+              _db.collection('orders').doc(orderId));
+    final snap = await ref.get();
+    final data = _asMap(snap.data());
+    final now = DateTime.now().toIso8601String();
+    final history = List<Map<String, dynamic>>.from(
+      asMapList(data['statusHistory']),
+    );
+    if (done) {
+      history.add({
+        'status': data['orderStatus']?.toString() ?? OrderStatus.packing,
+        'note': 'Packing done',
+        'timestamp': now,
       });
     }
+    await ref.update({
+      'employeePackingDone': done,
+      'updatedAt': now,
+      'statusHistory': history,
+    });
   }
 
   @override
-  Future<void> assignEmployee(String orderId, String employeeId) async {
-    final ref = await _findOrderRef(orderId);
-    if (ref != null) {
-      await ref.update({'assignedEmployeeId': employeeId});
-    } else {
-      await _db.collection('orders').doc(orderId).update({
-        'assignedEmployeeId': employeeId,
-      });
-    }
+  Future<void> assignEmployee(
+    String orderId,
+    String employeeId, {
+    String companyId = '',
+  }) async {
+    final ref = companyId.isNotEmpty
+        ? _ordersCol(companyId).doc(orderId)
+        : (await _findOrderRef(orderId) ??
+              _db.collection('orders').doc(orderId));
+    // An empty id clears the assignment, handing the order back to the pool.
+    await ref.update({
+      'assignedEmployeeId': employeeId.isEmpty ? null : employeeId,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
   }
 
   @override
   Future<void> submitReview(Review review) async {
-    final col = _reviewsCol(review.companyId);
-    final ref = col.doc();
+    if (review.companyId.trim().isEmpty) {
+      throw ArgumentError('A review must belong to a shop.');
+    }
+    if (review.orderId.trim().isEmpty) {
+      throw ArgumentError('A review must belong to an order.');
+    }
+    if (review.rating < 1 || review.rating > 5) {
+      throw ArgumentError('A rating must be between 1 and 5.');
+    }
+    final id = Review.idFor(
+      orderId: review.orderId,
+      productId: review.productId,
+    );
+    final ref = _reviewsCol(review.companyId).doc(id);
+    final now = DateTime.now().toIso8601String();
+
+    // Only the customer who received the order may review it, and only once it
+    // has been handed over.
+    final orderRef = _ordersCol(review.companyId).doc(review.orderId);
+    final orderSnap = await orderRef.get();
+    if (!orderSnap.exists) {
+      throw StateError('Order not found.');
+    }
+    final orderData = _asMap(orderSnap.data());
+    if (orderData['userId']?.toString() != review.userId) {
+      throw StateError('You can only review your own order.');
+    }
+    final status = orderData['orderStatus']?.toString() ?? '';
+    if (status != OrderStatus.delivered && status != OrderStatus.completed) {
+      throw StateError('An order can be reviewed once it has been delivered.');
+    }
+
+    // Editing keeps the original date and any hidden/visible decision the shop
+    // made, so a shopper cannot un-hide a review by re-saving it.
+    final existing = await ref.get();
+    final old = existing.data();
     await ref.set({
-      'id': ref.id,
+      'id': id,
       'orderId': review.orderId,
       'userId': review.userId,
       'userName': review.userName,
       'companyId': review.companyId,
+      'productId': review.productId,
+      'productName': review.productName,
       'rating': review.rating,
       'message': review.message,
-      'isVisible': true,
-      'createdAt': DateTime.now().toIso8601String(),
+      'isVisible': existing.exists ? (old?['isVisible'] ?? true) : true,
+      'createdAt': existing.exists ? (old?['createdAt'] ?? now) : now,
+      if (existing.exists) 'updatedAt': now,
     });
-    final orderRef = await _findOrderRef(review.orderId);
-    if (orderRef != null) {
-      await orderRef.update({'reviewId': ref.id});
+
+    // The first review completes a delivered order. Later reviews of the other
+    // items (and edits) leave the finished order alone.
+    if (status == OrderStatus.delivered) {
+      final history =
+          List<Map<String, dynamic>>.from(asMapList(orderData['statusHistory']))
+            ..add({
+              'status': OrderStatus.completed,
+              'note': 'Completed after the customer review',
+              'timestamp': now,
+            });
+      await orderRef.update({
+        'orderStatus': OrderStatus.completed,
+        'reviewId': id,
+        'statusHistory': history,
+        'updatedAt': now,
+      });
     }
+  }
+
+  @override
+  Future<List<Review>> orderReviews(
+    String orderId, {
+    required String companyId,
+  }) async {
+    final snap = await _reviewsCol(
+      companyId,
+    ).where('orderId', isEqualTo: orderId).get();
+    return [for (final d in snap.docs) Review.fromMap(d.id, _asMap(d.data()))];
+  }
+
+  @override
+  Future<List<Review>> productReviews(
+    String productId, {
+    required String companyId,
+  }) async {
+    final snap = await _reviewsCol(
+      companyId,
+    ).where('productId', isEqualTo: productId).get();
+    return [
+      for (final d in snap.docs) Review.fromMap(d.id, _asMap(d.data())),
+    ].where((r) => r.isVisible).toList();
   }
 
   @override
@@ -2665,7 +2780,15 @@ class FirebaseAppRepository implements AppRepository {
   }
 
   @override
-  Future<void> setReviewVisibility(String reviewId, bool visible) async {
+  Future<void> setReviewVisibility(
+    String reviewId,
+    bool visible, {
+    String companyId = '',
+  }) async {
+    if (companyId.isNotEmpty) {
+      await _reviewsCol(companyId).doc(reviewId).update({'isVisible': visible});
+      return;
+    }
     final snap = await _db
         .collectionGroup('reviews')
         .where('id', isEqualTo: reviewId)
@@ -3003,6 +3126,7 @@ class FirebaseAppRepository implements AppRepository {
             email: user.email ?? data['email'] ?? cachedUser?.email ?? '',
             role: 'employee',
             employeeRole: data['role'],
+            permissions: parsePermissions(data['permissions']),
           );
         }
       } catch (_) {}
@@ -3055,6 +3179,7 @@ class FirebaseAppRepository implements AppRepository {
                   email: user.email ?? eData['email'] ?? data['email'] ?? '',
                   role: 'employee',
                   employeeRole: eData['role'],
+                  permissions: parsePermissions(eData['permissions']),
                 );
               }
             } catch (_) {}
@@ -3113,6 +3238,7 @@ class FirebaseAppRepository implements AppRepository {
           email: user.email ?? data['email'] ?? '',
           role: 'employee',
           employeeRole: data['role'],
+          permissions: parsePermissions(data['permissions']),
         );
       }
     } catch (_) {}
@@ -3153,6 +3279,7 @@ class FirebaseAppRepository implements AppRepository {
             email: user.email ?? data['email'] ?? '',
             role: 'employee',
             employeeRole: data['role'],
+            permissions: parsePermissions(data['permissions']),
           );
         }
       }
@@ -3185,6 +3312,7 @@ class FirebaseAppRepository implements AppRepository {
           email: user.email ?? '',
           role: 'employee',
           employeeRole: data['role'],
+          permissions: parsePermissions(data['permissions']),
         );
       }
     } catch (_) {}

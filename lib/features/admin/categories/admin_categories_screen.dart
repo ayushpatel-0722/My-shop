@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/services/admin_company_name.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/domain/category_tree.dart';
@@ -351,7 +352,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
   /// Enters or leaves manual ordering (disabled while a search is active).
   void _toggleReorder() {
     if (_searchCtrl.text.trim().isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).clearSearchToReorder),
         ),
@@ -390,7 +391,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
           ..clear()
           ..addAll(previous);
       });
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).couldNotSaveTheNewOrder('$e'),
@@ -406,7 +407,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     try {
       await repo.backfillCategorySortOrder(companyId: _companyId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).categoryOrderingBackfilled,
@@ -415,7 +416,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(AppLocalizations.of(context).backfillFailed('$e')),
         ),
@@ -490,7 +491,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
     try {
       await repo.deleteCategory(category.id, companyId: category.companyId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).categoryDeleted(category.name),
@@ -499,7 +500,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToDeleteCategory('$e'),

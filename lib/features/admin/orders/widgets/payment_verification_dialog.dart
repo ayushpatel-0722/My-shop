@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../../core/models/order.dart';
 import '../../../../core/services/auth_session.dart';
@@ -102,7 +103,7 @@ class _PaymentVerificationDialogState extends State<PaymentVerificationDialog> {
 
       if (!mounted) return;
       Navigator.of(context).pop(true);
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Row(
             children: [

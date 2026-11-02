@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/domain/employee_roles.dart';
 import '../../../core/models/employee.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
+import 'employee_role_labels.dart';
 
 /// Screen for creating and editing an Employee (Section 6.3 & 17.1).
 ///
@@ -52,7 +55,6 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
   // State values
   String _companyId = '';
   String _companyName = '';
-  String _role = 'Picker';
   String _gender = 'male';
   DateTime? _selectedDob;
   String _salaryType = 'monthly'; // 'monthly' | 'yearly'
@@ -61,21 +63,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
   bool _isLoadingEmployee = false;
   String? _loadedEmployeeId;
 
-  // Permissions map
-  bool _canPack = true;
-  bool _canDispatch = false;
-  bool _canManageInventory = false;
-  bool _canViewReports = false;
-
-  List<String> get _roles => [
-    'Picker',
-    AppLocalizations.of(context).manufacturer,
-    AppLocalizations.of(context).manager,
-    AppLocalizations.of(context).dispatcher,
-    AppLocalizations.of(context).cashier,
-    AppLocalizations.of(context).supervisor,
-    AppLocalizations.of(context).qualityInspector,
-  ];
+  EmployeeRole _employeeRole = EmployeeRole.orderPacker;
 
   bool get isEditMode => widget.employee != null || widget.employeeId != null;
 
@@ -114,7 +102,6 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
     _addressCtrl.text = emp.address;
     _detailsCtrl.text = emp.details;
     _salaryCtrl.text = emp.salary > 0 ? emp.salary.toStringAsFixed(0) : '';
-    _role = emp.role.isNotEmpty ? emp.role : 'Picker';
     _gender = (emp.gender.isNotEmpty) ? emp.gender.toLowerCase() : 'male';
     _salaryType = emp.salaryType.isNotEmpty ? emp.salaryType : 'monthly';
     _shiftActive = emp.shiftActive;
@@ -125,10 +112,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
       } catch (_) {}
     }
 
-    _canPack = emp.permissions['canPack'] ?? false;
-    _canDispatch = emp.permissions['canDispatch'] ?? false;
-    _canManageInventory = emp.permissions['canManageInventory'] ?? false;
-    _canViewReports = emp.permissions['canViewReports'] ?? false;
+    _employeeRole = EmployeeRole.resolve(emp.role, emp.permissions);
 
     if (emp.companyId.isNotEmpty) {
       _companyId = emp.companyId;
@@ -180,7 +164,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
       if (sessionCompany.isNotEmpty) {
         _companyId = sessionCompany;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text(
               AppLocalizations.of(context).noCompanyScopeFoundForCurrentAdmin,
@@ -209,19 +193,14 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
         email: _emailCtrl.text.trim(),
         address: _addressCtrl.text.trim(),
         details: _detailsCtrl.text.trim(),
-        role: _role,
+        role: _employeeRole.id,
         gender: _gender,
         dob: dobStr,
         salary: parsedSalary,
         salaryType: _salaryType,
         shiftActive: _shiftActive,
         createdBy: AuthSession.currentUser?.id ?? '',
-        permissions: {
-          'canPack': _canPack,
-          'canDispatch': _canDispatch,
-          'canManageInventory': _canManageInventory,
-          'canViewReports': _canViewReports,
-        },
+        permissions: _employeeRole.fullPermissions,
       );
 
       if (isEditMode && empId.isNotEmpty) {
@@ -232,7 +211,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
       }
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             isEditMode
@@ -254,7 +233,7 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToSaveEmployee('$e'),
@@ -478,21 +457,35 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                           ),
                         ],
                         const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          initialValue: _roles.contains(_role)
-                              ? _role
-                              : _roles.first,
+                        DropdownButtonFormField<EmployeeRole>(
+                          key: const Key('employee-role-field'),
+                          initialValue: _employeeRole,
                           decoration: InputDecoration(
                             labelText: AppLocalizations.of(
                               context,
                             ).designationRole,
                             prefixIcon: const Icon(Icons.work_outline),
                           ),
-                          items: _roles.map((r) {
-                            return DropdownMenuItem(value: r, child: Text(r));
-                          }).toList(),
-                          onChanged: (v) =>
-                              setState(() => _role = v ?? 'Picker'),
+                          items: [
+                            for (final r in EmployeeRole.values)
+                              DropdownMenuItem(
+                                value: r,
+                                child: Text(
+                                  r.label(AppLocalizations.of(context)),
+                                ),
+                              ),
+                          ],
+                          onChanged: (v) => setState(
+                            () => _employeeRole = v ?? EmployeeRole.orderPacker,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _employeeRole.description(
+                            AppLocalizations.of(context),
+                          ),
+                          key: const Key('employee-role-description'),
+                          style: theme.textTheme.bodySmall,
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -734,114 +727,6 @@ class _AdminAddEmployeeScreenState extends State<AdminAddEmployeeScreen> {
                   const SizedBox(height: 20),
 
                   // Card 4: Granular Operational Permissions
-                  ModernCard(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.security_outlined,
-                              color: theme.colorScheme.primary,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppLocalizations.of(
-                                context,
-                              ).operationalPermissions,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          AppLocalizations.of(
-                            context,
-                          ).assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? AppTheme.textSecondaryDark
-                                : AppTheme.textSecondaryLight,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _canPack,
-                          title: Text(
-                            AppLocalizations.of(context).orderPackingCanpack,
-                          ),
-                          subtitle: Text(
-                            AppLocalizations.of(
-                              context,
-                            ).accessPackingHubToVerifyItemsAndMarkOrdersAsPacked,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onChanged: (v) =>
-                              setState(() => _canPack = v ?? false),
-                        ),
-                        const Divider(height: 8),
-                        CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _canDispatch,
-                          title: Text(
-                            AppLocalizations.of(
-                              context,
-                            ).orderDispatchCandispatch,
-                          ),
-                          subtitle: Text(
-                            AppLocalizations.of(
-                              context,
-                            ).assignDeliveryRidersAndDispatchOrdersForFulfillment,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onChanged: (v) =>
-                              setState(() => _canDispatch = v ?? false),
-                        ),
-                        const Divider(height: 8),
-                        CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _canManageInventory,
-                          title: Text(
-                            AppLocalizations.of(
-                              context,
-                            ).inventoryManagementCanmanageinventory,
-                          ),
-                          subtitle: Text(
-                            AppLocalizations.of(
-                              context,
-                            ).viewAndUpdateStockCountsAndWarehouseAlerts,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onChanged: (v) =>
-                              setState(() => _canManageInventory = v ?? false),
-                        ),
-                        const Divider(height: 8),
-                        CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _canViewReports,
-                          title: Text(
-                            AppLocalizations.of(
-                              context,
-                            ).reportsAnalyticsCanviewreports,
-                          ),
-                          subtitle: Text(
-                            AppLocalizations.of(
-                              context,
-                            ).viewDailyEmployeeActivityAndOperationsLogs,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onChanged: (v) =>
-                              setState(() => _canViewReports = v ?? false),
-                        ),
-                      ],
-                    ),
-                  ),
-
                   const SizedBox(height: 32),
 
                   // Save Action Button

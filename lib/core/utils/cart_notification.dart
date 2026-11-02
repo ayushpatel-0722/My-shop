@@ -1,62 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../app/routes/app_router.dart';
+import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/app/routes/app_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
+import 'package:myshop/features/checkout/cart/cart_cubit.dart';
 
-/// Shows an add-to-cart success notification that remains visible until
-/// dismissed by the user or replaced by another add-to-cart action.
+/// Tells the shopper a product went into the cart.
+///
+/// One toast at a time: a quick second add replaces the first instead of
+/// stacking behind it, and the toast hides itself after [AppToast.duration]
+/// even though it carries a "view cart" action.
 void showAddToCartNotification(
   BuildContext context, {
   required String productName,
   String? variantLabel,
 }) {
+  final l10n = AppLocalizations.of(context);
   final messenger = ScaffoldMessenger.of(context);
-  // Dismiss any existing notification immediately so rapid clicks don't stack
-  messenger.clearSnackBars();
+  final hasVariant = variantLabel != null && variantLabel.trim().isNotEmpty;
+  final itemCount = _cartItemCount(context);
 
-  final variantSuffix = (variantLabel != null && variantLabel.trim().isNotEmpty)
-      ? ' ($variantLabel)'
-      : '';
-
-  messenger.showSnackBar(
-    SnackBar(
-      key: const Key('add-to-cart-success-snackbar'),
-      content: Row(
-        children: [
-          const Icon(
-            Icons.check_circle_rounded,
-            color: Color(0xFF22C55E),
-            size: 20,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              '$productName$variantSuffix added to cart',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13.5,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-      duration: const Duration(seconds: 3),
-      showCloseIcon: true,
-      closeIconColor: Colors.white70,
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      backgroundColor: const Color(0xFF1E293B),
-      action: SnackBarAction(
-        label: 'VIEW CART',
-        textColor: const Color(0xFFFF6B61),
-        onPressed: () {
-          messenger.hideCurrentSnackBar();
-          context.push(AppRoutes.cart);
-        },
-      ),
-    ),
+  AppToast.success(
+    context,
+    hasVariant
+        ? l10n.addedToCart2(productName, ' ($variantLabel)')
+        : l10n.addedToCart(productName),
+    detail: itemCount > 0 ? l10n.cartItemsInCart(itemCount) : null,
+    actionLabel: l10n.viewCart,
+    onAction: () {
+      messenger.hideCurrentSnackBar();
+      context.push(AppRoutes.cart);
+    },
+    key: const Key('add-to-cart-success-snackbar'),
   );
+}
+
+int _cartItemCount(BuildContext context) {
+  try {
+    return context.read<CartCubit>().state.totalItems;
+  } on Object {
+    // No cart in scope (e.g. a bare widget test): just skip the count.
+    return 0;
+  }
 }

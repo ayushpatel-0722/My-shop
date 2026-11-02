@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../domain/employee_roles.dart';
 import '../models/app_user.dart';
 
 /// A global auth session used by the router's role guards.
@@ -44,5 +45,14 @@ class AuthSession with ChangeNotifier {
 
   static bool get isAdmin => currentUser?.isAdmin ?? false;
   static bool get isEmployee => currentUser?.isEmployee ?? false;
+
+  /// What the signed-in admin / employee may do on the orders pipeline.
+  static OrderPermissions get orderPermissions {
+    final user = currentUser;
+    if (user == null || user.isAdmin) return const OrderPermissions.admin();
+    return OrderPermissions.employee(user.access);
+  }
+
+  static bool get isManager => currentUser?.isManager ?? false;
   static bool get isUser => currentUser?.isUser ?? false;
 }

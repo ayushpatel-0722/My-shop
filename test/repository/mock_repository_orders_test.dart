@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/domain/voucher_evaluator.dart';
 import 'package:myshop/core/models/order.dart';
+import 'package:myshop/core/models/review.dart';
 import 'package:myshop/core/models/voucher.dart';
 
 Future<void> tick() => Future<void>.delayed(const Duration(milliseconds: 1));
@@ -210,8 +211,20 @@ void main() {
       await repo.updateOrderStatus(placed.id, OrderStatus.packing);
       await repo.updateOrderStatus(placed.id, OrderStatus.ready);
       await repo.updateOrderStatus(placed.id, OrderStatus.onTheWay);
-      await repo.updateOrderStatus(placed.id, OrderStatus.completed);
+      await repo.updateOrderStatus(placed.id, OrderStatus.delivered);
 
+      // Delivered is not the end: the customer's review completes the order.
+      expect((await repo.order(placed.id))!.orderStatus, OrderStatus.delivered);
+      await repo.submitReview(
+        Review(
+          id: '',
+          orderId: placed.id,
+          userId: placed.userId,
+          companyId: placed.companyId,
+          productId: placed.items.first.productId,
+          rating: 5,
+        ),
+      );
       final stored = (await repo.order(placed.id))!;
       expect(stored.orderStatus, OrderStatus.completed);
       expect(stored.isOpen, isFalse);
@@ -233,6 +246,7 @@ void main() {
       await repo.updateOrderStatus(placed.id, OrderStatus.packing);
       await repo.updateOrderStatus(placed.id, OrderStatus.ready);
       await repo.updateOrderStatus(placed.id, OrderStatus.onTheWay);
+      await repo.updateOrderStatus(placed.id, OrderStatus.delivered);
       await repo.updateOrderStatus(placed.id, OrderStatus.completed);
 
       expect(

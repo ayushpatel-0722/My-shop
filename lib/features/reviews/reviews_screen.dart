@@ -113,7 +113,25 @@ class ReviewsScreen extends StatelessWidget {
             ),
           ],
         ),
-        subtitle: r.message.isEmpty ? null : Text(r.message),
+        subtitle: (r.message.isEmpty && r.productName.isEmpty)
+            ? null
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Which product the review is about.
+                  if (r.productName.isNotEmpty)
+                    Text(
+                      r.productName,
+                      key: Key('review-product-${r.id}'),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  if (r.message.isNotEmpty) Text(r.message),
+                ],
+              ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../core/models/customer.dart';
 import '../auth_cubit.dart';
@@ -101,13 +102,10 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     setState(() => _busy = false);
 
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).signInFailedPleaseTryAgain,
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
+      AppToast.error(
+        context,
+        AppLocalizations.of(context).signInFailedPleaseTryAgain,
+        detail: authCubit.state.error,
       );
       return;
     }
@@ -142,7 +140,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     setState(() => _busy = false);
 
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToSaveMobileNumberTryAgain,
@@ -182,7 +180,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     setState(() => _busy = false);
 
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToSaveAddressTryAgain,

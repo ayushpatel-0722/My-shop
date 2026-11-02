@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -57,7 +58,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 : l10n.invalidCredentials;
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(msg)));
+            ).showAppToast(SnackBar(content: Text(msg)));
           }
         },
         builder: (context, state) {
@@ -194,7 +195,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           _companyError = companyErr;
           _companyPassError = passErr;
         });
-        messenger.showSnackBar(
+        messenger.showAppToast(
           SnackBar(
             content: Text(l10n.pleaseEnterCompanyNameAndCompanyPassword),
           ),
@@ -234,7 +235,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           setState(() {
             _companyError = l10n.companyNotFound(companyName);
           });
-          messenger.showSnackBar(
+          messenger.showAppToast(
             SnackBar(content: Text(l10n.companyNotFound(companyName))),
           );
           return;
@@ -250,7 +251,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           setState(() {
             _companyPassError = l10n.incorrectCompanyPassword;
           });
-          messenger.showSnackBar(
+          messenger.showAppToast(
             SnackBar(content: Text(l10n.incorrectCompanyPassword)),
           );
           return;
@@ -267,7 +268,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           final errMsg = e.toString().contains('permission-denied')
               ? l10n.accessDeniedByServerPleaseCheckYourInternetConnectionAndTryAgain
               : l10n.couldNotVerifyCompanyPleaseTryAgain('$e');
-          messenger.showSnackBar(SnackBar(content: Text(errMsg)));
+          messenger.showAppToast(SnackBar(content: Text(errMsg)));
         }
       } finally {
         if (mounted) setState(() => _validatingStep1 = false);
@@ -295,7 +296,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           _emailError = emailErr;
           _passError = passErr;
         });
-        messenger.showSnackBar(
+        messenger.showAppToast(
           SnackBar(content: Text(l10n.pleaseEnterAdminEmailAndPassword)),
         );
         return;

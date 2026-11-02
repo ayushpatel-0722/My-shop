@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/theme/app_theme.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -780,7 +781,7 @@ class _CartLineCard extends StatelessWidget {
     // "Move to Wishlist" is the alternative to deleting the item outright.
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(
+      ..showAppToast(
         SnackBar(
           content: Text('${removed.product.name} removed from cart'),
           duration: const Duration(seconds: 4),
@@ -791,7 +792,7 @@ class _CartLineCard extends StatelessWidget {
               wishlist.addFromCart(removed);
               messenger
                 ..hideCurrentSnackBar()
-                ..showSnackBar(
+                ..showAppToast(
                   SnackBar(
                     content: Text(
                       '${removed.product.name} saved to your wishlist',

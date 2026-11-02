@@ -11,6 +11,7 @@ import '../../core/models/company.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/services/secure_session_cache.dart';
 import '../../core/services/service_locator.dart';
+import 'google_sign_in_errors.dart';
 
 enum AuthStatus { unauthenticated, authenticating, authenticated, error }
 
@@ -506,8 +507,8 @@ class AuthCubit extends Cubit<AuthState> {
       emit(const AuthState(status: AuthStatus.unauthenticated));
       return false;
     } catch (e) {
-      final msg = e.toString().replaceFirst('Exception: ', '');
-      debugPrint('[AuthCubit] signInWithGoogle failed: $msg');
+      debugPrint('[AuthCubit] signInWithGoogle failed: $e');
+      final msg = describeGoogleSignInError(e);
       emit(AuthState(status: AuthStatus.error, error: msg));
       return false;
     }

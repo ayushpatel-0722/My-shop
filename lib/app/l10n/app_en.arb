@@ -123,7 +123,7 @@
   "assign": "Assign",
   "assignAnExistingParentCategoryInTheSameCompanyForNesting": "Assign an existing parent category in the same company for nesting. ",
   "assignDeliveryRidersAndDispatchOrdersForFulfillment": "Assign delivery riders and dispatch orders for fulfillment.",
-  "assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges": "Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.",
+  "assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges": "Packing and dispatch let staff take only their own step of an order. Confirming, cancelling, payments and moving a packed order to Ready stay with admins.",
   "availableInventoryUnits": "Available inventory units",
   "backfillOrderingForOldCategories": "Backfill ordering for old categories",
   "baseMeasurementType": "Base Measurement Type",
@@ -2975,5 +2975,153 @@
   "shopHoursNoOpenDay": "Keep at least one day open.",
   "shopStatusActive": "Active",
   "shopStatusSuspended": "Suspended",
-  "shopStatusInactive": "Inactive"
+  "shopStatusInactive": "Inactive",
+  "reviewRateProductTitle": "Rate this product",
+  "reviewEditTitle": "Edit your review",
+  "reviewYourRating": "Your rating",
+  "reviewMessageLabel": "Your review (optional)",
+  "reviewSubmitButton": "Submit review",
+  "reviewUpdateButton": "Update review",
+  "reviewThanks": "Thanks for your review!",
+  "reviewUpdated": "Your review was updated.",
+  "reviewCouldNotSubmit": "Could not submit your review: {error}",
+  "@reviewCouldNotSubmit": {
+    "description": "",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewSignInRequired": "Please sign in to write a review.",
+  "reviewOnlyAfterDelivery": "You can review items once your order is delivered.",
+  "reviewOrderNotFound": "We could not find this order.",
+  "reviewNotYourOrder": "This order belongs to another account.",
+  "reviewItemNotInOrder": "This product is not part of that order.",
+  "reviewRateYourItems": "Rate your items",
+  "reviewWrite": "Write a review",
+  "reviewEdit": "Edit review",
+  "reviewCouldNotLoad": "Could not load your reviews.",
+  "productNoReviewsYet": "No reviews yet",
+  "productRatingsAndReviews": "{count, plural, =1{1 rating & review} other{{count} ratings & reviews}}",
+  "@productRatingsAndReviews": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "shopContactTitle": "Contact the shop",
+  "shopCallShop": "Call shop",
+  "shopPhoneCopied": "Phone number copied",
+  "cartItemsInCart": "{count, plural, =1{1 item in your cart} other{{count} items in your cart}}",
+  "@cartItemsInCart": {
+    "description": "Second line of the add-to-cart toast",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empDashboardTitle": "Packing dashboard",
+  "empStageToPack": "To pack",
+  "empStageInProgress": "In progress",
+  "empStagePacked": "Packed",
+  "empStageHandedOver": "Handed over",
+  "empTotalOrders": "Total orders",
+  "empSearchHint": "Search by order or customer",
+  "empNoOrdersInStage": "No orders here right now",
+  "empLoadError": "Could not load orders. Check your connection or permissions and try again.",
+  "empRetry": "Retry",
+  "empNoShop": "Your account is not linked to a shop. Ask your admin to check your profile.",
+  "empViewDetails": "View details",
+  "empStartPacking": "Start packing",
+  "empMarkPacked": "Mark as packed",
+  "empItemsCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@empItemsCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empOrderItems": "Items to pack",
+  "empOrderInfo": "Order information",
+  "empCustomer": "Customer",
+  "empPlaced": "Placed",
+  "empPackedProgress": "{done} of {total} items checked",
+  "@empPackedProgress": {
+    "description": "",
+    "placeholders": {
+      "done": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "empSku": "SKU: {sku}",
+  "@empSku": {
+    "description": "",
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      }
+    }
+  },
+  "empQty": "Qty",
+  "empNoItems": "This order has no items.",
+  "empActionFailed": "Could not update the order. Please try again.",
+  "empPackingStarted": "Packing started",
+  "empWaitingForAdmin": "Packed — waiting for the admin to hand over.",
+  "empNotAllowed": "This order is not available to you.",
+  "empStartDelivery": "Start delivery",
+  "empMarkDelivered": "Mark as delivered",
+  "empStageToDispatch": "Ready to dispatch",
+  "empStageOutForDelivery": "Out for delivery",
+  "empStageDelivered": "Delivered",
+  "empNoAccess": "Your role has no order duties yet. Ask your admin to enable packing or dispatch for you.",
+  "switchRole": "Switch role",
+  "switchRoleSubtitle": "Back to the role selection screen",
+  "switchRoleConfirm": "You will be signed out of this account. Continue?",
+  "empSelectAll": "Select all",
+  "empClearAll": "Clear all",
+  "empCheckAllToFinish": "Check every item to finish packing",
+  "empStartToCheck": "Start packing to tick off items",
+  "empMoreItems": "+{count} more",
+  "@empMoreItems": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "empOpenToPack": "Open & pack",
+  "empAllPacked": "All items packed",
+  "empOrderProgress": "Order progress",
+  "empYourStep": "Your step",
+  "empDeliveryAddress": "Delivery address",
+  "empPhone": "Phone",
+  "empCopied": "Copied",
+  "empConfirmDelivered": "Mark this order as delivered? This cannot be undone.",
+  "empDeliveryStarted": "Delivery started",
+  "empDeliveredDone": "Order marked as delivered",
+  "empUpdated": "Last updated",
+  "empBackToDashboard": "Back to dashboard",
+  "empCancel": "Cancel",
+  "empConfirm": "Confirm",
+  "empTotalPieces": "Total pieces",
+  "empMarkedReady": "Order marked ready for delivery",
+  "employeeRoleManager": "Manager",
+  "employeeRoleOrderPacker": "Order Packer",
+  "employeeRoleOrderDelivery": "Order Delivery",
+  "employeeRoleManagerDesc": "Manages every order status",
+  "employeeRoleOrderPackerDesc": "Orders from Confirmed to Ready",
+  "employeeRoleOrderDeliveryDesc": "Orders from Ready for Delivery to Delivered",
+  "employeeRoleLabel": "Role",
+  "employeeConsole": "Employee Console"
 }

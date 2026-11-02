@@ -8,6 +8,10 @@ class OrderStatus {
   static const packing = 'packing';
   static const ready = 'ready';
   static const onTheWay = 'on_the_way';
+
+  /// Handed over to the customer. The order becomes [completed] once the
+  /// customer has reviewed it.
+  static const delivered = 'delivered';
   static const completed = 'completed';
 
   static const all = <String>[
@@ -17,6 +21,7 @@ class OrderStatus {
     packing,
     ready,
     onTheWay,
+    delivered,
     completed,
   ];
 
@@ -27,6 +32,7 @@ class OrderStatus {
     packing,
     ready,
     onTheWay,
+    delivered,
     completed,
   ];
 
@@ -402,6 +408,11 @@ class Order {
 
   bool get isCancelled => orderStatus == OrderStatus.cancelled;
   bool get isCompleted => orderStatus == OrderStatus.completed;
+  bool get isDelivered => orderStatus == OrderStatus.delivered;
+
+  /// The customer may rate the items once they have been handed over; a
+  /// completed order stays open for editing the review.
+  bool get canBeReviewed => isDelivered || isCompleted;
   bool get isPending => orderStatus == OrderStatus.pending;
 
   /// Still flowing through the pipeline (neither delivered nor cancelled).

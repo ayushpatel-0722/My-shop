@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../core/domain/shop_hours.dart';
@@ -218,7 +219,7 @@ class _AdminShopSettingsScreenState extends State<AdminShopSettingsScreen> {
   }
 
   void _snack(String message, {bool error = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showAppToast(
       SnackBar(
         content: Text(message),
         backgroundColor: error ? Theme.of(context).colorScheme.error : null,

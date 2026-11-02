@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
+import 'package:myshop/core/widgets/category_image.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/models/category.dart';
@@ -85,7 +87,7 @@ class _AdminTrendingNowScreenState extends State<AdminTrendingNowScreen> {
     final categories = await repo.categories(companyId: shop.id).first;
     if (!mounted) return;
     if (categories.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         const SnackBar(
           content: Text('No categories found for this shop.'),
           behavior: SnackBarBehavior.floating,
@@ -140,7 +142,7 @@ class _AdminTrendingNowScreenState extends State<AdminTrendingNowScreen> {
           initialCategoryId: initialCategoryId,
           onItemAdded: (item) async {
             await repo.saveHomeTrendingItem(item);
-            scaffoldMessenger.showSnackBar(
+            scaffoldMessenger.showAppToast(
               SnackBar(
                 content: Text(
                   'Added "${item.productName ?? 'Product'}" to Trending Now.',
@@ -154,7 +156,7 @@ class _AdminTrendingNowScreenState extends State<AdminTrendingNowScreen> {
             for (final item in items) {
               await repo.saveHomeTrendingItem(item);
             }
-            scaffoldMessenger.showSnackBar(
+            scaffoldMessenger.showAppToast(
               SnackBar(
                 content: Text(
                   'Added ${items.length} ${items.length == 1 ? 'product' : 'products'} to Trending Now.',
@@ -202,7 +204,7 @@ class _AdminTrendingNowScreenState extends State<AdminTrendingNowScreen> {
     if (confirmed == true && mounted) {
       await repo.deleteHomeTrendingItem(entry.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           const SnackBar(
             content: Text('Removed item from Trending Now.'),
             behavior: SnackBarBehavior.floating,
@@ -1246,37 +1248,31 @@ class _TrendingEntryCard extends StatelessWidget {
                                   color: Color(0xFF0D9488),
                                   size: 22,
                                 ))
-                        : (category != null &&
-                                  (category!.iconUrl.startsWith('http://') ||
-                                      category!.iconUrl.startsWith(
-                                        'https://',
-                                      ) ||
-                                      category!.iconUrl.startsWith('assets/'))
-                              ? AppProductImage(
-                                  url: category!.iconUrl,
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                  fallback: const Icon(
-                                    Icons.category_rounded,
-                                    color: Color(0xFF6366F1),
-                                    size: 22,
+                        : (category != null
+                              ? CategoryImage(
+                                  category: category!,
+                                  fallback: (c) => Center(
+                                    child:
+                                        c.iconUrl.isNotEmpty &&
+                                            c.iconUrl.runes.length <= 4
+                                        ? Text(
+                                            c.iconUrl,
+                                            style: const TextStyle(
+                                              fontSize: 22,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.category_rounded,
+                                            color: Color(0xFF6366F1),
+                                            size: 22,
+                                          ),
                                   ),
                                 )
-                              : (category != null &&
-                                        category!.iconUrl.isNotEmpty &&
-                                        category!.iconUrl.runes.length <= 4
-                                    ? Center(
-                                        child: Text(
-                                          category!.iconUrl,
-                                          style: const TextStyle(fontSize: 22),
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.category_rounded,
-                                        color: Color(0xFF6366F1),
-                                        size: 22,
-                                      ))),
+                              : const Icon(
+                                  Icons.category_rounded,
+                                  color: Color(0xFF6366F1),
+                                  size: 22,
+                                )),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -1626,13 +1622,19 @@ class _CategorySelectionSheet extends StatelessWidget {
                               color: const Color(0xFFEEF2FF),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Center(
-                              child: Text(
-                                cat.iconUrl.isNotEmpty &&
-                                        cat.iconUrl.runes.length <= 4
-                                    ? cat.iconUrl
-                                    : '📁',
-                                style: const TextStyle(fontSize: 20),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: CategoryImage(
+                                category: cat,
+                                fallback: (c) => Center(
+                                  child: Text(
+                                    c.iconUrl.isNotEmpty &&
+                                            c.iconUrl.runes.length <= 4
+                                        ? c.iconUrl
+                                        : '📁',
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                ),
                               ),
                             ),
                           ),

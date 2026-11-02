@@ -229,9 +229,9 @@ void main() {
     });
 
     test('progress follows the tracker chain', () {
-      expect(OrderEta.progress(OrderStatus.pending), closeTo(1 / 6, 0.001));
-      expect(OrderEta.progress(OrderStatus.confirmed), closeTo(2 / 6, 0.001));
-      expect(OrderEta.progress(OrderStatus.onTheWay), closeTo(5 / 6, 0.001));
+      expect(OrderEta.progress(OrderStatus.pending), closeTo(1 / 7, 0.001));
+      expect(OrderEta.progress(OrderStatus.confirmed), closeTo(2 / 7, 0.001));
+      expect(OrderEta.progress(OrderStatus.onTheWay), closeTo(5 / 7, 0.001));
       expect(OrderEta.progress(OrderStatus.completed), 1);
       expect(OrderEta.progress(OrderStatus.cancelled), 0);
     });

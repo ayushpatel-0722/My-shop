@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/order.dart';
+import 'package:myshop/core/models/review.dart';
 import 'package:myshop/features/auth/auth_cubit.dart';
 import 'package:myshop/features/checkout/cart/cart_cubit.dart';
 import 'package:myshop/features/checkout/tracking/order_tracking_screen.dart';
@@ -223,7 +224,7 @@ void main() {
           matching: find.byKey(Key('order-progress-${order.id}')),
         ),
       );
-      expect(bar.value, closeTo(1 / 6, 0.001), reason: 'pending = stage 1/6');
+      expect(bar.value, closeTo(1 / 7, 0.001), reason: 'pending = stage 1/7');
     });
 
     testWidgets('the progress bar fills as the order advances', (tester) async {
@@ -240,7 +241,7 @@ void main() {
       final bar = tester.widget<LinearProgressIndicator>(
         find.byKey(Key('order-progress-${order.id}')),
       );
-      expect(bar.value, closeTo(3 / 6, 0.001), reason: 'packing = stage 3/6');
+      expect(bar.value, closeTo(3 / 7, 0.001), reason: 'packing = stage 3/7');
     });
 
     testWidgets('a paid order shows the Paid chip', (tester) async {
@@ -405,7 +406,7 @@ void main() {
       expect(line.variant?.variantId, 'NOVA-X5-BLK');
     });
 
-    testWidgets('tapping a star opens the review sheet pre-filled', (
+    testWidgets('Rate your items lists the products and opens their review', (
       tester,
     ) async {
       final order = await placeOrder(status: OrderStatus.completed);
@@ -416,35 +417,32 @@ void main() {
         user: TestHarness.shopper,
       );
 
-      // Five tappable stars on an unreviewed completed order.
-      final card = find.byKey(Key('order-card-${order.id}'));
-      final stars = find.descendant(
-        of: card,
-        matching: find.byIcon(Icons.star_outline),
-      );
-      expect(stars, findsNWidgets(5));
-
-      await tester.tap(stars.at(2)); // 3 stars
+      await tester.tap(find.byKey(Key('rate-items-${order.id}')));
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const Key('order-review-section')), findsOneWidget);
+      expect(find.byKey(const Key('review-item-p_tomato')), findsOneWidget);
+      expect(find.text('Fresh Tomatoes'), findsWidgets);
+
+      await tester.tap(find.byKey(const Key('review-write-p_tomato')));
+      await tester.pumpAndSettle();
       expect(find.textContaining('Leave review ${order.id}'), findsOneWidget);
-      expect(find.textContaining('rating=3'), findsOneWidget);
+      expect(find.textContaining('product=p_tomato'), findsOneWidget);
     });
 
-    testWidgets('an already reviewed order shows no star row', (tester) async {
-      await repo.placeOrder(
-        Order(
+    testWidgets('a reviewed product shows its stars and Edit review', (
+      tester,
+    ) async {
+      final order = await placeOrder(status: OrderStatus.completed);
+      await repo.submitReview(
+        Review(
           id: '',
+          orderId: order.id,
           userId: TestHarness.shopper.id,
           companyId: 'c_organic',
-          companyName: 'GreenLeaf Organics',
-          orderStatus: OrderStatus.completed,
-          reviewId: 'r_existing',
-          items: const [
-            OrderItem(productId: 'p_milk', qty: 1, unitPrice: 68, name: 'Milk'),
-          ],
-          subtotal: 68,
-          totalAmount: 68,
+          productId: 'p_tomato',
+          productName: 'Fresh Tomatoes',
+          rating: 4,
         ),
       );
 
@@ -453,9 +451,30 @@ void main() {
         const OrdersScreen(),
         user: TestHarness.shopper,
       );
+      await tester.tap(find.byKey(Key('rate-items-${order.id}')));
+      await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.star_outline), findsNothing);
-      expect(find.byIcon(Icons.star_outline_rounded), findsNothing);
+      expect(find.byKey(const Key('review-write-p_tomato')), findsNothing);
+      expect(find.byKey(const Key('review-edit-p_tomato')), findsOneWidget);
+      final stars = find.descendant(
+        of: find.byKey(const Key('review-stars-p_tomato')),
+        matching: find.byIcon(Icons.star),
+      );
+      expect(stars, findsNWidgets(4), reason: 'a 4-star review');
+    });
+
+    testWidgets('orders that are not completed cannot be reviewed', (
+      tester,
+    ) async {
+      final order = await placeOrder(status: OrderStatus.packing);
+
+      await pumpTestApp(
+        tester,
+        const OrdersScreen(),
+        user: TestHarness.shopper,
+      );
+
+      expect(find.byKey(Key('rate-items-${order.id}')), findsNothing);
     });
   });
 }

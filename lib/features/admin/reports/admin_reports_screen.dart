@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -121,7 +122,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showAppToast(
           SnackBar(
             content: Text('Failed to generate report: $e'),
             backgroundColor: Colors.red.shade700,
@@ -148,7 +149,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
       final savedPath = result.path != null && result.path!.isNotEmpty
           ? ' Saved to: ${result.path}'
           : '';
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Row(
             children: [
@@ -162,7 +163,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             'Failed to save $label: ${result.error ?? "Unknown error"}',
@@ -207,7 +208,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
               .where((o) => o.paymentStatus == PaymentStatus.done)
               .length;
           final completedOrdersCount = filteredOrders
-              .where((o) => o.orderStatus == OrderStatus.completed)
+              .where((o) => o.canBeReviewed)
               .length;
           final cancelledOrdersCount = filteredOrders
               .where((o) => o.orderStatus == OrderStatus.cancelled)

@@ -3,6 +3,7 @@ import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/environment.dart';
@@ -84,7 +85,7 @@ class QrDeepLinkService {
     await Clipboard.setData(ClipboardData(text: text));
     HapticFeedback.lightImpact();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Row(
             children: [

@@ -7,6 +7,7 @@ import '../../../app/routes/app_router.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
+import '../../../core/models/review.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/cart_notification.dart';
@@ -21,6 +22,7 @@ import '../../checkout/cart/cart_cubit.dart';
 import '../../checkout/cart/wishlist_cubit.dart';
 import '../../marketplace/widgets/product_card.dart';
 import '../../marketplace/widgets/web_header.dart';
+import '../../reviews/widgets/product_reviews_list.dart';
 
 /// Product Detail Page (Section 17.3).
 ///
@@ -541,6 +543,21 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               // Spec tables & policy, folded into the same collapsible
                               // treatment so nothing dominates the page.
                               ..._specAndPolicyBlocks(p),
+
+                              // What other customers said about this product.
+                              const SizedBox(height: 8),
+                              Text(
+                                'Customer reviews',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w700),
+                              ),
+                              const SizedBox(height: 8),
+                              ProductReviewsList(
+                                key: ValueKey('reviews-${p.id}'),
+                                productId: p.id,
+                                companyId: p.companyId,
+                              ),
+                              const SizedBox(height: 16),
 
                               // Related Products (Mobile)
                               _buildRelatedProductsSection(p),
@@ -1477,43 +1494,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildRatingRow(BuildContext context, Product p) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-          decoration: BoxDecoration(
-            color: const Color(0xFFE6F7F2),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.star_rounded, size: 14, color: Color(0xFF0CA678)),
-              SizedBox(width: 3),
-              Text(
-                '4.5',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0CA678),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          '120+ ratings & reviews',
-          style: TextStyle(
-            fontSize: 12.5,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildRatingRow(BuildContext context, Product p) =>
+      _ProductRating(key: ValueKey('rating-${p.id}'), product: p);
 
   Widget _buildTrustPerks(BuildContext context) {
     return Container(
@@ -1977,6 +1959,98 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
           );
         },
       ),
+    );
+  }
+}
+
+/// The product's real rating: the average and number of shopper reviews, or
+/// "No reviews yet".
+class _ProductRating extends StatefulWidget {
+  final Product product;
+  const _ProductRating({super.key, required this.product});
+
+  @override
+  State<_ProductRating> createState() => _ProductRatingState();
+}
+
+class _ProductRatingState extends State<_ProductRating> {
+  late final Future<List<Review>> _reviews = _load();
+
+  Future<List<Review>> _load() async {
+    final p = widget.product;
+    if (p.companyId.isEmpty) return const <Review>[];
+    try {
+      return await repo.productReviews(p.id, companyId: p.companyId);
+    } catch (_) {
+      return const <Review>[];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return FutureBuilder<List<Review>>(
+      future: _reviews,
+      builder: (context, snap) {
+        final reviews = snap.data ?? const <Review>[];
+        if (reviews.isEmpty) {
+          // Nothing to show while loading; "No reviews yet" once we know.
+          if (!snap.hasData) return const SizedBox(height: 22);
+          return Text(
+            l10n.productNoReviewsYet,
+            key: const Key('product-no-reviews'),
+            style: TextStyle(
+              fontSize: 12.5,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          );
+        }
+        final average =
+            reviews.fold<int>(0, (sum, r) => sum + r.rating) / reviews.length;
+        return Row(
+          key: const Key('product-rating-row'),
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE6F7F2),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.star_rounded,
+                    size: 14,
+                    color: Color(0xFF0CA678),
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    average.toStringAsFixed(1),
+                    key: const Key('product-rating-average'),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0CA678),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n.productRatingsAndReviews(reviews.length),
+              key: const Key('product-rating-count'),
+              style: TextStyle(
+                fontSize: 12.5,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

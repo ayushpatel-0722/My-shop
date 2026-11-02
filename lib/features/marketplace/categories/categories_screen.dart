@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/category_image.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -313,7 +314,7 @@ class CategoriesScreen extends StatelessWidget {
                   crossAxisCount: cols,
                   mainAxisSpacing: 14,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 0.72,
+                  childAspectRatio: 0.66,
                 ),
                 itemBuilder: (context, i) {
                   final cat = roots[i].category;
@@ -328,8 +329,8 @@ class CategoriesScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          width: 66,
-                          height: 66,
+                          width: 76,
+                          height: 76,
                           decoration: BoxDecoration(
                             color: bgColor,
                             shape: BoxShape.circle,
@@ -375,41 +376,10 @@ class CategoriesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryIcon(Category cat) {
-    if (cat.iconUrl.startsWith('http://') ||
-        cat.iconUrl.startsWith('https://')) {
-      return Image.network(
-        cat.iconUrl,
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: Colors.black.withValues(alpha: 0.04),
-            child: const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          );
-        },
-        errorBuilder: (_, _, _) => Center(child: _fallbackCategoryIcon(cat)),
-      );
-    }
-    if (cat.iconUrl.startsWith('assets/')) {
-      return Image.asset(
-        cat.iconUrl,
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Center(child: _fallbackCategoryIcon(cat)),
-      );
-    }
-    return Center(child: _fallbackCategoryIcon(cat));
-  }
+  Widget _buildCategoryIcon(Category cat) => CategoryImage(
+    category: cat,
+    fallback: (c) => Center(child: _fallbackCategoryIcon(c)),
+  );
 
   Widget _fallbackCategoryIcon(Category cat) {
     if (cat.iconUrl.isNotEmpty && cat.iconUrl.runes.length <= 4) {

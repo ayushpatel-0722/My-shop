@@ -1,3 +1,4 @@
+import '../domain/employee_roles.dart';
 import 'customer.dart';
 export 'customer.dart' show AddressEntry, Customer;
 
@@ -12,6 +13,10 @@ class AppUser {
   final String mobileNumber;
   final String role; // admin | employee | user
   final String? employeeRole; // e.g. Picker, Dispatcher
+
+  /// Employee permission switches (canPack, canDispatch, ...). Empty for
+  /// admins/shoppers and for legacy employees: see [EmployeeAccess].
+  final Map<String, bool> permissions;
   final String authProvider; // google | phone | email
   final String googleId;
   final List<AddressEntry> addresses;
@@ -25,6 +30,7 @@ class AppUser {
     this.mobileNumber = '',
     required this.role,
     this.employeeRole,
+    this.permissions = const {},
     this.authProvider = '',
     this.googleId = '',
     this.addresses = const [],
@@ -33,6 +39,11 @@ class AppUser {
   bool get isAdmin => role == 'admin';
   bool get isEmployee => role == 'employee';
   bool get isUser => role == 'user';
+
+  /// An employee with the Manager role: works the whole order pipeline and
+  /// manages the other employees from the admin screens.
+  bool get isManager => isEmployee && access.canManageOrders;
+  EmployeeAccess get access => EmployeeAccess(permissions);
   String get phone => mobileNumber;
 
   /// Primary or default address for delivery
@@ -53,6 +64,7 @@ class AppUser {
     mobileNumber: map['mobileNumber'] ?? '',
     role: map['role'] ?? 'user',
     employeeRole: map['employeeRole'],
+    permissions: parsePermissions(map['permissions']),
     authProvider: map['authProvider'] ?? '',
     googleId: map['googleId'] ?? '',
     addresses: (map['addresses'] as List? ?? const [])
@@ -69,6 +81,7 @@ class AppUser {
     String? mobileNumber,
     String? role,
     String? employeeRole,
+    Map<String, bool>? permissions,
     String? authProvider,
     String? googleId,
     List<AddressEntry>? addresses,
@@ -81,6 +94,7 @@ class AppUser {
     mobileNumber: mobileNumber ?? this.mobileNumber,
     role: role ?? this.role,
     employeeRole: employeeRole ?? this.employeeRole,
+    permissions: permissions ?? this.permissions,
     authProvider: authProvider ?? this.authProvider,
     googleId: googleId ?? this.googleId,
     addresses: addresses ?? this.addresses,
@@ -95,6 +109,7 @@ class AppUser {
     'mobileNumber': mobileNumber,
     'role': role,
     'employeeRole': employeeRole,
+    'permissions': permissions,
     'authProvider': authProvider,
     'googleId': googleId,
     'addresses': addresses.map((e) => e.toMap()).toList(),

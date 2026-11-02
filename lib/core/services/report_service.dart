@@ -73,9 +73,7 @@ class ReportService {
     final paymentsReceived = orders
         .where((o) => o.paymentStatus == PaymentStatus.done)
         .fold<double>(0.0, (sum, o) => sum + (o.amountPaid ?? o.totalAmount));
-    final completedCount = orders
-        .where((o) => o.orderStatus == OrderStatus.completed)
-        .length;
+    final completedCount = orders.where((o) => o.canBeReviewed).length;
     final cancelledCount = orders
         .where((o) => o.orderStatus == OrderStatus.cancelled)
         .length;
@@ -254,9 +252,7 @@ class ReportService {
     final paymentsReceived = orders
         .where((o) => o.paymentStatus == PaymentStatus.done)
         .fold<double>(0.0, (sum, o) => sum + (o.amountPaid ?? o.totalAmount));
-    final completedCount = orders
-        .where((o) => o.orderStatus == OrderStatus.completed)
-        .length;
+    final completedCount = orders.where((o) => o.canBeReviewed).length;
     final cancelledCount = orders
         .where((o) => o.orderStatus == OrderStatus.cancelled)
         .length;

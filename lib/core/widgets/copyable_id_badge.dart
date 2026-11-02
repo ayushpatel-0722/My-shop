@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 /// Small monospace chip showing a document id; tapping copies it.
 ///
@@ -29,7 +30,7 @@ class CopyableIdBadge extends StatelessWidget {
         onTap: () {
           Clipboard.setData(ClipboardData(text: id));
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showAppToast(
             SnackBar(
               content: Text(
                 AppLocalizations.of(context).idCopiedToClipboard(label, id),

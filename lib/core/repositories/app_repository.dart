@@ -178,9 +178,35 @@ abstract class AppRepository {
     double? amountPaid,
     String? note,
   });
-  Future<void> setEmployeePackingDone(String orderId, bool done);
-  Future<void> assignEmployee(String orderId, String employeeId);
+  Future<void> setEmployeePackingDone(
+    String orderId,
+    bool done, {
+    String companyId = '',
+  });
+  Future<void> assignEmployee(
+    String orderId,
+    String employeeId, {
+    String companyId = '',
+  });
+
+  /// Saves the shopper's review of a product from a completed order.
+  ///
+  /// There is one review per product per order ([Review.idFor]): submitting
+  /// again edits it. The order document is never written, because shoppers
+  /// may only change an order to cancel it.
   Future<void> submitReview(Review review);
+
+  /// The reviews written for [orderId] (one per reviewed product).
+  Future<List<Review>> orderReviews(
+    String orderId, {
+    required String companyId,
+  });
+
+  /// The visible reviews of one product.
+  Future<List<Review>> productReviews(
+    String productId, {
+    required String companyId,
+  });
   Future<void> markNotificationRead(String id);
 
   /// Creates **or** updates a voucher (matched by id, then by code).
@@ -215,7 +241,11 @@ abstract class AppRepository {
   Future<void> saveDeliveryCharge(DeliveryCharge charge);
   Future<void> deleteDeliveryCharge(String pincode, {String companyId = ''});
   Future<void> importDeliveryCharges(List<DeliveryCharge> charges);
-  Future<void> setReviewVisibility(String reviewId, bool visible);
+  Future<void> setReviewVisibility(
+    String reviewId,
+    bool visible, {
+    String companyId = '',
+  });
   Future<void> saveRecommendation(Recommendation rec);
   Future<void> saveBanner(OfferBanner banner);
   Future<void> saveAdBanner(AdBanner banner);

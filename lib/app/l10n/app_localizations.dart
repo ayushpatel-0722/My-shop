@@ -850,7 +850,7 @@ abstract class AppLocalizations {
   /// No description provided for @assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges.
   ///
   /// In en, this message translates to:
-  /// **'Assign workflow responsibilities. Note: Staff permissions never include manual order-status changes.'**
+  /// **'Packing and dispatch let staff take only their own step of an order. Confirming, cancelling, payments and moving a packed order to Ready stay with admins.'**
   String
   get assignWorkflowResponsibilitiesNoteStaffPermissionsNeverIncludeManualOrderStatusChanges;
 
@@ -7708,6 +7708,540 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Inactive'**
   String get shopStatusInactive;
+
+  /// No description provided for @reviewRateProductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this product'**
+  String get reviewRateProductTitle;
+
+  /// No description provided for @reviewEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your review'**
+  String get reviewEditTitle;
+
+  /// No description provided for @reviewYourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating'**
+  String get reviewYourRating;
+
+  /// No description provided for @reviewMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review (optional)'**
+  String get reviewMessageLabel;
+
+  /// No description provided for @reviewSubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get reviewSubmitButton;
+
+  /// No description provided for @reviewUpdateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update review'**
+  String get reviewUpdateButton;
+
+  /// No description provided for @reviewThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your review!'**
+  String get reviewThanks;
+
+  /// No description provided for @reviewUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review was updated.'**
+  String get reviewUpdated;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit your review: {error}'**
+  String reviewCouldNotSubmit(String error);
+
+  /// No description provided for @reviewSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to write a review.'**
+  String get reviewSignInRequired;
+
+  /// No description provided for @reviewOnlyAfterDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'You can review items once your order is delivered.'**
+  String get reviewOnlyAfterDelivery;
+
+  /// No description provided for @reviewOrderNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find this order.'**
+  String get reviewOrderNotFound;
+
+  /// No description provided for @reviewNotYourOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'This order belongs to another account.'**
+  String get reviewNotYourOrder;
+
+  /// No description provided for @reviewItemNotInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'This product is not part of that order.'**
+  String get reviewItemNotInOrder;
+
+  /// No description provided for @reviewRateYourItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your items'**
+  String get reviewRateYourItems;
+
+  /// No description provided for @reviewWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a review'**
+  String get reviewWrite;
+
+  /// No description provided for @reviewEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit review'**
+  String get reviewEdit;
+
+  /// No description provided for @reviewCouldNotLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your reviews.'**
+  String get reviewCouldNotLoad;
+
+  /// No description provided for @productNoReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get productNoReviewsYet;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 rating & review} other{{count} ratings & reviews}}'**
+  String productRatingsAndReviews(num count);
+
+  /// No description provided for @shopContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the shop'**
+  String get shopContactTitle;
+
+  /// No description provided for @shopCallShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Call shop'**
+  String get shopCallShop;
+
+  /// No description provided for @shopPhoneCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number copied'**
+  String get shopPhoneCopied;
+
+  /// Second line of the add-to-cart toast
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item in your cart} other{{count} items in your cart}}'**
+  String cartItemsInCart(num count);
+
+  /// No description provided for @empDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing dashboard'**
+  String get empDashboardTitle;
+
+  /// No description provided for @empStageToPack.
+  ///
+  /// In en, this message translates to:
+  /// **'To pack'**
+  String get empStageToPack;
+
+  /// No description provided for @empStageInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get empStageInProgress;
+
+  /// No description provided for @empStagePacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Packed'**
+  String get empStagePacked;
+
+  /// No description provided for @empStageHandedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed over'**
+  String get empStageHandedOver;
+
+  /// No description provided for @empTotalOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Total orders'**
+  String get empTotalOrders;
+
+  /// No description provided for @empSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by order or customer'**
+  String get empSearchHint;
+
+  /// No description provided for @empNoOrdersInStage.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders here right now'**
+  String get empNoOrdersInStage;
+
+  /// No description provided for @empLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load orders. Check your connection or permissions and try again.'**
+  String get empLoadError;
+
+  /// No description provided for @empRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get empRetry;
+
+  /// No description provided for @empNoShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not linked to a shop. Ask your admin to check your profile.'**
+  String get empNoShop;
+
+  /// No description provided for @empViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get empViewDetails;
+
+  /// No description provided for @empStartPacking.
+  ///
+  /// In en, this message translates to:
+  /// **'Start packing'**
+  String get empStartPacking;
+
+  /// No description provided for @empMarkPacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as packed'**
+  String get empMarkPacked;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String empItemsCount(num count);
+
+  /// No description provided for @empOrderItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items to pack'**
+  String get empOrderItems;
+
+  /// No description provided for @empOrderInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Order information'**
+  String get empOrderInfo;
+
+  /// No description provided for @empCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get empCustomer;
+
+  /// No description provided for @empPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Placed'**
+  String get empPlaced;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} items checked'**
+  String empPackedProgress(num done, num total);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'SKU: {sku}'**
+  String empSku(String sku);
+
+  /// No description provided for @empQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get empQty;
+
+  /// No description provided for @empNoItems.
+  ///
+  /// In en, this message translates to:
+  /// **'This order has no items.'**
+  String get empNoItems;
+
+  /// No description provided for @empActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update the order. Please try again.'**
+  String get empActionFailed;
+
+  /// No description provided for @empPackingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing started'**
+  String get empPackingStarted;
+
+  /// No description provided for @empWaitingForAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Packed — waiting for the admin to hand over.'**
+  String get empWaitingForAdmin;
+
+  /// No description provided for @empNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is not available to you.'**
+  String get empNotAllowed;
+
+  /// No description provided for @empStartDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Start delivery'**
+  String get empStartDelivery;
+
+  /// No description provided for @empMarkDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as delivered'**
+  String get empMarkDelivered;
+
+  /// No description provided for @empStageToDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to dispatch'**
+  String get empStageToDispatch;
+
+  /// No description provided for @empStageOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get empStageOutForDelivery;
+
+  /// No description provided for @empStageDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get empStageDelivered;
+
+  /// No description provided for @empNoAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role has no order duties yet. Ask your admin to enable packing or dispatch for you.'**
+  String get empNoAccess;
+
+  /// No description provided for @switchRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch role'**
+  String get switchRole;
+
+  /// No description provided for @switchRoleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the role selection screen'**
+  String get switchRoleSubtitle;
+
+  /// No description provided for @switchRoleConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be signed out of this account. Continue?'**
+  String get switchRoleConfirm;
+
+  /// No description provided for @empSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get empSelectAll;
+
+  /// No description provided for @empClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get empClearAll;
+
+  /// No description provided for @empCheckAllToFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Check every item to finish packing'**
+  String get empCheckAllToFinish;
+
+  /// No description provided for @empStartToCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Start packing to tick off items'**
+  String get empStartToCheck;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String empMoreItems(num count);
+
+  /// No description provided for @empOpenToPack.
+  ///
+  /// In en, this message translates to:
+  /// **'Open & pack'**
+  String get empOpenToPack;
+
+  /// No description provided for @empAllPacked.
+  ///
+  /// In en, this message translates to:
+  /// **'All items packed'**
+  String get empAllPacked;
+
+  /// No description provided for @empOrderProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Order progress'**
+  String get empOrderProgress;
+
+  /// No description provided for @empYourStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Your step'**
+  String get empYourStep;
+
+  /// No description provided for @empDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery address'**
+  String get empDeliveryAddress;
+
+  /// No description provided for @empPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get empPhone;
+
+  /// No description provided for @empCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get empCopied;
+
+  /// No description provided for @empConfirmDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark this order as delivered? This cannot be undone.'**
+  String get empConfirmDelivered;
+
+  /// No description provided for @empDeliveryStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery started'**
+  String get empDeliveryStarted;
+
+  /// No description provided for @empDeliveredDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Order marked as delivered'**
+  String get empDeliveredDone;
+
+  /// No description provided for @empUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get empUpdated;
+
+  /// No description provided for @empBackToDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to dashboard'**
+  String get empBackToDashboard;
+
+  /// No description provided for @empCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get empCancel;
+
+  /// No description provided for @empConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get empConfirm;
+
+  /// No description provided for @empTotalPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Total pieces'**
+  String get empTotalPieces;
+
+  /// No description provided for @empMarkedReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Order marked ready for delivery'**
+  String get empMarkedReady;
+
+  /// No description provided for @employeeRoleManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager'**
+  String get employeeRoleManager;
+
+  /// No description provided for @employeeRoleOrderPacker.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Packer'**
+  String get employeeRoleOrderPacker;
+
+  /// No description provided for @employeeRoleOrderDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Delivery'**
+  String get employeeRoleOrderDelivery;
+
+  /// No description provided for @employeeRoleManagerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manages every order status'**
+  String get employeeRoleManagerDesc;
+
+  /// No description provided for @employeeRoleOrderPackerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders from Confirmed to Ready'**
+  String get employeeRoleOrderPackerDesc;
+
+  /// No description provided for @employeeRoleOrderDeliveryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders from Ready for Delivery to Delivered'**
+  String get employeeRoleOrderDeliveryDesc;
+
+  /// No description provided for @employeeRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get employeeRoleLabel;
+
+  /// No description provided for @employeeConsole.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee Console'**
+  String get employeeConsole;
 }
 
 class _AppLocalizationsDelegate

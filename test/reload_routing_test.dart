@@ -71,26 +71,28 @@ void main() {
       expect(inAppRedirect, isNull);
     });
 
-    test('LoggedIn Employee reloading any screen moves to /employee', () {
-      const employee = AppUser(
-        id: 'emp_1',
-        name: 'Employee Test',
-        email: 'employee@myshop.com',
-        role: 'employee',
-        companyId: 'comp_1',
-      );
-      AuthSession.set(employee, restoring: false);
-      AuthSession.hasCompletedInitialBoot = false;
+    test(
+      'LoggedIn Employee reloading any screen moves to the orders pipeline',
+      () {
+        const employee = AppUser(
+          id: 'emp_1',
+          name: 'Employee Test',
+          email: 'employee@myshop.com',
+          role: 'employee',
+          companyId: 'comp_1',
+        );
+        AuthSession.set(employee, restoring: false);
+        AuthSession.hasCompletedInitialBoot = false;
 
-      // 1. Simulate reload arriving at /employee/packing/123
-      final reloadRedirect = appRouteRedirect('/employee/packing/123');
-      expect(reloadRedirect, equals(AppRoutes.employeeHome));
-      expect(AuthSession.hasCompletedInitialBoot, isTrue);
+        // 1. Simulate reload arriving at /employee/packing/123
+        final reloadRedirect = appRouteRedirect('/employee/packing/123');
+        expect(reloadRedirect, equals(AppRoutes.adminOrders));
+        expect(AuthSession.hasCompletedInitialBoot, isTrue);
 
-      // 2. Subsequent in-app navigation to /employee/packing/123 is allowed
-      final inAppRedirect = appRouteRedirect('/employee/packing/123');
-      expect(inAppRedirect, isNull);
-    });
+        // 2. Subsequent in-app navigation to the pipeline is allowed
+        expect(appRouteRedirect(AppRoutes.adminOrders), isNull);
+      },
+    );
 
     test(
       'Unauthenticated user cannot access /admin area during in-app navigation',

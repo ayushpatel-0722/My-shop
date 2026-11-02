@@ -49,7 +49,7 @@ void main() {
 
       expect(find.text('Employees'), findsOneWidget);
       expect(find.text('Ramesh Packer'), findsOneWidget);
-      expect(find.text('Picker • packer@greenleaf.in'), findsOneWidget);
+      expect(find.text('Order Packer • packer@greenleaf.in'), findsOneWidget);
       expect(find.text('Active Shift'), findsOneWidget);
       expect(find.text('Pack'), findsOneWidget);
       expect(find.byIcon(Icons.person_add_outlined), findsOneWidget);

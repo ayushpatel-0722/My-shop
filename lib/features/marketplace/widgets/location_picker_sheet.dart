@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../core/models/company.dart';
 import '../../../core/models/customer.dart';
@@ -65,7 +66,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
     if (mounted) {
       Navigator.of(context).pop(detected);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -82,7 +83,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
   void _applyPincode(String pincode) {
     final cleanPin = pincode.trim();
     if (cleanPin.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).pleaseEnterAValid6DigitPincode,
@@ -112,7 +113,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
     context.read<AuthCubit>().selectActiveAddress(pinAddress);
     Navigator.of(context).pop(pinAddress);
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showAppToast(
       SnackBar(
         content: Text(
           AppLocalizations.of(
@@ -127,7 +128,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
 
   void _onAddNewAddress(BuildContext context, List<AddressEntry> addresses) {
     if (addresses.length >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -193,7 +194,7 @@ class _LocationPickerSheetState extends State<LocationPickerSheet> {
     if (confirmed == true) {
       final ok = await authCubit.deleteUserAddress(addr.id);
       if (ok) {
-        messenger.showSnackBar(
+        messenger.showAppToast(
           SnackBar(
             content: Text(l10n.addressDeleted),
             duration: const Duration(seconds: 2),

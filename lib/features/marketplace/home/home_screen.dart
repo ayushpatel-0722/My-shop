@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
+import 'package:myshop/core/widgets/category_image.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/domain/category_lookup.dart';
 import '../../../core/domain/category_tree.dart';
 import '../../../core/models/banner.dart';
 import '../../../core/models/category.dart';
@@ -600,7 +603,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Clipboard.setData(
                                 const ClipboardData(text: 'FESTIVE50'),
                               );
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context).showAppToast(
                                 SnackBar(
                                   content: Text(
                                     AppLocalizations.of(
@@ -772,10 +775,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
             if (dynamicItems.isNotEmpty) {
               // Map dynamic items to Category instances in saved displayOrder
-              final byId = {for (final c in allCategories) c.id: c};
               final resolved = <Category>[];
               for (final item in dynamicItems) {
-                final cat = byId[item.categoryId];
+                final cat = findShopCategory(
+                  allCategories,
+                  item.shopId,
+                  item.categoryId,
+                );
                 if (cat != null) {
                   resolved.add(cat);
                 } else if (item.categoryName.isNotEmpty) {
@@ -826,7 +832,7 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            const itemWidth = 100.0;
+            const itemWidth = 132.0;
             const spacing = 16.0;
             final cols =
                 ((constraints.maxWidth + spacing) / (itemWidth + spacing))
@@ -839,7 +845,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisCount: cols,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: 0.78,
+                childAspectRatio: 0.86,
               ),
               itemCount: list.length,
               itemBuilder: (context, i) {
@@ -854,7 +860,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return SizedBox(
-      height: 126,
+      height: 158,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -879,36 +885,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
               ).primaryColor.withValues(alpha: 0.06),
               child: SizedBox(
-                width: 80,
+                width: 98,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 68,
-                      height: 68,
+                      width: 94,
+                      height: 94,
                       decoration: BoxDecoration(
                         color: bgColor,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(22),
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.9),
                           width: 1.5,
                         ),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.05),
+                            color: Color.fromRGBO(0, 0, 0, 0.08),
                             blurRadius: 10,
                             offset: Offset(0, 3),
                           ),
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(20),
                         child: _buildCategoryIcon(cat),
                       ),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
-                      height: 32,
+                      height: 34,
                       child: Center(
                         child: Text(
                           cat.name,
@@ -916,7 +922,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 11.5,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w600,
                             letterSpacing: -0.1,
                             color: Color(0xFF1E2229),
@@ -991,41 +997,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryIcon(Category cat) {
-    if (cat.iconUrl.startsWith('http://') ||
-        cat.iconUrl.startsWith('https://')) {
-      return Image.network(
-        cat.iconUrl,
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: Colors.black.withValues(alpha: 0.04),
-            child: const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          );
-        },
-        errorBuilder: (_, _, _) => Center(child: _fallbackCategoryIcon(cat)),
-      );
-    }
-    if (cat.iconUrl.startsWith('assets/')) {
-      return Image.asset(
-        cat.iconUrl,
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Center(child: _fallbackCategoryIcon(cat)),
-      );
-    }
-    return Center(child: _fallbackCategoryIcon(cat));
-  }
+  Widget _buildCategoryIcon(Category cat) => CategoryImage(
+    category: cat,
+    fallback: (c) => Center(child: _fallbackCategoryIcon(c)),
+  );
 
   Widget _fallbackCategoryIcon(Category cat) {
     if (cat.iconUrl.isNotEmpty && cat.iconUrl.runes.length <= 4) {
@@ -1274,7 +1249,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onClaimed?.call();
               Clipboard.setData(ClipboardData(text: v.code));
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.of(context).showAppToast(
                 SnackBar(
                   content: Row(
                     children: [
@@ -1603,7 +1578,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 if (dynamicItems.isNotEmpty) {
                   final prodsById = {for (final p in allProducts) p.id: p};
-                  final catsById = {for (final c in allCategories) c.id: c};
 
                   final resolvedItems = <_TrendingRailItem>[];
                   for (final item in dynamicItems) {
@@ -1642,7 +1616,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
                     } else if (item.isCategory && item.categoryId != null) {
-                      final cat = catsById[item.categoryId!];
+                      final cat = findShopCategory(
+                        allCategories,
+                        item.shopId,
+                        item.categoryId!,
+                      );
                       if (cat != null) {
                         resolvedItems.add(_TrendingRailItem.category(cat));
                       } else if (item.categoryName != null &&
@@ -2687,7 +2665,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               navigator.pop();
                             }
                             if (ok) {
-                              scaffoldMessenger.showSnackBar(
+                              scaffoldMessenger.showAppToast(
                                 SnackBar(
                                   content: Text(
                                     l10n.mobileNumberSavedSuccessfully,

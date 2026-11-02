@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
+import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../core/models/delivery_charge.dart';
@@ -155,7 +156,7 @@ class _AdminDeliveryChargesScreenState
     }).toList();
 
     repo.importDeliveryCharges(charges);
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showAppToast(
       SnackBar(
         content: Text(
           AppLocalizations.of(
@@ -195,7 +196,7 @@ class _AdminDeliveryChargesScreenState
     try {
       await repo.deleteDeliveryCharge(charge.pincode, companyId: _companyId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(
@@ -206,7 +207,7 @@ class _AdminDeliveryChargesScreenState
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showAppToast(
         SnackBar(
           content: Text(
             AppLocalizations.of(context).failedToDeleteDeliveryCharge('$e'),
