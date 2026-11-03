@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/theme/app_theme.dart';
+import 'package:myshop/core/utils/favorite_actions.dart';
+import 'package:myshop/core/widgets/addon_lines.dart';
 import 'package:myshop/core/widgets/app_toast.dart';
+import 'package:myshop/features/checkout/cart/wishlist_cubit.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -18,7 +21,6 @@ import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../marketplace/widgets/web_header.dart';
 import 'cart_cubit.dart';
-import 'wishlist_cubit.dart';
 
 /// Cart grouped by company (Section 3 / multi-company cart support).
 ///
@@ -638,6 +640,11 @@ class _CartLineCard extends StatelessWidget {
                     const SizedBox(height: 6),
                   ],
 
+                  if (item.addOns.isNotEmpty) ...[
+                    AddOnLines(addOns: item.addOns),
+                    const SizedBox(height: 6),
+                  ],
+
                   // Unit price of ONE pack + strikethrough MRP — always
                   // driven by the variant snapshot ("₹300 / 500g").
                   Row(
@@ -774,6 +781,8 @@ class _CartLineCard extends StatelessWidget {
   /// Removes the line and immediately offers the way to keep the product.
   void _removeWithOffers(BuildContext context, VoidCallback removeLine) {
     final messenger = ScaffoldMessenger.of(context);
+    // The row is gone once the line is removed; the navigator's context is not.
+    final screenContext = Navigator.of(context).context;
     final wishlist = context.read<WishlistCubit>();
     final removed = item;
     removeLine();
@@ -789,7 +798,11 @@ class _CartLineCard extends StatelessWidget {
           action: SnackBarAction(
             label: 'MOVE TO WISHLIST',
             onPressed: () {
-              wishlist.addFromCart(removed);
+              FavoriteActions.add(
+                screenContext,
+                removed.product,
+                cubit: wishlist,
+              );
               messenger
                 ..hideCurrentSnackBar()
                 ..showAppToast(

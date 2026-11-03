@@ -177,41 +177,33 @@ class StoreHours {
   }
 }
 
-/// Aggregate numbers shown on a store page (rating, review count, followers).
+/// Aggregate numbers shown on a store page (rating, review count).
 ///
 /// Previously every screen recomputed these inline — and the store page
 /// invented a 5.0 rating when a shop had no reviews yet. One definition now.
 class StoreStats {
   final double averageRating;
   final int reviewCount;
-  final int followerCount;
 
-  const StoreStats({
-    this.averageRating = 0,
-    this.reviewCount = 0,
-    this.followerCount = 0,
-  });
+  const StoreStats({this.averageRating = 0, this.reviewCount = 0});
 
   /// Average over the **visible** reviews; 0 (not 5.0) when there are none.
-  factory StoreStats.fromReviews(
-    List<Review> reviews, {
-    int followerCount = 0,
-  }) {
+  factory StoreStats.fromReviews(List<Review> reviews) {
     final visible = reviews.where((r) => r.isVisible).toList();
     final total = visible.fold<int>(0, (sum, r) => sum + r.rating);
     return StoreStats(
       averageRating: visible.isEmpty ? 0 : total / visible.length,
       reviewCount: visible.length,
-      followerCount: followerCount,
     );
   }
+
+  /// A shop's rating and reviews are shown to shoppers only from this many
+  /// reviews on, so one or two early reviews never define a shop.
+  static const int minReviewsToShow = 5;
+
+  bool get showReviews => reviewCount >= minReviewsToShow;
 
   /// "4.6" / "New" — never fabricates a rating for an unreviewsed shop.
   String get ratingLabel =>
       reviewCount == 0 ? L10n.current.msgNew : averageRating.toStringAsFixed(1);
-
-  /// "128 followers" / "1 follower".
-  String get followerLabel => followerCount == 1
-      ? L10n.current.msg1Follower
-      : L10n.current.followers('$followerCount');
 }

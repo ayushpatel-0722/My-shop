@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/widgets/app_toast.dart';
+import 'package:myshop/features/product/widgets/add_on_sheet.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
@@ -28,6 +29,7 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/category_image.dart';
 import '../../../core/widgets/modern_shimmer.dart';
+import '../../../core/widgets/shop_map.dart';
 import '../../../core/widgets/shop_phone.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
@@ -72,8 +74,6 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   /// Length of the filtered grid in the last build, so pagination stops once
   /// everything is on screen.
   int _filteredCount = 0;
-
-  bool _isFollowing = false;
 
   final PageController _carouselCtrl = PageController();
   int _carouselIndex = 0;
@@ -121,8 +121,20 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
   }
 
   void _handleAddToCart(BuildContext context, Product product) {
-    void doAdd() {
-      context.read<CartCubit>().add(product, company: _company);
+    Future<void> doAdd() async {
+      final cart = context.read<CartCubit>();
+      final choice = await AddOnSheet.pick(
+        context,
+        product: product,
+        symbol: _company?.currencySymbol ?? '₹',
+      );
+      if (choice == null || !context.mounted) return;
+      cart.add(
+        product,
+        company: _company,
+        qty: choice.qty,
+        addOns: choice.addOns,
+      );
       showAddToCartNotification(context, productName: product.name);
     }
 
@@ -562,12 +574,7 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
         _ShopDetailsBlock(
           company: company,
           bannerImage: _bannerImage(company, offerBanners),
-          stats: StoreStats.fromReviews(
-            reviews,
-            followerCount: company.followers + (_isFollowing ? 1 : 0),
-          ),
-          isFollowing: _isFollowing,
-          onToggleFollow: () => setState(() => _isFollowing = !_isFollowing),
+          stats: StoreStats.fromReviews(reviews),
         ),
 
         const SizedBox(height: 16),
@@ -1055,21 +1062,134 @@ class _CompanyStoreScreenState extends State<CompanyStoreScreen> {
 // Building blocks
 // =============================================================================
 
+/// Location (with Directions), call and reviews of a shop, as tappable rows.
+class _ShopInfoCard extends StatelessWidget {
+  final Company company;
+  final StoreStats stats;
+
+  const _ShopInfoCard({required this.company, required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final address = company.address.trim();
+    final phone = company.phone.trim();
+    final hasMap = shopMapUrl(company) != null;
+    const labelStyle = TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF334155),
+    );
+    final actionStyle = TextStyle(
+      fontSize: 12.5,
+      fontWeight: FontWeight.w700,
+      color: Theme.of(context).colorScheme.primary,
+    );
+
+    Widget row({
+      required Key key,
+      required IconData icon,
+      required Widget label,
+      required Widget trailing,
+      required VoidCallback? onTap,
+    }) => InkWell(
+      key: key,
+      borderRadius: BorderRadius.circular(8),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF475569)),
+            const SizedBox(width: 10),
+            Expanded(child: label),
+            const SizedBox(width: 8),
+            trailing,
+          ],
+        ),
+      ),
+    );
+
+    final rows = <Widget>[
+      if (hasMap)
+        row(
+          key: const Key('store-location-row'),
+          icon: Icons.place_outlined,
+          label: Text(
+            address.isNotEmpty ? address : l10n.shopDirections,
+            key: const Key('store-address'),
+            style: labelStyle,
+          ),
+          trailing: Text(
+            l10n.shopDirections,
+            key: const Key('store-directions-button'),
+            style: actionStyle,
+          ),
+          onTap: () => openShopMap(context, company),
+        )
+      else if (address.isNotEmpty)
+        row(
+          key: const Key('store-location-row'),
+          icon: Icons.place_outlined,
+          label: Text(
+            address,
+            key: const Key('store-address'),
+            style: labelStyle,
+          ),
+          trailing: const SizedBox.shrink(),
+          onTap: null,
+        ),
+      if (phone.isNotEmpty)
+        row(
+          key: const Key('store-phone-row'),
+          icon: Icons.phone_outlined,
+          label: Text(
+            phone,
+            key: const Key('store-phone-number'),
+            style: labelStyle,
+          ),
+          trailing: Text(l10n.shopCallShop, style: actionStyle),
+          onTap: () => callShop(context, phone),
+        ),
+      if (stats.showReviews)
+        row(
+          key: const Key('store-reviews-row'),
+          icon: Icons.star_outline_rounded,
+          label: Text(l10n.shopSeeReviews, style: labelStyle),
+          trailing: const Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: Color(0xFF94A3B8),
+          ),
+          onTap: () => context.push(
+            AppRoutes.reviews.replaceFirst(':companyId', company.id),
+          ),
+        ),
+    ];
+
+    return Container(
+      key: const Key('store-info-card'),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(children: rows),
+    );
+  }
+}
+
 /// Shop details block: banner, overlapping logo, name + verified badge,
-/// tappable rating row, open/closed pill, follower count + follow button.
+/// tappable rating row and open/closed pill.
 class _ShopDetailsBlock extends StatelessWidget {
   final Company company;
   final String? bannerImage;
   final StoreStats stats;
-  final bool isFollowing;
-  final VoidCallback onToggleFollow;
 
   const _ShopDetailsBlock({
     required this.company,
     required this.bannerImage,
     required this.stats,
-    required this.isFollowing,
-    required this.onToggleFollow,
   });
 
   @override
@@ -1232,8 +1352,6 @@ class _ShopDetailsBlock extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 3, 16, 0),
             child: Text(
               company.details,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12.5, color: Color(0xFF6C757D)),
             ),
           ),
@@ -1247,7 +1365,7 @@ class _ShopDetailsBlock extends StatelessWidget {
             spacing: 6,
             runSpacing: 5,
             children: [
-              if (stats.reviewCount > 0) ...[
+              if (stats.showReviews) ...[
                 InkWell(
                   key: const Key('store-rating-row'),
                   borderRadius: BorderRadius.circular(6),
@@ -1328,45 +1446,6 @@ class _ShopDetailsBlock extends StatelessWidget {
                   ],
                 ),
               ),
-              const Text(
-                '•',
-                style: TextStyle(color: Color(0xFFCBD5E1), fontSize: 13),
-              ),
-              Text(
-                stats.followerLabel,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF6C757D)),
-              ),
-              const SizedBox(width: 4),
-              OutlinedButton(
-                key: const Key('follow-button'),
-                onPressed: onToggleFollow,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 26),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 0,
-                  ),
-                  visualDensity: VisualDensity.compact,
-                  side: BorderSide(
-                    color: isFollowing
-                        ? const Color(0xFF3D38D9)
-                        : const Color(0xFFCBD5E1),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text(
-                  isFollowing ? '✓ Following' : '+ Follow',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: isFollowing
-                        ? const Color(0xFF3D38D9)
-                        : const Color(0xFF1E2229),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -1377,47 +1456,12 @@ class _ShopDetailsBlock extends StatelessWidget {
           child: _buildDeliveryInfoPill(context, company),
         ),
 
-        // The phone number the shop admin entered in Shop Settings.
-        if (company.phone.trim().isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
-            child: InkWell(
-              key: const Key('store-phone-row'),
-              borderRadius: BorderRadius.circular(8),
-              onTap: () => callShop(context, company.phone),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.phone_outlined,
-                      size: 16,
-                      color: Color(0xFF475569),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      company.phone.trim(),
-                      key: const Key('store-phone-number'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF334155),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      AppLocalizations.of(context).shopCallShop,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        // Where the shop is, how to reach it, and what shoppers say — all
+        // from what the shop admin entered in Shop Settings.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          child: _ShopInfoCard(company: company, stats: stats),
+        ),
       ],
     );
   }

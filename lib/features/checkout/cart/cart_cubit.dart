@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
+import '../../../core/models/product_addon.dart';
 import '../../../core/services/cart_storage.dart';
 
 class CartState {
@@ -64,6 +65,7 @@ class CartCubit extends Cubit<CartState> {
     String? companyName,
     int qty = 1,
     Company? company,
+    List<AddOnSnapshot> addOns = const [],
   }) {
     final items = [...state.items];
     final resolvedCompanyId = companyId ?? company?.id ?? product.companyId;
@@ -75,6 +77,7 @@ class CartCubit extends Cubit<CartState> {
       product: product,
       selectedVariant: variant,
       qty: qty,
+      addOns: addOns,
     );
 
     final i = items.indexWhere(
@@ -136,12 +139,33 @@ class CartCubit extends Cubit<CartState> {
     emit(state.copyWith(items: remaining));
   }
 
-  /// Replaces one line with [updated] (same cart key) — used by the checkout
+  /// Replaces the line keyed [oldKey] with [updated] — used by the checkout
   /// price/stock re-validation to sync the cart with the latest catalogue.
-  void replaceItem(CartItem updated) {
-    final items = state.items
-        .map((e) => e.cartKey == updated.cartKey ? updated : e)
-        .toList();
+  ///
+  /// [oldKey] is the key the line had before the change; it differs from
+  /// `updated.cartKey` when add-ons were dropped. If that makes the line
+  /// identical to another one, the two are merged (quantity capped by stock).
+  void replaceItem(String oldKey, CartItem updated) {
+    final items = [...state.items];
+    final i = items.indexWhere((e) => e.cartKey == oldKey);
+    if (i == -1) return;
+    final twin = items.indexWhere(
+      (e) =>
+          e.cartKey == updated.cartKey &&
+          e.companyId == updated.companyId &&
+          !identical(e, items[i]),
+    );
+    if (twin != -1) {
+      final merged = items[twin].qty + updated.qty;
+      items[twin] = items[twin].copyWith(
+        qty: merged > updated.maxQty ? updated.maxQty : merged,
+        variant: updated.variant,
+        addOns: updated.addOns,
+      );
+      items.removeAt(i);
+    } else {
+      items[i] = updated;
+    }
     _persist(items);
     emit(state.copyWith(items: items));
   }

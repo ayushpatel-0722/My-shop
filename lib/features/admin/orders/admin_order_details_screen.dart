@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:myshop/core/widgets/addon_lines.dart';
 import 'package:myshop/core/widgets/app_toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -814,6 +815,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                               color: Colors.grey.shade600,
                             ),
                           ),
+                          AddOnLines(addOns: item.addOns),
                         ],
                       ),
                     ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
+import '../cache/app_images.dart';
 import '../models/product.dart';
 
 /// A robust image widget for products and categories that gracefully handles:
@@ -128,27 +129,25 @@ class AppProductImage extends StatelessWidget {
         ? targetUrl
         : 'https://$targetUrl';
 
-    return Image.network(
+    return AppNetworkImage(
       effectiveUrl,
       width: width,
       height: height,
       fit: fit,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        if (loadingWidget != null) return loadingWidget!;
-        return Container(
-          width: width,
-          height: height,
-          color: const Color(0xFFF8F9FA),
-          child: Center(
-            child: SizedBox(
-              width: (width != null && width! < 30) ? 14 : 20,
-              height: (height != null && height! < 30) ? 14 : 20,
-              child: const CircularProgressIndicator(strokeWidth: 2),
+      placeholder:
+          loadingWidget ??
+          Container(
+            width: width,
+            height: height,
+            color: const Color(0xFFF8F9FA),
+            child: Center(
+              child: SizedBox(
+                width: (width != null && width! < 30) ? 14 : 20,
+                height: (height != null && height! < 30) ? 14 : 20,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              ),
             ),
           ),
-        );
-      },
       errorBuilder: (_, _, _) => fallbackWidget,
     );
   }

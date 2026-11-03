@@ -15,15 +15,29 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
+import '../../../core/widgets/replay_stream_builder.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/marketplace_bottom_nav.dart';
 import '../widgets/section_header.dart';
 import '../widgets/web_header.dart';
 
+/// The most categories shown in one row on a phone.
+const int kMobileCategoryColumns = 3;
+
 /// Categories Screen displaying All Shops and All Shop Categories with rich styling.
-class CategoriesScreen extends StatelessWidget {
+class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
+
+  @override
+  State<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen> {
+  // Opened once: a rebuild must not open the queries again (and flash a
+  // loader), and the tab keeps these while another tab is shown.
+  late final Stream<List<Category>> _categories = repo.categories();
+  late final Stream<List<Company>> _companies = repo.companies();
 
   static const _pastelColors = [
     Color(0xFFE6F7F2), // Mint Green
@@ -37,8 +51,8 @@ class CategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoriesStream = repo.categories();
-    final companiesStream = repo.companies();
+    final categoriesStream = _categories;
+    final companiesStream = _companies;
 
     bool canPop() {
       try {
@@ -81,12 +95,9 @@ class CategoriesScreen extends StatelessWidget {
               )
             : AppBar(
                 automaticallyImplyLeading: false,
-                leading: canPop()
-                    ? BackButton(
-                        color: const Color(0xFF1E2229),
-                        onPressed: handleBack,
-                      )
-                    : null,
+                // A main tab: no back arrow (the bottom bar is how to move
+                // around). The phone's own Back button still returns to Home.
+                leading: null,
                 backgroundColor: Colors.white,
                 elevation: 0,
                 scrolledUnderElevation: 1,
@@ -175,13 +186,17 @@ class CategoriesScreen extends StatelessWidget {
                             size: 20,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            AppLocalizations.of(
-                              context,
-                            ).searchCategoriesBrandsOrShops,
-                            style: const TextStyle(
-                              color: Color(0xFF9CA3AF),
-                              fontSize: 14,
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              ).searchCategoriesBrandsOrShops,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],
@@ -236,7 +251,7 @@ class CategoriesScreen extends StatelessWidget {
   }
 
   Widget _buildCategoriesGrid(Stream<List<Category>> categoriesStream) {
-    return StreamBuilder<List<Category>>(
+    return ReplayStreamBuilder<List<Category>>(
       stream: categoriesStream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
@@ -247,10 +262,10 @@ class CategoriesScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: 8,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 14,
+                crossAxisCount: kMobileCategoryColumns,
+                mainAxisSpacing: 16,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.76,
+                childAspectRatio: 0.9,
               ),
               itemBuilder: (context, i) => const Column(
                 children: [
@@ -303,18 +318,21 @@ class CategoriesScreen extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
+              // At most three categories per row on a phone, so each one is big
+              // enough to read and to recognise by its picture.
               final cols = context.isDesktop
                   ? ((constraints.maxWidth + 14) / 120).floor().clamp(4, 12)
-                  : 4;
+                  : kMobileCategoryColumns;
+              final tile = cols == kMobileCategoryColumns ? 92.0 : 76.0;
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: roots.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: cols,
-                  mainAxisSpacing: 14,
+                  mainAxisSpacing: 16,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 0.66,
+                  childAspectRatio: cols == kMobileCategoryColumns ? 0.8 : 0.66,
                 ),
                 itemBuilder: (context, i) {
                   final cat = roots[i].category;
@@ -329,8 +347,8 @@ class CategoriesScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          width: 76,
-                          height: 76,
+                          width: tile,
+                          height: tile,
                           decoration: BoxDecoration(
                             color: bgColor,
                             shape: BoxShape.circle,
@@ -407,7 +425,7 @@ class CategoriesScreen extends StatelessWidget {
   }
 
   Widget _buildShopsSliver(Stream<List<Company>> companiesStream) {
-    return StreamBuilder<List<Company>>(
+    return ReplayStreamBuilder<List<Company>>(
       stream: companiesStream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {

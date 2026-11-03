@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,8 +8,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app/app.dart';
 import 'app/l10n/locale_cubit.dart';
+import 'core/cache/app_images.dart';
+import 'core/cache/cache_consent.dart';
+import 'core/cache/cache_consent_controller.dart';
+import 'core/cache/firestore_cache.dart';
+import 'core/cache/shared_streams.dart';
 import 'core/config/app_config.dart';
 import 'core/config/environment.dart';
+import 'core/services/auth_session.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/service_locator.dart';
 import 'features/auth/auth_cubit.dart';
@@ -84,6 +91,37 @@ Future<void> main() async {
     }
   }
 
+  // ------------------------------------------------------------------
+  // Caching: Firestore's bounded on-device cache, the image disk cache and,
+  // on the web, the one-time storage consent. The cache is configured before
+  // the first read; on the web that waits for the shopper's answer.
+  // ------------------------------------------------------------------
+  AppImages.init();
+  var storedConsent = CacheConsent.undecided;
+  if (firebaseReady) {
+    try {
+      await FirestoreCache.clearIfPending(FirebaseFirestore.instance);
+    } catch (e) {
+      debugPrint('Cache clear skipped: $e');
+    }
+  }
+  if (kIsWeb) storedConsent = await CacheConsentStore().read();
+
+  // The app starts right away. On the web, a first-time visitor is asked over
+  // the running app (see CacheConsentPrompt); until answered nothing is kept
+  // on disk. Everyone else gets their stored answer applied now.
+  final consentController = CacheConsentController(
+    initial: storedConsent,
+    isWeb: kIsWeb,
+    onApply: (consent) {
+      if (firebaseReady) {
+        FirestoreCache.apply(FirebaseFirestore.instance, consent: consent);
+      }
+    },
+  );
+  CacheConsentController.instance = consentController;
+  consentController.start();
+
   runApp(Bootstrap(firebaseReady: firebaseReady));
 }
 
@@ -135,6 +173,36 @@ class _BootstrapState extends State<Bootstrap> {
   void initState() {
     super.initState();
     _localeCubit.load();
+    // Favourites belong to whoever is signed in: follow the session so a
+    // sign-out or an account switch never shows the previous user's list.
+    AuthSession.instance.addListener(_syncFavorites);
+    AuthSession.instance.addListener(_onAccountChanged);
+    _syncFavorites();
+  }
+
+  String? _lastUserId = AuthSession.currentUser?.id;
+
+  void _syncFavorites() => _wishlistCubit.bindUser(AuthSession.currentUser?.id);
+
+  /// Private data must not outlive the account it belongs to: when a signed-in
+  /// account signs out (or another signs in), the in-memory shared queries are
+  /// dropped and Firestore's on-device cache is cleared at the next start.
+  void _onAccountChanged() {
+    final id = AuthSession.currentUser?.id;
+    final previous = _lastUserId;
+    if (id == previous) return;
+    _lastUserId = id;
+    if (previous != null) {
+      SharedStreams.instance.clear();
+      FirestoreCache.markForClearing();
+    }
+  }
+
+  @override
+  void dispose() {
+    AuthSession.instance.removeListener(_syncFavorites);
+    AuthSession.instance.removeListener(_onAccountChanged);
+    super.dispose();
   }
 
   @override

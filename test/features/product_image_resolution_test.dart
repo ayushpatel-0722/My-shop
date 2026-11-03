@@ -276,7 +276,10 @@ void main() {
 
       expect(find.byType(Image), findsOneWidget);
       final imageWidget = tester.widget<Image>(find.byType(Image));
-      expect(imageWidget.image, isA<NetworkImage>());
+      // Decoded through a ResizeImage over the network image.
+      final provider = imageWidget.image;
+      expect(provider, isA<ResizeImage>());
+      expect((provider as ResizeImage).imageProvider, isA<NetworkImage>());
     });
   });
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/addon_lines.dart';
 import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
@@ -628,6 +629,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                               ).colorScheme.onSurfaceVariant,
                             ),
                           ),
+                          AddOnLines(addOns: item.addOns),
                         ],
                       ),
                     ),

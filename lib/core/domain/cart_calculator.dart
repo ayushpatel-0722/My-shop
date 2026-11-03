@@ -60,14 +60,14 @@ class CartCalculator {
 
   /// Maths for one cart line.
   ///
-  ///   itemTotal    = variant.price × quantity
-  ///   itemMrpTotal = variant.mrp × quantity
+  ///   itemTotal    = (variant.price + add-ons) × quantity
+  ///   itemMrpTotal = (variant.mrp + add-ons' mrp) × quantity
   ///   itemDiscount = itemMrpTotal − itemTotal
   ///   totalQuantityInUnit = variant.unitValue × quantity
   CartLineCalc line(CartItem item) {
     final qty = item.qty < 0 ? 0 : item.qty;
-    final itemTotal = roundMoney(item.effectivePrice * qty);
-    final itemMrpTotal = roundMoney(item.effectiveMrp * qty);
+    final itemTotal = roundMoney(item.unitPriceWithAddOns * qty);
+    final itemMrpTotal = roundMoney(item.unitMrpWithAddOns * qty);
     final discount = itemMrpTotal - itemTotal;
     return CartLineCalc(
       cartItemId: item.cartKey,

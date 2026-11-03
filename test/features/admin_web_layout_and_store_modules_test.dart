@@ -40,7 +40,8 @@ void main() {
     testWidgets(
       'Desktop view (> 1024) shows permanent sidebar and desktop AppBar',
       (tester) async {
-        tester.view.physicalSize = const Size(1280, 800);
+        // Tall enough to build the whole (scrolling) menu.
+        tester.view.physicalSize = const Size(1280, 1100);
         tester.view.devicePixelRatio = 1.0;
         addTearDown(() {
           tester.view.resetPhysicalSize();

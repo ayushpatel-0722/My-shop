@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:uuid/uuid.dart';
 
 import '../../app/l10n/l10n_service.dart';
+import '../cache/cache_policy.dart';
+import '../cache/shared_streams.dart';
 import '../domain/category_tree.dart';
 import '../domain/employee_roles.dart';
 import '../domain/order_status.dart';
@@ -18,6 +20,7 @@ import '../models/category.dart';
 import '../models/company.dart';
 import '../models/delivery_charge.dart';
 import '../models/employee.dart';
+import '../models/favorite.dart';
 import '../models/home_explore_category.dart';
 import '../models/home_trending_item.dart';
 import '../models/notification.dart';
@@ -964,8 +967,101 @@ class FirebaseAppRepository implements AppRepository {
 
   // ----------------------------------------------------------------- Reads --
 
+  // The read streams below are shared: one live listener per query however
+  // many widgets watch it, the last value replayed to a new watcher, and a
+  // failed refresh never clears what is already shown (see SharedStreams).
+  // Only public data is shared; per-user streams (orders, favourites,
+  // notifications) deliberately are not.
+  final SharedStreams _shared = SharedStreams.instance;
+
   @override
-  Stream<List<Company>> companies() => _companiesCol()
+  Stream<List<Company>> companies() =>
+      _shared.stream('companies', DataClass.reference, () => _rawCompanies());
+
+  @override
+  Stream<List<Category>> categories({String companyId = ''}) => _shared.stream(
+    'categories|$companyId',
+    DataClass.reference,
+    () => _rawCategories(companyId: companyId),
+  );
+
+  @override
+  Stream<List<Product>> products({
+    String companyId = '',
+    String categoryId = '',
+    String search = '',
+  }) => _shared.stream(
+    'products|$companyId|$categoryId|$search',
+    DataClass.catalog,
+    () => _rawProducts(
+      companyId: companyId,
+      categoryId: categoryId,
+      search: search,
+    ),
+  );
+
+  @override
+  Stream<List<AdBanner>> adBanners() =>
+      _shared.stream('adBanners', DataClass.reference, () => _rawAdBanners());
+
+  @override
+  Stream<List<OfferBanner>> offerBanners(String companyId) => _shared.stream(
+    'offerBanners|$companyId',
+    DataClass.reference,
+    () => _rawOfferBanners(companyId),
+  );
+
+  @override
+  Stream<List<Voucher>> vouchers(String companyId) => _shared.stream(
+    'vouchers|$companyId',
+    DataClass.volatile,
+    () => _rawVouchers(companyId),
+  );
+
+  @override
+  Stream<List<DeliveryCharge>> deliveryCharges({String companyId = ''}) =>
+      _shared.stream(
+        'deliveryCharges|$companyId',
+        DataClass.reference,
+        () => _rawDeliveryCharges(companyId: companyId),
+      );
+
+  @override
+  Stream<List<Review>> reviews(String companyId) => _shared.stream(
+    'reviews|$companyId',
+    DataClass.volatile,
+    () => _rawReviews(companyId),
+  );
+
+  @override
+  Stream<List<Recommendation>> recommendationRecords({String companyId = ''}) =>
+      _shared.stream(
+        'recommendations|$companyId',
+        DataClass.catalog,
+        () => _rawRecommendationRecords(companyId: companyId),
+      );
+
+  @override
+  Stream<List<HomeExploreCategory>> homeExploreCategories({
+    String shopId = '',
+    bool activeOnly = false,
+  }) => _shared.stream(
+    'homeExplore|$shopId|$activeOnly',
+    DataClass.catalog,
+    () => _rawHomeExploreCategories(shopId: shopId, activeOnly: activeOnly),
+  );
+
+  @override
+  Stream<List<HomeTrendingItem>> homeTrendingNow({
+    String shopId = '',
+    bool activeOnly = false,
+  }) => _shared.stream(
+    'homeTrending|$shopId|$activeOnly',
+    DataClass.catalog,
+    () => _rawHomeTrendingNow(shopId: shopId, activeOnly: activeOnly),
+  );
+
+  Stream<List<Company>> _rawCompanies() => _companiesCol()
       .snapshots()
       .map(
         (s) =>
@@ -983,8 +1079,7 @@ class FirebaseAppRepository implements AppRepository {
     return null;
   }
 
-  @override
-  Stream<List<Category>> categories({String companyId = ''}) {
+  Stream<List<Category>> _rawCategories({String companyId = ''}) {
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream =
         companyId.isNotEmpty
         ? _categoriesCol(companyId).snapshots()
@@ -1048,8 +1143,7 @@ class FirebaseAppRepository implements AppRepository {
     return null;
   }
 
-  @override
-  Stream<List<Product>> products({
+  Stream<List<Product>> _rawProducts({
     String companyId = '',
     String categoryId = '',
     String search = '',
@@ -1136,8 +1230,7 @@ class FirebaseAppRepository implements AppRepository {
     return null;
   }
 
-  @override
-  Stream<List<AdBanner>> adBanners() => _db
+  Stream<List<AdBanner>> _rawAdBanners() => _db
       .collection('ads_banners')
       .snapshots()
       .map(
@@ -1147,8 +1240,7 @@ class FirebaseAppRepository implements AppRepository {
       )
       .asBroadcastStream();
 
-  @override
-  Stream<List<OfferBanner>> offerBanners(String companyId) {
+  Stream<List<OfferBanner>> _rawOfferBanners(String companyId) {
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream =
         companyId.isNotEmpty
         ? _bannersCol(companyId).snapshots()
@@ -1170,8 +1262,7 @@ class FirebaseAppRepository implements AppRepository {
         .asBroadcastStream();
   }
 
-  @override
-  Stream<List<Voucher>> vouchers(String companyId) {
+  Stream<List<Voucher>> _rawVouchers(String companyId) {
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream =
         companyId.isNotEmpty
         ? _vouchersCol(companyId).snapshots()
@@ -1252,8 +1343,7 @@ class FirebaseAppRepository implements AppRepository {
     return DeliveryCharge.fromMap(doc.id, _asMap(doc.data()));
   }
 
-  @override
-  Stream<List<DeliveryCharge>> deliveryCharges({String companyId = ''}) {
+  Stream<List<DeliveryCharge>> _rawDeliveryCharges({String companyId = ''}) {
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream =
         companyId.isNotEmpty
         ? _deliveryChargesCol(companyId).snapshots()
@@ -1430,8 +1520,7 @@ class FirebaseAppRepository implements AppRepository {
     return Order.fromMap(doc.id, map).copyWithItems(items);
   }
 
-  @override
-  Stream<List<Review>> reviews(String companyId) {
+  Stream<List<Review>> _rawReviews(String companyId) {
     // No server-side orderBy: it would silently drop reviews that have no
     // `createdAt`, and a collection-group orderBy needs an index that may not
     // be deployed (the stream then fails and the list looks empty). Sorting
@@ -1645,8 +1734,9 @@ class FirebaseAppRepository implements AppRepository {
     }
   }
 
-  @override
-  Stream<List<Recommendation>> recommendationRecords({String companyId = ''}) {
+  Stream<List<Recommendation>> _rawRecommendationRecords({
+    String companyId = '',
+  }) {
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream =
         companyId.isNotEmpty
         ? _recommendationsCol(companyId).snapshots()
@@ -2225,6 +2315,87 @@ class FirebaseAppRepository implements AppRepository {
     await ref.update({
       'assignedEmployeeId': employeeId.isEmpty ? null : employeeId,
       'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  // ---- Favourites ------------------------------------------------------
+  //
+  // One document per shopper, `favorites/{userId}`, holding the liked
+  // products as an ordered `items` array (oldest first, newest last). A single
+  // array makes "the oldest favourite" unambiguous and lets one transaction
+  // enforce the limit and the no-duplicates rule for every device.
+
+  DocumentReference<Map<String, dynamic>> _favoritesDoc(String userId) =>
+      _db.collection('favorites').doc(userId);
+
+  List<FavoriteEntry> _parseFavorites(Map<String, dynamic>? data) {
+    final raw = data?['items'];
+    if (raw is! List) return const <FavoriteEntry>[];
+    final seen = <String>{};
+    return [
+      for (final e in raw)
+        if (e is Map)
+          if (FavoriteEntry.fromMap(Map<String, dynamic>.from(e))
+              case final entry
+              when entry.productId.isNotEmpty && seen.add(entry.productId))
+            entry,
+    ];
+  }
+
+  Future<void> _writeFavorites(
+    Transaction tx,
+    DocumentReference<Map<String, dynamic>> ref,
+    String userId,
+    List<FavoriteEntry> items,
+  ) async {
+    tx.set(ref, {
+      'userId': userId,
+      'items': items.map((e) => e.toMap()).toList(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  @override
+  Stream<List<FavoriteEntry>> favorites(String userId) {
+    if (userId.isEmpty) return Stream.value(const <FavoriteEntry>[]);
+    return _favoritesDoc(
+      userId,
+    ).snapshots().map((s) => _parseFavorites(s.data()));
+  }
+
+  @override
+  Future<List<FavoriteEntry>> addFavorite(
+    String userId,
+    FavoriteEntry entry, {
+    bool replaceOldest = false,
+  }) {
+    if (userId.isEmpty || entry.productId.isEmpty) {
+      throw ArgumentError('A user and a product are required.');
+    }
+    final ref = _favoritesDoc(userId);
+    return _db.runTransaction<List<FavoriteEntry>>((tx) async {
+      final items = [..._parseFavorites((await tx.get(ref)).data())];
+      if (items.any((e) => e.productId == entry.productId)) return items;
+      if (items.length >= maxFavoriteProducts) {
+        if (!replaceOldest) throw const FavoriteLimitReached();
+        items.removeRange(0, items.length - maxFavoriteProducts + 1);
+      }
+      items.add(entry);
+      await _writeFavorites(tx, ref, userId, items);
+      return items;
+    });
+  }
+
+  @override
+  Future<List<FavoriteEntry>> removeFavorite(String userId, String productId) {
+    if (userId.isEmpty) throw ArgumentError('A user is required.');
+    final ref = _favoritesDoc(userId);
+    return _db.runTransaction<List<FavoriteEntry>>((tx) async {
+      final items = [..._parseFavorites((await tx.get(ref)).data())];
+      final before = items.length;
+      items.removeWhere((e) => e.productId == productId);
+      if (items.length != before) await _writeFavorites(tx, ref, userId, items);
+      return items;
     });
   }
 
@@ -2829,12 +3000,23 @@ class FirebaseAppRepository implements AppRepository {
   }
 
   @override
+  Future<String?> storefrontLockHash() async {
+    // Always from the server: a stale cached copy must not decide who may edit.
+    final snap = await _db
+        .collection('storefront_config')
+        .doc('lock')
+        .get(const GetOptions(source: Source.server));
+    final hash = snap.data()?['passwordHash'];
+    return hash is String && hash.trim().isNotEmpty ? hash.trim() : null;
+  }
+
+  @override
   Future<void> saveAdBanner(AdBanner banner) {
     final id = banner.id.isEmpty ? _uuid.v4() : banner.id;
     return _db.collection('ads_banners').doc(id).set({
       'id': id,
       'image': banner.image,
-      'actionType': banner.actionType.name,
+      'actionType': banner.actionTypeWire,
       'actionTarget': banner.actionTarget,
       'priority': banner.priority,
     });
@@ -2873,8 +3055,7 @@ class FirebaseAppRepository implements AppRepository {
 
   // ------------------------------------------ Home Dynamic Configurations --
 
-  @override
-  Stream<List<HomeExploreCategory>> homeExploreCategories({
+  Stream<List<HomeExploreCategory>> _rawHomeExploreCategories({
     String shopId = '',
     bool activeOnly = false,
   }) {
@@ -2932,8 +3113,7 @@ class FirebaseAppRepository implements AppRepository {
     await batch.commit();
   }
 
-  @override
-  Stream<List<HomeTrendingItem>> homeTrendingNow({
+  Stream<List<HomeTrendingItem>> _rawHomeTrendingNow({
     String shopId = '',
     bool activeOnly = false,
   }) {

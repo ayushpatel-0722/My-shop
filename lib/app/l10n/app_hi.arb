@@ -782,8 +782,6 @@
   "openNowCloses": "अभी खुला · बंद होगा {close}{closesuffix}",
   "closedOpens": "बंद · खुलेगा {time}{day}",
   "msgNew": "नया",
-  "msg1Follower": "1 फ़ॉलोअर",
-  "followers": "{followercount} फ़ॉलोअर्स",
   "productTitleIsRequired": "उत्पाद शीर्षक आवश्यक है।",
   "useAtLeast2Characters": "कम से कम 2 अक्षर उपयोग करें।",
   "mrpMustBeGreaterThan0": "MRP 0 से अधिक होना चाहिए।",
@@ -1384,5 +1382,157 @@
   "employeeRoleOrderPackerDesc": "कन्फर्म से तैयार तक के ऑर्डर",
   "employeeRoleOrderDeliveryDesc": "डिलीवरी के लिए तैयार से डिलीवर तक के ऑर्डर",
   "employeeRoleLabel": "भूमिका",
-  "employeeConsole": "कर्मचारी कंसोल"
+  "employeeConsole": "कर्मचारी कंसोल",
+  "favLoginRequired": "पसंदीदा उत्पाद सहेजने के लिए कृपया लॉग इन करें।",
+  "favLimitTitle": "पसंदीदा की सीमा पूरी हो गई",
+  "favLimitBody": "आप अधिकतम {max} पसंदीदा उत्पाद सहेज सकते हैं। इसे जोड़ने पर आपका सबसे पुराना पसंदीदा हट जाएगा। क्या आप जारी रखना चाहते हैं?",
+  "@favLimitBody": {
+    "description": "",
+    "placeholders": {
+      "max": {
+        "type": "num"
+      }
+    }
+  },
+  "favReplaceOldest": "सबसे पुराना बदलें",
+  "favSyncFailed": "आपके पसंदीदा अपडेट नहीं हो सके। कनेक्शन जांचकर फिर कोशिश करें।",
+  "addOnsSectionTitle": "ऐड-ऑन",
+  "addOnsSectionHint": "ग्राहक इस उत्पाद के साथ वैकल्पिक सेवाएँ जोड़ सकते हैं, जैसे असेंबली या मंज़िल तक डिलीवरी।",
+  "addAddOn": "ऐड-ऑन जोड़ें",
+  "editAddOn": "ऐड-ऑन बदलें",
+  "noAddOnsYet": "कोई ऐड-ऑन नहीं। ग्राहक यह उत्पाद जैसा है वैसा ही खरीदेंगे।",
+  "addOnSelectionTypeLabel": "ग्राहक कैसे चुनें",
+  "addOnCheckboxOption": "चेकबॉक्स: कितने भी",
+  "addOnRadioOption": "रेडियो: केवल एक",
+  "addOnTitleLabel": "शीर्षक",
+  "addOnDescriptionLabel": "विवरण (वैकल्पिक)",
+  "addOnImageUrlLabel": "छवि URL (वैकल्पिक)",
+  "addOnPriceLabel": "कीमत",
+  "addOnDiscountLabel": "छूट के बाद कीमत (वैकल्पिक)",
+  "addOnEnabledLabel": "चालू",
+  "addOnDisabledChip": "बंद",
+  "addOnTitleRequired": "ऐड-ऑन का शीर्षक लिखें।",
+  "addOnPriceInvalid": "सही कीमत लिखें (0 या अधिक)।",
+  "addOnDiscountInvalid": "छूट के बाद की कीमत, कीमत से कम होनी चाहिए।",
+  "addOnImageInvalid": "छवि http या https लिंक होनी चाहिए।",
+  "addOnDuplicateTitle": "दो ऐड-ऑन का शीर्षक एक जैसा है।",
+  "addOnsFixBeforeSaving": "सहेजने से पहले ऐड-ऑन ठीक करें।",
+  "addOnsSheetTitle": "ऐड-ऑन चुनें",
+  "addOnsHeading": "ऐड-ऑन",
+  "addOnsPickAny": "वैकल्पिक: कितने भी चुनें",
+  "addOnsPickOne": "वैकल्पिक: एक चुनें",
+  "addOnsProductPrice": "उत्पाद की कीमत",
+  "addOnsTotalLabel": "ऐड-ऑन",
+  "addOnsFinalTotal": "कुल",
+  "addOnsContinueToBuy": "खरीदना जारी रखें",
+  "addOnFree": "मुफ़्त",
+  "addOnPerItem": "प्रति नग",
+  "addOnsRemovedNotice": "{product} के लिए {addOns} अब उपलब्ध नहीं है और हटा दिया गया।",
+  "@addOnsRemovedNotice": {
+    "description": "",
+    "placeholders": {
+      "addOns": {
+        "type": "String"
+      },
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "addOnsPriceUpdatedNotice": "{product} के ऐड-ऑन की कीमतें बदल गई हैं।",
+  "@addOnsPriceUpdatedNotice": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "shopDirections": "रास्ता देखें",
+  "shopMapCopied": "मैप लिंक कॉपी हो गया",
+  "shopSeeReviews": "सभी समीक्षाएँ देखें",
+  "shopMapHelp": "अपनी दुकान का Google Maps शेयर लिंक यहाँ चिपकाएँ। ग्राहक इससे आपको ढूँढते हैं।",
+  "cacheConsentTitle": "कुकीज़ और सहेजा गया डेटा",
+  "cacheConsentBody": "यह ऐप ठीक से चलने और तेज़ लोड होने के लिए आपके ब्राउज़र की स्टोरेज इस्तेमाल करता है। चुनें कि आप किसकी अनुमति देना चाहते हैं।",
+  "cacheConsentNote": "लगभग 40 MB तक जगह लेता है। पुराना डेटा अपने आप हटता है और सब कुछ सर्वर से ताज़ा होता रहता है। पासवर्ड और भुगतान की जानकारी कभी नहीं सहेजी जाती। आप इसे कभी भी ब्राउज़र सेटिंग्स में साफ़ कर सकते हैं। अनुमति देने पर यह आपकी अगली विज़िट से चालू हो सकता है।",
+  "cacheConsentAllow": "सभी की अनुमति दें",
+  "cacheConsentNotNow": "केवल ज़रूरी",
+  "offlineShowingSaved": "आप ऑफ़लाइन हैं। सहेजा हुआ डेटा दिखाया जा रहा है।",
+  "cacheConsentEssentialTitle": "ज़रूरी (हमेशा चालू)",
+  "cacheConsentEssentialBody": "आपको साइन-इन रखता है और आपकी भाषा, कार्ट और यह चुनाव याद रखता है। इसके बिना ऐप नहीं चल सकता।",
+  "cacheConsentSavedTitle": "तेज़ लोडिंग के लिए सहेजा गया डेटा",
+  "cacheConsentSavedBody": "दुकान की जानकारी, प्रोडक्ट, कैटेगरी और बैनर, आपके हाल के ऑर्डर और प्रोडक्ट की तस्वीरें इस ब्राउज़र में सहेजी जाती हैं, ताकि पेज तुरंत खुलें और धीमे या ऑफ़लाइन नेटवर्क में भी कुछ दिखे।",
+  "likedProductsTitle": "पसंद किए गए प्रोडक्ट",
+  "likedProductsSubtitle": "जिन प्रोडक्ट को आपने पसंद किया",
+  "likedProductsEmpty": "आपने अभी तक कोई प्रोडक्ट पसंद नहीं किया।",
+  "likedProductsEmptyHint": "प्रोडक्ट पर दिल दबाएँ, वह यहाँ सहेज जाएगा।",
+  "likedProductUnavailable": "अब उपलब्ध नहीं",
+  "likedProductRemove": "पसंद से हटाएँ",
+  "likedProductsCount": "{count} पसंद",
+  "@likedProductsCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voucherAllProducts": "सभी प्रोडक्ट",
+  "voucherMoreCount": "+{count} और",
+  "voucherSelectedCategories": "चुनी हुई कैटेगरी",
+  "voucherSelectedProducts": "चुने हुए प्रोडक्ट",
+  "vouchersEmpty": "अभी कोई वाउचर उपलब्ध नहीं है।",
+  "voucherValidTill": "{date} तक मान्य",
+  "moreFromThisCategory": "इसी कैटेगरी से और",
+  "showMoreProducts": "और दिखाएँ",
+  "@voucherMoreCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@voucherValidTill": {
+    "description": "",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherAppliesTo": "लागू",
+  "storefrontLockedTitle": "यह सेक्शन लॉक है",
+  "storefrontLockedHint": "बदलाव के लिए पासवर्ड चाहिए। खोलने के लिए ताले पर टैप करें।",
+  "storefrontUnlockButton": "बदलने के लिए खोलें",
+  "storefrontLockTooltip": "लॉक है: खोलने के लिए टैप करें",
+  "storefrontUnlockedTooltip": "खुला है: फिर से लॉक करने के लिए टैप करें",
+  "storefrontUnlockTitle": "पासवर्ड डालें",
+  "storefrontUnlockBody": "यह सेक्शन तय करता है कि हर ग्राहक को होम स्क्रीन पर क्या दिखे। आगे बढ़ने के लिए एडिटिंग पासवर्ड डालें।",
+  "storefrontPasswordLabel": "पासवर्ड",
+  "storefrontUnlockAction": "खोलें",
+  "storefrontWrongPassword": "गलत पासवर्ड। फिर कोशिश करें।",
+  "storefrontNotConfigured": "एडिटिंग पासवर्ड अभी सेट नहीं है। प्लेटफ़ॉर्म मालिक से सेट करवाएँ।",
+  "storefrontCheckFailed": "पासवर्ड जाँचा नहीं जा सका। कनेक्शन देखें और फिर कोशिश करें।",
+  "storefrontTooManyAttempts": "बहुत ज़्यादा गलत कोशिशें। {seconds} सेकंड बाद फिर कोशिश करें।",
+  "storefrontUnlockedToast": "खुल गया। अब आप बदल सकते हैं।",
+  "storefrontLockedAgainToast": "फिर से लॉक हो गया।",
+  "adsBannerTitle": "होम स्क्रीन विज्ञापन बैनर",
+  "adsBannerEmptyTitle": "अभी कोई विज्ञापन बैनर नहीं",
+  "adsBannerEmptyBody": "यहाँ जोड़े गए बैनर हर ग्राहक की होम स्क्रीन के ऊपर बैनर कैरोसेल में दिखते हैं।",
+  "adsBannerAdd": "विज्ञापन बैनर जोड़ें",
+  "adsBannerCreateFirst": "पहला विज्ञापन बैनर बनाएँ",
+  "adsBannerCreateTitle": "विज्ञापन बैनर जोड़ें",
+  "adsBannerSaved": "विज्ञापन बैनर सहेजा गया।",
+  "adsBannerDeleted": "विज्ञापन बैनर हटाया गया।",
+  "adsBannerDeleteTitle": "विज्ञापन बैनर हटाएँ",
+  "adsBannerDeleteBody": "यह बैनर हर ग्राहक की होम स्क्रीन से हट जाएगा।",
+  "@storefrontTooManyAttempts": {
+    "description": "",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

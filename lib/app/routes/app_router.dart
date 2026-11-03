@@ -9,7 +9,10 @@ import '../../core/models/product.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/utils/app_route_logger.dart';
 import '../../features/account/account_screen.dart';
+import '../../features/account/liked_products_screen.dart';
+import '../../features/account/vouchers_screen.dart';
 import '../../features/admin/admins/admin_admins_screen.dart';
+import '../../features/admin/banners/admin_ads_banners_screen.dart';
 import '../../features/admin/banners/admin_banners_screen.dart';
 import '../../features/admin/categories/admin_add_category_screen.dart';
 import '../../features/admin/categories/admin_categories_screen.dart';
@@ -48,6 +51,7 @@ import '../../features/marketplace/categories/categories_screen.dart';
 import '../../features/marketplace/category_view/category_view_screen.dart';
 import '../../features/marketplace/company_store/company_store_screen.dart';
 import '../../features/marketplace/home/home_screen.dart';
+import '../../features/marketplace/widgets/marketplace_shell.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/product/details/product_details_screen.dart';
 import '../../features/product/search/search_screen.dart';
@@ -58,6 +62,19 @@ import '../../features/splash/role_selection_screen.dart';
 import '../../features/splash/splash_screen.dart';
 
 /// Route path constants.
+/// An admin page. Admin pages carry their own sidebar, so a page change must
+/// not animate: the sidebar would fade in again on every click. With no
+/// transition only the content area appears to change.
+class AdminRoute extends GoRoute {
+  AdminRoute({required super.path, required GoRouterWidgetBuilder builder})
+    : super(
+        pageBuilder: (context, state) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: builder(context, state),
+        ),
+      );
+}
+
 class AppRoutes {
   static const splash = '/';
   static const role = '/role';
@@ -83,6 +100,8 @@ class AppRoutes {
   static const reviews = '/reviews/:companyId';
   static const leaveReview = '/leave-review/:orderId';
   static const notifications = '/notifications';
+  static const favorites = '/favorites';
+  static const vouchers = '/vouchers';
 
   static const admin = '/admin';
   static const adminOrders = '/admin/orders';
@@ -109,6 +128,7 @@ class AppRoutes {
   static const adminQr = '/admin/qr';
   static const adminExploreCategories = '/admin/home-explore-categories';
   static const adminTrendingNow = '/admin/home-trending-now';
+  static const adminAdsBanners = '/admin/home-ads-banners';
 
   static const employeeHome = '/employee';
   static const packing = '/employee/packing/:orderId';
@@ -227,6 +247,7 @@ String? appRouteRedirect(String loc) {
       (loc == AppRoutes.cart ||
           loc == AppRoutes.checkout ||
           loc == AppRoutes.orders ||
+          loc == AppRoutes.favorites ||
           loc.startsWith('/order/'))) {
     return AppRoutes.userLogin;
   }
@@ -286,13 +307,45 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.companyOnboarding,
       builder: (_, s) => const CompanyOnboardingScreen(),
     ),
-    GoRoute(
-      path: AppRoutes.home,
-      builder: (_, s) => HomeScreen(shopId: s.uri.queryParameters['shopId']),
-    ),
-    GoRoute(
-      path: AppRoutes.categories,
-      builder: (_, s) => const CategoriesScreen(),
+    // The four shopper tabs live in one stateful shell: each keeps its screens,
+    // data, scroll position and filters while another tab is shown.
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, shell) => MarketplaceShell(shell: shell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (_, s) =>
+                  HomeScreen(shopId: s.uri.queryParameters['shopId']),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.categories,
+              builder: (_, s) => const CategoriesScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.orders,
+              builder: (_, s) => const OrdersScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.account,
+              builder: (_, s) => const AccountScreen(),
+            ),
+          ],
+        ),
+      ],
     ),
     GoRoute(
       path: AppRoutes.companyStore,
@@ -357,8 +410,6 @@ final GoRouter appRouter = GoRouter(
         return CheckoutScreen(directItems: directItems);
       },
     ),
-    GoRoute(path: AppRoutes.orders, builder: (_, s) => const OrdersScreen()),
-    GoRoute(path: AppRoutes.account, builder: (_, s) => const AccountScreen()),
     GoRoute(
       path: AppRoutes.helpSupport,
       builder: (_, s) => const HelpSupportScreen(),
@@ -398,32 +449,40 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.notifications,
       builder: (_, s) => const NotificationsScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.favorites,
+      builder: (_, s) => const LikedProductsScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.vouchers,
+      builder: (_, s) => const VouchersScreen(),
+    ),
 
     // Admin
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.admin,
       builder: (_, s) => const AdminDashboardScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminOrders,
       builder: (_, s) => const AdminOrdersScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminOrderDetails,
       builder: (_, state) =>
           AdminOrderDetailsScreen(orderId: state.pathParameters['id'] ?? ''),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminProducts,
       builder: (_, s) => const AdminProductsScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminAddProduct,
       builder: (_, state) => AdminAddProductScreen(
         product: state.extra is Product ? state.extra as Product : null,
       ),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminEditProduct,
       builder: (_, state) {
         final id = state.pathParameters['id'];
@@ -431,17 +490,17 @@ final GoRouter appRouter = GoRouter(
         return AdminAddProductScreen(product: product, productId: id);
       },
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminCategories,
       builder: (_, s) => const AdminCategoriesScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminAddCategory,
       builder: (_, state) => AdminAddCategoryScreen(
         category: state.extra is Category ? state.extra as Category : null,
       ),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminEditCategory,
       builder: (_, state) {
         final id = state.pathParameters['id'];
@@ -451,21 +510,21 @@ final GoRouter appRouter = GoRouter(
         return AdminAddCategoryScreen(category: category, categoryId: id);
       },
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminVouchers,
       builder: (_, s) => const AdminVouchersScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminEmployees,
       builder: (_, s) => const AdminEmployeesScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminAddEmployee,
       builder: (_, state) => AdminAddEmployeeScreen(
         employee: state.extra is Employee ? state.extra as Employee : null,
       ),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminEditEmployee,
       builder: (_, state) {
         final id = state.pathParameters['id'];
@@ -475,19 +534,19 @@ final GoRouter appRouter = GoRouter(
         return AdminAddEmployeeScreen(employee: employee, employeeId: id);
       },
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminAdmins,
       builder: (_, s) => const AdminAdminsScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminShopSettings,
       builder: (_, s) => const AdminShopSettingsScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminDelivery,
       builder: (_, s) => const AdminDeliveryChargesScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminAddDelivery,
       builder: (_, state) => AdminAddDeliveryChargeScreen(
         deliveryCharge: state.extra is DeliveryCharge
@@ -495,7 +554,7 @@ final GoRouter appRouter = GoRouter(
             : null,
       ),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminEditDelivery,
       builder: (_, state) {
         final pincode = state.pathParameters['pincode'];
@@ -508,30 +567,37 @@ final GoRouter appRouter = GoRouter(
         );
       },
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminBanners,
       builder: (_, s) => const AdminBannersScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminReviews,
       builder: (_, s) => const AdminReviewsScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminRecommendations,
       builder: (_, s) => const AdminRecommendationsScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminReports,
       builder: (_, s) => const AdminReportsScreen(),
     ),
-    GoRoute(path: AppRoutes.adminQr, builder: (_, s) => const AdminQrScreen()),
-    GoRoute(
+    AdminRoute(
+      path: AppRoutes.adminQr,
+      builder: (_, s) => const AdminQrScreen(),
+    ),
+    AdminRoute(
       path: AppRoutes.adminExploreCategories,
       builder: (_, s) => const AdminExploreCategoriesScreen(),
     ),
-    GoRoute(
+    AdminRoute(
       path: AppRoutes.adminTrendingNow,
       builder: (_, s) => const AdminTrendingNowScreen(),
+    ),
+    AdminRoute(
+      path: AppRoutes.adminAdsBanners,
+      builder: (_, s) => const AdminAdsBannersScreen(),
     ),
 
     // Employee

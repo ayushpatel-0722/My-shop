@@ -13,6 +13,7 @@ import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_product_image.dart';
 import '../admin_shell.dart';
+import '../storefront_lock/locked_admin_shell.dart';
 import 'widgets/shop_selector_bar.dart';
 
 /// Admin screen to manage items (products and categories) displayed in the
@@ -602,7 +603,7 @@ class _AdminTrendingNowScreenState extends State<AdminTrendingNowScreen> {
       );
     }
 
-    return AdminShell(
+    return LockedAdminShell(
       title: 'Home Trending Now',
       actions: [
         IconButton(

@@ -182,6 +182,12 @@ void main() {
     expect(find.text('MOVE TO WISHLIST'), findsOneWidget);
     await tester.tap(find.text('MOVE TO WISHLIST'));
     await tester.pumpAndSettle();
+    // Saving is asynchronous (load the list, then write it) and runs on real
+    // event-loop turns, which pumping alone does not give it.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
 
     expect(wishlist.state.contains('p_curd'), isTrue);
     expect(find.text('Set Curd (Dahi) saved to your wishlist'), findsOneWidget);

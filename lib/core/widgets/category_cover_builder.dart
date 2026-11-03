@@ -39,6 +39,22 @@ class CategoryCoverBuilder extends StatelessWidget {
     return null;
   }
 
+  /// Up to [max] usable product images, in the category's order — so a tile
+  /// can try the next photo when one fails to load.
+  static List<String> coversFor(
+    Category category,
+    Map<String, String> imageByProduct, {
+    int max = 4,
+  }) {
+    final out = <String>[];
+    for (final id in category.productList) {
+      final url = imageByProduct[id];
+      if (url != null && !out.contains(url)) out.add(url);
+      if (out.length >= max) break;
+    }
+    return out;
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Product>>(

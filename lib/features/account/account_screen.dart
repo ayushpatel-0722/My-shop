@@ -14,50 +14,18 @@ import '../auth/widgets/auth_bottom_sheet.dart';
 import '../marketplace/widgets/location_picker_sheet.dart';
 import '../marketplace/widgets/marketplace_bottom_nav.dart';
 import '../marketplace/widgets/web_header.dart';
+import 'account_stat_cards.dart';
 
 /// Full-screen Account/Profile screen with AppBar and MarketplaceBottomNav.
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
-  Widget _statCard(String label, String value, VoidCallback? onTap) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFF0F2F5)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, 0.03),
-                blurRadius: 6,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E2229),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
-              ),
-            ],
-          ),
-        ),
-      ),
+  /// Opens the liked-products list (after login, for a guest).
+  void _openLiked(BuildContext context) {
+    AuthGuard.runWithAuth(
+      context,
+      message: AppLocalizations.of(context).favLoginRequired,
+      onAuthenticated: () => context.push(AppRoutes.favorites),
     );
   }
 
@@ -285,24 +253,8 @@ class AccountScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Stat cards: Orders / Vouchers / Wishlist
-            Row(
-              children: [
-                _statCard('Orders', '—', () {
-                  AuthGuard.runWithAuth(
-                    context,
-                    message: 'Please log in to view your orders.',
-                    onAuthenticated: () {
-                      context.go(AppRoutes.orders);
-                    },
-                  );
-                }),
-                const SizedBox(width: 10),
-                _statCard('Vouchers', '—', () {}),
-                const SizedBox(width: 10),
-                _statCard('Saved', '—', () {}),
-              ],
-            ),
+            // Orders / Vouchers / Saved: live counts, each opens its screen.
+            AccountStatCards(userId: user?.id),
 
             const SizedBox(height: 16),
 
@@ -334,6 +286,22 @@ class AccountScreen extends StatelessWidget {
                         },
                       );
                     },
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  ListTile(
+                    key: const Key('account-liked-products'),
+                    leading: const Icon(
+                      Icons.favorite_border_rounded,
+                      color: Color(0xFFFF5247),
+                    ),
+                    title: Text(
+                      AppLocalizations.of(context).likedProductsTitle,
+                    ),
+                    subtitle: Text(
+                      AppLocalizations.of(context).likedProductsSubtitle,
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _openLiked(context),
                   ),
                   const Divider(height: 1, indent: 56),
                   ListTile(

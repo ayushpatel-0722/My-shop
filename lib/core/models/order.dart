@@ -1,4 +1,5 @@
 import '../utils/type_utils.dart';
+import 'product_addon.dart';
 
 /// Order lifecycle statuses.
 class OrderStatus {
@@ -185,6 +186,11 @@ class OrderItem {
   final double mrp;
   final Map<String, String> variantAttributes;
 
+  /// Add-ons bought with each unit, as sold. [unitPrice] and [mrp] already
+  /// include them (so [itemTotal] needs no extra step); this list is what
+  /// receipts and the packing team read to see what was ordered.
+  final List<AddOnSnapshot> addOns;
+
   const OrderItem({
     required this.productId,
     required this.qty,
@@ -198,7 +204,15 @@ class OrderItem {
     this.unitType = '',
     this.mrp = 0,
     this.variantAttributes = const {},
+    this.addOns = const [],
   });
+
+  /// Add-ons' price for one unit (already inside [unitPrice]).
+  double get addOnUnitTotal => AddOnTotals.price(addOns);
+
+  /// Price of one unit without the add-ons.
+  double get baseUnitPrice =>
+      fromPaise(toPaise(unitPrice) - toPaise(addOnUnitTotal));
 
   double get itemTotal => unitPrice * (qty < 0 ? 0 : qty);
 
@@ -241,6 +255,11 @@ class OrderItem {
       unitType: asString(map['unitType']),
       mrp: asDouble(map['mrp'] ?? map['unitMrp']),
       variantAttributes: attrs,
+      addOns: [
+        if (map['addOns'] is List)
+          for (final a in map['addOns'] as List)
+            if (a is Map) AddOnSnapshot.fromMap(Map<String, dynamic>.from(a)),
+      ],
     );
   }
 
@@ -261,6 +280,8 @@ class OrderItem {
     'mrp': mrp,
     'quantity': qty,
     'variantAttributes': variantAttributes,
+    'addOns': addOns.map((e) => e.toMap()).toList(),
+    'addOnsUnitTotal': addOnUnitTotal,
   };
 
   OrderItem copyWith({
@@ -275,6 +296,7 @@ class OrderItem {
     String? unitType,
     double? mrp,
     Map<String, String>? variantAttributes,
+    List<AddOnSnapshot>? addOns,
   }) => OrderItem(
     productId: productId,
     qty: qty ?? this.qty,
@@ -288,6 +310,7 @@ class OrderItem {
     unitType: unitType ?? this.unitType,
     mrp: mrp ?? this.mrp,
     variantAttributes: variantAttributes ?? this.variantAttributes,
+    addOns: addOns ?? this.addOns,
   );
 
   @override

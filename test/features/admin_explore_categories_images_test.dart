@@ -5,6 +5,7 @@ import 'package:myshop/core/models/home_explore_category.dart';
 import 'package:myshop/core/models/product.dart';
 import 'package:myshop/features/admin/home_config/admin_explore_categories_screen.dart';
 
+import '../helpers/storefront_unlock.dart';
 import '../helpers/test_harness.dart';
 
 /// Home Explore Categories (admin) shows a real picture for each category:
@@ -15,6 +16,7 @@ void main() {
   setUp(() {
     TestHarness.setupPlatformChannels();
     repo = TestHarness.useMockRepository();
+    configureStorefrontLock(repo);
     TestHarness.signIn(TestHarness.admin);
   });
 
@@ -68,6 +70,7 @@ void main() {
       );
     }
     await pumpTestApp(tester, const AdminExploreCategoriesScreen());
+    await unlockStorefront(tester);
   }
 
   List<String> imageUrlsIn(WidgetTester tester, Finder scope) => [

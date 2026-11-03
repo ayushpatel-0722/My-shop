@@ -7,6 +7,7 @@ import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
+import '../../../core/domain/addon_rules.dart';
 import '../../../core/domain/order_pricing.dart';
 import '../../../core/domain/voucher_evaluator.dart';
 import '../../../core/models/cart_item.dart';
@@ -18,6 +19,7 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive_extensions.dart';
+import '../../../core/widgets/addon_lines.dart';
 import '../../../core/widgets/app_product_image.dart';
 import '../../auth/auth_cubit.dart';
 import '../cart/cart_cubit.dart';
@@ -208,7 +210,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Future<void> _revalidate(List<CartItem> items) async {
     final l10n = AppLocalizations.of(context);
     final messages = <String>[];
-    final updates = <CartItem>[];
+    // Changed lines, keyed by the cart key they had BEFORE the change (the
+    // key itself moves when add-ons are dropped).
+    final updates = <String, CartItem>{};
 
     for (final item in items) {
       final latest = await repo.product(item.product.id);
@@ -216,6 +220,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _unavailable.add(item.cartKey);
         messages.add(l10n.isUnavailable(item.product.name));
         continue;
+      }
+
+      // Add-ons are re-checked against the live catalogue too: a disabled or
+      // deleted one is dropped, prices follow the shop's current prices.
+      final freshAddOns = AddOnRules.refresh(latest, item.addOns);
+      if (freshAddOns.removedTitles.isNotEmpty) {
+        messages.add(
+          l10n.addOnsRemovedNotice(
+            freshAddOns.removedTitles.join(', '),
+            item.product.name,
+          ),
+        );
+      }
+      if (freshAddOns.priceChanged) {
+        messages.add(l10n.addOnsPriceUpdatedNotice(item.product.name));
       }
 
       final vid = item.variant?.variantId ?? '';
@@ -247,8 +266,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           messages.add(l10n.priceUpdatedFor(item.product.name));
         }
         if (qty != item.qty ||
+            freshAddOns.changed ||
             (snap.price - item.effectivePrice).abs() > 0.001) {
-          updates.add(item.copyWith(qty: qty, variant: snap));
+          updates[item.cartKey] = item.copyWith(
+            qty: qty,
+            variant: snap,
+            addOns: freshAddOns.addOns,
+          );
         }
       } else {
         final snap = VariantSnapshot.fromProduct(latest);
@@ -268,8 +292,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           messages.add(l10n.priceUpdatedFor(item.product.name));
         }
         if (qty != item.qty ||
+            freshAddOns.changed ||
             (snap.price - item.effectivePrice).abs() > 0.001) {
-          updates.add(item.copyWith(qty: qty, variant: snap));
+          updates[item.cartKey] = item.copyWith(
+            qty: qty,
+            variant: snap,
+            addOns: freshAddOns.addOns,
+          );
         }
       }
     }
@@ -280,14 +309,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         setState(() {
           _directItems = [
             for (final e in _directItems ?? const <CartItem>[])
-              updates.firstWhereOrNull((u) => u.cartKey == e.cartKey) ?? e,
+              updates[e.cartKey] ?? e,
           ];
         });
       } else {
         final cart = context.read<CartCubit>();
-        for (final u in updates) {
-          cart.replaceItem(u);
-        }
+        updates.forEach(cart.replaceItem);
       }
     }
     if (messages.isNotEmpty) {
@@ -512,6 +539,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   unitValue: line.unitValue,
                   unitType: line.unitType,
                   mrp: line.mrp,
+                  addOns: line.addOns,
                 ),
               )
               .toList(),
@@ -1984,7 +2012,7 @@ class _StoreCheckoutCard extends StatelessWidget {
                     if (isDesktop && item.qty > 1) ...[
                       const SizedBox(width: 8),
                       Text(
-                        '(${formatCurrency(item.effectivePrice)} each)',
+                        '(${formatCurrency(item.unitPriceWithAddOns)} each)',
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(
@@ -1995,6 +2023,11 @@ class _StoreCheckoutCard extends StatelessWidget {
                     ],
                   ],
                 ),
+                if (item.addOns.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: AddOnLines(addOns: item.addOns),
+                  ),
                 if (unavailable)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),

@@ -2883,14 +2883,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msgNew => 'New';
 
   @override
-  String get msg1Follower => '1 follower';
-
-  @override
-  String followers(String followercount) {
-    return '$followercount followers';
-  }
-
-  @override
   String get productTitleIsRequired => 'Product title is required.';
 
   @override
@@ -4818,4 +4810,312 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employeeConsole => 'Employee Console';
+
+  @override
+  String get favLoginRequired => 'Please log in to save favourite products.';
+
+  @override
+  String get favLimitTitle => 'Favourites limit reached';
+
+  @override
+  String favLimitBody(num max) {
+    return 'You can save up to $max favourite products. Adding this one will remove your oldest favourite. Do you want to continue?';
+  }
+
+  @override
+  String get favReplaceOldest => 'Replace oldest';
+
+  @override
+  String get favSyncFailed =>
+      'Could not update your favourites. Check your connection and try again.';
+
+  @override
+  String get addOnsSectionTitle => 'Add-ons';
+
+  @override
+  String get addOnsSectionHint =>
+      'Optional extras customers can add to this product, such as assembly or delivery to a floor.';
+
+  @override
+  String get addAddOn => 'Add an add-on';
+
+  @override
+  String get editAddOn => 'Edit add-on';
+
+  @override
+  String get noAddOnsYet => 'No add-ons. Customers buy this product as it is.';
+
+  @override
+  String get addOnSelectionTypeLabel => 'How customers choose';
+
+  @override
+  String get addOnCheckboxOption => 'Checkbox: any number';
+
+  @override
+  String get addOnRadioOption => 'Radio: only one';
+
+  @override
+  String get addOnTitleLabel => 'Title';
+
+  @override
+  String get addOnDescriptionLabel => 'Description (optional)';
+
+  @override
+  String get addOnImageUrlLabel => 'Image URL (optional)';
+
+  @override
+  String get addOnPriceLabel => 'Price';
+
+  @override
+  String get addOnDiscountLabel => 'Discounted price (optional)';
+
+  @override
+  String get addOnEnabledLabel => 'Enabled';
+
+  @override
+  String get addOnDisabledChip => 'Disabled';
+
+  @override
+  String get addOnTitleRequired => 'Enter a title for the add-on.';
+
+  @override
+  String get addOnPriceInvalid => 'Enter a valid price (0 or more).';
+
+  @override
+  String get addOnDiscountInvalid =>
+      'The discounted price must be lower than the price.';
+
+  @override
+  String get addOnImageInvalid => 'Image must be an http or https link.';
+
+  @override
+  String get addOnDuplicateTitle => 'Two add-ons have the same title.';
+
+  @override
+  String get addOnsFixBeforeSaving => 'Please fix the add-ons before saving.';
+
+  @override
+  String get addOnsSheetTitle => 'Choose add-ons';
+
+  @override
+  String get addOnsHeading => 'Add-ons';
+
+  @override
+  String get addOnsPickAny => 'Optional: pick any';
+
+  @override
+  String get addOnsPickOne => 'Optional: pick one';
+
+  @override
+  String get addOnsProductPrice => 'Product price';
+
+  @override
+  String get addOnsTotalLabel => 'Add-ons';
+
+  @override
+  String get addOnsFinalTotal => 'Total';
+
+  @override
+  String get addOnsContinueToBuy => 'Continue to buy';
+
+  @override
+  String get addOnFree => 'Free';
+
+  @override
+  String get addOnPerItem => 'per item';
+
+  @override
+  String addOnsRemovedNotice(String addOns, String product) {
+    return '$addOns is no longer available for $product and was removed.';
+  }
+
+  @override
+  String addOnsPriceUpdatedNotice(String product) {
+    return 'Add-on prices changed for $product.';
+  }
+
+  @override
+  String get shopDirections => 'Directions';
+
+  @override
+  String get shopMapCopied => 'Map link copied';
+
+  @override
+  String get shopSeeReviews => 'See all reviews';
+
+  @override
+  String get shopMapHelp =>
+      'Paste the Google Maps share link of your shop. Shoppers use it to find you.';
+
+  @override
+  String get cacheConsentTitle => 'Cookies & saved data';
+
+  @override
+  String get cacheConsentBody =>
+      'This app uses your browser\'s storage to work properly and to load faster. Choose what you are happy with.';
+
+  @override
+  String get cacheConsentNote =>
+      'Uses up to about 40 MB of space. Old items are removed automatically and everything is refreshed from the server. Passwords and payment details are never saved. You can clear it any time in your browser settings. If you allow it, it may start working from your next visit.';
+
+  @override
+  String get cacheConsentAllow => 'Allow all';
+
+  @override
+  String get cacheConsentNotNow => 'Only essential';
+
+  @override
+  String get offlineShowingSaved => 'You are offline. Showing saved data.';
+
+  @override
+  String get cacheConsentEssentialTitle => 'Essential (always on)';
+
+  @override
+  String get cacheConsentEssentialBody =>
+      'Keeps you signed in and remembers your language, your cart and this choice. The app cannot work without it.';
+
+  @override
+  String get cacheConsentSavedTitle => 'Saved data for faster loading';
+
+  @override
+  String get cacheConsentSavedBody =>
+      'Shop details, products, categories and banners, your recent orders and product images are saved in this browser, so pages open at once and still show something when your connection is slow or offline.';
+
+  @override
+  String get likedProductsTitle => 'Liked products';
+
+  @override
+  String get likedProductsSubtitle => 'Products you have liked';
+
+  @override
+  String get likedProductsEmpty => 'You have not liked any products yet.';
+
+  @override
+  String get likedProductsEmptyHint =>
+      'Tap the heart on a product to save it here.';
+
+  @override
+  String get likedProductUnavailable => 'No longer available';
+
+  @override
+  String get likedProductRemove => 'Remove from liked';
+
+  @override
+  String likedProductsCount(int count) {
+    return '$count liked';
+  }
+
+  @override
+  String get voucherAllProducts => 'All products';
+
+  @override
+  String voucherMoreCount(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get voucherSelectedCategories => 'Selected categories';
+
+  @override
+  String get voucherSelectedProducts => 'Selected products';
+
+  @override
+  String get vouchersEmpty => 'No vouchers are available right now.';
+
+  @override
+  String voucherValidTill(String date) {
+    return 'Valid till $date';
+  }
+
+  @override
+  String get moreFromThisCategory => 'More from this Category';
+
+  @override
+  String get showMoreProducts => 'Show more';
+
+  @override
+  String get voucherAppliesTo => 'Applies to';
+
+  @override
+  String get storefrontLockedTitle => 'This section is locked';
+
+  @override
+  String get storefrontLockedHint =>
+      'Editing needs a password. Tap the lock to unlock it.';
+
+  @override
+  String get storefrontUnlockButton => 'Unlock to edit';
+
+  @override
+  String get storefrontLockTooltip => 'Locked: tap to unlock';
+
+  @override
+  String get storefrontUnlockedTooltip => 'Unlocked: tap to lock again';
+
+  @override
+  String get storefrontUnlockTitle => 'Enter password';
+
+  @override
+  String get storefrontUnlockBody =>
+      'This section changes what every shopper sees on the home screen. Enter the editing password to continue.';
+
+  @override
+  String get storefrontPasswordLabel => 'Password';
+
+  @override
+  String get storefrontUnlockAction => 'Unlock';
+
+  @override
+  String get storefrontWrongPassword => 'Wrong password. Try again.';
+
+  @override
+  String get storefrontNotConfigured =>
+      'The editing password has not been set up yet. Ask the platform owner to set it up.';
+
+  @override
+  String get storefrontCheckFailed =>
+      'Could not check the password. Check your connection and try again.';
+
+  @override
+  String storefrontTooManyAttempts(int seconds) {
+    return 'Too many wrong attempts. Try again in $seconds seconds.';
+  }
+
+  @override
+  String get storefrontUnlockedToast => 'Unlocked. You can edit now.';
+
+  @override
+  String get storefrontLockedAgainToast => 'Locked again.';
+
+  @override
+  String get adsBannerTitle => 'Home Screen Ads Banner';
+
+  @override
+  String get adsBannerEmptyTitle => 'No ads banners yet';
+
+  @override
+  String get adsBannerEmptyBody =>
+      'Banners added here appear in the banner carousel at the top of every shopper\'s home screen.';
+
+  @override
+  String get adsBannerAdd => 'Add ads banner';
+
+  @override
+  String get adsBannerCreateFirst => 'Create first ads banner';
+
+  @override
+  String get adsBannerCreateTitle => 'Add ads banner';
+
+  @override
+  String get adsBannerSaved => 'Ads banner saved.';
+
+  @override
+  String get adsBannerDeleted => 'Ads banner deleted.';
+
+  @override
+  String get adsBannerDeleteTitle => 'Delete ads banner';
+
+  @override
+  String get adsBannerDeleteBody =>
+      'This banner will disappear from every shopper\'s home screen.';
 }

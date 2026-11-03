@@ -293,6 +293,11 @@ List<_AdminNavItemData> _allAdminNavItems(BuildContext context) {
       route: AppRoutes.adminTrendingNow,
     ),
     _AdminNavItemData(
+      icon: Icons.campaign_outlined,
+      label: l10n.adsBannerTitle,
+      route: AppRoutes.adminAdsBanners,
+    ),
+    _AdminNavItemData(
       icon: Icons.qr_code_2,
       label: l10n.qrCodes,
       route: AppRoutes.adminQr,
@@ -340,7 +345,11 @@ bool _isRouteActive(String currentPath, String itemRoute) {
 // -----------------------------------------------------------------------------
 // Desktop Persistent Sidebar
 // -----------------------------------------------------------------------------
-class _AdminDesktopSidebar extends StatelessWidget {
+/// Forgets the remembered menu scroll position (a fresh session, or a test).
+@visibleForTesting
+void resetAdminSidebarScroll() => _AdminDesktopSidebar.savedOffset = 0;
+
+class _AdminDesktopSidebar extends StatefulWidget {
   final String companyName;
   final AppUser? user;
   final String currentPath;
@@ -350,6 +359,60 @@ class _AdminDesktopSidebar extends StatelessWidget {
     required this.user,
     required this.currentPath,
   });
+
+  /// Where the menu was scrolled to. Every admin page builds its own sidebar,
+  /// so without this each click would start the menu again from the top.
+  @visibleForTesting
+  static double savedOffset = 0;
+
+  @override
+  State<_AdminDesktopSidebar> createState() => _AdminDesktopSidebarState();
+}
+
+class _AdminDesktopSidebarState extends State<_AdminDesktopSidebar> {
+  late final ScrollController _scroll = ScrollController(
+    initialScrollOffset: _AdminDesktopSidebar.savedOffset,
+  )..addListener(_remember);
+  final GlobalKey _activeKey = GlobalKey();
+
+  String get companyName => widget.companyName;
+  AppUser? get user => widget.user;
+  String get currentPath => widget.currentPath;
+
+  void _remember() {
+    if (_scroll.hasClients) {
+      _AdminDesktopSidebar.savedOffset = _scroll.offset;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Only if the selected item is out of sight (a page opened directly, or
+    // reached from inside another page) bring it into view; otherwise leave
+    // the menu exactly where it is.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _activeKey.currentContext;
+      if (!mounted || ctx == null || !_scroll.hasClients) return;
+      final box = ctx.findRenderObject() as RenderBox?;
+      final viewport = _scroll.position.viewportDimension;
+      if (box == null || !box.attached) return;
+      final scrollBox =
+          _scroll.position.context.storageContext.findRenderObject()
+              as RenderBox?;
+      if (scrollBox == null) return;
+      final top = box.localToGlobal(Offset.zero, ancestor: scrollBox).dy;
+      if (top < 0 || top + box.size.height > viewport) {
+        Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -436,48 +499,57 @@ class _AdminDesktopSidebar extends StatelessWidget {
 
             // Navigation Items List
             Expanded(
-              child: ListView.builder(
+              child: ListView(
+                controller: _scroll,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 10,
                 ),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  final isActive = _isRouteActive(currentPath, item.route);
+                children: [
+                  for (var index = 0; index < items.length; index++)
+                    Builder(
+                      builder: (context) {
+                        final item = items[index];
+                        final isActive = _isRouteActive(
+                          currentPath,
+                          item.route,
+                        );
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (item.section != null) ...[
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            10,
-                            index == 0 ? 4 : 14,
-                            10,
-                            6,
-                          ),
-                          child: Text(
-                            item.section!,
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
-                              color: theme.colorScheme.onSurfaceVariant
-                                  .withValues(alpha: 0.8),
+                        return Column(
+                          key: isActive ? _activeKey : null,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (item.section != null) ...[
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  10,
+                                  index == 0 ? 4 : 14,
+                                  10,
+                                  6,
+                                ),
+                                child: Text(
+                                  item.section!,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.8,
+                                    color: theme.colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            _SidebarNavItem(
+                              icon: item.icon,
+                              label: item.label,
+                              route: item.route,
+                              isActive: isActive,
                             ),
-                          ),
-                        ),
-                      ],
-                      _SidebarNavItem(
-                        icon: item.icon,
-                        label: item.label,
-                        route: item.route,
-                        isActive: isActive,
-                      ),
-                    ],
-                  );
-                },
+                          ],
+                        );
+                      },
+                    ),
+                ],
               ),
             ),
 

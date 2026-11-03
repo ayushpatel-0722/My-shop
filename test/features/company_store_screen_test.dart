@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/order.dart';
 import 'package:myshop/core/models/product.dart';
+import 'package:myshop/core/models/review.dart';
 import 'package:myshop/features/checkout/cart/cart_cubit.dart';
 import 'package:myshop/features/marketplace/company_store/company_store_screen.dart';
 
@@ -31,7 +32,7 @@ void main() {
     size: size ?? const Size(430, 6000),
   );
 
-  testWidgets('shop details: logo, verified badge, rating, followers, pill', (
+  testWidgets('shop details: logo, verified badge, rating, pill', (
     tester,
   ) async {
     await pumpStore(tester);
@@ -40,19 +41,19 @@ void main() {
     expect(find.byKey(const Key('verified-badge')), findsOneWidget);
     expect(find.byKey(const Key('open-closed-pill')), findsOneWidget);
 
-    // Real review data: one seeded 5-star review for GreenLeaf.
-    expect(find.text('5.0'), findsOneWidget);
-    expect(find.textContaining('1 review'), findsOneWidget);
+    // Only one seeded review: below the minimum, so no rating is shown.
+    expect(find.byKey(const Key('store-rating-row')), findsNothing);
+    expect(find.text('No reviews yet'), findsNothing);
 
-    // Follower count comes from the company record.
-    expect(find.text('128 followers'), findsOneWidget);
+    expect(find.text('Follow'), findsNothing);
+    expect(find.textContaining('follower'), findsNothing);
   });
 
   testWidgets('an unverified store shows no verified badge', (tester) async {
     await pumpStore(tester, slug: 'techtronics-hub');
 
     expect(find.byKey(const Key('verified-badge')), findsNothing);
-    expect(find.text('42 followers'), findsOneWidget);
+    expect(find.textContaining('follower'), findsNothing);
   });
 
   testWidgets('the offer carousel promotes this store\'s own vouchers', (
@@ -256,20 +257,6 @@ void main() {
     expect(find.text('Price ↓'), findsOneWidget);
   });
 
-  testWidgets('the follow button toggles and bumps the follower count', (
-    tester,
-  ) async {
-    await pumpStore(tester);
-
-    expect(find.text('+ Follow'), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('follow-button')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('✓ Following'), findsOneWidget);
-    expect(find.text('129 followers'), findsOneWidget);
-  });
-
   testWidgets('the app-bar search is scoped to this store', (tester) async {
     await pumpStore(tester);
 
@@ -279,7 +266,55 @@ void main() {
     expect(find.text('Search companyId=c_organic'), findsOneWidget);
   });
 
+  Future<void> addReviews(int n) async {
+    for (var i = 0; i < n; i++) {
+      await repo.submitReview(
+        Review(
+          id: 'extra_$i',
+          orderId: 'extra_order_$i',
+          userId: 'extra_user_$i',
+          companyId: 'c_organic',
+          rating: i.isEven ? 5 : 4,
+        ),
+      );
+    }
+  }
+
+  testWidgets('four reviews are not enough to show a rating', (tester) async {
+    await addReviews(3); // plus the one seeded review = 4
+    await pumpStore(tester);
+    expect(find.byKey(const Key('store-rating-row')), findsNothing);
+    expect(find.byKey(const Key('store-reviews-row')), findsNothing);
+  });
+
+  testWidgets('from five reviews the average and review count appear', (
+    tester,
+  ) async {
+    await addReviews(4); // 5, 4, 5, 4 plus the seeded 5 star = 5 reviews
+    await pumpStore(tester);
+    expect(find.byKey(const Key('store-rating-row')), findsOneWidget);
+    expect(find.text('4.6'), findsOneWidget);
+    expect(find.textContaining('5 reviews'), findsOneWidget);
+    expect(find.byKey(const Key('store-reviews-row')), findsOneWidget);
+  });
+
+  testWidgets('the full shop description is shown, not two lines', (
+    tester,
+  ) async {
+    final long = List.filled(
+      12,
+      'Fresh organic produce delivered daily.',
+    ).join(' ');
+    final c = (await repo.company('c_organic'))!;
+    await repo.updateCompanyDetails(c.copyWith(details: long));
+    await pumpStore(tester);
+    final text = tester.widget<Text>(find.text(long));
+    expect(text.maxLines, isNull);
+    expect(text.overflow, isNot(TextOverflow.ellipsis));
+  });
+
   testWidgets('the rating row opens the reviews screen', (tester) async {
+    await addReviews(4);
     await pumpStore(tester);
 
     await tester.tap(find.byKey(const Key('store-rating-row')));

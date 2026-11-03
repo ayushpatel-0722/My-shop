@@ -307,6 +307,28 @@ service cloud.firestore {
       allow write: if isSignedIn() && (userId == request.auth.uid || isAdmin());
     }
 
+    // Favourite products: one private document per shopper, keyed by their uid.
+    // `items` is the ordered list (oldest first) and holds at most 25 entries;
+    // the same cap is enforced by the app, this is the server-side backstop.
+    match /favorites/{userId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow create, update: if isSignedIn()
+        && userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.items is list
+        && request.resource.data.items.size() <= 25;
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+
+    // Editing password for the home-screen storefront sections. One document,
+    // the same for every company, holding only a salted hash (never the
+    // password). Admins may read it to check what was typed; nobody can write
+    // it from the app: the platform owner sets it in the Firebase console.
+    match /storefront_config/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // Platform-wide Ads Banners
     match /ads_banners/{bannerId} {
       allow read: if true;

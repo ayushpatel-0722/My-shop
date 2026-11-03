@@ -1,4 +1,5 @@
 import '../models/cart_item.dart';
+import '../models/product_addon.dart';
 import '../models/voucher.dart';
 import 'voucher_evaluator.dart';
 
@@ -26,6 +27,10 @@ class PricedLine {
   final double mrp;
   final Map<String, String> variantAttributes;
 
+  /// Add-ons bought with each unit. [unitPrice] and [mrp] already include
+  /// them, so a line's total is always `unitPrice × qty`.
+  final List<AddOnSnapshot> addOns;
+
   const PricedLine({
     required this.productId,
     required this.name,
@@ -39,6 +44,7 @@ class PricedLine {
     this.unitType = '',
     this.mrp = 0,
     this.variantAttributes = const {},
+    this.addOns = const [],
   });
 
   double get lineTotal => roundMoney(unitPrice * qty);
@@ -66,6 +72,7 @@ class PricedLine {
     'unitType': unitType,
     'mrp': mrp,
     'variantAttributes': variantAttributes,
+    'addOns': addOns.map((e) => e.toMap()).toList(),
   };
 
   @override
@@ -157,14 +164,15 @@ class OrderPricer {
             name: e.product.name,
             image: e.product.images.isNotEmpty ? e.product.images.first : '',
             qty: e.qty,
-            unitPrice: e.effectivePrice,
+            unitPrice: e.unitPriceWithAddOns,
             variantTitle: e.variantLabel,
             variantSku: e.variantId,
             variantLabel: e.variantLabel,
             unitValue: e.unitValue,
             unitType: e.unitType,
-            mrp: e.effectiveMrp,
+            mrp: e.unitMrpWithAddOns,
             variantAttributes: const {},
+            addOns: e.addOns,
           ),
         )
         .toList();

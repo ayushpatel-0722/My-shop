@@ -1,5 +1,6 @@
 import '../../app/l10n/l10n_service.dart';
 import 'product.dart';
+import 'product_addon.dart';
 
 /// Frozen copy of the variant the shopper actually picked.
 ///
@@ -129,12 +130,18 @@ class CartItem {
   final VariantSnapshot? variant;
   final int qty;
 
+  /// Optional extras bought with each unit (assembly, delivery, ...), frozen
+  /// when the line was added. The same product with a different set of
+  /// add-ons is a different line (see [cartKey]).
+  final List<AddOnSnapshot> addOns;
+
   const CartItem({
     required this.companyId,
     required this.companyName,
     required this.product,
     this.variant,
     this.qty = 1,
+    this.addOns = const [],
   });
 
   /// Builds a line carrying a full snapshot of the selected variant.
@@ -144,6 +151,7 @@ class CartItem {
     required Product product,
     ProductVariant? selectedVariant,
     int qty = 1,
+    List<AddOnSnapshot> addOns = const [],
   }) {
     // No explicit selection on a VARIANT product resolves to the product's
     // default variant (product details preselects it: "1 kg" of a 1 kg
@@ -165,6 +173,7 @@ class CartItem {
           ? VariantSnapshot.fromVariant(product, resolved)
           : VariantSnapshot.fromProduct(product),
       qty: qty < 1 ? 1 : qty,
+      addOns: List<AddOnSnapshot>.unmodifiable(addOns),
     );
   }
 
@@ -204,6 +213,11 @@ class CartItem {
           (map['quantity'] as num?)?.toInt() ??
           (map['qty'] as num?)?.toInt() ??
           1,
+      addOns: [
+        if (map['addOns'] is List)
+          for (final a in map['addOns'] as List)
+            if (a is Map) AddOnSnapshot.fromMap(Map<String, dynamic>.from(a)),
+      ],
     );
   }
 
@@ -217,6 +231,7 @@ class CartItem {
     'product': product.toMap(),
     'variant': variant?.toMap(),
     'quantity': qty,
+    'addOns': addOns.map((e) => e.toMap()).toList(),
     'itemTotal': lineTotal,
     'itemMrpTotal': lineMrpTotal,
   };
@@ -236,10 +251,36 @@ class CartItem {
   /// Effective unit MRP (list price) of this line.
   double get effectiveMrp => variant?.mrp ?? product.mrp;
 
-  double get lineTotal => effectivePrice * qty;
+  /// Add-ons' selling price for ONE unit of the product.
+  double get addOnUnitPrice => AddOnTotals.price(addOns);
+
+  /// Add-ons' regular price for ONE unit of the product.
+  double get addOnUnitMrp => AddOnTotals.mrp(addOns);
+
+  /// Product (variant) price plus the add-ons, for ONE unit.
+  ///
+  /// Without add-ons this is exactly the product price (untouched); with
+  /// them the sum is rounded to the paisa so no float noise reaches a total.
+  double get unitPriceWithAddOns => addOns.isEmpty
+      ? effectivePrice
+      : fromPaise(toPaise(effectivePrice + addOnUnitPrice));
+
+  /// List price of one unit including the add-ons' regular prices.
+  double get unitMrpWithAddOns => addOns.isEmpty
+      ? effectiveMrp
+      : fromPaise(toPaise(effectiveMrp + addOnUnitMrp));
+
+  double get lineTotal => addOns.isEmpty
+      ? effectivePrice * qty
+      : fromPaise(toPaise(unitPriceWithAddOns * qty));
 
   /// `mrp × qty` — the pre-discount value of the line.
-  double get lineMrpTotal => effectiveMrp * qty;
+  double get lineMrpTotal => addOns.isEmpty
+      ? effectiveMrp * qty
+      : fromPaise(toPaise(unitMrpWithAddOns * qty));
+
+  /// Add-ons' total for the whole line (all units).
+  double get addOnLineTotal => fromPaise(toPaise(addOnUnitPrice) * qty);
 
   /// MRP saved on this line (`0` when nothing was discounted).
   double get lineDiscount {
@@ -259,7 +300,11 @@ class CartItem {
   /// same product are separate rows.
   String get cartKey {
     final vid = variant?.variantId ?? '';
-    return vid.isEmpty ? product.id : '${product.id}_$vid';
+    final base = vid.isEmpty ? product.id : '${product.id}_$vid';
+    if (addOns.isEmpty) return base;
+    // Same add-ons in any order merge; a different set is a separate line.
+    final ids = addOns.map((a) => a.addOnId).toSet().toList()..sort();
+    return '$base+${ids.join(',')}';
   }
 
   String get displayName => variantLabel.isNotEmpty
@@ -365,11 +410,16 @@ class CartItem {
   /// Middle label of the "–  x  +" stepper: the quantity of packs.
   String get stepperLabel => '$qty';
 
-  CartItem copyWith({int? qty, VariantSnapshot? variant}) => CartItem(
+  CartItem copyWith({
+    int? qty,
+    VariantSnapshot? variant,
+    List<AddOnSnapshot>? addOns,
+  }) => CartItem(
     companyId: companyId,
     companyName: companyName,
     product: product,
     variant: variant ?? this.variant,
     qty: qty ?? this.qty,
+    addOns: addOns ?? this.addOns,
   );
 }

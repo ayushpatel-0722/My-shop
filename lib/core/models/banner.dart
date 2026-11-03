@@ -10,6 +10,15 @@ class AdBanner {
   final DateTime? endDate;
   final int priority;
 
+  /// The value stored in Firebase for [actionType] (what [AdBanner.fromMap]
+  /// reads back).
+  String get actionTypeWire => switch (actionType) {
+    BannerActionType.category => 'category',
+    BannerActionType.companyPage => 'company_page',
+    BannerActionType.externalUrl => 'external_url',
+    BannerActionType.product => 'product',
+  };
+
   const AdBanner({
     required this.id,
     required this.image,
@@ -36,8 +45,8 @@ class AdBanner {
 
   static BannerActionType _actionFrom(String s) => switch (s) {
     'category' => BannerActionType.category,
-    'company_page' => BannerActionType.companyPage,
-    'external_url' => BannerActionType.externalUrl,
+    'company_page' || 'companyPage' => BannerActionType.companyPage,
+    'external_url' || 'externalUrl' => BannerActionType.externalUrl,
     _ => BannerActionType.product,
   };
 }

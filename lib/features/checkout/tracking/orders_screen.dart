@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/addon_lines.dart';
 import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/l10n/app_localizations.dart';
@@ -40,6 +41,29 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   String _statusFilter = 'all';
   final Set<String> _cancellingOrderIds = <String>{};
+
+  // This tab is kept alive while others are shown, so the orders query is
+  // opened once per signed-in account (not on every rebuild, which showed the
+  // loader again), and dropped — with the filter — when the account changes.
+  String? _ordersUserId;
+  Stream<List<Order>>? _orders;
+
+  Stream<List<Order>> _ordersFor(String userId) {
+    if (_ordersUserId != userId) {
+      _ordersUserId = userId;
+      _orders = repo.orders(userId: userId);
+      _statusFilter = 'all';
+      _cancellingOrderIds.clear();
+    }
+    return _orders!;
+  }
+
+  void _forgetAccount() {
+    _ordersUserId = null;
+    _orders = null;
+    _statusFilter = 'all';
+    _cancellingOrderIds.clear();
+  }
 
   Future<void> _confirmCancelOrder(
     BuildContext context,
@@ -109,6 +133,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final authCubit = context.watch<AuthCubit>();
     final user = authCubit.currentUser;
     final isLoggedIn = authCubit.isLoggedIn && user != null;
+    if (!isLoggedIn) _forgetAccount(); // signed out: nothing of theirs is kept
 
     return PopScope(
       canPop: false,
@@ -141,7 +166,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         body: !isLoggedIn
             ? _buildGuestView(context)
             : StreamBuilder<List<Order>>(
-                stream: repo.orders(userId: user.id),
+                stream: _ordersFor(user.id),
                 builder: (context, snap) {
                   if (snap.connectionState == ConnectionState.waiting &&
                       (snap.data?.isEmpty ?? true)) {
@@ -1057,6 +1082,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           ),
                         ],
                       ),
+                      if (line.addOns.isNotEmpty)
+                        AddOnLines(addOns: line.addOns),
                     ],
                   ),
                 ),

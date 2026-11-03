@@ -49,9 +49,12 @@ void main() {
     ),
   );
 
-  String shownUrl(WidgetTester tester) =>
-      ((tester.widget<Image>(find.byType(Image).first)).image as NetworkImage)
-          .url;
+  /// The URL being loaded (images are decoded through a ResizeImage).
+  String shownUrl(WidgetTester tester) {
+    final image = tester.widget<Image>(find.byType(Image).first).image;
+    final inner = image is ResizeImage ? image.imageProvider : image;
+    return (inner as NetworkImage).url;
+  }
 
   testWidgets(
     'a category without its own image shows its first product photo',

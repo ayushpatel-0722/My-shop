@@ -17,7 +17,6 @@ void main() {
     currency: 'INR',
     rating: 4.5,
     reviewCount: 12,
-    followers: 7,
     isVerified: true,
     deliveryTypes: ['self_pickup'],
     minOrderAmount: 500,
@@ -77,7 +76,6 @@ void main() {
         currency: 'USD',
         rating: 1.0,
         reviewCount: 0,
-        followers: 0,
         isVerified: false,
       );
       await repo.updateCompanyDetails(tampered);
@@ -91,7 +89,6 @@ void main() {
       expect(saved.currency, 'INR');
       expect(saved.rating, 4.5);
       expect(saved.reviewCount, 12);
-      expect(saved.followers, 7);
       expect(saved.isVerified, isTrue);
     },
   );
@@ -131,7 +128,6 @@ void main() {
       'currency',
       'rating',
       'reviewCount',
-      'followers',
       'isVerified',
       'openingDate',
     ]) {

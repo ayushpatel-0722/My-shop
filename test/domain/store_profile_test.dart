@@ -129,18 +129,32 @@ void main() {
           rating: 1,
           isVisible: false,
         ),
-      ], followerCount: 128);
+      ]);
 
       expect(stats.averageRating, 4);
       expect(stats.reviewCount, 2);
       expect(stats.ratingLabel, '4.0');
-      expect(stats.followerLabel, '128 followers');
+    });
+
+    test('reviews are shown only from five visible reviews on', () {
+      List<Review> n(int c) => [
+        for (var i = 0; i < c; i++)
+          Review(
+            id: 'r$i',
+            orderId: 'o$i',
+            userId: 'u',
+            companyId: 'c',
+            rating: 5,
+          ),
+      ];
+      expect(StoreStats.fromReviews(n(4)).showReviews, isFalse);
+      expect(StoreStats.fromReviews(n(5)).showReviews, isTrue);
+      expect(StoreStats.minReviewsToShow, 5);
     });
 
     test('a shop with no reviews is "New", never a fake 5.0', () {
-      final stats = StoreStats.fromReviews(const [], followerCount: 1);
+      final stats = StoreStats.fromReviews(const []);
       expect(stats.ratingLabel, 'New');
-      expect(stats.followerLabel, '1 follower');
     });
   });
 

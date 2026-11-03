@@ -13,6 +13,7 @@ import '../models/category.dart';
 import '../models/company.dart';
 import '../models/delivery_charge.dart';
 import '../models/employee.dart';
+import '../models/favorite.dart';
 import '../models/home_explore_category.dart';
 import '../models/home_trending_item.dart';
 import '../models/notification.dart';
@@ -988,6 +989,54 @@ class MockAppRepository implements AppRepository {
     _pushOrders();
   }
 
+  // ---- Favourites ------------------------------------------------------
+
+  final Map<String, List<FavoriteEntry>> _favorites = {};
+  final Map<String, StreamController<List<FavoriteEntry>>> _favoriteCtrls = {};
+
+  StreamController<List<FavoriteEntry>> _favoriteCtrl(String userId) =>
+      _favoriteCtrls.putIfAbsent(
+        userId,
+        () => StreamController<List<FavoriteEntry>>.broadcast(),
+      );
+
+  List<FavoriteEntry> _readFavorites(String userId) =>
+      List.unmodifiable(_favorites[userId] ?? const <FavoriteEntry>[]);
+
+  @override
+  Stream<List<FavoriteEntry>> favorites(String userId) =>
+      _live(_favoriteCtrl(userId), () => _readFavorites(userId));
+
+  @override
+  Future<List<FavoriteEntry>> addFavorite(
+    String userId,
+    FavoriteEntry entry, {
+    bool replaceOldest = false,
+  }) async {
+    final items = [...?_favorites[userId]];
+    if (items.any((e) => e.productId == entry.productId)) return items;
+    if (items.length >= maxFavoriteProducts) {
+      if (!replaceOldest) throw const FavoriteLimitReached();
+      items.removeRange(0, items.length - maxFavoriteProducts + 1);
+    }
+    items.add(entry);
+    _favorites[userId] = items;
+    _favoriteCtrl(userId).add(items);
+    return List.unmodifiable(items);
+  }
+
+  @override
+  Future<List<FavoriteEntry>> removeFavorite(
+    String userId,
+    String productId,
+  ) async {
+    final items = [...?_favorites[userId]]
+      ..removeWhere((e) => e.productId == productId);
+    _favorites[userId] = items;
+    _favoriteCtrl(userId).add(items);
+    return List.unmodifiable(items);
+  }
+
   @override
   Future<void> submitReview(Review review) async {
     if (review.companyId.trim().isEmpty) {
@@ -1447,6 +1496,18 @@ class MockAppRepository implements AppRepository {
       _offerBanners[i] = banner;
     }
     _pushBanners();
+  }
+
+  /// What [storefrontLockHash] returns; tests set it (null = not set up).
+  String? storefrontLockHashValue;
+
+  /// When true, [storefrontLockHash] fails like a lost connection.
+  bool storefrontLockHashFails = false;
+
+  @override
+  Future<String?> storefrontLockHash() async {
+    if (storefrontLockHashFails) throw StateError('offline');
+    return storefrontLockHashValue;
   }
 
   @override

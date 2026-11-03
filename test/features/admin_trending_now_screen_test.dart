@@ -6,6 +6,7 @@ import 'package:myshop/core/models/home_trending_item.dart';
 import 'package:myshop/core/models/product.dart';
 import 'package:myshop/features/admin/home_config/admin_trending_now_screen.dart';
 
+import '../helpers/storefront_unlock.dart';
 import '../helpers/test_harness.dart';
 
 void main() {
@@ -57,6 +58,7 @@ void main() {
       'renders on narrow mobile screen (360x740) without any overflow',
       (tester) async {
         final repo = TestHarness.useMockRepository();
+        configureStorefrontLock(repo);
         TestHarness.signIn(TestHarness.admin);
 
         await repo.createCompany(shop);
@@ -90,6 +92,7 @@ void main() {
           user: TestHarness.admin,
           size: const Size(360, 740),
         );
+        await unlockStorefront(tester);
 
         // Verify no Flutter errors
         expect(tester.takeException(), isNull);
@@ -116,6 +119,7 @@ void main() {
       'renders on extra-narrow mobile screen (320x640) without overflow',
       (tester) async {
         final repo = TestHarness.useMockRepository();
+        configureStorefrontLock(repo);
         TestHarness.signIn(TestHarness.admin);
 
         await repo.createCompany(shop);
@@ -147,6 +151,7 @@ void main() {
           user: TestHarness.admin,
           size: const Size(320, 640),
         );
+        await unlockStorefront(tester);
 
         expect(tester.takeException(), isNull);
         expect(find.text(longNamedProduct.name), findsOneWidget);
@@ -157,6 +162,7 @@ void main() {
       tester,
     ) async {
       final repo = TestHarness.useMockRepository();
+      configureStorefrontLock(repo);
       TestHarness.signIn(TestHarness.admin);
 
       await repo.createCompany(shop);
@@ -187,6 +193,7 @@ void main() {
         user: TestHarness.admin,
         size: const Size(360, 740),
       );
+      await unlockStorefront(tester);
 
       // Tap on the card
       await tester.tap(find.text(longNamedProduct.name));
@@ -202,6 +209,7 @@ void main() {
       'Add Products Sheet opens and filters by search and category without overflow',
       (tester) async {
         final repo = TestHarness.useMockRepository();
+        configureStorefrontLock(repo);
         TestHarness.signIn(TestHarness.admin);
 
         await repo.createCompany(shop);
@@ -234,6 +242,7 @@ void main() {
           user: TestHarness.admin,
           size: const Size(360, 740),
         );
+        await unlockStorefront(tester);
 
         // Tap Add Products button
         await tester.tap(find.text('Add Products'));
@@ -279,6 +288,7 @@ void main() {
       tester,
     ) async {
       final repo = TestHarness.useMockRepository();
+      configureStorefrontLock(repo);
       TestHarness.signIn(TestHarness.admin);
 
       await repo.createCompany(shop);
@@ -293,6 +303,7 @@ void main() {
         user: TestHarness.admin,
         size: const Size(360, 600),
       );
+      await unlockStorefront(tester);
 
       expect(tester.takeException(), isNull);
       expect(
@@ -309,6 +320,7 @@ void main() {
       'renders on wide desktop/tablet layout (1024x768) without regressions',
       (tester) async {
         final repo = TestHarness.useMockRepository();
+        configureStorefrontLock(repo);
         TestHarness.signIn(TestHarness.admin);
 
         await repo.createCompany(shop);
@@ -339,6 +351,7 @@ void main() {
           user: TestHarness.admin,
           size: const Size(1024, 768),
         );
+        await unlockStorefront(tester);
 
         expect(tester.takeException(), isNull);
         expect(find.text('1 Trending Item'), findsOneWidget);

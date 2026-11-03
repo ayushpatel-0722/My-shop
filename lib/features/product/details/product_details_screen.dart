@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/utils/favorite_actions.dart';
+import 'package:myshop/features/product/widgets/add_on_sheet.dart';
+import 'package:myshop/features/product/widgets/product_discovery_sections.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -16,11 +19,11 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/app_product_image.dart';
 import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/collapsible_section.dart';
+import '../../../core/widgets/favorite_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../../checkout/cart/wishlist_cubit.dart';
-import '../../marketplace/widgets/product_card.dart';
 import '../../marketplace/widgets/web_header.dart';
 import '../../reviews/widgets/product_reviews_list.dart';
 
@@ -244,7 +247,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 leading: BackButton(onPressed: handleBack),
                 backgroundColor: Colors.white,
                 elevation: 0,
-                actions: const [BackToAdminButton()],
+                actions: [
+                  // Like / unlike, right where the shopper is looking.
+                  FavoriteButton(product: p),
+                  const BackToAdminButton(),
+                ],
               ),
         body: isDesktop
             ? SingleChildScrollView(
@@ -960,14 +967,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: OutlinedButton(
                 onPressed: inStock
                     ? () {
-                        void doAddToCart() {
+                        Future<void> doAddToCart() async {
                           final currentVariant =
                               _selectedVariant ?? selectedVariant;
+                          final choice = await AddOnSheet.pick(
+                            context,
+                            product: p,
+                            variant: currentVariant,
+                            qty: _qty,
+                            symbol: symbol,
+                          );
+                          if (choice == null || !mounted) return;
                           context.read<CartCubit>().add(
                             p,
                             variant: currentVariant,
                             company: _company,
-                            qty: _qty,
+                            qty: choice.qty,
+                            addOns: choice.addOns,
                           );
                           final label = currentVariant?.label ?? '';
                           showAddToCartNotification(
@@ -999,16 +1015,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: FilledButton(
                 onPressed: inStock
                     ? () {
-                        void doBuyNow() {
+                        Future<void> doBuyNow() async {
                           final currentVariant =
                               _selectedVariant ?? selectedVariant;
+                          final choice = await AddOnSheet.pick(
+                            context,
+                            product: p,
+                            variant: currentVariant,
+                            qty: _qty,
+                            symbol: symbol,
+                            action: AddOnAction.buyNow,
+                          );
+                          if (choice == null || !mounted) return;
                           // Direct order carries the SELECTED variant snapshot.
                           final directItem = CartItem.fromSelection(
                             companyId: _company?.id ?? p.companyId,
                             companyName: _company?.name ?? '',
                             product: p,
                             selectedVariant: currentVariant,
-                            qty: _qty,
+                            qty: choice.qty,
+                            addOns: choice.addOns,
                           );
                           context.push(AppRoutes.checkout, extra: directItem);
                         }
@@ -1146,9 +1172,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: () {
-                        if (wishlistCubit != null) {
-                          wishlistCubit.toggle(p);
-                        }
+                        FavoriteActions.toggle(context, p);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8),
@@ -1300,14 +1324,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             key: const Key('desktop-add-to-cart-btn'),
             onPressed: inStock
                 ? () {
-                    void doAddToCart() {
+                    Future<void> doAddToCart() async {
                       final currentVariant =
                           _selectedVariant ?? selectedVariant;
+                      final choice = await AddOnSheet.pick(
+                        context,
+                        product: p,
+                        variant: currentVariant,
+                        qty: _qty,
+                        symbol: symbol,
+                      );
+                      if (choice == null || !mounted) return;
                       context.read<CartCubit>().add(
                         p,
                         variant: currentVariant,
                         company: _company,
-                        qty: _qty,
+                        qty: choice.qty,
+                        addOns: choice.addOns,
                       );
                       final label = currentVariant?.label ?? '';
                       showAddToCartNotification(
@@ -1346,15 +1379,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             key: const Key('desktop-buy-now-btn'),
             onPressed: inStock
                 ? () {
-                    void doBuyNow() {
+                    Future<void> doBuyNow() async {
                       final currentVariant =
                           _selectedVariant ?? selectedVariant;
+                      final choice = await AddOnSheet.pick(
+                        context,
+                        product: p,
+                        variant: currentVariant,
+                        qty: _qty,
+                        symbol: symbol,
+                        action: AddOnAction.buyNow,
+                      );
+                      if (choice == null || !mounted) return;
                       final directItem = CartItem.fromSelection(
                         companyId: _company?.id ?? p.companyId,
                         companyName: _company?.name ?? '',
                         product: p,
                         selectedVariant: currentVariant,
-                        qty: _qty,
+                        qty: choice.qty,
+                        addOns: choice.addOns,
                       );
                       context.push(AppRoutes.checkout, extra: directItem);
                     }
@@ -1384,9 +1427,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         const SizedBox(width: 10),
         IconButton.filledTonal(
           onPressed: () {
-            if (wishlistCubit != null) {
-              wishlistCubit.toggle(p);
-            }
+            FavoriteActions.toggle(context, p);
           },
           icon: Icon(
             inWishlist ? Icons.favorite_rounded : Icons.favorite_border_rounded,
@@ -1535,125 +1576,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildRelatedProductsSection(Product p) {
-    if (p.categoryId.isEmpty && p.companyId.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return StreamBuilder<List<Product>>(
-      stream: repo.products(companyId: p.companyId, categoryId: p.categoryId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            !snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: M3ProductGridSkeleton(itemCount: 4),
-          );
-        }
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
-
-        final related = snapshot.data!
-            .where((item) => item.id != p.id && item.isInStock)
-            .toList();
-
-        if (related.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        final isDesktop = context.isDesktop;
-
-        return Padding(
-          padding: EdgeInsets.only(top: 32, bottom: isDesktop ? 48 : 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Divider(height: 32),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    'More from this Category',
-                    style: TextStyle(
-                      fontSize: isDesktop ? 22 : 18,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1E2229),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2.5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF5247).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${related.length}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFFF5247),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final width = constraints.maxWidth;
-                  int columns;
-                  if (width < 600) {
-                    columns = 2;
-                  } else if (width < 900) {
-                    columns = 3;
-                  } else if (width < 1200) {
-                    columns = 4;
-                  } else if (width < 1600) {
-                    columns = 5;
-                  } else {
-                    columns = 6;
-                  }
-
-                  final childAspectRatio =
-                      ResponsiveGrid.calculateProductAspectRatio(
-                        width,
-                        columns,
-                        showBrand: true,
-                      );
-
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      childAspectRatio: childAspectRatio,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    itemCount: related.length,
-                    itemBuilder: (context, index) {
-                      final item = related[index];
-                      return ProductCard(
-                        product: item,
-                        company: _company,
-                        onTap: () =>
-                            context.push(AppRoutes.productPath(item.id)),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  /// Under the product: more from its category, recommendations and trending
+  /// (see [ProductDiscoverySections]).
+  Widget _buildRelatedProductsSection(Product p) => ProductDiscoverySections(
+    key: ValueKey('discovery-${p.id}'),
+    product: p,
+    company: _company,
+  );
 }
 
 class _TrustPerkItem extends StatelessWidget {

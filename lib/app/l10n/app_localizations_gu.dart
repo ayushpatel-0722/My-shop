@@ -2886,14 +2886,6 @@ class AppLocalizationsGu extends AppLocalizations {
   String get msgNew => 'નવું';
 
   @override
-  String get msg1Follower => '1 ફોલોઅર';
-
-  @override
-  String followers(String followercount) {
-    return '$followercount ફોલોઅર્સ';
-  }
-
-  @override
   String get productTitleIsRequired => 'ઉત્પાદન શીર્ષક જરૂરી છે.';
 
   @override
@@ -4823,4 +4815,316 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get employeeConsole => 'કર્મચારી કન્સોલ';
+
+  @override
+  String get favLoginRequired =>
+      'મનપસંદ પ્રોડક્ટ સાચવવા કૃપા કરીને લૉગ ઇન કરો.';
+
+  @override
+  String get favLimitTitle => 'મનપસંદની મર્યાદા પૂરી થઈ';
+
+  @override
+  String favLimitBody(num max) {
+    return 'તમે વધુમાં વધુ $max મનપસંદ પ્રોડક્ટ સાચવી શકો છો. આ ઉમેરવાથી તમારું સૌથી જૂનું મનપસંદ દૂર થશે. શું તમે ચાલુ રાખવા માંગો છો?';
+  }
+
+  @override
+  String get favReplaceOldest => 'સૌથી જૂનું બદલો';
+
+  @override
+  String get favSyncFailed =>
+      'તમારા મનપસંદ અપડેટ થઈ શક્યા નહીં. કનેક્શન તપાસી ફરી પ્રયાસ કરો.';
+
+  @override
+  String get addOnsSectionTitle => 'એડ-ઓન';
+
+  @override
+  String get addOnsSectionHint =>
+      'ગ્રાહકો આ ઉત્પાદન સાથે વૈકલ્પિક સેવાઓ ઉમેરી શકે છે, જેમ કે એસેમ્બલી અથવા માળ સુધી ડિલિવરી.';
+
+  @override
+  String get addAddOn => 'એડ-ઓન ઉમેરો';
+
+  @override
+  String get editAddOn => 'એડ-ઓન બદલો';
+
+  @override
+  String get noAddOnsYet =>
+      'કોઈ એડ-ઓન નથી. ગ્રાહકો આ ઉત્પાદન જેમ છે તેમ ખરીદશે.';
+
+  @override
+  String get addOnSelectionTypeLabel => 'ગ્રાહક કેવી રીતે પસંદ કરે';
+
+  @override
+  String get addOnCheckboxOption => 'ચેકબોક્સ: ગમે તેટલા';
+
+  @override
+  String get addOnRadioOption => 'રેડિયો: ફક્ત એક';
+
+  @override
+  String get addOnTitleLabel => 'શીર્ષક';
+
+  @override
+  String get addOnDescriptionLabel => 'વર્ણન (વૈકલ્પિક)';
+
+  @override
+  String get addOnImageUrlLabel => 'છબી URL (વૈકલ્પિક)';
+
+  @override
+  String get addOnPriceLabel => 'કિંમત';
+
+  @override
+  String get addOnDiscountLabel => 'ડિસ્કાઉન્ટ પછીની કિંમત (વૈકલ્પિક)';
+
+  @override
+  String get addOnEnabledLabel => 'ચાલુ';
+
+  @override
+  String get addOnDisabledChip => 'બંધ';
+
+  @override
+  String get addOnTitleRequired => 'એડ-ઓનનું શીર્ષક લખો.';
+
+  @override
+  String get addOnPriceInvalid => 'સાચી કિંમત લખો (0 અથવા વધુ).';
+
+  @override
+  String get addOnDiscountInvalid =>
+      'ડિસ્કાઉન્ટ પછીની કિંમત, કિંમત કરતાં ઓછી હોવી જોઈએ.';
+
+  @override
+  String get addOnImageInvalid => 'છબી http અથવા https લિંક હોવી જોઈએ.';
+
+  @override
+  String get addOnDuplicateTitle => 'બે એડ-ઓનનું શીર્ષક સરખું છે.';
+
+  @override
+  String get addOnsFixBeforeSaving => 'સાચવતા પહેલાં એડ-ઓન સુધારો.';
+
+  @override
+  String get addOnsSheetTitle => 'એડ-ઓન પસંદ કરો';
+
+  @override
+  String get addOnsHeading => 'એડ-ઓન';
+
+  @override
+  String get addOnsPickAny => 'વૈકલ્પિક: ગમે તેટલા પસંદ કરો';
+
+  @override
+  String get addOnsPickOne => 'વૈકલ્પિક: એક પસંદ કરો';
+
+  @override
+  String get addOnsProductPrice => 'ઉત્પાદનની કિંમત';
+
+  @override
+  String get addOnsTotalLabel => 'એડ-ઓન';
+
+  @override
+  String get addOnsFinalTotal => 'કુલ';
+
+  @override
+  String get addOnsContinueToBuy => 'ખરીદી ચાલુ રાખો';
+
+  @override
+  String get addOnFree => 'મફત';
+
+  @override
+  String get addOnPerItem => 'પ્રતિ નંગ';
+
+  @override
+  String addOnsRemovedNotice(String addOns, String product) {
+    return '$product માટે $addOns હવે ઉપલબ્ધ નથી અને દૂર કર્યું.';
+  }
+
+  @override
+  String addOnsPriceUpdatedNotice(String product) {
+    return '$product ના એડ-ઓનની કિંમતો બદલાઈ છે.';
+  }
+
+  @override
+  String get shopDirections => 'રસ્તો જુઓ';
+
+  @override
+  String get shopMapCopied => 'મેપ લિંક કૉપિ થઈ';
+
+  @override
+  String get shopSeeReviews => 'બધી સમીક્ષાઓ જુઓ';
+
+  @override
+  String get shopMapHelp =>
+      'તમારી દુકાનની Google Maps શેર લિંક અહીં પેસ્ટ કરો. ગ્રાહકો તમને શોધવા માટે તેનો ઉપયોગ કરે છે.';
+
+  @override
+  String get cacheConsentTitle => 'કૂકીઝ અને સાચવેલો ડેટા';
+
+  @override
+  String get cacheConsentBody =>
+      'આ એપ બરાબર ચાલવા અને ઝડપથી લોડ થવા માટે તમારા બ્રાઉઝરના સ્ટોરેજનો ઉપયોગ કરે છે. તમે શેની મંજૂરી આપવા માંગો છો તે પસંદ કરો.';
+
+  @override
+  String get cacheConsentNote =>
+      'લગભગ 40 MB સુધી જગ્યા વાપરે છે. જૂનો ડેટા આપમેળે દૂર થાય છે અને બધું સર્વરથી તાજું થતું રહે છે. પાસવર્ડ અને ચુકવણીની વિગતો ક્યારેય સાચવવામાં આવતી નથી. તમે તેને ગમે ત્યારે બ્રાઉઝર સેટિંગ્સમાં સાફ કરી શકો છો. મંજૂરી આપો તો તે તમારી આગલી મુલાકાતથી ચાલુ થઈ શકે છે.';
+
+  @override
+  String get cacheConsentAllow => 'બધાની મંજૂરી આપો';
+
+  @override
+  String get cacheConsentNotNow => 'ફક્ત જરૂરી';
+
+  @override
+  String get offlineShowingSaved =>
+      'તમે ઑફલાઇન છો. સાચવેલો ડેટા બતાવી રહ્યા છીએ.';
+
+  @override
+  String get cacheConsentEssentialTitle => 'જરૂરી (હંમેશા ચાલુ)';
+
+  @override
+  String get cacheConsentEssentialBody =>
+      'તમને સાઇન-ઇન રાખે છે અને તમારી ભાષા, કાર્ટ અને આ પસંદગી યાદ રાખે છે. તેના વગર એપ ચાલી શકતી નથી.';
+
+  @override
+  String get cacheConsentSavedTitle => 'ઝડપી લોડિંગ માટે સાચવેલો ડેટા';
+
+  @override
+  String get cacheConsentSavedBody =>
+      'દુકાનની માહિતી, પ્રોડક્ટ, કેટેગરી અને બેનર, તમારા તાજેતરના ઓર્ડર અને પ્રોડક્ટની તસવીરો આ બ્રાઉઝરમાં સાચવવામાં આવે છે, જેથી પેજ તરત ખુલે અને ધીમા કે ઑફલાઇન નેટવર્કમાં પણ કંઈક દેખાય.';
+
+  @override
+  String get likedProductsTitle => 'પસંદ કરેલા પ્રોડક્ટ';
+
+  @override
+  String get likedProductsSubtitle => 'તમે પસંદ કરેલા પ્રોડક્ટ';
+
+  @override
+  String get likedProductsEmpty => 'તમે હજી કોઈ પ્રોડક્ટ પસંદ કર્યો નથી.';
+
+  @override
+  String get likedProductsEmptyHint =>
+      'પ્રોડક્ટ પર હૃદય દબાવો, તે અહીં સચવાઈ જશે.';
+
+  @override
+  String get likedProductUnavailable => 'હવે ઉપલબ્ધ નથી';
+
+  @override
+  String get likedProductRemove => 'પસંદમાંથી દૂર કરો';
+
+  @override
+  String likedProductsCount(int count) {
+    return '$count પસંદ';
+  }
+
+  @override
+  String get voucherAllProducts => 'બધા પ્રોડક્ટ';
+
+  @override
+  String voucherMoreCount(int count) {
+    return '+$count વધુ';
+  }
+
+  @override
+  String get voucherSelectedCategories => 'પસંદ કરેલી કેટેગરી';
+
+  @override
+  String get voucherSelectedProducts => 'પસંદ કરેલા પ્રોડક્ટ';
+
+  @override
+  String get vouchersEmpty => 'હમણાં કોઈ વાઉચર ઉપલબ્ધ નથી.';
+
+  @override
+  String voucherValidTill(String date) {
+    return '$date સુધી માન્ય';
+  }
+
+  @override
+  String get moreFromThisCategory => 'આ જ કેટેગરીમાંથી વધુ';
+
+  @override
+  String get showMoreProducts => 'વધુ બતાવો';
+
+  @override
+  String get voucherAppliesTo => 'લાગુ';
+
+  @override
+  String get storefrontLockedTitle => 'આ વિભાગ લૉક છે';
+
+  @override
+  String get storefrontLockedHint =>
+      'ફેરફાર માટે પાસવર્ડ જોઈએ. ખોલવા માટે તાળા પર ટૅપ કરો.';
+
+  @override
+  String get storefrontUnlockButton => 'ફેરફાર માટે ખોલો';
+
+  @override
+  String get storefrontLockTooltip => 'લૉક છે: ખોલવા ટૅપ કરો';
+
+  @override
+  String get storefrontUnlockedTooltip => 'ખુલ્લું છે: ફરી લૉક કરવા ટૅપ કરો';
+
+  @override
+  String get storefrontUnlockTitle => 'પાસવર્ડ દાખલ કરો';
+
+  @override
+  String get storefrontUnlockBody =>
+      'આ વિભાગ નક્કી કરે છે કે દરેક ગ્રાહકને હોમ સ્ક્રીન પર શું દેખાય. આગળ વધવા એડિટિંગ પાસવર્ડ દાખલ કરો.';
+
+  @override
+  String get storefrontPasswordLabel => 'પાસવર્ડ';
+
+  @override
+  String get storefrontUnlockAction => 'ખોલો';
+
+  @override
+  String get storefrontWrongPassword => 'ખોટો પાસવર્ડ. ફરી પ્રયત્ન કરો.';
+
+  @override
+  String get storefrontNotConfigured =>
+      'એડિટિંગ પાસવર્ડ હજી સેટ થયો નથી. પ્લૅટફૉર્મ માલિકને સેટ કરવા કહો.';
+
+  @override
+  String get storefrontCheckFailed =>
+      'પાસવર્ડ ચકાસી શકાયો નથી. કનેક્શન તપાસો અને ફરી પ્રયત્ન કરો.';
+
+  @override
+  String storefrontTooManyAttempts(int seconds) {
+    return 'ઘણા ખોટા પ્રયત્નો. $seconds સેકન્ડ પછી ફરી પ્રયત્ન કરો.';
+  }
+
+  @override
+  String get storefrontUnlockedToast =>
+      'ખુલ્લું થયું. હવે તમે ફેરફાર કરી શકો છો.';
+
+  @override
+  String get storefrontLockedAgainToast => 'ફરી લૉક થયું.';
+
+  @override
+  String get adsBannerTitle => 'હોમ સ્ક્રીન જાહેરાત બૅનર';
+
+  @override
+  String get adsBannerEmptyTitle => 'હજી કોઈ જાહેરાત બૅનર નથી';
+
+  @override
+  String get adsBannerEmptyBody =>
+      'અહીં ઉમેરેલા બૅનર દરેક ગ્રાહકની હોમ સ્ક્રીનની ટોચે બૅનર કૅરોસેલમાં દેખાય છે.';
+
+  @override
+  String get adsBannerAdd => 'જાહેરાત બૅનર ઉમેરો';
+
+  @override
+  String get adsBannerCreateFirst => 'પહેલું જાહેરાત બૅનર બનાવો';
+
+  @override
+  String get adsBannerCreateTitle => 'જાહેરાત બૅનર ઉમેરો';
+
+  @override
+  String get adsBannerSaved => 'જાહેરાત બૅનર સાચવ્યું.';
+
+  @override
+  String get adsBannerDeleted => 'જાહેરાત બૅનર કાઢી નાખ્યું.';
+
+  @override
+  String get adsBannerDeleteTitle => 'જાહેરાત બૅનર કાઢી નાખો';
+
+  @override
+  String get adsBannerDeleteBody =>
+      'આ બૅનર દરેક ગ્રાહકની હોમ સ્ક્રીનથી દૂર થશે.';
 }

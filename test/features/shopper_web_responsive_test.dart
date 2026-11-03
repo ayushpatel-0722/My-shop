@@ -435,6 +435,10 @@ void main() {
 
       // Tap favorite button
       await tester.tap(find.byIcon(Icons.favorite_border_rounded));
+      // Saving runs on real event-loop turns, which pumping alone does not give.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
       await tester.pumpAndSettle();
 
       // Now item is in wishlist and heart is filled
@@ -516,17 +520,22 @@ void main() {
         // Section header is rendered
         expect(find.text('More from this Category'), findsOneWidget);
 
+        // Judged inside that section: the rows below it (Recommended, Trending)
+        // show other products of the shop on purpose.
+        final section = find.byKey(const Key('discovery-category'));
+        Finder inSection(String name) =>
+            find.descendant(of: section, matching: find.text(name));
+
         // Related products from the same category and shop are rendered
-        expect(find.text(relatedProduct1.name), findsOneWidget);
-        expect(find.text(relatedProduct2.name), findsOneWidget);
+        expect(inSection(relatedProduct1.name), findsOneWidget);
+        expect(inSection(relatedProduct2.name), findsOneWidget);
 
         // Different category and different shop products are excluded
-        expect(find.text(differentCategoryProduct.name), findsNothing);
-        expect(find.text(differentShopProduct.name), findsNothing);
+        expect(inSection(differentCategoryProduct.name), findsNothing);
+        expect(inSection(differentShopProduct.name), findsNothing);
 
-        // Main product is not duplicated in the related section
-        final mainProductFinders = find.text(mainProduct.name);
-        expect(mainProductFinders, findsOneWidget);
+        // The main product is not in its own related section
+        expect(inSection(mainProduct.name), findsNothing);
       },
     );
   });

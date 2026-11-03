@@ -26,9 +26,6 @@ class Company {
   /// Profile badge shown next to the store name (managed by the platform).
   final bool isVerified;
 
-  /// Number of shoppers following this store (denormalised counter).
-  final int followers;
-
   /// Minutes the store needs to pick & pack an order (ETA on order cards).
   final int handlingMinutes;
 
@@ -59,7 +56,6 @@ class Company {
     this.weeklyHours = const [],
     this.openingDate,
     this.isVerified = false,
-    this.followers = 0,
     this.handlingMinutes = 45,
     this.deliveryMinutes = 30,
     this.minOrderAmount = 0.0,
@@ -98,7 +94,6 @@ class Company {
     isVerified: map['isVerified'] is bool
         ? map['isVerified'] as bool
         : map['verified'] == true,
-    followers: _asInt(map['followers']),
     handlingMinutes: _asIntWithDefault(map['handlingMinutes'], 45),
     deliveryMinutes: _asIntWithDefault(map['deliveryMinutes'], 30),
     minOrderAmount:
@@ -128,7 +123,6 @@ class Company {
     'weeklyHours': weeklyHours.map((e) => e.toMap()).toList(),
     'openingDate': openingDate?.toIso8601String(),
     'isVerified': isVerified,
-    'followers': followers,
     'handlingMinutes': handlingMinutes,
     'deliveryMinutes': deliveryMinutes,
     'minOrderAmount': minOrderAmount,
@@ -193,7 +187,6 @@ class Company {
     List<WeeklyHours>? weeklyHours,
     DateTime? openingDate,
     bool? isVerified,
-    int? followers,
     int? handlingMinutes,
     int? deliveryMinutes,
     double? minOrderAmount,
@@ -218,7 +211,6 @@ class Company {
     weeklyHours: weeklyHours ?? this.weeklyHours,
     openingDate: openingDate ?? this.openingDate,
     isVerified: isVerified ?? this.isVerified,
-    followers: followers ?? this.followers,
     handlingMinutes: handlingMinutes ?? this.handlingMinutes,
     deliveryMinutes: deliveryMinutes ?? this.deliveryMinutes,
     minOrderAmount: minOrderAmount ?? this.minOrderAmount,

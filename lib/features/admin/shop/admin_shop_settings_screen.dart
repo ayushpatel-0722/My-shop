@@ -563,6 +563,8 @@ class _AdminShopSettingsScreenState extends State<AdminShopSettingsScreen> {
             decoration: InputDecoration(
               labelText: l10n.shopMapLabel,
               hintText: 'https://maps.google.com/...',
+              helperText: l10n.shopMapHelp,
+              helperMaxLines: 2,
               border: const OutlineInputBorder(),
             ),
           ),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myshop/app/l10n/app_localizations.dart';
 import 'package:myshop/core/services/auth_session.dart';
+import 'package:myshop/core/utils/favorite_actions.dart';
 import 'package:myshop/features/auth/widgets/auth_bottom_sheet.dart';
+import 'package:myshop/features/product/widgets/add_on_sheet.dart';
 
 import '../../../core/models/company.dart';
 import '../../../core/models/product.dart';
@@ -396,8 +398,20 @@ class _ProductCardState extends State<ProductCard> {
     return (((product.amount - product.price) / product.amount) * 100).round();
   }
 
-  void _doAddToCart(BuildContext context) {
-    context.read<CartCubit>().add(widget.product, company: widget.company);
+  Future<void> _doAddToCart(BuildContext context) async {
+    final cart = context.read<CartCubit>();
+    final choice = await AddOnSheet.pick(
+      context,
+      product: widget.product,
+      symbol: widget.company?.currencySymbol ?? '₹',
+    );
+    if (choice == null || !context.mounted) return;
+    cart.add(
+      widget.product,
+      company: widget.company,
+      qty: choice.qty,
+      addOns: choice.addOns,
+    );
     showAddToCartNotification(context, productName: widget.product.name);
   }
 
@@ -423,9 +437,7 @@ class _ProductCardState extends State<ProductCard> {
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: () {
-          if (wishlistCubit != null) {
-            wishlistCubit.toggle(widget.product);
-          }
+          FavoriteActions.toggle(context, widget.product);
         },
         child: Padding(
           padding: EdgeInsets.all(isDesktop ? 6.5 : 5.5),

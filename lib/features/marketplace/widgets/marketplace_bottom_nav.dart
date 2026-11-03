@@ -15,6 +15,22 @@ class MarketplaceBottomNav extends StatelessWidget {
 
   final int currentIndex;
 
+  /// Brings tab [index] to the front. Inside the tab shell that keeps the
+  /// tab's own state; from a page outside it (a shop page, say) it navigates
+  /// to the tab's route.
+  static void _openTab(BuildContext context, int index, String route) {
+    final shell = StatefulNavigationShell.maybeOf(context);
+    if (shell != null) {
+      // A page opened on top of a tab ("See all", a category) leaves the shell
+      // still on that tab. Asking for the tab you are "on" must then bring its
+      // own screen back — start the tab from its first page — rather than do
+      // nothing, which made the first tap on Home appear dead.
+      shell.goBranch(index, initialLocation: index == shell.currentIndex);
+    } else {
+      context.go(route);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -49,28 +65,25 @@ class MarketplaceBottomNav extends StatelessWidget {
             indicatorColor: isDark
                 ? const Color(0xFF332022)
                 : const Color(0xFFFFEBEA),
-            onDestinationSelected: (index) async {
+            onDestinationSelected: (index) {
+              // Tapping the tab you are on does nothing; the others are only
+              // brought to the front (their screens were kept alive), so they
+              // show what they already have instead of starting again.
               if (index == currentIndex) return;
-
               switch (index) {
                 case 0:
-                  context.go(AppRoutes.home);
-                  break;
+                  _openTab(context, 0, AppRoutes.home);
                 case 1:
-                  context.go(AppRoutes.categories);
-                  break;
+                  _openTab(context, 1, AppRoutes.categories);
                 case 2:
                   AuthGuard.runWithAuth(
                     context,
                     message: 'Please log in to view your orders.',
-                    onAuthenticated: () {
-                      context.go(AppRoutes.orders);
-                    },
+                    onAuthenticated: () =>
+                        _openTab(context, 2, AppRoutes.orders),
                   );
-                  break;
                 case 3:
-                  context.go(AppRoutes.account);
-                  break;
+                  _openTab(context, 3, AppRoutes.account);
               }
             },
             destinations: [

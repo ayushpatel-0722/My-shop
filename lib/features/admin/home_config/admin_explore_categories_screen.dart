@@ -8,6 +8,7 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/category_cover_builder.dart';
 import '../admin_shell.dart';
+import '../storefront_lock/locked_admin_shell.dart';
 import 'widgets/shop_selector_bar.dart';
 
 /// Admin screen to manage category cards displayed in the user home screen's
@@ -364,7 +365,7 @@ class _AdminExploreCategoriesScreenState
       );
     }
 
-    return AdminShell(
+    return LockedAdminShell(
       title: 'Home Explore Categories',
       actions: [
         IconButton(

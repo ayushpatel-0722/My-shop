@@ -2149,16 +2149,6 @@
     }
   },
   "msgNew": "New",
-  "msg1Follower": "1 follower",
-  "followers": "{followercount} followers",
-  "@followers": {
-    "description": "",
-    "placeholders": {
-      "followercount": {
-        "type": "String"
-      }
-    }
-  },
   "productTitleIsRequired": "Product title is required.",
   "useAtLeast2Characters": "Use at least 2 characters.",
   "mrpMustBeGreaterThan0": "MRP must be greater than 0.",
@@ -3123,5 +3113,157 @@
   "employeeRoleOrderPackerDesc": "Orders from Confirmed to Ready",
   "employeeRoleOrderDeliveryDesc": "Orders from Ready for Delivery to Delivered",
   "employeeRoleLabel": "Role",
-  "employeeConsole": "Employee Console"
+  "employeeConsole": "Employee Console",
+  "favLoginRequired": "Please log in to save favourite products.",
+  "favLimitTitle": "Favourites limit reached",
+  "favLimitBody": "You can save up to {max} favourite products. Adding this one will remove your oldest favourite. Do you want to continue?",
+  "@favLimitBody": {
+    "description": "",
+    "placeholders": {
+      "max": {
+        "type": "num"
+      }
+    }
+  },
+  "favReplaceOldest": "Replace oldest",
+  "favSyncFailed": "Could not update your favourites. Check your connection and try again.",
+  "addOnsSectionTitle": "Add-ons",
+  "addOnsSectionHint": "Optional extras customers can add to this product, such as assembly or delivery to a floor.",
+  "addAddOn": "Add an add-on",
+  "editAddOn": "Edit add-on",
+  "noAddOnsYet": "No add-ons. Customers buy this product as it is.",
+  "addOnSelectionTypeLabel": "How customers choose",
+  "addOnCheckboxOption": "Checkbox: any number",
+  "addOnRadioOption": "Radio: only one",
+  "addOnTitleLabel": "Title",
+  "addOnDescriptionLabel": "Description (optional)",
+  "addOnImageUrlLabel": "Image URL (optional)",
+  "addOnPriceLabel": "Price",
+  "addOnDiscountLabel": "Discounted price (optional)",
+  "addOnEnabledLabel": "Enabled",
+  "addOnDisabledChip": "Disabled",
+  "addOnTitleRequired": "Enter a title for the add-on.",
+  "addOnPriceInvalid": "Enter a valid price (0 or more).",
+  "addOnDiscountInvalid": "The discounted price must be lower than the price.",
+  "addOnImageInvalid": "Image must be an http or https link.",
+  "addOnDuplicateTitle": "Two add-ons have the same title.",
+  "addOnsFixBeforeSaving": "Please fix the add-ons before saving.",
+  "addOnsSheetTitle": "Choose add-ons",
+  "addOnsHeading": "Add-ons",
+  "addOnsPickAny": "Optional: pick any",
+  "addOnsPickOne": "Optional: pick one",
+  "addOnsProductPrice": "Product price",
+  "addOnsTotalLabel": "Add-ons",
+  "addOnsFinalTotal": "Total",
+  "addOnsContinueToBuy": "Continue to buy",
+  "addOnFree": "Free",
+  "addOnPerItem": "per item",
+  "addOnsRemovedNotice": "{addOns} is no longer available for {product} and was removed.",
+  "@addOnsRemovedNotice": {
+    "description": "",
+    "placeholders": {
+      "addOns": {
+        "type": "String"
+      },
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "addOnsPriceUpdatedNotice": "Add-on prices changed for {product}.",
+  "@addOnsPriceUpdatedNotice": {
+    "description": "",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "shopDirections": "Directions",
+  "shopMapCopied": "Map link copied",
+  "shopSeeReviews": "See all reviews",
+  "shopMapHelp": "Paste the Google Maps share link of your shop. Shoppers use it to find you.",
+  "cacheConsentTitle": "Cookies & saved data",
+  "cacheConsentBody": "This app uses your browser's storage to work properly and to load faster. Choose what you are happy with.",
+  "cacheConsentNote": "Uses up to about 40 MB of space. Old items are removed automatically and everything is refreshed from the server. Passwords and payment details are never saved. You can clear it any time in your browser settings. If you allow it, it may start working from your next visit.",
+  "cacheConsentAllow": "Allow all",
+  "cacheConsentNotNow": "Only essential",
+  "offlineShowingSaved": "You are offline. Showing saved data.",
+  "cacheConsentEssentialTitle": "Essential (always on)",
+  "cacheConsentEssentialBody": "Keeps you signed in and remembers your language, your cart and this choice. The app cannot work without it.",
+  "cacheConsentSavedTitle": "Saved data for faster loading",
+  "cacheConsentSavedBody": "Shop details, products, categories and banners, your recent orders and product images are saved in this browser, so pages open at once and still show something when your connection is slow or offline.",
+  "likedProductsTitle": "Liked products",
+  "likedProductsSubtitle": "Products you have liked",
+  "likedProductsEmpty": "You have not liked any products yet.",
+  "likedProductsEmptyHint": "Tap the heart on a product to save it here.",
+  "likedProductUnavailable": "No longer available",
+  "likedProductRemove": "Remove from liked",
+  "likedProductsCount": "{count} liked",
+  "@likedProductsCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "voucherAllProducts": "All products",
+  "voucherMoreCount": "+{count} more",
+  "voucherSelectedCategories": "Selected categories",
+  "voucherSelectedProducts": "Selected products",
+  "vouchersEmpty": "No vouchers are available right now.",
+  "voucherValidTill": "Valid till {date}",
+  "moreFromThisCategory": "More from this Category",
+  "showMoreProducts": "Show more",
+  "@voucherMoreCount": {
+    "description": "",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@voucherValidTill": {
+    "description": "",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "voucherAppliesTo": "Applies to",
+  "storefrontLockedTitle": "This section is locked",
+  "storefrontLockedHint": "Editing needs a password. Tap the lock to unlock it.",
+  "storefrontUnlockButton": "Unlock to edit",
+  "storefrontLockTooltip": "Locked: tap to unlock",
+  "storefrontUnlockedTooltip": "Unlocked: tap to lock again",
+  "storefrontUnlockTitle": "Enter password",
+  "storefrontUnlockBody": "This section changes what every shopper sees on the home screen. Enter the editing password to continue.",
+  "storefrontPasswordLabel": "Password",
+  "storefrontUnlockAction": "Unlock",
+  "storefrontWrongPassword": "Wrong password. Try again.",
+  "storefrontNotConfigured": "The editing password has not been set up yet. Ask the platform owner to set it up.",
+  "storefrontCheckFailed": "Could not check the password. Check your connection and try again.",
+  "storefrontTooManyAttempts": "Too many wrong attempts. Try again in {seconds} seconds.",
+  "storefrontUnlockedToast": "Unlocked. You can edit now.",
+  "storefrontLockedAgainToast": "Locked again.",
+  "adsBannerTitle": "Home Screen Ads Banner",
+  "adsBannerEmptyTitle": "No ads banners yet",
+  "adsBannerEmptyBody": "Banners added here appear in the banner carousel at the top of every shopper's home screen.",
+  "adsBannerAdd": "Add ads banner",
+  "adsBannerCreateFirst": "Create first ads banner",
+  "adsBannerCreateTitle": "Add ads banner",
+  "adsBannerSaved": "Ads banner saved.",
+  "adsBannerDeleted": "Ads banner deleted.",
+  "adsBannerDeleteTitle": "Delete ads banner",
+  "adsBannerDeleteBody": "This banner will disappear from every shopper's home screen.",
+  "@storefrontTooManyAttempts": {
+    "description": "",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myshop/core/widgets/addon_lines.dart';
 
 import '../../../../app/routes/app_router.dart';
 import '../../../../core/models/order.dart';
@@ -343,6 +344,7 @@ class _OrderItemRow extends StatelessWidget {
                 '${formatCurrency(item.unitPrice)} × ${item.qty}',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
+              AddOnLines(addOns: item.addOns),
             ],
           ),
         ),

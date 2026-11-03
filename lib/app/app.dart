@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/services/service_locator.dart';
 import '../core/utils/force_update_gate.dart';
+import '../core/widgets/cache_consent_prompt.dart';
+import '../core/widgets/offline_banner.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_cubit.dart';
 import 'routes/app_router.dart';
@@ -78,7 +80,9 @@ class _AppState extends State<App> {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             routerConfig: appRouter,
             builder: (context, child) {
-              return child ?? const SizedBox.shrink();
+              return CacheConsentPrompt(
+                child: OfflineBanner(child: child ?? const SizedBox.shrink()),
+              );
             },
           );
           return ForceUpdateGate(

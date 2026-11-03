@@ -8,6 +8,7 @@ import '../models/category.dart';
 import '../models/company.dart';
 import '../models/delivery_charge.dart';
 import '../models/employee.dart';
+import '../models/favorite.dart';
 import '../models/home_explore_category.dart';
 import '../models/home_trending_item.dart';
 import '../models/notification.dart';
@@ -249,6 +250,13 @@ abstract class AppRepository {
   Future<void> saveRecommendation(Recommendation rec);
   Future<void> saveBanner(OfferBanner banner);
   Future<void> saveAdBanner(AdBanner banner);
+
+  /// The salted hash of the password that unlocks editing of the home-screen
+  /// storefront sections (Explore Categories, Trending Now, Ads Banner), or
+  /// null when none has been set up. One password for every company: it lives
+  /// in a single Firebase document (`storefront_config/lock`, field
+  /// `passwordHash`), never as plain text. Throws when it can not be read.
+  Future<String?> storefrontLockHash();
   Future<void> deleteBanner(String id, {String companyId = ''});
 
   // Home Screen Sections Management
@@ -279,6 +287,25 @@ abstract class AppRepository {
 
   /// Registers an FCM push token against a customer.
   Future<void> registerFcmToken(String userId, String token);
+
+  // ---- Favourites (liked products) ---------------------------------------
+
+  /// Live favourites of [userId], oldest first.
+  Stream<List<FavoriteEntry>> favorites(String userId);
+
+  /// Likes [entry] for [userId] and returns the resulting list.
+  ///
+  /// Idempotent: an already-liked product leaves the list unchanged. When the
+  /// list holds [maxFavoriteProducts] entries the oldest one is dropped if
+  /// [replaceOldest] is true, otherwise [FavoriteLimitReached] is thrown.
+  Future<List<FavoriteEntry>> addFavorite(
+    String userId,
+    FavoriteEntry entry, {
+    bool replaceOldest = false,
+  });
+
+  /// Removes [productId] from [userId]'s favourites and returns the list.
+  Future<List<FavoriteEntry>> removeFavorite(String userId, String productId);
 }
 
 /// Helper used when storing external media URLs instead of uploaded files.

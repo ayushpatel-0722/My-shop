@@ -4862,18 +4862,6 @@ abstract class AppLocalizations {
   /// **'New'**
   String get msgNew;
 
-  /// No description provided for @msg1Follower.
-  ///
-  /// In en, this message translates to:
-  /// **'1 follower'**
-  String get msg1Follower;
-
-  ///
-  ///
-  /// In en, this message translates to:
-  /// **'{followercount} followers'**
-  String followers(String followercount);
-
   /// No description provided for @productTitleIsRequired.
   ///
   /// In en, this message translates to:
@@ -8242,6 +8230,564 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Employee Console'**
   String get employeeConsole;
+
+  /// No description provided for @favLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to save favourite products.'**
+  String get favLoginRequired;
+
+  /// No description provided for @favLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourites limit reached'**
+  String get favLimitTitle;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'You can save up to {max} favourite products. Adding this one will remove your oldest favourite. Do you want to continue?'**
+  String favLimitBody(num max);
+
+  /// No description provided for @favReplaceOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace oldest'**
+  String get favReplaceOldest;
+
+  /// No description provided for @favSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update your favourites. Check your connection and try again.'**
+  String get favSyncFailed;
+
+  /// No description provided for @addOnsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add-ons'**
+  String get addOnsSectionTitle;
+
+  /// No description provided for @addOnsSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional extras customers can add to this product, such as assembly or delivery to a floor.'**
+  String get addOnsSectionHint;
+
+  /// No description provided for @addAddOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an add-on'**
+  String get addAddOn;
+
+  /// No description provided for @editAddOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit add-on'**
+  String get editAddOn;
+
+  /// No description provided for @noAddOnsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No add-ons. Customers buy this product as it is.'**
+  String get noAddOnsYet;
+
+  /// No description provided for @addOnSelectionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'How customers choose'**
+  String get addOnSelectionTypeLabel;
+
+  /// No description provided for @addOnCheckboxOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkbox: any number'**
+  String get addOnCheckboxOption;
+
+  /// No description provided for @addOnRadioOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio: only one'**
+  String get addOnRadioOption;
+
+  /// No description provided for @addOnTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get addOnTitleLabel;
+
+  /// No description provided for @addOnDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get addOnDescriptionLabel;
+
+  /// No description provided for @addOnImageUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Image URL (optional)'**
+  String get addOnImageUrlLabel;
+
+  /// No description provided for @addOnPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get addOnPriceLabel;
+
+  /// No description provided for @addOnDiscountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Discounted price (optional)'**
+  String get addOnDiscountLabel;
+
+  /// No description provided for @addOnEnabledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get addOnEnabledLabel;
+
+  /// No description provided for @addOnDisabledChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get addOnDisabledChip;
+
+  /// No description provided for @addOnTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title for the add-on.'**
+  String get addOnTitleRequired;
+
+  /// No description provided for @addOnPriceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price (0 or more).'**
+  String get addOnPriceInvalid;
+
+  /// No description provided for @addOnDiscountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The discounted price must be lower than the price.'**
+  String get addOnDiscountInvalid;
+
+  /// No description provided for @addOnImageInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Image must be an http or https link.'**
+  String get addOnImageInvalid;
+
+  /// No description provided for @addOnDuplicateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Two add-ons have the same title.'**
+  String get addOnDuplicateTitle;
+
+  /// No description provided for @addOnsFixBeforeSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fix the add-ons before saving.'**
+  String get addOnsFixBeforeSaving;
+
+  /// No description provided for @addOnsSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose add-ons'**
+  String get addOnsSheetTitle;
+
+  /// No description provided for @addOnsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Add-ons'**
+  String get addOnsHeading;
+
+  /// No description provided for @addOnsPickAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: pick any'**
+  String get addOnsPickAny;
+
+  /// No description provided for @addOnsPickOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: pick one'**
+  String get addOnsPickOne;
+
+  /// No description provided for @addOnsProductPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Product price'**
+  String get addOnsProductPrice;
+
+  /// No description provided for @addOnsTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add-ons'**
+  String get addOnsTotalLabel;
+
+  /// No description provided for @addOnsFinalTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get addOnsFinalTotal;
+
+  /// No description provided for @addOnsContinueToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to buy'**
+  String get addOnsContinueToBuy;
+
+  /// No description provided for @addOnFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get addOnFree;
+
+  /// No description provided for @addOnPerItem.
+  ///
+  /// In en, this message translates to:
+  /// **'per item'**
+  String get addOnPerItem;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{addOns} is no longer available for {product} and was removed.'**
+  String addOnsRemovedNotice(String addOns, String product);
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Add-on prices changed for {product}.'**
+  String addOnsPriceUpdatedNotice(String product);
+
+  /// No description provided for @shopDirections.
+  ///
+  /// In en, this message translates to:
+  /// **'Directions'**
+  String get shopDirections;
+
+  /// No description provided for @shopMapCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Map link copied'**
+  String get shopMapCopied;
+
+  /// No description provided for @shopSeeReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'See all reviews'**
+  String get shopSeeReviews;
+
+  /// No description provided for @shopMapHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the Google Maps share link of your shop. Shoppers use it to find you.'**
+  String get shopMapHelp;
+
+  /// No description provided for @cacheConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookies & saved data'**
+  String get cacheConsentTitle;
+
+  /// No description provided for @cacheConsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This app uses your browser\'s storage to work properly and to load faster. Choose what you are happy with.'**
+  String get cacheConsentBody;
+
+  /// No description provided for @cacheConsentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses up to about 40 MB of space. Old items are removed automatically and everything is refreshed from the server. Passwords and payment details are never saved. You can clear it any time in your browser settings. If you allow it, it may start working from your next visit.'**
+  String get cacheConsentNote;
+
+  /// No description provided for @cacheConsentAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow all'**
+  String get cacheConsentAllow;
+
+  /// No description provided for @cacheConsentNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Only essential'**
+  String get cacheConsentNotNow;
+
+  /// No description provided for @offlineShowingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Showing saved data.'**
+  String get offlineShowingSaved;
+
+  /// No description provided for @cacheConsentEssentialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential (always on)'**
+  String get cacheConsentEssentialTitle;
+
+  /// No description provided for @cacheConsentEssentialBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps you signed in and remembers your language, your cart and this choice. The app cannot work without it.'**
+  String get cacheConsentEssentialBody;
+
+  /// No description provided for @cacheConsentSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved data for faster loading'**
+  String get cacheConsentSavedTitle;
+
+  /// No description provided for @cacheConsentSavedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop details, products, categories and banners, your recent orders and product images are saved in this browser, so pages open at once and still show something when your connection is slow or offline.'**
+  String get cacheConsentSavedBody;
+
+  /// No description provided for @likedProductsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Liked products'**
+  String get likedProductsTitle;
+
+  /// No description provided for @likedProductsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Products you have liked'**
+  String get likedProductsSubtitle;
+
+  /// No description provided for @likedProductsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not liked any products yet.'**
+  String get likedProductsEmpty;
+
+  /// No description provided for @likedProductsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart on a product to save it here.'**
+  String get likedProductsEmptyHint;
+
+  /// No description provided for @likedProductUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer available'**
+  String get likedProductUnavailable;
+
+  /// No description provided for @likedProductRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from liked'**
+  String get likedProductRemove;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'{count} liked'**
+  String likedProductsCount(int count);
+
+  /// No description provided for @voucherAllProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'All products'**
+  String get voucherAllProducts;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String voucherMoreCount(int count);
+
+  /// No description provided for @voucherSelectedCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected categories'**
+  String get voucherSelectedCategories;
+
+  /// No description provided for @voucherSelectedProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected products'**
+  String get voucherSelectedProducts;
+
+  /// No description provided for @vouchersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No vouchers are available right now.'**
+  String get vouchersEmpty;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Valid till {date}'**
+  String voucherValidTill(String date);
+
+  /// No description provided for @moreFromThisCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'More from this Category'**
+  String get moreFromThisCategory;
+
+  /// No description provided for @showMoreProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get showMoreProducts;
+
+  /// No description provided for @voucherAppliesTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to'**
+  String get voucherAppliesTo;
+
+  /// No description provided for @storefrontLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This section is locked'**
+  String get storefrontLockedTitle;
+
+  /// No description provided for @storefrontLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing needs a password. Tap the lock to unlock it.'**
+  String get storefrontLockedHint;
+
+  /// No description provided for @storefrontUnlockButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock to edit'**
+  String get storefrontUnlockButton;
+
+  /// No description provided for @storefrontLockTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked: tap to unlock'**
+  String get storefrontLockTooltip;
+
+  /// No description provided for @storefrontUnlockedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked: tap to lock again'**
+  String get storefrontUnlockedTooltip;
+
+  /// No description provided for @storefrontUnlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get storefrontUnlockTitle;
+
+  /// No description provided for @storefrontUnlockBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This section changes what every shopper sees on the home screen. Enter the editing password to continue.'**
+  String get storefrontUnlockBody;
+
+  /// No description provided for @storefrontPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get storefrontPasswordLabel;
+
+  /// No description provided for @storefrontUnlockAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get storefrontUnlockAction;
+
+  /// No description provided for @storefrontWrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password. Try again.'**
+  String get storefrontWrongPassword;
+
+  /// No description provided for @storefrontNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'The editing password has not been set up yet. Ask the platform owner to set it up.'**
+  String get storefrontNotConfigured;
+
+  /// No description provided for @storefrontCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check the password. Check your connection and try again.'**
+  String get storefrontCheckFailed;
+
+  ///
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong attempts. Try again in {seconds} seconds.'**
+  String storefrontTooManyAttempts(int seconds);
+
+  /// No description provided for @storefrontUnlockedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked. You can edit now.'**
+  String get storefrontUnlockedToast;
+
+  /// No description provided for @storefrontLockedAgainToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked again.'**
+  String get storefrontLockedAgainToast;
+
+  /// No description provided for @adsBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Screen Ads Banner'**
+  String get adsBannerTitle;
+
+  /// No description provided for @adsBannerEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No ads banners yet'**
+  String get adsBannerEmptyTitle;
+
+  /// No description provided for @adsBannerEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Banners added here appear in the banner carousel at the top of every shopper\'s home screen.'**
+  String get adsBannerEmptyBody;
+
+  /// No description provided for @adsBannerAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ads banner'**
+  String get adsBannerAdd;
+
+  /// No description provided for @adsBannerCreateFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create first ads banner'**
+  String get adsBannerCreateFirst;
+
+  /// No description provided for @adsBannerCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ads banner'**
+  String get adsBannerCreateTitle;
+
+  /// No description provided for @adsBannerSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads banner saved.'**
+  String get adsBannerSaved;
+
+  /// No description provided for @adsBannerDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads banner deleted.'**
+  String get adsBannerDeleted;
+
+  /// No description provided for @adsBannerDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete ads banner'**
+  String get adsBannerDeleteTitle;
+
+  /// No description provided for @adsBannerDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This banner will disappear from every shopper\'s home screen.'**
+  String get adsBannerDeleteBody;
 }
 
 class _AppLocalizationsDelegate

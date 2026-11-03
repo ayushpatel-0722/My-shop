@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../../app/l10n/l10n_service.dart';
 import '../utils/type_utils.dart';
+import 'product_addon.dart';
 
 /// How a product is measured and sold.
 class ProductType {
@@ -516,6 +517,12 @@ class Product {
   final bool isUnlimitedStock;
   final bool isRecommended;
 
+  /// Optional extras sold with the product (assembly, delivery, ...).
+  final List<ProductAddOn> addOns;
+
+  /// `checkbox` (any number of add-ons) or `radio` (only one).
+  final String addOnSelection;
+
   const Product({
     required this.id,
     required this.companyId,
@@ -540,6 +547,8 @@ class Product {
     this.stockQty = 0,
     this.isUnlimitedStock = false,
     this.isRecommended = false,
+    this.addOns = const [],
+    this.addOnSelection = AddOnSelectionType.checkbox,
   });
 
   /// Effective selling price.
@@ -738,6 +747,8 @@ class Product {
     stockQty: asInt(map['stockQty']),
     isUnlimitedStock: asBool(map['isUnlimitedStock']),
     isRecommended: asBool(map['isRecommended']),
+    addOns: asMapList(map['addOns']).map(ProductAddOn.fromMap).toList(),
+    addOnSelection: AddOnSelectionType.normalize(map['addOnSelection']),
   );
 
   Map<String, dynamic> toMap() => {
@@ -763,6 +774,8 @@ class Product {
     'stockQty': stockQty,
     'isUnlimitedStock': isUnlimitedStock,
     'isRecommended': isRecommended,
+    'addOns': addOns.map((e) => e.toMap()).toList(),
+    'addOnSelection': addOnSelection,
   };
 
   Product copyWith({
@@ -789,6 +802,8 @@ class Product {
     int? stockQty,
     bool? isUnlimitedStock,
     bool? isRecommended,
+    List<ProductAddOn>? addOns,
+    String? addOnSelection,
   }) {
     return Product(
       id: id ?? this.id,
@@ -814,6 +829,8 @@ class Product {
       stockQty: stockQty ?? this.stockQty,
       isUnlimitedStock: isUnlimitedStock ?? this.isUnlimitedStock,
       isRecommended: isRecommended ?? this.isRecommended,
+      addOns: addOns ?? this.addOns,
+      addOnSelection: addOnSelection ?? this.addOnSelection,
     );
   }
 }

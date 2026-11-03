@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../cache/app_images.dart';
 import '../models/category.dart';
 import '../models/product.dart';
 import '../services/service_locator.dart';
@@ -54,11 +55,12 @@ class CategoryImage extends StatelessWidget {
     }
     final icon = category.iconUrl.trim();
     if (category.hasImageIcon) {
-      return Image.network(
+      return AppNetworkImage(
         icon,
         width: double.infinity,
         height: double.infinity,
         fit: fit,
+        decodeWidth: 240,
         errorBuilder: (_, _, _) => _productCover(),
       );
     }
@@ -85,15 +87,23 @@ class CategoryImage extends StatelessWidget {
           for (final p in snap.data ?? const <Product>[])
             if (p.images.isNotEmpty) p.id: p.images.first,
         };
-        final url = CategoryCoverBuilder.coverFor(category, byId);
-        if (url == null) return fallback(category);
-        return Image.network(
-          url,
-          width: double.infinity,
-          height: double.infinity,
-          fit: fit,
-          errorBuilder: (_, _, _) => fallback(category),
-        );
+        final urls = CategoryCoverBuilder.coversFor(category, byId);
+        if (urls.isEmpty) return fallback(category);
+        // The first photo, and if it can not be loaded the next one, and so
+        // on, ending at the glyph — never a half-empty tile.
+        Widget chain = fallback(category);
+        for (final url in urls.reversed) {
+          final next = chain;
+          chain = AppNetworkImage(
+            url,
+            width: double.infinity,
+            height: double.infinity,
+            fit: fit,
+            decodeWidth: 240,
+            errorBuilder: (_, _, _) => next,
+          );
+        }
+        return chain;
       },
     );
   }

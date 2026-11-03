@@ -137,52 +137,67 @@ void main() {
       },
     );
 
-    testWidgets('displays every active item without truncation cap', (
-      tester,
-    ) async {
-      const shop = Company(
-        id: 'shop_1',
-        name: 'Spice Store',
-        slug: 'spice-store',
-      );
-      await repo.createCompany(shop);
-
-      for (int i = 0; i < 15; i++) {
-        final p = Product(
-          id: 'prod_$i',
-          companyId: 'shop_1',
-          name: 'Spice Item $i',
-          amount: 50,
-          discountAmt: 45,
-          isUnlimitedStock: true,
-          images: ['https://example.com/$i.jpg'],
+    testWidgets(
+      'lists every active item, a page at a time (no permanent cap)',
+      (tester) async {
+        const shop = Company(
+          id: 'shop_1',
+          name: 'Spice Store',
+          slug: 'spice-store',
         );
-        await repo.saveProduct(p);
+        await repo.createCompany(shop);
 
-        await repo.saveHomeTrendingItem(
-          HomeTrendingItem(
-            id: 't_$i',
-            shopId: 'shop_1',
-            productId: 'prod_$i',
-            itemType: 'product',
-            displayOrder: i,
-            isActive: true,
-          ),
+        for (int i = 0; i < 15; i++) {
+          final p = Product(
+            id: 'prod_$i',
+            companyId: 'shop_1',
+            name: 'Spice Item $i',
+            amount: 50,
+            discountAmt: 45,
+            isUnlimitedStock: true,
+            images: ['https://example.com/$i.jpg'],
+          );
+          await repo.saveProduct(p);
+
+          await repo.saveHomeTrendingItem(
+            HomeTrendingItem(
+              id: 't_$i',
+              shopId: 'shop_1',
+              productId: 'prod_$i',
+              itemType: 'product',
+              displayOrder: i,
+              isActive: true,
+            ),
+          );
+        }
+
+        await pumpTestApp(
+          tester,
+          const HomeScreen(shopId: 'shop_1'),
+          user: TestHarness.shopper,
+          size: const Size(375, 667),
         );
-      }
+        await tester.pumpAndSettle();
 
-      await pumpTestApp(
-        tester,
-        const HomeScreen(shopId: 'shop_1'),
-        user: TestHarness.shopper,
-        size: const Size(375, 667),
-      );
-      await tester.pumpAndSettle();
+        // The first page is built at once, not all 15 ...
+        expect(find.byType(TrendingVerticalProductCard), findsNWidgets(10));
 
-      // All 15 products must be rendered
-      expect(find.byType(TrendingVerticalProductCard), findsNWidgets(15));
-      await tester.pump(const Duration(seconds: 3));
-    });
+        // ... and scrolling on reaches every one of them: nothing is cut off.
+        for (var i = 0; i < 10; i++) {
+          if (find.byType(TrendingVerticalProductCard).evaluate().length >=
+              15) {
+            break;
+          }
+          await tester.drag(
+            find.byType(Scrollable).first,
+            const Offset(0, -900),
+          );
+          await tester.pumpAndSettle();
+        }
+        expect(find.byType(TrendingVerticalProductCard), findsNWidgets(15));
+        await tester.pump(const Duration(seconds: 3));
+      },
+    );
 
     testWidgets('filters trending products when shop switching occurs', (
       tester,

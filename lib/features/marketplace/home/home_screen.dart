@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,10 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/core/widgets/app_toast.dart';
 import 'package:myshop/core/widgets/category_image.dart';
+import 'package:myshop/features/product/widgets/add_on_sheet.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/cache/cache_policy.dart';
+import '../../../core/cache/refreshable.dart';
 import '../../../core/domain/category_lookup.dart';
 import '../../../core/domain/category_tree.dart';
 import '../../../core/models/banner.dart';
@@ -28,11 +32,14 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/app_product_image.dart';
 import '../../../core/widgets/back_to_admin_button.dart';
 import '../../../core/widgets/modern_shimmer.dart';
+import '../../../core/widgets/replay_stream_builder.dart';
+import '../../../core/widgets/voucher_target_line.dart';
 import '../../auth/auth_cubit.dart';
 import '../../auth/widgets/auth_bottom_sheet.dart';
 import '../../checkout/cart/cart_cubit.dart';
 import '../widgets/location_picker_sheet.dart';
 import '../widgets/marketplace_bottom_nav.dart';
+import '../widgets/marketplace_shell.dart';
 import '../widgets/product_card.dart';
 import '../widgets/section_header.dart';
 import '../widgets/web_header.dart';
@@ -64,6 +71,58 @@ class _HomeScreenState extends State<HomeScreen> {
   int _carouselIndex = 0;
   String? _selectedShopId;
 
+  // The data sources are opened once, not on every rebuild (a rebuild used to
+  // open every query again). Shop-dependent ones follow the selected shop.
+  late final Stream<List<Company>> _companies = repo.companies();
+  late final Stream<List<Category>> _categories = repo.categories();
+  late final Stream<List<AdBanner>> _ads = repo.adBanners();
+  // Fetched once and kept: shown at once when the tab is opened again, and
+  // refreshed in the background only when it has gone stale.
+  late final Refreshable<List<Product>> _recs = Refreshable<List<Product>>(
+    load: () => repo.recommendations(),
+    ttl: RefreshPolicy.homeTtl,
+    equals: _sameProducts,
+  );
+
+  static bool _sameProducts(List<Product> a, List<Product> b) =>
+      a.length == b.length &&
+      jsonEncode([for (final p in a) p.toMap()]) ==
+          jsonEncode([for (final p in b) p.toMap()]);
+
+  void _onTabChanged() {
+    if (MarketplaceTabs.active.value == MarketplaceTabs.home) {
+      _recs.scheduleRefresh(RefreshPolicy.tabReturnDelay);
+    }
+  }
+
+  late final Stream<List<Product>> _allProducts = repo.products();
+  late final Stream<List<Voucher>> _vouchers = repo.vouchers('');
+  late final Stream<List<HomeExploreCategory>> _exploreDynamic = repo
+      .homeExploreCategories(activeOnly: true);
+  String? _boundShopId;
+  Stream<List<HomeTrendingItem>>? _trendingDynamic;
+  Stream<List<Product>>? _trendingProducts;
+
+  /// The long product lists load a page at a time as the shopper scrolls,
+  /// instead of building (and downloading the pictures of) every product at
+  /// once, which froze the page for a long while on phones.
+  static const int _pageSize = 10;
+  int _pages = 1;
+  int _trendingTotal = 0;
+  int _recommendedTotal = 0;
+
+  int get _limit => _pages * _pageSize;
+
+  bool get _hasMore => _trendingTotal > _limit || _recommendedTotal > _limit;
+
+  void _onScroll() {
+    if (!_scrollCtrl.hasClients || !_hasMore) return;
+    final pos = _scrollCtrl.position;
+    if (pos.pixels >= pos.maxScrollExtent - 600) {
+      setState(() => _pages++);
+    }
+  }
+
   @override
   void didUpdateWidget(HomeScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -93,6 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _selectedShopId = widget.shopId;
+    _scrollCtrl.addListener(_onScroll);
+    _recs.refresh();
+    MarketplaceTabs.active.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _mobileCheckTimer = Timer(const Duration(seconds: 2), () {
         if (!mounted || _hasCheckedMobile) return;
@@ -105,6 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _mobileCheckTimer?.cancel();
+    MarketplaceTabs.active.removeListener(_onTabChanged);
+    _recs.dispose();
     _carouselCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
@@ -113,22 +177,28 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final companies = repo.companies();
-    final categories = repo.categories();
-    final ads = repo.adBanners();
-    final recs = repo.recommendations();
-    final recommendedProducts = repo.products();
-    final vouchers = repo.vouchers('');
+    final companies = _companies;
+    final categories = _categories;
+    final ads = _ads;
+    final recs = _recs;
+    final recommendedProducts = _allProducts;
+    final vouchers = _vouchers;
 
     final effectiveShopId = _selectedShopId ?? widget.shopId ?? '';
-    final dynamicExploreCategories = repo.homeExploreCategories(
-      activeOnly: true,
-    );
-    final dynamicTrendingItems = repo.homeTrendingNow(
-      shopId: effectiveShopId,
-      activeOnly: true,
-    );
-    final trendingProducts = repo.products(companyId: effectiveShopId);
+    final dynamicExploreCategories = _exploreDynamic;
+    if (_boundShopId != effectiveShopId || _trendingDynamic == null) {
+      // A different shop: open its own queries and start from page one.
+      _boundShopId = effectiveShopId;
+      _trendingDynamic = repo.homeTrendingNow(
+        shopId: effectiveShopId,
+        activeOnly: true,
+      );
+      _trendingProducts = repo.products(companyId: effectiveShopId);
+      _pages = 1;
+      _trendingTotal = 0;
+    }
+    final dynamicTrendingItems = _trendingDynamic!;
+    final trendingProducts = _trendingProducts!;
 
     final isDesktop = context.isDesktop;
 
@@ -456,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Promotional Banner Carousel
   // ---------------------------------------------------------------------------
   Widget _adsCarousel(Stream<List<AdBanner>> ads) {
-    return StreamBuilder<List<AdBanner>>(
+    return ReplayStreamBuilder<List<AdBanner>>(
       stream: ads,
       builder: (context, snap) {
         final list = snap.data ?? const <AdBanner>[];
@@ -757,7 +827,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Stream<List<Category>> categories,
     Stream<List<HomeExploreCategory>> dynamicCategories,
   ) {
-    return StreamBuilder<List<Category>>(
+    return ReplayStreamBuilder<List<Category>>(
       stream: categories,
       builder: (context, catSnap) {
         if (catSnap.connectionState == ConnectionState.waiting &&
@@ -766,7 +836,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         final allCategories = catSnap.data ?? const <Category>[];
 
-        return StreamBuilder<List<HomeExploreCategory>>(
+        return ReplayStreamBuilder<List<HomeExploreCategory>>(
           stream: dynamicCategories,
           builder: (context, dynamicSnap) {
             final dynamicItems =
@@ -811,7 +881,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: SectionHeader(
                     title: AppLocalizations.of(context).exploreCategories,
-                    onViewAll: () => context.push(AppRoutes.categories),
+                    // Categories is a tab: switch to it. Pushing it as a page put
+                    // an invisible copy inside the Categories tab (nothing
+                    // happened on screen, and the back arrow later led nowhere).
+                    onViewAll: () => context.go(AppRoutes.categories),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -1061,7 +1134,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Store Vouchers & Deals Section
   // ---------------------------------------------------------------------------
   Widget _storeVouchersSection(Stream<List<Voucher>> vouchers) {
-    return StreamBuilder<List<Voucher>>(
+    return ReplayStreamBuilder<List<Voucher>>(
       stream: vouchers,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
@@ -1095,7 +1168,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _vouchersRailContent(List<Voucher> list) {
     return SizedBox(
-      height: 94,
+      // Room for the extra "shop · applies to" line on each card.
+      height: 152,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1116,8 +1190,77 @@ class _HomeScreenState extends State<HomeScreen> {
     final discountStr = v.discountLabel;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Copy sits beside the discount, so the rows under it (shop, applies to,
+    // code) get the card's full width instead of sharing it with the button.
+    final copyButton = InkWell(
+      onTap: () {
+        setState(() => _claimedVouchers.add(v.id));
+        onClaimed?.call();
+        Clipboard.setData(ClipboardData(text: v.code));
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showAppToast(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).couponCopiedApplyAtCheckout(v.code),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF1E8F66),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isClaimed ? const Color(0xFFEFFAF5) : const Color(0xFFFF5247),
+          borderRadius: BorderRadius.circular(20),
+          border: isClaimed ? Border.all(color: const Color(0xFF1E8F66)) : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isClaimed ? Icons.check : Icons.copy_rounded,
+              size: 12,
+              color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              isClaimed
+                  ? AppLocalizations.of(context).copied
+                  : AppLocalizations.of(context).copy,
+              style: TextStyle(
+                color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Container(
-      width: isSheet ? double.infinity : 275,
+      width: isSheet ? double.infinity : 292,
       padding: EdgeInsets.symmetric(
         horizontal: 14,
         vertical: isSheet ? 12 : 10,
@@ -1170,16 +1313,37 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  discountStr,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        discountStr,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.5,
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF1E2229),
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    copyButton,
+                  ],
+                ),
+                const SizedBox(height: 2),
+                // Which shop this is for, and what it applies to.
+                VoucherTargetLine(
+                  voucher: v,
+                  layout: VoucherTargetLayout.column,
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13.5,
-                    color: isDark ? Colors.white : const Color(0xFF1E2229),
-                    height: 1.2,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : const Color(0xFF475569),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 3),
                 Align(
@@ -1240,79 +1404,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-
-          // Right Claim / Copy Action
-          InkWell(
-            onTap: () {
-              setState(() => _claimedVouchers.add(v.id));
-              onClaimed?.call();
-              Clipboard.setData(ClipboardData(text: v.code));
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showAppToast(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle_rounded,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          AppLocalizations.of(
-                            context,
-                          ).couponCopiedApplyAtCheckout(v.code),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  backgroundColor: const Color(0xFF1E8F66),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: isClaimed
-                    ? const Color(0xFFEFFAF5)
-                    : const Color(0xFFFF5247),
-                borderRadius: BorderRadius.circular(20),
-                border: isClaimed
-                    ? Border.all(color: const Color(0xFF1E8F66))
-                    : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isClaimed ? Icons.check : Icons.copy_rounded,
-                    size: 12,
-                    color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    isClaimed
-                        ? AppLocalizations.of(context).copied
-                        : AppLocalizations.of(context).copy,
-                    style: TextStyle(
-                      color: isClaimed ? const Color(0xFF1E8F66) : Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -1322,7 +1413,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Shops Near You Section
   // ---------------------------------------------------------------------------
   Widget _shopsNearYouSection(Stream<List<Company>> companies) {
-    return StreamBuilder<List<Company>>(
+    return ReplayStreamBuilder<List<Company>>(
       stream: companies,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
@@ -1451,7 +1542,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
 
                     // Rating & Review count — only displayed if at least 5 reviews
-                    StreamBuilder<List<Review>>(
+                    ReplayStreamBuilder<List<Review>>(
                       stream: repo.reviews(company.id),
                       builder: (context, reviewSnap) {
                         final reviews = reviewSnap.data ?? const <Review>[];
@@ -1554,7 +1645,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required Stream<List<Category>> categories,
     required Stream<List<HomeTrendingItem>> dynamicTrending,
   }) {
-    return StreamBuilder<List<Product>>(
+    return ReplayStreamBuilder<List<Product>>(
       stream: products,
       builder: (context, prodSnap) {
         if (prodSnap.connectionState == ConnectionState.waiting &&
@@ -1563,12 +1654,12 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         final allProducts = prodSnap.data ?? const <Product>[];
 
-        return StreamBuilder<List<Category>>(
+        return ReplayStreamBuilder<List<Category>>(
           stream: categories,
           builder: (context, catSnap) {
             final allCategories = catSnap.data ?? const <Category>[];
 
-            return StreamBuilder<List<HomeTrendingItem>>(
+            return ReplayStreamBuilder<List<HomeTrendingItem>>(
               stream: dynamicTrending,
               builder: (context, trendSnap) {
                 final dynamicItems =
@@ -1657,7 +1748,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    StreamBuilder<List<Company>>(
+                    ReplayStreamBuilder<List<Company>>(
                       stream: repo.companies(),
                       builder: (context, compSnap) {
                         final compList = (compSnap.data ?? const <Company>[])
@@ -1731,7 +1822,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return 6;
   }
 
-  Widget _dynamicTrendingVerticalContent(List<_TrendingRailItem> items) {
+  Widget _dynamicTrendingVerticalContent(List<_TrendingRailItem> all) {
+    _trendingTotal = all.length;
+    final items = all.take(_limit).toList();
     if (context.isDesktop) {
       return LayoutBuilder(
         builder: (context, constraints) {
@@ -1800,7 +1893,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _trendingProductsVerticalContent(List<Product> list) {
+  Widget _trendingProductsVerticalContent(List<Product> all) {
+    _trendingTotal = all.length;
+    final list = all.take(_limit).toList();
     if (context.isDesktop) {
       return LayoutBuilder(
         builder: (context, constraints) {
@@ -1847,11 +1942,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // Recommendations Section (2-Column Grid)
   // ---------------------------------------------------------------------------
   Widget _recommendationsSection(
-    Future<List<Product>> recs,
+    Refreshable<List<Product>> recs,
     Stream<List<Product>> allProducts,
     AppLocalizations l10n,
   ) {
-    return StreamBuilder<List<Product>>(
+    return ReplayStreamBuilder<List<Product>>(
       stream: allProducts,
       builder: (context, snapAll) {
         if (snapAll.connectionState == ConnectionState.waiting &&
@@ -1861,10 +1956,10 @@ class _HomeScreenState extends State<HomeScreen> {
         final allList = snapAll.data ?? const <Product>[];
         if (allList.isEmpty) return const SizedBox.shrink();
 
-        return FutureBuilder<List<Product>>(
-          future: recs,
-          builder: (context, snapRecs) {
-            final recList = snapRecs.data ?? const <Product>[];
+        return ListenableBuilder(
+          listenable: recs,
+          builder: (context, _) {
+            final recList = recs.value ?? const <Product>[];
             final productsToShow = recList.isNotEmpty ? recList : allList;
 
             return Column(
@@ -1878,6 +1973,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 10),
                 _buildProductGridView(productsToShow),
+                // More products follow as the shopper scrolls on. A still icon,
+                // not a spinner: an endless animation would keep the page
+                // redrawing for as long as it is open.
+                if (_hasMore)
+                  const Padding(
+                    key: Key('home-load-more'),
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ),
               ],
             );
           },
@@ -1886,7 +1995,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductGridView(List<Product> products) {
+  Widget _buildProductGridView(List<Product> all) {
+    _recommendedTotal = all.length;
+    final products = all.take(_limit).toList();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: LayoutBuilder(
@@ -2116,7 +2227,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 14),
         Expanded(
-          child: StreamBuilder<List<Voucher>>(
+          child: ReplayStreamBuilder<List<Voucher>>(
             stream: vouchers,
             initialData: initialList,
             builder: (context, snap) {
@@ -2355,7 +2466,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 12),
         Expanded(
-          child: StreamBuilder<List<Company>>(
+          child: ReplayStreamBuilder<List<Company>>(
             stream: repo.companies(),
             initialData: initialList,
             builder: (context, snap) {
@@ -2741,8 +2852,15 @@ class TrendingVerticalProductCard extends StatelessWidget {
     return (((product.amount - product.price) / product.amount) * 100).round();
   }
 
-  void _doAddToCart(BuildContext context) {
-    context.read<CartCubit>().add(product, company: company);
+  Future<void> _doAddToCart(BuildContext context) async {
+    final cart = context.read<CartCubit>();
+    final choice = await AddOnSheet.pick(
+      context,
+      product: product,
+      symbol: company?.currencySymbol ?? '₹',
+    );
+    if (choice == null || !context.mounted) return;
+    cart.add(product, company: company, qty: choice.qty, addOns: choice.addOns);
     showAddToCartNotification(context, productName: product.name);
   }
 

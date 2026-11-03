@@ -6,7 +6,9 @@ import 'package:myshop/core/widgets/app_toast.dart';
 
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/domain/addon_rules.dart';
 import '../../../core/models/product.dart';
+import '../../../core/models/product_addon.dart';
 import '../../../core/services/auth_session.dart';
 import '../../../core/services/qr_deep_link_service.dart';
 import '../../../core/services/service_locator.dart';
@@ -16,6 +18,7 @@ import '../../../core/widgets/modern_button.dart';
 import '../../../core/widgets/modern_card.dart';
 import '../../reviews/widgets/product_reviews_list.dart';
 import '../qr/widgets/entity_qr_dialog.dart';
+import 'widgets/addons_editor.dart';
 import 'widgets/structured_content_editors.dart';
 
 /// Full-screen form for creating and editing a Product with Dynamic Variant Generation.
@@ -66,6 +69,10 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   // Step 4: Dynamic Options & Variants State
   final List<ProductOption> _options = [];
   final List<ProductVariant> _variants = [];
+
+  // Add-ons: optional extras sold with the product, and how they are chosen.
+  List<ProductAddOn> _addOns = <ProductAddOn>[];
+  String _addOnSelection = AddOnSelectionType.checkbox;
 
   // Step 5: Specifications & Policies Controllers
   final List<MapEntry<TextEditingController, TextEditingController>>
@@ -269,6 +276,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
     _variants.clear();
     _variants.addAll(p.variants);
+
+    _addOns = List<ProductAddOn>.of(p.addOns);
+    _addOnSelection = AddOnSelectionType.normalize(p.addOnSelection);
 
     for (final entry in _specControllers) {
       entry.key.dispose();
@@ -1905,6 +1915,25 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         return;
       }
 
+      // Add-ons: a bad one blocks the save, with its reason.
+      final addOnIssue = AddOnRules.validateList(_addOns);
+      if (addOnIssue != null) {
+        if (mounted) {
+          final l10n = AppLocalizations.of(context);
+          ScaffoldMessenger.of(context).showAppToast(
+            SnackBar(
+              content: Text(
+                '${l10n.addOnsFixBeforeSaving} '
+                '${AddOnsEditor.messageFor(l10n, addOnIssue)}',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        setState(() => _isSaving = false);
+        return;
+      }
+
       final product = Product(
         id: resolvedId,
         companyId: _companyId,
@@ -1935,6 +1964,8 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
             allDetails[i].copyWith(order: i),
         ],
         policy: _policyCtrl.text.trim(),
+        addOns: _addOns,
+        addOnSelection: _addOnSelection,
       );
 
       await repo.saveProduct(product);
@@ -3479,6 +3510,19 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                         ),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ==========================================
+                // Add-ons (optional extras sold with the product)
+                // ==========================================
+                AddOnsEditor(
+                  addOns: _addOns,
+                  selectionType: _addOnSelection,
+                  onChanged: (list) => setState(() => _addOns = list),
+                  onSelectionChanged: (v) =>
+                      setState(() => _addOnSelection = v),
                 ),
 
                 const SizedBox(height: 20),
