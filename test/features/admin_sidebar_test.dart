@@ -95,19 +95,16 @@ void main() {
     expect(sidebarOffset(tester), 0);
 
     // Scroll the menu down, as the admin does to reach a lower item.
-    await tester.drag(sidebarList().first, const Offset(0, -400));
+    await tester.drag(sidebarList().first, const Offset(0, -1000));
     await tester.pumpAndSettle();
     final scrolled = sidebarOffset(tester);
     expect(scrolled, greaterThan(100));
 
-    // Tap the last item that is visible.
-    final items = find.descendant(
-      of: sidebarList().first,
-      matching: find.byType(InkWell),
+    // Pick an ordinary page that is in view (the Home Screen Config pages ask
+    // for a password first).
+    await tester.tap(
+      find.descendant(of: sidebarList().first, matching: find.text('Reviews')),
     );
-    final visible = items.evaluate().length;
-    expect(visible, greaterThan(3));
-    await tester.tap(items.at(visible - 3));
     await tester.pump(); // ONE frame: a transition would still show both pages
 
     expect(
@@ -124,6 +121,20 @@ void main() {
       scrolled,
       reason: 'the menu must not jump back to the top',
     );
+  });
+
+  testWidgets('desktop header has no back arrow while the sidebar shows', (
+    tester,
+  ) async {
+    await openAdmin(tester);
+    await tester.drag(sidebarList().first, const Offset(0, -1000));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(of: sidebarList().first, matching: find.text('Reviews')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsNothing);
+    expect(find.byIcon(Icons.arrow_back), findsNothing);
   });
 
   testWidgets('a second pick keeps the position too', (tester) async {

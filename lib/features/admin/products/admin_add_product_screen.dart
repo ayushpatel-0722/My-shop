@@ -7,6 +7,7 @@ import 'package:myshop/core/widgets/app_toast.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/domain/addon_rules.dart';
+import '../../../core/domain/product_limits.dart';
 import '../../../core/models/product.dart';
 import '../../../core/models/product_addon.dart';
 import '../../../core/services/auth_session.dart';
@@ -19,6 +20,7 @@ import '../../../core/widgets/modern_card.dart';
 import '../../reviews/widgets/product_reviews_list.dart';
 import '../qr/widgets/entity_qr_dialog.dart';
 import 'widgets/addons_editor.dart';
+import 'widgets/plan_limit_dialog.dart';
 import 'widgets/structured_content_editors.dart';
 
 /// Full-screen form for creating and editing a Product with Dynamic Variant Generation.
@@ -85,6 +87,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
   String _measurementType =
       'quantity_based'; // 'quantity_based' | 'weight_based'
   bool _isRecommended = false;
+  bool _isPublished = true;
   bool _isSaving = false;
   bool _isLoadingProduct = false;
   String? _loadedProductId;
@@ -263,6 +266,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
 
     _measurementType = p.type.isNotEmpty ? p.type : 'quantity_based';
     _isRecommended = p.isRecommended;
+    _isPublished = p.isPublished;
     _policyCtrl.text = p.policy;
     if (p.companyId.isNotEmpty) {
       _companyId = p.companyId;
@@ -1934,7 +1938,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         return;
       }
 
-      final product = Product(
+      var product = Product(
         id: resolvedId,
         companyId: _companyId,
         name: _nameCtrl.text.trim(),
@@ -1951,6 +1955,7 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         stockQty: stockValue,
         isUnlimitedStock: isUnlimited,
         isRecommended: _isRecommended,
+        isPublished: _isPublished,
         images: allImages,
         options: _options,
         variants: _variants,
@@ -1968,6 +1973,14 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
         addOnSelection: _addOnSelection,
       );
 
+      // Plan limits (`max_products`): ask before an over-limit publish, stop an
+      // over-limit creation. The repository checks again when saving.
+      final checked = await _checkPlanLimits(product);
+      if (checked == null) {
+        if (mounted) setState(() => _isSaving = false);
+        return;
+      }
+      product = checked;
       await repo.saveProduct(product);
 
       int removedTrendingCount = 0;
@@ -2055,6 +2068,9 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
           context.go(AppRoutes.adminProducts);
         } catch (_) {}
       }
+    } on ProductLimitException catch (e) {
+      // Another save got in first and the shop is now at its limit.
+      if (mounted) await _showCreateLimitDialog(e.cap);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showAppToast(
@@ -2066,6 +2082,92 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  /// Applies the plan's product limits to this save. Returns the product to
+  /// save (unpublished if the published limit is reached and the admin agreed),
+  /// or null when the save must not go ahead.
+  Future<Product?> _checkPlanLimits(Product product) async {
+    final company = await repo.company(_companyId);
+    final limits = ProductLimits(company?.maxProducts);
+    if (!limits.hasLimit) return product;
+
+    final counts = await repo.productCounts(_companyId);
+    Product? existing;
+    if (product.id.isNotEmpty) {
+      existing = await repo.product(product.id);
+      if (existing?.companyId != _companyId) existing = null;
+    }
+    // The product being edited is not "another" product: never count it twice.
+    final otherTotal = counts.total - (existing == null ? 0 : 1);
+    final otherPublished =
+        counts.published - (existing != null && existing.isPublished ? 1 : 0);
+
+    switch (limits.decide(
+      isNew: existing == null,
+      wasPublished: existing?.isPublished ?? false,
+      wantsPublished: product.isPublished,
+      otherTotal: otherTotal,
+      otherPublished: otherPublished,
+    )) {
+      case ProductLimitDecision.allowed:
+        return product;
+      case ProductLimitDecision.createBlocked:
+        if (mounted) await _showCreateLimitDialog(limits.totalCap!);
+        return null;
+      case ProductLimitDecision.publishBlocked:
+        if (!mounted) return null;
+        final l10n = AppLocalizations.of(context);
+        final choice = await showPlanLimitDialog(
+          context,
+          dialogKey: const Key('product-publish-limit-dialog'),
+          icon: Icons.visibility_off_outlined,
+          color: Colors.orange.shade800,
+          title: l10n.productPublishLimitTitle,
+          message: l10n.productPublishLimitBody(limits.maxProducts!),
+          usageLabel: l10n.subscriptionPublishedUsage,
+          used: otherPublished,
+          total: limits.maxProducts!,
+          confirmLabel: l10n.productLimitSaveUnpublished,
+          confirmKey: const Key('product-publish-limit-ok'),
+          cancelLabel: l10n.cancel,
+          cancelKey: const Key('product-publish-limit-cancel'),
+          upgradeKey: const Key('product-publish-limit-upgrade'),
+        );
+        if (choice == PlanLimitChoice.upgrade) {
+          _goToPlanPage();
+          return null;
+        }
+        if (choice != PlanLimitChoice.confirm) return null;
+        if (mounted) setState(() => _isPublished = false);
+        return product.copyWith(isPublished: false);
+    }
+  }
+
+  Future<void> _showCreateLimitDialog(int cap) async {
+    final l10n = AppLocalizations.of(context);
+    final choice = await showPlanLimitDialog(
+      context,
+      dialogKey: const Key('product-create-limit-dialog'),
+      icon: Icons.inventory_2_outlined,
+      color: Colors.red.shade700,
+      title: l10n.productCreateLimitTitle,
+      message: l10n.productCreateLimitBody(cap),
+      usageLabel: l10n.subscriptionTotalUsage,
+      used: cap,
+      total: cap,
+      cancelLabel: l10n.productLimitClose,
+      cancelKey: const Key('product-create-limit-close'),
+      upgradeKey: const Key('product-create-limit-upgrade'),
+    );
+    if (choice == PlanLimitChoice.upgrade) _goToPlanPage();
+  }
+
+  void _goToPlanPage() {
+    if (!mounted) return;
+    try {
+      context.go(AppRoutes.adminSubscription);
+    } catch (_) {}
   }
 
   @override
@@ -2993,6 +3095,27 @@ class _AdminAddProductScreenState extends State<AdminAddProductScreen> {
                             }).toList(),
                           ),
                           const SizedBox(height: 16),
+                          Material(
+                            color: Colors.transparent,
+                            child: SwitchListTile(
+                              key: const Key('product-published-switch'),
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).productPublishedLabel,
+                              ),
+                              subtitle: Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).productPublishedHint,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              value: _isPublished,
+                              onChanged: (val) =>
+                                  setState(() => _isPublished = val),
+                            ),
+                          ),
                           Material(
                             color: Colors.transparent,
                             child: SwitchListTile(

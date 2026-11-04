@@ -1,5 +1,6 @@
-// Prints the salted hash to store as `passwordHash` in the Firestore document
-// `storefront_config/lock`. The password is read from stdin and is never
+// Prints a salted hash to store in the `password` field of the Firestore
+// document `home_screen_confing_password/password` (optional: plain text works
+// too, a hash just keeps the password itself out of the database). The password is read from stdin and is never
 // written anywhere, so it stays out of the repository and shell history:
 //
 //   dart run tool/storefront_password_hash.dart
@@ -17,5 +18,6 @@ void main() {
     stderr.writeln('Use at least 8 characters.');
     exit(1);
   }
-  stdout.writeln(CompanyPassword.hash(password));
+  // A high iteration count: any signed-in user can read this hash.
+  stdout.writeln(CompanyPassword.hash(password, iterations: 150000));
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:firebase_database/firebase_database.dart';
 
+import '../domain/product_limits.dart';
 import '../models/admin.dart';
 import '../models/app_user.dart';
 import '../models/banner.dart';
@@ -82,13 +83,24 @@ abstract class AppRepository {
   Future<Company?> company(String id);
   Stream<List<Category>> categories({String companyId = ''});
   Future<Category?> category(String id, {String companyId = ''});
+
+  /// Products, by default only the published ones (what shoppers see). The
+  /// admin screens pass [includeUnpublished] to work with the whole catalogue.
   Stream<List<Product>> products({
     String companyId = '',
     String categoryId = '',
     String search = '',
+    bool includeUnpublished = false,
   });
+
+  /// How many products the shop has, all and published (for the plan's
+  /// `max_products` limits).
+  Future<ProductCounts> productCounts(String companyId);
   Future<Product?> product(String id);
-  Stream<List<AdBanner>> adBanners();
+
+  /// Home screen ads banners (`home_ads_banners`). With a [shopId] only that
+  /// shop's banners; without one, every shop's (the marketplace home).
+  Stream<List<AdBanner>> adBanners({String shopId = ''});
   Stream<List<OfferBanner>> offerBanners(String companyId);
   Stream<List<Voucher>> vouchers(String companyId);
 
@@ -216,6 +228,10 @@ abstract class AppRepository {
   Future<void> deleteVoucher(String voucherId, {String companyId = ''});
 
   /// Creates or updates a product and keeps its category assignment in sync.
+  /// Saves a product, enforcing the shop's plan limits: throws
+  /// [ProductLimitException] when a new product would go over the total
+  /// limit, and stores the product unpublished when publishing it would go
+  /// over the published limit.
   Future<void> saveProduct(Product product);
 
   /// Deletes a product and removes it from every category that listed it.
@@ -251,11 +267,13 @@ abstract class AppRepository {
   Future<void> saveBanner(OfferBanner banner);
   Future<void> saveAdBanner(AdBanner banner);
 
-  /// The salted hash of the password that unlocks editing of the home-screen
-  /// storefront sections (Explore Categories, Trending Now, Ads Banner), or
-  /// null when none has been set up. One password for every company: it lives
-  /// in a single Firebase document (`storefront_config/lock`, field
-  /// `passwordHash`), never as plain text. Throws when it can not be read.
+  /// The stored password that unlocks editing of the home-screen storefront
+  /// sections (Explore Categories, Trending Now, Ads Banner), or null when none
+  /// has been set up. One password for every company, kept by the developer in
+  /// a single Firebase document (`home_screen_confing_password/password`, field
+  /// `password`). It may be plain text or a `pbkdf2-sha256$...` hash; a hash is
+  /// safer, since the document is readable by signed-in users. Throws when it
+  /// can not be read.
   Future<String?> storefrontLockHash();
   Future<void> deleteBanner(String id, {String companyId = ''});
 

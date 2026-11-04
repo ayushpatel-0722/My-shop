@@ -5131,4 +5131,227 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get adsBannerDeleteBody =>
       'यह बैनर हर ग्राहक की होम स्क्रीन से हट जाएगा।';
+
+  @override
+  String get homeConfigGroupTitle => 'होम स्क्रीन कॉन्फ़िग';
+
+  @override
+  String get homeExploreCategoriesNav => 'होम एक्सप्लोर श्रेणियाँ';
+
+  @override
+  String get homeTrendingNowNav => 'होम ट्रेंडिंग नाउ';
+
+  @override
+  String get storefrontLockConfirmBody =>
+      'क्या आप सभी स्टोरफ्रंट कॉन्फ़िगरेशन सेक्शन लॉक करना चाहते हैं?';
+
+  @override
+  String get storefrontLockConfirmOk => 'ठीक है';
+
+  @override
+  String get shareProduct => 'प्रोडक्ट शेयर करें';
+
+  @override
+  String get productPublishLimitTitle => 'प्रकाशन सीमा पूरी हो गई';
+
+  @override
+  String productPublishLimitBody(int max) {
+    return 'आपका प्लान $max प्रोडक्ट तक प्रकाशित करने देता है, और सभी $max स्लॉट भर चुके हैं।\n\nआप यह प्रोडक्ट फिर भी सेव कर सकते हैं। यह तब तक अप्रकाशित (खरीदारों से छिपा) रहेगा, जब तक आप कोई स्लॉट खाली नहीं करते या और प्रोडक्ट प्रकाशित करने के लिए प्लान अपग्रेड नहीं करते।\n\nक्या आप इसे अप्रकाशित सेव करना चाहते हैं?';
+  }
+
+  @override
+  String get productCreateLimitTitle => 'प्रोडक्ट सीमा पूरी हो गई';
+
+  @override
+  String productCreateLimitBody(int cap) {
+    return 'आप अपने वर्तमान प्लान में अनुमत अधिकतम $cap प्रोडक्ट तक पहुँच गए हैं।\n\nऔर प्रोडक्ट जोड़ने के लिए अपना प्लान अपग्रेड करें, या जगह बनाने के लिए अनावश्यक प्रोडक्ट हटाएँ।';
+  }
+
+  @override
+  String get productLimitClose => 'बंद करें';
+
+  @override
+  String get upgradePlan => 'प्लान अपग्रेड करें';
+
+  @override
+  String get productPublishedLabel => 'प्रकाशित';
+
+  @override
+  String get productPublishedHint =>
+      'खरीदार इसे देख और खरीद सकते हैं। अप्रकाशित प्रोडक्ट छिपे रहते हैं।';
+
+  @override
+  String get productUnpublishedBadge => 'अप्रकाशित';
+
+  @override
+  String get subscriptionPlanTitle => 'सब्सक्रिप्शन प्लान';
+
+  @override
+  String get subscriptionPublishedUsage => 'प्रकाशित प्रोडक्ट';
+
+  @override
+  String get subscriptionTotalUsage => 'सभी प्रोडक्ट (प्रकाशित + अप्रकाशित)';
+
+  @override
+  String get subscriptionNoLimit =>
+      'आपके प्लान में कोई प्रोडक्ट सीमा तय नहीं है।';
+
+  @override
+  String subscriptionRulesNote(int max, int cap) {
+    return 'आप $max प्रोडक्ट तक प्रकाशित कर सकते हैं। कुल मिलाकर $cap तक बना सकते हैं; अतिरिक्त प्रोडक्ट अप्रकाशित रहेंगे। सीमा बढ़ाने के लिए प्लान अपग्रेड करने हेतु सपोर्ट से संपर्क करें।';
+  }
+
+  @override
+  String get productLimitSaveUnpublished => 'अप्रकाशित सेव करें';
+
+  @override
+  String productLimitUsed(int used, int total) {
+    return '$total में से $used उपयोग में';
+  }
+
+  @override
+  String get planBasic => 'बेसिक';
+
+  @override
+  String get planGolden => 'गोल्डन';
+
+  @override
+  String get planDiamond => 'डायमंड';
+
+  @override
+  String get planCustom => 'कस्टम प्लान';
+
+  @override
+  String get planYourPlan => 'आपका प्लान';
+
+  @override
+  String get planCurrentBadge => 'वर्तमान प्लान';
+
+  @override
+  String get planMostPopular => 'सबसे लोकप्रिय';
+
+  @override
+  String planPublishFeature(int count) {
+    return '$count प्रोडक्ट तक प्रकाशित करें';
+  }
+
+  @override
+  String planCreateFeature(int count) {
+    return 'कुल $count प्रोडक्ट तक रखें (अतिरिक्त अप्रकाशित रहते हैं)';
+  }
+
+  @override
+  String planCategoriesFeature(int count) {
+    return '$count श्रेणियाँ तक';
+  }
+
+  @override
+  String planUpgradeTo(String plan) {
+    return '$plan में अपग्रेड करें';
+  }
+
+  @override
+  String get planIncluded => 'आपके प्लान में शामिल';
+
+  @override
+  String get planChoose => 'अपना प्लान चुनें';
+
+  @override
+  String get planChooseHint =>
+      'हर प्लान में पूरा स्टोर शामिल है। अपने कैटलॉग के हिसाब से चुनें।';
+
+  @override
+  String get planCategoriesUsage => 'श्रेणियाँ';
+
+  @override
+  String get planContactTitle => 'अपग्रेड के लिए तैयार?';
+
+  @override
+  String planContactBody(String name) {
+    return 'प्लान बदलने के लिए $name से संपर्क करें। प्लान अपडेट होते ही नई सीमाएँ लागू हो जाती हैं।';
+  }
+
+  @override
+  String planContactEmailButton(String name) {
+    return '$name को ईमेल करें';
+  }
+
+  @override
+  String get planCopyEmail => 'ईमेल कॉपी करें';
+
+  @override
+  String get planEmailCopied => 'ईमेल पता कॉपी हो गया';
+
+  @override
+  String planEmailSubject(String plan, String shop) {
+    return 'प्लान अपग्रेड अनुरोध: $plan ($shop)';
+  }
+
+  @override
+  String planEmailBody(String name, String shop, String plan) {
+    return 'नमस्ते $name,\n\nमैं अपनी दुकान \"$shop\" को $plan प्लान में अपग्रेड करना चाहता/चाहती हूँ।\n\nधन्यवाद।';
+  }
+
+  @override
+  String planEmailFailed(String email) {
+    return 'ईमेल ऐप नहीं खुल सका। पता है $email।';
+  }
+
+  @override
+  String get authAdminSubtitle =>
+      'अपनी दुकान प्रबंधित करने के लिए साइन इन करें';
+
+  @override
+  String get authEmployeeSubtitle =>
+      'अपनी दुकान के ऑर्डर संभालने के लिए साइन इन करें';
+
+  @override
+  String get authRoleAdmin => 'एडमिन';
+
+  @override
+  String get authRoleEmployee => 'कर्मचारी';
+
+  @override
+  String get authStepCompany => 'कंपनी';
+
+  @override
+  String get authStepAccount => 'आपका खाता';
+
+  @override
+  String authStepOf(int current, int total) {
+    return 'चरण $current / $total';
+  }
+
+  @override
+  String get authChangeRole => 'दूसरी भूमिका चुनें';
+
+  @override
+  String get authShowPassword => 'पासवर्ड दिखाएं';
+
+  @override
+  String get authHidePassword => 'पासवर्ड छिपाएं';
+
+  @override
+  String get onboardingStepBusiness => 'व्यवसाय';
+
+  @override
+  String get onboardingStepHours => 'खुलने का समय';
+
+  @override
+  String get onboardingStepSetup => 'सेटअप';
+
+  @override
+  String get onboardingSubtitle => 'तीन छोटे चरणों में अपनी दुकान सेट करें';
+
+  @override
+  String get orderFilterAnyDate => 'कोई भी तारीख';
+
+  @override
+  String get orderFilterClear => 'फ़िल्टर हटाएं';
+
+  @override
+  String get orderFilterPickDate => 'तारीख सीमा चुनें';
+
+  @override
+  String get orderFilterStatus => 'स्थिति';
 }

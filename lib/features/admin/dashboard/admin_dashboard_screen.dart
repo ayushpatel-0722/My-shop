@@ -69,7 +69,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           final orders = ordersSnap.data ?? const <Order>[];
 
           return StreamBuilder<List<Product>>(
-            stream: repo.products(companyId: _companyId),
+            stream: repo.products(
+              companyId: _companyId,
+              includeUnpublished: true,
+            ),
             builder: (context, productsSnap) {
               final products = productsSnap.data ?? const <Product>[];
 

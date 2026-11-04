@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { limitsForCompany, enforce } = require('./product_limits');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -360,3 +361,60 @@ exports.ping = functions.https.onCall(async (data, context) => {
   console.log('ping called', { time: new Date().toISOString(), data });
   return { ok: true, time: new Date().toISOString(), echo: data || null };
 });
+
+// ---------------------------------------------------------------------------
+// Plan limits: `max_products` on the company is the most products the shop may
+// publish; the shop may hold 20% more, unpublished. The app checks first, this
+// is the final word (a modified client, or two saves at the same moment).
+//
+// Every write to a shop's products is checked inside a transaction that also
+// writes one small lock document per shop, so two writes at once are handled
+// one after the other and see each other's result.
+// ---------------------------------------------------------------------------
+exports.enforceProductLimits = functions.firestore
+  .document('companies/{companyId}/products/{productId}')
+  .onWrite(async (change, context) => {
+    if (!change.after.exists) return null; // deletions only free room
+    const { companyId, productId } = context.params;
+
+    const company = await db.collection('companies').doc(companyId).get();
+    const limits = limitsForCompany(company.data());
+    if (!limits) return null;
+
+    const createdNow = !change.before.exists;
+    const wasPublished =
+      change.before.exists && change.before.data().isPublished !== false;
+    const lockRef = db.collection('product_limit_locks').doc(companyId);
+    const productsRef = db
+      .collection('companies')
+      .doc(companyId)
+      .collection('products');
+
+    await db.runTransaction(async (tx) => {
+      await tx.get(lockRef);
+      const snap = await tx.get(productsRef);
+      const docs = snap.docs.map((d) => ({
+        id: d.id,
+        published: d.data().isPublished !== false,
+      }));
+      const action = enforce({
+        limits,
+        docs,
+        productId,
+        createdNow,
+        wasPublished,
+      });
+      if (action === 'delete') {
+        tx.delete(change.after.ref);
+      } else if (action === 'unpublish') {
+        tx.update(change.after.ref, { isPublished: false });
+      }
+      tx.set(
+        lockRef,
+        { checkedAt: admin.firestore.FieldValue.serverTimestamp() },
+        { merge: true },
+      );
+    });
+    return null;
+  });
+

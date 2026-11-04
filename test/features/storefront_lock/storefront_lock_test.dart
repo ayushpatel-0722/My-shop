@@ -3,12 +3,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:myshop/core/models/banner.dart';
 import 'package:myshop/core/models/company.dart';
 import 'package:myshop/core/services/company_password.dart';
+import 'package:myshop/features/admin/admin_shell.dart';
 import 'package:myshop/features/admin/banners/admin_ads_banners_screen.dart';
 import 'package:myshop/features/admin/home_config/admin_explore_categories_screen.dart';
 import 'package:myshop/features/admin/home_config/admin_trending_now_screen.dart';
 import 'package:myshop/features/admin/storefront_lock/locked_admin_shell.dart';
+import 'package:myshop/features/admin/storefront_lock/storefront_access.dart';
 import 'package:myshop/features/admin/storefront_lock/storefront_lock_controller.dart';
 
+import '../../helpers/storefront_unlock.dart';
 import '../../helpers/test_harness.dart';
 
 // A throwaway password for tests only; the real one lives in Firebase as a
@@ -175,7 +178,20 @@ void main() {
       expect(find.byKey(const Key('storefront-locked-overlay')), findsNothing);
       expect(find.byKey(const Key('fab')), findsOneWidget);
 
+      // Locking asks first: Cancel keeps it open, OK locks.
       await tester.tap(find.byKey(const Key('storefront-lock-button')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Do you want to lock all storefront configuration sections?'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('storefront-lock-confirm-cancel')));
+      await tester.pumpAndSettle();
+      expect(c.unlocked, isTrue);
+
+      await tester.tap(find.byKey(const Key('storefront-lock-button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('storefront-lock-confirm-ok')));
       await tester.pumpAndSettle();
       expect(c.unlocked, isFalse);
       expect(
@@ -228,6 +244,14 @@ void main() {
           actionType: BannerActionType.externalUrl,
           actionTarget: 'https://example.com',
           priority: 3,
+          shopId: 'c_organic',
+        ),
+      );
+      await repo.saveAdBanner(
+        const AdBanner(
+          id: 'other',
+          image: 'https://example.com/o.jpg',
+          shopId: 'c_techtronics',
         ),
       );
       await pumpTestApp(
@@ -236,6 +260,11 @@ void main() {
         user: TestHarness.admin,
       );
       expect(find.byKey(const Key('ads-banner-card-ad1')), findsOneWidget);
+      expect(
+        find.byKey(const Key('ads-banner-card-other')),
+        findsNothing,
+        reason: 'another shop\'s banner is not managed here',
+      );
 
       // The home screen reads the same stream.
       expect((await repo.adBanners().first).map((b) => b.id), contains('ad1'));
@@ -245,5 +274,161 @@ void main() {
         isNot(contains('ad1')),
       );
     });
+
+    testWidgets('a new banner is saved under the admin\'s shop', (
+      tester,
+    ) async {
+      final repo = TestHarness.useMockRepository();
+      configureStorefrontLock(repo);
+      TestHarness.signIn(TestHarness.admin);
+      await pumpTestApp(
+        tester,
+        const AdminAdsBannersScreen(),
+        user: TestHarness.admin,
+      );
+      await unlockStorefront(tester);
+      await tester.tap(find.byKey(const Key('ads-banner-add')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('ads-banner-image-field')),
+        'https://example.com/new.png',
+      );
+      await tester.tap(find.byKey(const Key('ads-banner-save')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final saved = await repo.adBanners().first;
+      final added = saved.singleWhere(
+        (b) => b.image == 'https://example.com/new.png',
+      );
+      expect(added.shopId, TestHarness.admin.companyId);
+    });
+  });
+
+  group('Admin menu: Home Screen Config group', () {
+    Future<void> pumpMenu(WidgetTester tester, Widget page) => pumpTestApp(
+      tester,
+      page,
+      user: TestHarness.admin,
+      size: const Size(1280, 1200),
+    );
+
+    testWidgets('is its own group, separate from Storefront Config', (
+      tester,
+    ) async {
+      TestHarness.useMockRepository();
+      await pumpMenu(tester, const AdminShell(title: 'Dash', child: Text('x')));
+      expect(find.text('STOREFRONT CONFIG'), findsOneWidget);
+      expect(find.text('HOME SCREEN CONFIG'), findsOneWidget);
+      expect(find.byKey(const Key('storefront-group-lock')), findsOneWidget);
+      expect(find.text('Home Trending Now'), findsOneWidget);
+      expect(find.text('Home Screen Ads Banner'), findsOneWidget);
+      expect(StorefrontAccess.controller.unlocked, isFalse);
+    });
+
+    testWidgets('header lock opens the dialog and unlocks the group', (
+      tester,
+    ) async {
+      final repo = TestHarness.useMockRepository();
+      repo.storefrontLockHashValue = _testHash;
+      await pumpMenu(tester, const AdminShell(title: 'Dash', child: Text('x')));
+      await tester.tap(find.byKey(const Key('storefront-group-lock')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('storefront-unlock-dialog')), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const Key('storefront-password-field')),
+        _testPassword,
+      );
+      await tester.tap(find.byKey(const Key('storefront-unlock-submit')));
+      await tester.pumpAndSettle();
+      expect(StorefrontAccess.controller.unlocked, isTrue);
+
+      // Tap the lock again: asks first, then locks on OK.
+      await tester.tap(find.byKey(const Key('storefront-group-lock')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('storefront-lock-confirm-cancel')));
+      await tester.pumpAndSettle();
+      expect(StorefrontAccess.controller.unlocked, isTrue);
+      await tester.tap(find.byKey(const Key('storefront-group-lock')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('storefront-lock-confirm-ok')));
+      await tester.pumpAndSettle();
+      expect(StorefrontAccess.controller.unlocked, isFalse);
+    });
+
+    testWidgets('signing out locks the group; the next login starts locked', (
+      tester,
+    ) async {
+      final repo = TestHarness.useMockRepository();
+      repo.storefrontLockHashValue = _testHash;
+      TestHarness.signIn(TestHarness.admin);
+      expect(
+        await StorefrontAccess.controller.tryUnlock(_testPassword),
+        UnlockResult.unlocked,
+      );
+      TestHarness.signOut();
+      expect(StorefrontAccess.controller.unlocked, isFalse);
+      TestHarness.signIn(TestHarness.admin);
+      expect(StorefrontAccess.controller.unlocked, isFalse);
+    });
+
+    testWidgets('tapping a protected item while locked asks for the password', (
+      tester,
+    ) async {
+      TestHarness.useMockRepository();
+      await pumpMenu(tester, const AdminShell(title: 'Dash', child: Text('x')));
+      await tester.tap(find.text('Home Trending Now'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('storefront-unlock-dialog')), findsOneWidget);
+    });
+
+    testWidgets('one unlock survives moving to other admin screens', (
+      tester,
+    ) async {
+      final repo = TestHarness.useMockRepository();
+      repo.storefrontLockHashValue = _testHash;
+      TestHarness.signIn(TestHarness.admin);
+      expect(
+        await StorefrontAccess.controller.tryUnlock(_testPassword),
+        UnlockResult.unlocked,
+      );
+
+      // A protected screen opens straight into edit mode...
+      await pumpMenu(tester, const AdminAdsBannersScreen());
+      expect(find.byKey(const Key('storefront-locked-overlay')), findsNothing);
+
+      // ...and moving to any other admin page (QR Codes, Vouchers, ...) does
+      // NOT lock it; the sidebar lock still shows "unlocked".
+      await pumpMenu(tester, const AdminShell(title: 'Dash', child: Text('x')));
+      await tester.pump();
+      expect(StorefrontAccess.controller.unlocked, isTrue);
+      expect(find.byIcon(Icons.lock_open_rounded), findsWidgets);
+
+      // Back in a protected screen: still open, no password asked.
+      await pumpMenu(tester, const AdminAdsBannersScreen());
+      expect(find.byKey(const Key('storefront-locked-overlay')), findsNothing);
+    });
+
+    for (final entry in <String, Widget>{
+      'explore categories': const AdminExploreCategoriesScreen(),
+      'trending now': const AdminTrendingNowScreen(),
+    }.entries) {
+      testWidgets('one unlock survives ${entry.key} loading / no-shop pages', (
+        tester,
+      ) async {
+        final repo = TestHarness.useMockRepository();
+        repo.storefrontLockHashValue = _testHash;
+        TestHarness.signIn(TestHarness.admin);
+        expect(
+          await StorefrontAccess.controller.tryUnlock(_testPassword),
+          UnlockResult.unlocked,
+        );
+        // No shop is set up, so the screen shows its plain placeholder page.
+        await pumpMenu(tester, entry.value);
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(StorefrontAccess.controller.unlocked, isTrue);
+      });
+    }
   });
 }

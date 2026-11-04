@@ -7,6 +7,12 @@
       "!**/.well-known/**",
       "**/node_modules/**"
     ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
     "headers": [
       {
         "source": "/.well-known/**",

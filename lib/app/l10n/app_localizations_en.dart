@@ -5118,4 +5118,224 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adsBannerDeleteBody =>
       'This banner will disappear from every shopper\'s home screen.';
+
+  @override
+  String get homeConfigGroupTitle => 'HOME SCREEN CONFIG';
+
+  @override
+  String get homeExploreCategoriesNav => 'Home Explore Categories';
+
+  @override
+  String get homeTrendingNowNav => 'Home Trending Now';
+
+  @override
+  String get storefrontLockConfirmBody =>
+      'Do you want to lock all storefront configuration sections?';
+
+  @override
+  String get storefrontLockConfirmOk => 'OK';
+
+  @override
+  String get shareProduct => 'Share product';
+
+  @override
+  String get productPublishLimitTitle => 'Publishing limit reached';
+
+  @override
+  String productPublishLimitBody(int max) {
+    return 'Your plan lets you publish up to $max products, and all $max slots are in use.\n\nYou can still save this product. It will stay unpublished (hidden from shoppers) until you free up a slot or upgrade your plan to publish more.\n\nDo you want to save it as unpublished?';
+  }
+
+  @override
+  String get productCreateLimitTitle => 'Product limit reached';
+
+  @override
+  String productCreateLimitBody(int cap) {
+    return 'You have reached the maximum of $cap products allowed on your current plan.\n\nTo add more products, upgrade your plan or delete products you no longer need to free up space.';
+  }
+
+  @override
+  String get productLimitClose => 'Close';
+
+  @override
+  String get upgradePlan => 'Upgrade plan';
+
+  @override
+  String get productPublishedLabel => 'Published';
+
+  @override
+  String get productPublishedHint =>
+      'Shoppers can see and buy it. Unpublished products stay hidden.';
+
+  @override
+  String get productUnpublishedBadge => 'Unpublished';
+
+  @override
+  String get subscriptionPlanTitle => 'Subscription Plan';
+
+  @override
+  String get subscriptionPublishedUsage => 'Published products';
+
+  @override
+  String get subscriptionTotalUsage => 'All products (published + unpublished)';
+
+  @override
+  String get subscriptionNoLimit => 'Your plan has no product limit set.';
+
+  @override
+  String subscriptionRulesNote(int max, int cap) {
+    return 'You can publish up to $max products. You can create up to $cap in total; the extra ones stay unpublished. To raise these limits, contact support to upgrade your plan.';
+  }
+
+  @override
+  String get productLimitSaveUnpublished => 'Save as unpublished';
+
+  @override
+  String productLimitUsed(int used, int total) {
+    return '$used of $total used';
+  }
+
+  @override
+  String get planBasic => 'Basic';
+
+  @override
+  String get planGolden => 'Golden';
+
+  @override
+  String get planDiamond => 'Diamond';
+
+  @override
+  String get planCustom => 'Custom plan';
+
+  @override
+  String get planYourPlan => 'Your plan';
+
+  @override
+  String get planCurrentBadge => 'Current plan';
+
+  @override
+  String get planMostPopular => 'Most popular';
+
+  @override
+  String planPublishFeature(int count) {
+    return 'Publish up to $count products';
+  }
+
+  @override
+  String planCreateFeature(int count) {
+    return 'Keep up to $count products in total (extra ones stay unpublished)';
+  }
+
+  @override
+  String planCategoriesFeature(int count) {
+    return 'Up to $count categories';
+  }
+
+  @override
+  String planUpgradeTo(String plan) {
+    return 'Upgrade to $plan';
+  }
+
+  @override
+  String get planIncluded => 'Included in your plan';
+
+  @override
+  String get planChoose => 'Choose your plan';
+
+  @override
+  String get planChooseHint =>
+      'Every plan includes the full store. Pick the one that fits your catalogue.';
+
+  @override
+  String get planCategoriesUsage => 'Categories';
+
+  @override
+  String get planContactTitle => 'Ready to upgrade?';
+
+  @override
+  String planContactBody(String name) {
+    return 'Get in touch with $name to change your plan. Your new limits apply as soon as the plan is updated.';
+  }
+
+  @override
+  String planContactEmailButton(String name) {
+    return 'Email $name';
+  }
+
+  @override
+  String get planCopyEmail => 'Copy email';
+
+  @override
+  String get planEmailCopied => 'Email address copied';
+
+  @override
+  String planEmailSubject(String plan, String shop) {
+    return 'Plan upgrade request: $plan ($shop)';
+  }
+
+  @override
+  String planEmailBody(String name, String shop, String plan) {
+    return 'Hello $name,\n\nI would like to upgrade my shop \"$shop\" to the $plan plan.\n\nThank you.';
+  }
+
+  @override
+  String planEmailFailed(String email) {
+    return 'Could not open your email app. The address is $email.';
+  }
+
+  @override
+  String get authAdminSubtitle => 'Sign in to manage your shop';
+
+  @override
+  String get authEmployeeSubtitle => 'Sign in to handle your shop\'s orders';
+
+  @override
+  String get authRoleAdmin => 'Admin';
+
+  @override
+  String get authRoleEmployee => 'Employee';
+
+  @override
+  String get authStepCompany => 'Company';
+
+  @override
+  String get authStepAccount => 'Your account';
+
+  @override
+  String authStepOf(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get authChangeRole => 'Choose a different role';
+
+  @override
+  String get authShowPassword => 'Show password';
+
+  @override
+  String get authHidePassword => 'Hide password';
+
+  @override
+  String get onboardingStepBusiness => 'Business';
+
+  @override
+  String get onboardingStepHours => 'Opening hours';
+
+  @override
+  String get onboardingStepSetup => 'Setup';
+
+  @override
+  String get onboardingSubtitle => 'Set up your shop in three short steps';
+
+  @override
+  String get orderFilterAnyDate => 'Any date';
+
+  @override
+  String get orderFilterClear => 'Clear filters';
+
+  @override
+  String get orderFilterPickDate => 'Select date range';
+
+  @override
+  String get orderFilterStatus => 'Status';
 }

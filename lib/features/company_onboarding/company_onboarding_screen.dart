@@ -14,6 +14,7 @@ import '../../core/models/company.dart';
 import '../../core/repositories/app_repository.dart';
 import '../../core/services/company_password.dart';
 import '../auth/auth_cubit.dart';
+import '../auth/widgets/auth_page_shell.dart';
 
 /// Company onboarding wizard (Section 8): basic details, weekly hours,
 /// delivery types, currency, tenant password and logo. On success it hands off
@@ -97,45 +98,105 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final wide = AuthPageShell.isWide(context);
     return Scaffold(
-      appBar: AppBar(title: Text('${l10n.createNewCompany} (${_step + 1}/3)')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: _stepBody(context, l10n)),
-            Row(
-              children: [
-                if (_step > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => setState(() => _step--),
-                      child: Text(l10n.back),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          tooltip: l10n.authChangeRole,
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () {
+            if (_step > 0) {
+              setState(() => _step--);
+            } else if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.role);
+            }
+          },
+        ),
+        title: Text(l10n.createNewCompany),
+      ),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                wide ? 24 : 16,
+                4,
+                wide ? 24 : 16,
+                16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.onboardingSubtitle,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
-                if (_step > 0) const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    key: Key(
-                      _step < 2
-                          ? 'onboarding_next_button'
-                          : 'onboarding_save_button',
-                    ),
-                    onPressed: _step < 2 ? _next : (_busy ? null : _finish),
-                    child: _busy
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
-                          )
-                        : Text(_step < 2 ? l10n.next : l10n.save),
+                  const SizedBox(height: 14),
+                  AuthStepBar(
+                    current: _step,
+                    labels: [
+                      l10n.onboardingStepBusiness,
+                      l10n.onboardingStepHours,
+                      l10n.onboardingStepSetup,
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Expanded(child: _stepBody(context, l10n)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      if (_step > 0)
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(52),
+                            ),
+                            onPressed: () => setState(() => _step--),
+                            child: Text(l10n.back),
+                          ),
+                        ),
+                      if (_step > 0) const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          key: Key(
+                            _step < 2
+                                ? 'onboarding_next_button'
+                                : 'onboarding_save_button',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(52),
+                          ),
+                          onPressed: _step < 2
+                              ? _next
+                              : (_busy ? null : _finish),
+                          child: _busy
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Text(_step < 2 ? l10n.next : l10n.save),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -286,213 +347,215 @@ class _CompanyOnboardingScreenState extends State<CompanyOnboardingScreen> {
       default:
         return ListView(
           children: [
-            Text(AppLocalizations.of(context).currency),
-            const SizedBox(height: 8),
-            SegmentedButton<String>(
-              segments: [
-                ButtonSegment(
-                  value: 'INR',
-                  label: Text(AppLocalizations.of(context).inr),
+            AuthFormSection(
+              title: l10n.onboardingStepSetup,
+              icon: Icons.tune,
+              children: [
+                Text(AppLocalizations.of(context).currency),
+                const SizedBox(height: 8),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(
+                      value: 'INR',
+                      label: Text(AppLocalizations.of(context).inr),
+                    ),
+                    ButtonSegment(
+                      value: 'USD',
+                      label: Text(AppLocalizations.of(context).usd),
+                    ),
+                  ],
+                  selected: {_currency},
+                  onSelectionChanged: (s) =>
+                      setState(() => _currency = s.first),
                 ),
-                ButtonSegment(
-                  value: 'USD',
-                  label: Text(AppLocalizations.of(context).usd),
+                const SizedBox(height: 24),
+                Text(AppLocalizations.of(context).deliveryTypes),
+                const SizedBox(height: 8),
+                CheckboxListTile(
+                  key: const Key('delivery_self_pickup_tile'),
+                  value: _deliveryTypes.contains('self_pickup'),
+                  onChanged: (v) => _toggleDelivery('self_pickup', v),
+                  title: Text(AppLocalizations.of(context).selfPickup2),
+                ),
+                CheckboxListTile(
+                  key: const Key('delivery_home_delivery_tile'),
+                  value: _deliveryTypes.contains('home_delivery'),
+                  onChanged: (v) => _toggleDelivery('home_delivery', v),
+                  title: Text(AppLocalizations.of(context).homeDelivery),
+                ),
+                if (_deliveryTypes.contains('home_delivery')) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    key: const Key('min_order_field'),
+                    controller: _minOrderCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)
+                          .minimumOrderForDelivery(
+                            _currency == 'USD' ? '\$' : '₹',
+                          ),
+                      hintText: AppLocalizations.of(context).eG1990ForNoMinimum,
+                      prefixIcon: const Icon(Icons.shopping_bag_outlined),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                AuthPasswordField(
+                  key: const Key('company_password_field'),
+                  controller: _passwordCtrl,
+                  label: '${l10n.companyPassword} *',
+                  errorText: _passwordError,
+                  onChanged: (v) {
+                    if (_passwordError != null) {
+                      setState(() => _passwordError = null);
+                    }
+                  },
                 ),
               ],
-              selected: {_currency},
-              onSelectionChanged: (s) => setState(() => _currency = s.first),
             ),
-            const SizedBox(height: 24),
-            Text(AppLocalizations.of(context).deliveryTypes),
-            const SizedBox(height: 8),
-            CheckboxListTile(
-              key: const Key('delivery_self_pickup_tile'),
-              value: _deliveryTypes.contains('self_pickup'),
-              onChanged: (v) => _toggleDelivery('self_pickup', v),
-              title: Text(AppLocalizations.of(context).selfPickup2),
-            ),
-            CheckboxListTile(
-              key: const Key('delivery_home_delivery_tile'),
-              value: _deliveryTypes.contains('home_delivery'),
-              onChanged: (v) => _toggleDelivery('home_delivery', v),
-              title: Text(AppLocalizations.of(context).homeDelivery),
-            ),
-            if (_deliveryTypes.contains('home_delivery')) ...[
-              const SizedBox(height: 12),
-              TextField(
-                key: const Key('min_order_field'),
-                controller: _minOrderCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(
-                    context,
-                  ).minimumOrderForDelivery(_currency == 'USD' ? '\$' : '₹'),
-                  hintText: AppLocalizations.of(context).eG1990ForNoMinimum,
-                  prefixIcon: const Icon(Icons.shopping_bag_outlined),
+            AuthFormSection(
+              title: AppLocalizations.of(context).companyBrandingImages,
+              icon: Icons.image_outlined,
+              children: [
+                TextField(
+                  key: const Key('company_logo_url_field'),
+                  controller: _logoUrlCtrl,
+                  keyboardType: TextInputType.url,
+                  onChanged: (v) {
+                    if (_logoUrlError != null) {
+                      setState(() => _logoUrlError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText:
+                        '${AppLocalizations.of(context).companyLogoUrl} *',
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).httpsExampleComLogoPng,
+                    prefixIcon: const Icon(
+                      Icons.photo_size_select_actual_outlined,
+                    ),
+                    errorText: _logoUrlError,
+                  ),
                 ),
-              ),
-            ],
-            const SizedBox(height: 24),
-            TextField(
-              key: const Key('company_password_field'),
-              controller: _passwordCtrl,
-              obscureText: true,
-              onChanged: (v) {
-                if (_passwordError != null) {
-                  setState(() => _passwordError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: '${l10n.companyPassword} *',
-                prefixIcon: const Icon(Icons.lock_outline),
-                errorText: _passwordError,
-              ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('company_banner_url_field'),
+                  controller: _bannerUrlCtrl,
+                  keyboardType: TextInputType.url,
+                  onChanged: (v) {
+                    if (_bannerUrlError != null) {
+                      setState(() => _bannerUrlError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText:
+                        '${AppLocalizations.of(context).companyBannerUrl} *',
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).httpsExampleComStoreBannerJpg,
+                    prefixIcon: const Icon(Icons.panorama_outlined),
+                    errorText: _bannerUrlError,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('company_profile_image_url_field'),
+                  controller: _profileImageUrlCtrl,
+                  keyboardType: TextInputType.url,
+                  onChanged: (v) {
+                    if (_profileImageUrlError != null) {
+                      setState(() => _profileImageUrlError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText:
+                        '${AppLocalizations.of(context).companyStorefrontProfileImageUrl} *',
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).httpsExampleComStorefrontPhotoJpg,
+                    prefixIcon: const Icon(Icons.storefront_outlined),
+                    errorText: _profileImageUrlError,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Text(
-              AppLocalizations.of(context).companyBrandingImages,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('company_logo_url_field'),
-              controller: _logoUrlCtrl,
-              keyboardType: TextInputType.url,
-              onChanged: (v) {
-                if (_logoUrlError != null) setState(() => _logoUrlError = null);
-              },
-              decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context).companyLogoUrl} *',
-                hintText: AppLocalizations.of(context).httpsExampleComLogoPng,
-                prefixIcon: const Icon(Icons.photo_size_select_actual_outlined),
-                errorText: _logoUrlError,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('company_banner_url_field'),
-              controller: _bannerUrlCtrl,
-              keyboardType: TextInputType.url,
-              onChanged: (v) {
-                if (_bannerUrlError != null) {
-                  setState(() => _bannerUrlError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context).companyBannerUrl} *',
-                hintText: AppLocalizations.of(
-                  context,
-                ).httpsExampleComStoreBannerJpg,
-                prefixIcon: const Icon(Icons.panorama_outlined),
-                errorText: _bannerUrlError,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('company_profile_image_url_field'),
-              controller: _profileImageUrlCtrl,
-              keyboardType: TextInputType.url,
-              onChanged: (v) {
-                if (_profileImageUrlError != null) {
-                  setState(() => _profileImageUrlError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText:
-                    '${AppLocalizations.of(context).companyStorefrontProfileImageUrl} *',
-                hintText: AppLocalizations.of(
-                  context,
-                ).httpsExampleComStorefrontPhotoJpg,
-                prefixIcon: const Icon(Icons.storefront_outlined),
-                errorText: _profileImageUrlError,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context).firstAdminAccount,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('admin_name_field'),
-              controller: _adminNameCtrl,
-              onChanged: (v) {
-                if (_adminNameError != null) {
-                  setState(() => _adminNameError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context).adminName} *',
-                prefixIcon: const Icon(Icons.person),
-                errorText: _adminNameError,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('admin_email_field'),
-              controller: _adminEmailCtrl,
-              keyboardType: TextInputType.emailAddress,
-              onChanged: (v) {
-                if (_adminEmailError != null) {
-                  setState(() => _adminEmailError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context).adminEmail} *',
-                prefixIcon: const Icon(Icons.mail_outline),
-                errorText: _adminEmailError,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('admin_mobile_field'),
-              controller: _adminMobileCtrl,
-              keyboardType: TextInputType.phone,
-              onChanged: (v) {
-                if (_adminMobileError != null) {
-                  setState(() => _adminMobileError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: '${l10n.mobileNumber} *',
-                hintText: 'e.g. 9876543210',
-                prefixIcon: const Icon(Icons.phone_outlined),
-                errorText: _adminMobileError,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('admin_password_field'),
-              controller: _adminPassCtrl,
-              obscureText: true,
-              onChanged: (v) {
-                if (_adminPassError != null) {
-                  setState(() => _adminPassError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context).password} *',
-                prefixIcon: const Icon(Icons.lock_outline),
-                errorText: _adminPassError,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('admin_password_confirm_field'),
-              controller: _adminPassConfirmCtrl,
-              obscureText: true,
-              onChanged: (v) {
-                if (_adminPassConfirmError != null) {
-                  setState(() => _adminPassConfirmError = null);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: '${AppLocalizations.of(context).confirmPassword} *',
-                prefixIcon: const Icon(Icons.lock_outline),
-                errorText: _adminPassConfirmError,
-              ),
+            AuthFormSection(
+              title: AppLocalizations.of(context).firstAdminAccount,
+              icon: Icons.person_outline,
+              children: [
+                TextField(
+                  key: const Key('admin_name_field'),
+                  controller: _adminNameCtrl,
+                  onChanged: (v) {
+                    if (_adminNameError != null) {
+                      setState(() => _adminNameError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: '${AppLocalizations.of(context).adminName} *',
+                    prefixIcon: const Icon(Icons.person),
+                    errorText: _adminNameError,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('admin_email_field'),
+                  controller: _adminEmailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: (v) {
+                    if (_adminEmailError != null) {
+                      setState(() => _adminEmailError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: '${AppLocalizations.of(context).adminEmail} *',
+                    prefixIcon: const Icon(Icons.mail_outline),
+                    errorText: _adminEmailError,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('admin_mobile_field'),
+                  controller: _adminMobileCtrl,
+                  keyboardType: TextInputType.phone,
+                  onChanged: (v) {
+                    if (_adminMobileError != null) {
+                      setState(() => _adminMobileError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: '${l10n.mobileNumber} *',
+                    hintText: 'e.g. 9876543210',
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    errorText: _adminMobileError,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                AuthPasswordField(
+                  key: const Key('admin_password_field'),
+                  controller: _adminPassCtrl,
+                  label: '${AppLocalizations.of(context).password} *',
+                  errorText: _adminPassError,
+                  onChanged: (v) {
+                    if (_adminPassError != null) {
+                      setState(() => _adminPassError = null);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                AuthPasswordField(
+                  key: const Key('admin_password_confirm_field'),
+                  controller: _adminPassConfirmCtrl,
+                  label: '${AppLocalizations.of(context).confirmPassword} *',
+                  errorText: _adminPassConfirmError,
+                  onChanged: (v) {
+                    if (_adminPassConfirmError != null) {
+                      setState(() => _adminPassConfirmError = null);
+                    }
+                  },
+                ),
+              ],
             ),
           ],
         );

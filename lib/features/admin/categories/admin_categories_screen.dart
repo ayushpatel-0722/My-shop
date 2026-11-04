@@ -149,7 +149,10 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen> {
             ),
           Expanded(
             child: StreamBuilder<List<Product>>(
-              stream: repo.products(companyId: _companyId),
+              stream: repo.products(
+                companyId: _companyId,
+                includeUnpublished: true,
+              ),
               builder: (context, productSnap) {
                 final productImages = <String, String>{
                   for (final p in productSnap.data ?? const <Product>[])

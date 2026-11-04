@@ -38,21 +38,26 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
+    // Back returns to wherever the order was opened from (the orders list, or
+    // a notification); with nothing underneath (just after checkout) it goes
+    // to the orders list.
+    void back() {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go(AppRoutes.orders);
+      }
+    }
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          context.go(AppRoutes.orders);
-        }
+        if (!didPop) back();
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.orderStatus),
-          leading: BackButton(
-            onPressed: () {
-              context.go(AppRoutes.orders);
-            },
-          ),
+          leading: BackButton(onPressed: back),
         ),
         body: StreamBuilder<Order?>(
           stream: repo.watchOrder(

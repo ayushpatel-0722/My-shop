@@ -15,6 +15,7 @@ import '../../../core/utils/responsive_extensions.dart';
 import '../../../core/widgets/modern_shimmer.dart';
 import '../../../core/widgets/order_status_badge.dart';
 import '../admin_shell.dart';
+import 'widgets/order_filter_bar.dart';
 import 'widgets/order_items_dialog.dart';
 import 'widgets/payment_verification_dialog.dart';
 
@@ -40,6 +41,18 @@ class AdminOrdersScreen extends StatefulWidget {
 class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   final _searchCtrl = TextEditingController();
   String _statusFilter = 'all';
+  DateTimeRange? _dateRange;
+
+  bool get _hasFilters =>
+      _searchCtrl.text.trim().isNotEmpty ||
+      _statusFilter != 'all' ||
+      _dateRange != null;
+
+  void _clearFilters() => setState(() {
+    _searchCtrl.clear();
+    _statusFilter = 'all';
+    _dateRange = null;
+  });
 
   @override
   void dispose() {
@@ -73,27 +86,16 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: TextField(
-              key: const Key('order-search-field'),
-              controller: _searchCtrl,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).searchOrders,
-                hintText: AppLocalizations.of(context).referencePincodeProduct,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchCtrl.text.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchCtrl.clear();
-                          setState(() {});
-                        },
-                      ),
-                border: const OutlineInputBorder(),
-                isDense: true,
-              ),
-              onChanged: (_) => setState(() {}),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            child: OrderFilterBar(
+              searchKey: const Key('order-search-field'),
+              searchController: _searchCtrl,
+              searchHint: AppLocalizations.of(context).referencePincodeProduct,
+              onSearchChanged: (_) => setState(() {}),
+              dateRange: _dateRange,
+              onDateRangeChanged: (r) => setState(() => _dateRange = r),
+              onClear: _clearFilters,
+              hasActiveFilters: _hasFilters,
             ),
           ),
           _StatusFilterBar(
@@ -111,6 +113,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                       (o) =>
                           (_statusFilter == 'all' ||
                               o.orderStatus == _statusFilter) &&
+                          orderInDateRange(o.createdAt, _dateRange) &&
                           _matches(o, query),
                     )
                     .toList();
@@ -155,7 +158,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                   children: [
                     _PipelineSummary(orders: all),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
                     for (final status in _visibleColumns(visible))
                       _PipelineColumn(
                         status: status,
@@ -199,21 +202,30 @@ class _StatusFilterBar extends StatelessWidget {
         int countOf(String status) =>
             orders.where((o) => o.orderStatus == status).length;
 
-        return SizedBox(
-          height: 46,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _chip(AppLocalizations.of(context).all3, orders.length, 'all'),
-              for (final status in OrderStatusRules.boardColumns)
-                _chip(
-                  orderStatusLabel(context, status),
-                  countOf(status),
-                  status,
-                ),
-            ],
-          ),
+        final chips = <Widget>[
+          _chip(AppLocalizations.of(context).all3, orders.length, 'all'),
+          for (final status in OrderStatusRules.boardColumns)
+            _chip(orderStatusLabel(context, status), countOf(status), status),
+        ];
+        return LayoutBuilder(
+          builder: (context, c) {
+            // Wide windows wrap onto a second line instead of scrolling
+            // sideways; phones keep one compact scrolling row.
+            if (c.maxWidth >= 640) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Wrap(spacing: 8, runSpacing: 8, children: chips),
+              );
+            }
+            return SizedBox(
+              height: 48,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: chips,
+              ),
+            );
+          },
         );
       },
     );
@@ -221,10 +233,13 @@ class _StatusFilterBar extends StatelessWidget {
 
   Widget _chip(String label, int count, String value) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: 4),
       child: FilterChip(
         label: Text('$label ($count)'),
         selected: selected == value,
+        showCheckmark: false,
+        visualDensity: VisualDensity.compact,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onSelected: (_) => onChanged(value),
       ),
     );
@@ -239,41 +254,41 @@ class _PipelineSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = context.isDesktop;
     final open = orders.where((o) => o.isOpen).length;
     final revenue = orders
         .where((o) => !o.isCancelled)
         .fold<double>(0, (sum, o) => sum + o.totalAmount);
 
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(isDesktop ? 18 : 14),
-        child: Row(
-          children: [
-            Expanded(
-              child: _Metric(
-                label: AppLocalizations.of(context).openOrders,
-                value: '$open',
-                icon: Icons.timelapse,
-              ),
-            ),
-            Expanded(
-              child: _Metric(
-                label: AppLocalizations.of(context).allOrders,
-                value: '${orders.length}',
-                icon: Icons.receipt_long,
-              ),
-            ),
-            Expanded(
-              child: _Metric(
-                label: AppLocalizations.of(context).revenue2,
-                value: formatCurrency(revenue),
-                icon: Icons.currency_rupee,
-              ),
-            ),
-          ],
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: _Metric(
+            label: l10n.openOrders,
+            value: '$open',
+            icon: Icons.timelapse,
+            color: const Color(0xFFD97706),
+          ),
         ),
-      ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _Metric(
+            label: l10n.allOrders,
+            value: '${orders.length}',
+            icon: Icons.receipt_long,
+            color: const Color(0xFF2563EB),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _Metric(
+            label: l10n.revenue2,
+            value: formatCurrency(revenue),
+            icon: Icons.currency_rupee,
+            color: const Color(0xFF16A34A),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -282,32 +297,63 @@ class _Metric extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
+  final Color color;
 
-  const _Metric({required this.label, required this.value, required this.icon});
+  const _Metric({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = context.isDesktop;
-    return Column(
-      children: [
-        Icon(
-          icon,
-          size: isDesktop ? 22 : 18,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: isDesktop ? 20 : 15,
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 16 : 10,
+        vertical: isDesktop ? 14 : 12,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: isDesktop ? 20 : 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: isDesktop ? 13 : 11.5,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        Text(
-          label,
-          style: TextStyle(fontSize: isDesktop ? 13 : 11, color: Colors.grey),
-        ),
-      ],
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: isDesktop ? 22 : 17,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -327,23 +373,41 @@ class _PipelineColumn extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(width: 4, height: 18, color: orderStatusColor(status)),
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: orderStatusColor(status),
+                  shape: BoxShape.circle,
+                ),
+              ),
               const SizedBox(width: 8),
               Text(
                 orderStatusLabel(context, status),
                 style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
                 ),
               ),
-              const SizedBox(width: 6),
-              Text(
-                '(${orders.length})',
-                style: const TextStyle(color: Colors.grey),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: orderStatusColor(status).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${orders.length}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: orderStatusColor(status),
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           if (orders.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -357,6 +421,78 @@ class _PipelineColumn extends StatelessWidget {
               _OrderCard(key: Key('order-card-${order.id}'), order: order),
               const SizedBox(height: 8),
             ],
+        ],
+      ),
+    );
+  }
+}
+
+const _btnRadius = 10.0;
+
+final ButtonStyle _primaryStyle = FilledButton.styleFrom(
+  minimumSize: const Size(0, 42),
+  padding: const EdgeInsets.symmetric(horizontal: 18),
+  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(_btnRadius),
+  ),
+);
+final ButtonStyle _tonalStyle = FilledButton.styleFrom(
+  minimumSize: const Size(0, 42),
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(_btnRadius),
+  ),
+);
+final ButtonStyle _secondaryStyle = OutlinedButton.styleFrom(
+  minimumSize: const Size(0, 42),
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(_btnRadius),
+  ),
+);
+final ButtonStyle _actionIconStyle = IconButton.styleFrom(
+  minimumSize: const Size(42, 42),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(_btnRadius),
+  ),
+);
+
+/// A small rounded label with an optional icon (payment / delivery info).
+class _Pill extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final MaterialColor color;
+
+  const _Pill({required this.icon, required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color.shade800),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: color.shade800,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -429,26 +565,26 @@ class _OrderCardState extends State<_OrderCard> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 3),
-                      Row(
-                        children: [
-                          Text(
-                            order.reference,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: isDesktop ? 13 : 12,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          if (dateStr.isNotEmpty) ...[
-                            Text(
-                              ' · $dateStr',
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: order.reference,
                               style: TextStyle(
-                                fontSize: isDesktop ? 13 : 12,
-                                color: Colors.grey,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
                               ),
                             ),
+                            if (dateStr.isNotEmpty)
+                              TextSpan(
+                                text: ' · $dateStr',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
                           ],
-                        ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: isDesktop ? 13 : 12),
                       ),
                     ],
                   ),
@@ -466,141 +602,41 @@ class _OrderCardState extends State<_OrderCard> {
             ),
             const SizedBox(height: 10),
 
-            // Middle row: Status badges & Fulfillment info
+            // Status and payment at a glance.
             Wrap(
               spacing: 6,
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 OrderStatusBadge(status: order.orderStatus),
-                // Payment Method Badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 8 : 7,
-                    vertical: isDesktop ? 3 : 2.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: order.isPaid
-                        ? (order.isUpi
-                              ? Colors.indigo.withValues(alpha: 0.12)
-                              : Colors.teal.withValues(alpha: 0.12))
-                        : Colors.grey.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        order.isUpi
-                            ? Icons.qr_code_2
-                            : (order.isCash
-                                  ? Icons.payments_outlined
-                                  : Icons.help_outline),
-                        size: isDesktop ? 13 : 11,
-                        color: order.isPaid
-                            ? (order.isUpi
-                                  ? Colors.indigo.shade800
-                                  : Colors.teal.shade800)
-                            : Colors.grey.shade700,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Payment: ${order.paymentMethodDisplay}',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 11.5 : 10.5,
-                          fontWeight: FontWeight.bold,
-                          color: order.isPaid
-                              ? (order.isUpi
-                                    ? Colors.indigo.shade800
-                                    : Colors.teal.shade800)
-                              : Colors.grey.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
+                _Pill(
+                  icon: order.isUpi
+                      ? Icons.qr_code_2
+                      : (order.isCash
+                            ? Icons.payments_outlined
+                            : Icons.help_outline),
+                  text: 'Payment: ${order.paymentMethodDisplay}',
+                  color: order.isPaid
+                      ? (order.isUpi ? Colors.indigo : Colors.teal)
+                      : Colors.grey,
                 ),
-                // Payment Status Badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 8 : 7,
-                    vertical: isDesktop ? 3 : 2.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: order.isPaid
-                        ? Colors.green.withValues(alpha: 0.12)
-                        : (order.isPaymentFailed
-                              ? Colors.red.withValues(alpha: 0.12)
-                              : Colors.orange.withValues(alpha: 0.12)),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        order.isPaid
-                            ? Icons.check_circle_outline
-                            : (order.isPaymentFailed
-                                  ? Icons.error_outline
-                                  : Icons.schedule),
-                        size: isDesktop ? 13 : 11,
-                        color: order.isPaid
-                            ? Colors.green.shade800
-                            : (order.isPaymentFailed
-                                  ? Colors.red.shade800
-                                  : Colors.orange.shade900),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Status: ${order.paymentStatusDisplay.toUpperCase()}',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 11.5 : 10.5,
-                          fontWeight: FontWeight.bold,
-                          color: order.isPaid
-                              ? Colors.green.shade800
-                              : (order.isPaymentFailed
-                                    ? Colors.red.shade800
-                                    : Colors.orange.shade900),
-                        ),
-                      ),
-                    ],
-                  ),
+                _Pill(
+                  icon: order.isPaid
+                      ? Icons.check_circle_outline
+                      : (order.isPaymentFailed
+                            ? Icons.error_outline
+                            : Icons.schedule),
+                  text: 'Status: ${order.paymentStatusDisplay.toUpperCase()}',
+                  color: order.isPaid
+                      ? Colors.green
+                      : (order.isPaymentFailed ? Colors.red : Colors.orange),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 8 : 7,
-                    vertical: isDesktop ? 3 : 2.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: order.isSelfPickup
-                        ? Colors.blue.withValues(alpha: 0.1)
-                        : Colors.teal.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        order.isSelfPickup
-                            ? Icons.storefront_outlined
-                            : Icons.local_shipping_outlined,
-                        size: isDesktop ? 14 : 12,
-                        color: order.isSelfPickup
-                            ? Colors.blue.shade800
-                            : Colors.teal.shade800,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        order.isSelfPickup ? 'Self Pickup' : 'Delivery',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 11.5 : 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: order.isSelfPickup
-                              ? Colors.blue.shade800
-                              : Colors.teal.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
+                _Pill(
+                  icon: order.isSelfPickup
+                      ? Icons.storefront_outlined
+                      : Icons.local_shipping_outlined,
+                  text: order.isSelfPickup ? 'Self Pickup' : 'Delivery',
+                  color: order.isSelfPickup ? Colors.blue : Colors.teal,
                 ),
               ],
             ),
@@ -678,256 +714,121 @@ class _OrderCardState extends State<_OrderCard> {
               const LinearProgressIndicator(),
             ],
 
-            const Divider(height: 20),
+            const Divider(height: 22),
 
-            // Bottom action row: Responsive desktop vs mobile layout
-            if (isDesktop) ...[
-              Row(
-                children: [
-                  // Quick items dialog button
-                  IconButton.outlined(
-                    key: Key('order-items-btn-${order.id}'),
-                    icon: Icon(
-                      Icons.shopping_bag_outlined,
-                      size: isDesktop ? 20 : 18,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    tooltip: 'View ordered items (${order.itemCount})',
-                    onPressed: () =>
-                        OrderItemsPreviewDialog.show(context, order),
-                  ),
-                  const SizedBox(width: 8),
+            // Actions: secondary on the left, the one forward action on the
+            // right. Buttons share one height, radius and text style.
+            LayoutBuilder(
+              builder: (context, c) {
+                final compact = c.maxWidth < 520;
+                final showPay =
+                    canVerifyPayment && !order.isPaid && !order.isCancelled;
 
-                  // View Details Button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      key: Key('order-details-btn-${order.id}'),
-                      icon: Icon(
-                        Icons.visibility_outlined,
-                        size: isDesktop ? 18 : 16,
-                      ),
-                      label: Text(
-                        'View Details',
-                        style: TextStyle(fontSize: isDesktop ? 13.5 : 12.5),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                      ),
-                      onPressed: () => context.push(
-                        AppRoutes.adminOrderDetailsPath(order.id),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // Quick payment verification button
-                  if (canVerifyPayment &&
-                      !order.isPaid &&
-                      !order.isCancelled) ...[
-                    FilledButton.tonalIcon(
-                      key: Key('order-verify-payment-${order.id}'),
-                      icon: Icon(
-                        Icons.payments_outlined,
-                        size: isDesktop ? 16 : 14,
-                      ),
-                      label: Text(
-                        'Confirm Payment',
-                        style: TextStyle(fontSize: isDesktop ? 13 : 12),
-                      ),
-                      style: FilledButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 10 : 8,
+                final itemsBtn = IconButton.outlined(
+                  key: Key('order-items-btn-${order.id}'),
+                  icon: const Icon(Icons.shopping_bag_outlined, size: 20),
+                  style: _actionIconStyle,
+                  tooltip: 'View ordered items (${order.itemCount})',
+                  onPressed: () => OrderItemsPreviewDialog.show(context, order),
+                );
+                final detailsBtn = OutlinedButton(
+                  key: Key('order-details-btn-${order.id}'),
+                  style: _secondaryStyle,
+                  onPressed: () =>
+                      context.push(AppRoutes.adminOrderDetailsPath(order.id)),
+                  child: const Text('View Details'),
+                );
+                final payBtn = FilledButton.tonal(
+                  key: Key('order-verify-payment-${order.id}'),
+                  style: _tonalStyle,
+                  onPressed: _isLoading
+                      ? null
+                      : () => PaymentVerificationDialog.show(context, order),
+                  child: const Text('Confirm Payment'),
+                );
+                final Widget? forwardBtn = canConfirm
+                    ? FilledButton(
+                        key: Key('order-advance-${order.id}'),
+                        style: _primaryStyle.copyWith(
+                          backgroundColor: WidgetStatePropertyAll(
+                            Colors.green.shade700,
+                          ),
                         ),
-                      ),
-                      onPressed: _isLoading
-                          ? null
-                          : () =>
-                                PaymentVerificationDialog.show(context, order),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-
-                  // Main forward action: Mark Confirmed or next stage
-                  if (canConfirm) ...[
-                    FilledButton(
-                      key: Key('order-advance-${order.id}'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.green.shade700,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 14 : 12,
+                        onPressed: _isLoading
+                            ? null
+                            : () => _confirmOrder(context),
+                        child: const Text('Confirm'),
+                      )
+                    : (next != null
+                          ? FilledButton(
+                              key: Key('order-advance-${order.id}'),
+                              style: _primaryStyle,
+                              onPressed: _isLoading
+                                  ? null
+                                  : () => _advance(context, next),
+                              child: Text(orderStatusLabel(context, next)),
+                            )
+                          : null);
+                final cancelBtn = cancellable
+                    ? IconButton(
+                        key: Key('order-cancel-${order.id}'),
+                        icon: Icon(
+                          Icons.cancel_outlined,
+                          size: 22,
+                          color: theme.colorScheme.error,
                         ),
-                      ),
-                      onPressed: _isLoading
-                          ? null
-                          : () => _confirmOrder(context),
-                      child: Text(
-                        'Confirm',
-                        style: TextStyle(fontSize: isDesktop ? 13.5 : 12.5),
-                      ),
-                    ),
-                  ] else if (next != null) ...[
-                    FilledButton.tonal(
-                      key: Key('order-advance-${order.id}'),
-                      style: FilledButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 12 : 10,
-                        ),
-                      ),
-                      onPressed: _isLoading
-                          ? null
-                          : () => _advance(context, next),
-                      child: Text(
-                        orderStatusLabel(context, next),
-                        style: TextStyle(fontSize: isDesktop ? 13.5 : 12.5),
-                      ),
-                    ),
-                  ],
+                        tooltip: 'Cancel Order',
+                        onPressed: _isLoading
+                            ? null
+                            : () => _confirmCancel(context),
+                      )
+                    : null;
 
-                  // Cancel button
-                  if (cancellable) ...[
-                    const SizedBox(width: 6),
-                    IconButton(
-                      key: Key('order-cancel-${order.id}'),
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        size: isDesktop ? 22 : 20,
-                        color: theme.colorScheme.error,
+                if (compact) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          itemsBtn,
+                          const SizedBox(width: 8),
+                          Expanded(child: detailsBtn),
+                          if (cancelBtn != null) ...[
+                            const SizedBox(width: 4),
+                            cancelBtn,
+                          ],
+                        ],
                       ),
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Cancel Order',
-                      onPressed: _isLoading
-                          ? null
-                          : () => _confirmCancel(context),
-                    ),
-                  ],
-                ],
-              ),
-            ] else ...[
-              // Mobile / Compact Layout
-              Row(
-                children: [
-                  IconButton.outlined(
-                    key: Key('order-items-btn-${order.id}'),
-                    icon: const Icon(Icons.shopping_bag_outlined, size: 18),
-                    visualDensity: VisualDensity.compact,
-                    tooltip: 'View ordered items (${order.itemCount})',
-                    onPressed: () =>
-                        OrderItemsPreviewDialog.show(context, order),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      key: Key('order-details-btn-${order.id}'),
-                      icon: const Icon(Icons.visibility_outlined, size: 16),
-                      label: const Text(
-                        'View Details',
-                        style: TextStyle(fontSize: 12.5),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                      ),
-                      onPressed: () => context.push(
-                        AppRoutes.adminOrderDetailsPath(order.id),
-                      ),
-                    ),
-                  ),
-                  if (cancellable) ...[
-                    const SizedBox(width: 6),
-                    IconButton(
-                      key: Key('order-cancel-${order.id}'),
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        size: 20,
-                        color: theme.colorScheme.error,
-                      ),
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Cancel Order',
-                      onPressed: _isLoading
-                          ? null
-                          : () => _confirmCancel(context),
-                    ),
-                  ],
-                ],
-              ),
-              if ((!order.isPaid && !order.isCancelled) ||
-                  canConfirm ||
-                  next != null) ...[
-                const SizedBox(height: 8),
-                Row(
+                      if (showPay || forwardBtn != null) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            if (showPay) Expanded(child: payBtn),
+                            if (showPay && forwardBtn != null)
+                              const SizedBox(width: 8),
+                            if (forwardBtn != null) Expanded(child: forwardBtn),
+                          ],
+                        ),
+                      ],
+                    ],
+                  );
+                }
+                return Row(
                   children: [
-                    if (canVerifyPayment &&
-                        !order.isPaid &&
-                        !order.isCancelled) ...[
-                      Expanded(
-                        child: FilledButton.tonalIcon(
-                          key: Key('order-verify-payment-${order.id}'),
-                          icon: const Icon(Icons.payments_outlined, size: 15),
-                          label: const Text(
-                            'Confirm Payment',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          style: FilledButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                          ),
-                          onPressed: _isLoading
-                              ? null
-                              : () => PaymentVerificationDialog.show(
-                                  context,
-                                  order,
-                                ),
-                        ),
-                      ),
-                    ],
-                    if (!order.isPaid &&
-                        !order.isCancelled &&
-                        (canConfirm || next != null))
-                      const SizedBox(width: 8),
-                    if (canConfirm) ...[
-                      Expanded(
-                        child: FilledButton(
-                          key: Key('order-advance-${order.id}'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.green.shade700,
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                          ),
-                          onPressed: _isLoading
-                              ? null
-                              : () => _confirmOrder(context),
-                          child: const Text(
-                            'Confirm',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      ),
-                    ] else if (next != null) ...[
-                      Expanded(
-                        child: FilledButton.tonal(
-                          key: Key('order-advance-${order.id}'),
-                          style: FilledButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                          ),
-                          onPressed: _isLoading
-                              ? null
-                              : () => _advance(context, next),
-                          child: Text(
-                            orderStatusLabel(context, next),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      ),
+                    itemsBtn,
+                    const SizedBox(width: 8),
+                    detailsBtn,
+                    const Spacer(),
+                    if (showPay) ...[payBtn, const SizedBox(width: 8)],
+                    ?forwardBtn,
+                    if (cancelBtn != null) ...[
+                      const SizedBox(width: 4),
+                      cancelBtn,
                     ],
                   ],
-                ),
-              ],
-            ],
+                );
+              },
+            ),
           ],
         ),
       ),

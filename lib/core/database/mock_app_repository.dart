@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../app/l10n/l10n_service.dart';
 import '../domain/category_tree.dart';
 import '../domain/order_status.dart';
+import '../domain/product_limits.dart';
 import '../models/admin.dart';
 import '../models/app_user.dart';
 import '../models/banner.dart';
@@ -204,7 +205,9 @@ class MockAppRepository implements AppRepository {
     String companyId = '',
     String categoryId = '',
     String search = '',
+    bool includeUnpublished = false,
   }) => _products.where((p) {
+    if (!includeUnpublished && !p.isPublished) return false;
     if (companyId.isNotEmpty && p.companyId != companyId) return false;
     if (categoryId.isNotEmpty && p.categoryId != categoryId) return false;
     if (search.isNotEmpty && !p.matches(search)) return false;
@@ -485,22 +488,38 @@ class MockAppRepository implements AppRepository {
     String companyId = '',
     String categoryId = '',
     String search = '',
+    bool includeUnpublished = false,
   }) => _live(
     _productsCtrl,
     () => _readProducts(
       companyId: companyId,
       categoryId: categoryId,
       search: search,
+      includeUnpublished: includeUnpublished,
     ),
   );
+
+  @override
+  Future<ProductCounts> productCounts(String companyId) async {
+    final mine = _products.where((p) => p.companyId == companyId);
+    return ProductCounts(
+      total: mine.length,
+      published: mine.where((p) => p.isPublished).length,
+    );
+  }
 
   @override
   Future<Product?> product(String id) async =>
       _products.firstWhereOrNull((p) => p.id == id);
 
   @override
-  Stream<List<AdBanner>> adBanners() =>
-      _live(_adBannersCtrl, () => List.unmodifiable(_adBanners));
+  Stream<List<AdBanner>> adBanners({String shopId = ''}) => _live(
+    _adBannersCtrl,
+    () => List.unmodifiable([
+      for (final b in _adBanners)
+        if (shopId.isEmpty || b.shopId == shopId) b,
+    ]),
+  );
 
   @override
   Stream<List<OfferBanner>> offerBanners(String companyId) => _live(
@@ -1190,7 +1209,24 @@ class MockAppRepository implements AppRepository {
       throw ArgumentError('A product must belong to a company.');
     }
     final id = product.id.isEmpty ? _uuid.v4() : product.id;
-    final saved = product.copyWith(id: id);
+    final existing = _products.firstWhereOrNull((p) => p.id == id);
+    final company = _companies.firstWhereOrNull(
+      (c) => c.id == product.companyId,
+    );
+    final limits = ProductLimits(company?.maxProducts);
+    final counts = await productCounts(product.companyId);
+    final saved = limits
+        .guardSave(
+          product,
+          existing: existing,
+          others: ProductCounts(
+            total: counts.total - (existing == null ? 0 : 1),
+            published:
+                counts.published -
+                (existing != null && existing.isPublished ? 1 : 0),
+          ),
+        )
+        .copyWith(id: id);
     final i = _products.indexWhere((p) => p.id == id);
     if (i == -1) {
       _products.add(saved);

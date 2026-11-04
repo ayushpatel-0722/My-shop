@@ -113,7 +113,9 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
         final result = await reports.savePdf(bytes, fileName);
         _handleExportResult(result, 'PDF report (.pdf)');
       } else if (type == 'word') {
-        final products = await repo.products(companyId: _companyId).first;
+        final products = await repo
+            .products(companyId: _companyId, includeUnpublished: true)
+            .first;
         final bytes = await reports.buildCatalogDoc(products);
         final stamp = DateTime.now().toIso8601String().split('T').first;
         final fileName = 'catalog_sheet_$stamp';

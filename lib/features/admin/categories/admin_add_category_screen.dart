@@ -861,7 +861,10 @@ class _AdminAddCategoryScreenState extends State<AdminAddCategoryScreen> {
 
                   // Card 4: Interactive Product Assignment Picker
                   StreamBuilder<List<Product>>(
-                    stream: repo.products(companyId: _companyId),
+                    stream: repo.products(
+                      companyId: _companyId,
+                      includeUnpublished: true,
+                    ),
                     builder: (context, prodSnap) {
                       final allCompanyProducts =
                           prodSnap.data ?? const <Product>[];

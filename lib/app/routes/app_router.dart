@@ -32,6 +32,7 @@ import '../../features/admin/recommendations/admin_recommendations_screen.dart';
 import '../../features/admin/reports/admin_reports_screen.dart';
 import '../../features/admin/reviews/admin_reviews_screen.dart';
 import '../../features/admin/shop/admin_shop_settings_screen.dart';
+import '../../features/admin/subscription/admin_subscription_screen.dart';
 import '../../features/admin/vouchers/admin_vouchers_screen.dart';
 import '../../features/auth/admin_login/admin_login_screen.dart';
 import '../../features/auth/employee_login/employee_login_screen.dart';
@@ -125,6 +126,7 @@ class AppRoutes {
   static const adminReviews = '/admin/reviews';
   static const adminRecommendations = '/admin/recommendations';
   static const adminReports = '/admin/reports';
+  static const adminSubscription = '/admin/subscription';
   static const adminQr = '/admin/qr';
   static const adminExploreCategories = '/admin/home-explore-categories';
   static const adminTrendingNow = '/admin/home-trending-now';
@@ -578,6 +580,10 @@ final GoRouter appRouter = GoRouter(
     AdminRoute(
       path: AppRoutes.adminRecommendations,
       builder: (_, s) => const AdminRecommendationsScreen(),
+    ),
+    AdminRoute(
+      path: AppRoutes.adminSubscription,
+      builder: (_, _) => const AdminSubscriptionScreen(),
     ),
     AdminRoute(
       path: AppRoutes.adminReports,

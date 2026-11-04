@@ -10,12 +10,12 @@ const env = await initializeTestEnvironment({projectId:'demo-rules', firestore:{
 const admin = () => env.authenticatedContext('boss', {role: 'admin'}).firestore();
 const shopper = () => env.authenticatedContext('shopper').firestore();
 const anon = () => env.unauthenticatedContext().firestore();
-const lock = (db) => doc(db, 'storefront_config/lock');
+const lock = (db) => doc(db, 'home_screen_confing_password/password');
 
 await env.clearFirestore();
 await env.withSecurityRulesDisabled(async ctx => {
   // A made-up value: only the shape matters to the rules.
-  await setDoc(doc(ctx.firestore(), 'storefront_config/lock'), {passwordHash: 'pbkdf2-sha256$1$c2FsdA==$aGFzaA=='});
+  await setDoc(doc(ctx.firestore(), 'home_screen_confing_password/password'), {password: 'pbkdf2-sha256$1$c2FsdA==$aGFzaA=='});
 });
 
 const results = [];
@@ -25,12 +25,12 @@ async function check(name, p, expectOk) {
 }
 
 await check('admin reads the lock setting', getDoc(lock(admin())), true);
-await check('shopper cannot read it', getDoc(lock(shopper())), false);
+await check('any signed-in user (e.g. a company admin) can read it', getDoc(lock(shopper())), true);
 await check('guest cannot read it', getDoc(lock(anon())), false);
-await check('admin cannot overwrite it from the app', setDoc(lock(admin()), {passwordHash: 'x'}), false);
+await check('admin cannot overwrite it from the app', setDoc(lock(admin()), {password: 'x'}), false);
 await check('admin cannot delete it from the app', deleteDoc(lock(admin())), false);
-await check('shopper cannot write it', setDoc(lock(shopper()), {passwordHash: 'x'}), false);
-await check('guest cannot write it', setDoc(lock(anon()), {passwordHash: 'x'}), false);
+await check('shopper cannot write it', setDoc(lock(shopper()), {password: 'x'}), false);
+await check('guest cannot write it', setDoc(lock(anon()), {password: 'x'}), false);
 
 await env.cleanup();
 for (const r of results) console.log(r.join(' | '));

@@ -3265,5 +3265,175 @@
         "type": "int"
       }
     }
-  }
+  },
+  "homeConfigGroupTitle": "HOME SCREEN CONFIG",
+  "homeExploreCategoriesNav": "Home Explore Categories",
+  "homeTrendingNowNav": "Home Trending Now",
+  "storefrontLockConfirmBody": "Do you want to lock all storefront configuration sections?",
+  "storefrontLockConfirmOk": "OK",
+  "shareProduct": "Share product",
+  "productPublishLimitTitle": "Publishing limit reached",
+  "productPublishLimitBody": "Your plan lets you publish up to {max} products, and all {max} slots are in use.\n\nYou can still save this product. It will stay unpublished (hidden from shoppers) until you free up a slot or upgrade your plan to publish more.\n\nDo you want to save it as unpublished?",
+  "productCreateLimitTitle": "Product limit reached",
+  "productCreateLimitBody": "You have reached the maximum of {cap} products allowed on your current plan.\n\nTo add more products, upgrade your plan or delete products you no longer need to free up space.",
+  "productLimitClose": "Close",
+  "upgradePlan": "Upgrade plan",
+  "productPublishedLabel": "Published",
+  "productPublishedHint": "Shoppers can see and buy it. Unpublished products stay hidden.",
+  "productUnpublishedBadge": "Unpublished",
+  "subscriptionPlanTitle": "Subscription Plan",
+  "subscriptionPublishedUsage": "Published products",
+  "subscriptionTotalUsage": "All products (published + unpublished)",
+  "subscriptionNoLimit": "Your plan has no product limit set.",
+  "subscriptionRulesNote": "You can publish up to {max} products. You can create up to {cap} in total; the extra ones stay unpublished. To raise these limits, contact support to upgrade your plan.",
+  "@subscriptionRulesNote": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "productLimitSaveUnpublished": "Save as unpublished",
+  "productLimitUsed": "{used} of {total} used",
+  "@productPublishLimitBody": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "@productCreateLimitBody": {
+    "placeholders": {
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "@productLimitUsed": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planBasic": "Basic",
+  "planGolden": "Golden",
+  "planDiamond": "Diamond",
+  "planCustom": "Custom plan",
+  "planYourPlan": "Your plan",
+  "planCurrentBadge": "Current plan",
+  "planMostPopular": "Most popular",
+  "planPublishFeature": "Publish up to {count} products",
+  "@planPublishFeature": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planCreateFeature": "Keep up to {count} products in total (extra ones stay unpublished)",
+  "@planCreateFeature": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planCategoriesFeature": "Up to {count} categories",
+  "@planCategoriesFeature": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planUpgradeTo": "Upgrade to {plan}",
+  "@planUpgradeTo": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "planIncluded": "Included in your plan",
+  "planChoose": "Choose your plan",
+  "planChooseHint": "Every plan includes the full store. Pick the one that fits your catalogue.",
+  "planCategoriesUsage": "Categories",
+  "planContactTitle": "Ready to upgrade?",
+  "planContactBody": "Get in touch with {name} to change your plan. Your new limits apply as soon as the plan is updated.",
+  "@planContactBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "planContactEmailButton": "Email {name}",
+  "@planContactEmailButton": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "planCopyEmail": "Copy email",
+  "planEmailCopied": "Email address copied",
+  "planEmailSubject": "Plan upgrade request: {plan} ({shop})",
+  "@planEmailSubject": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "shop": {
+        "type": "String"
+      }
+    }
+  },
+  "planEmailBody": "Hello {name},\n\nI would like to upgrade my shop \"{shop}\" to the {plan} plan.\n\nThank you.",
+  "@planEmailBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "shop": {
+        "type": "String"
+      },
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "planEmailFailed": "Could not open your email app. The address is {email}.",
+  "@planEmailFailed": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authAdminSubtitle": "Sign in to manage your shop",
+  "authEmployeeSubtitle": "Sign in to handle your shop's orders",
+  "authRoleAdmin": "Admin",
+  "authRoleEmployee": "Employee",
+  "authStepCompany": "Company",
+  "authStepAccount": "Your account",
+  "authStepOf": "Step {current} of {total}",
+  "@authStepOf": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "authChangeRole": "Choose a different role",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "onboardingStepBusiness": "Business",
+  "onboardingStepHours": "Opening hours",
+  "onboardingStepSetup": "Setup",
+  "onboardingSubtitle": "Set up your shop in three short steps",
+  "orderFilterAnyDate": "Any date",
+  "orderFilterClear": "Clear filters",
+  "orderFilterPickDate": "Select date range",
+  "orderFilterStatus": "Status"
 }

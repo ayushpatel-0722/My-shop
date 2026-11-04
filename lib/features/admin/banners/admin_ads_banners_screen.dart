@@ -5,6 +5,7 @@ import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../core/cache/app_images.dart';
 import '../../../core/models/banner.dart';
+import '../../../core/services/auth_session.dart';
 import '../../../core/services/service_locator.dart';
 import '../storefront_lock/locked_admin_shell.dart';
 
@@ -22,16 +23,19 @@ class AdminAdsBannersScreen extends StatefulWidget {
 }
 
 class _AdminAdsBannersScreenState extends State<AdminAdsBannersScreen> {
-  late final Stream<List<AdBanner>> _banners = repo.adBanners();
+  late final Stream<List<AdBanner>> _banners = repo.adBanners(shopId: _shopId);
+
+  String get _shopId => AuthSession.currentUser?.companyId ?? '';
 
   void _openSheet({AdBanner? banner}) {
+    final shopId = _shopId;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => _AdsBannerSheet(banner: banner),
+      builder: (_) => _AdsBannerSheet(banner: banner, shopId: shopId),
     );
   }
 
@@ -299,7 +303,10 @@ class _AdsBannerCard extends StatelessWidget {
 }
 
 class _AdsBannerSheet extends StatefulWidget {
-  const _AdsBannerSheet({this.banner});
+  const _AdsBannerSheet({this.banner, this.shopId = ''});
+
+  /// The shop the new banner belongs to.
+  final String shopId;
 
   /// The banner being edited; null when adding a new one.
   final AdBanner? banner;
@@ -316,6 +323,10 @@ class _AdsBannerSheetState extends State<_AdsBannerSheet> {
   late final _target = TextEditingController(text: widget.banner?.actionTarget);
   late String _actionType = widget.banner?.actionTypeWire ?? 'product';
   bool _saving = false;
+
+  /// Why the last save failed, shown inside the sheet (a toast would sit
+  /// behind it).
+  String? _error;
 
   @override
   void dispose() {
@@ -344,7 +355,10 @@ class _AdsBannerSheetState extends State<_AdsBannerSheet> {
       );
       return;
     }
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
     try {
       await repo.saveAdBanner(
         AdBanner(
@@ -353,6 +367,7 @@ class _AdsBannerSheetState extends State<_AdsBannerSheet> {
           actionType: _action,
           actionTarget: _target.text.trim(),
           priority: int.tryParse(_priority.text.trim()) ?? 0,
+          shopId: widget.banner?.shopId ?? widget.shopId,
         ),
       );
       if (!mounted) return;
@@ -360,11 +375,11 @@ class _AdsBannerSheetState extends State<_AdsBannerSheet> {
       messenger.showAppToast(SnackBar(content: Text(l10n.adsBannerSaved)));
     } catch (e) {
       if (!mounted) return;
-      messenger.showAppToast(
-        SnackBar(
-          content: Text('Failed to save banner: $e'),
-          backgroundColor: Colors.red,
-        ),
+      final denied = e.toString().contains('permission-denied');
+      setState(
+        () => _error = denied
+            ? 'You do not have permission to save banners for this shop.'
+            : 'Failed to save banner: $e',
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -510,6 +525,14 @@ class _AdsBannerSheetState extends State<_AdsBannerSheet> {
                 isDense: true,
               ),
             ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _error!,
+                key: const Key('ads-banner-error'),
+                style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+              ),
+            ],
             const SizedBox(height: 20),
             FilledButton(
               key: const Key('ads-banner-save'),

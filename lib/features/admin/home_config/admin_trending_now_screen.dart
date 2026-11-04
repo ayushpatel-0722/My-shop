@@ -665,7 +665,10 @@ class _AdminTrendingNowScreenState extends State<AdminTrendingNowScreen> {
                 final entries = configSnap.data ?? const <HomeTrendingItem>[];
 
                 return StreamBuilder<List<Product>>(
-                  stream: repo.products(companyId: shop.id),
+                  stream: repo.products(
+                    companyId: shop.id,
+                    includeUnpublished: true,
+                  ),
                   builder: (context, productSnap) {
                     final products = productSnap.data ?? const <Product>[];
                     final productMap = {for (final p in products) p.id: p};

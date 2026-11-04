@@ -6,6 +6,7 @@ import 'package:myshop/core/widgets/app_toast.dart';
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../auth_cubit.dart';
+import '../widgets/auth_page_shell.dart';
 
 /// Single-step Employee login (Section 5.2): Company + Email + Password.
 class EmployeeLoginScreen extends StatefulWidget {
@@ -40,93 +41,97 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.employeeLogin)),
-      body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state.status == AuthStatus.authenticated) {
-            final user = state.user;
-            context.go(
-              user == null ? AppRoutes.employeeHome : employeeHomeFor(user),
-            );
-          } else if (state.status == AuthStatus.error) {
-            final msg =
-                state.error != null &&
-                    state.error!.isNotEmpty &&
-                    state.error != 'invalid'
-                ? state.error!
-                : l10n.invalidCredentials;
-            ScaffoldMessenger.of(
-              context,
-            ).showAppToast(SnackBar(content: Text(msg)));
-          }
-        },
-        builder: (context, state) {
-          final loading = state.status == AuthStatus.authenticating;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: _companyCtrl,
-                  onChanged: (_) {
-                    if (_companyError != null) {
-                      setState(() => _companyError = null);
-                    }
-                  },
-                  decoration: InputDecoration(
-                    hintText: l10n.companyName,
-                    prefixIcon: const Icon(Icons.business),
-                    errorText: _companyError,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (_) {
-                    if (_emailError != null) {
-                      setState(() => _emailError = null);
-                    }
-                  },
-                  decoration: InputDecoration(
-                    hintText: l10n.email,
-                    prefixIcon: const Icon(Icons.mail_outline),
-                    errorText: _emailError,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passCtrl,
-                  obscureText: true,
-                  onChanged: (_) {
-                    if (_passError != null) {
-                      setState(() => _passError = null);
-                    }
-                  },
-                  decoration: InputDecoration(
-                    hintText: l10n.password,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    errorText: _passError,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: loading ? null : _login,
-                  child: loading
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
-                        )
-                      : Text(l10n.login),
-                ),
-              ],
-            ),
+    return BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          final user = state.user;
+          context.go(
+            user == null ? AppRoutes.employeeHome : employeeHomeFor(user),
           );
-        },
-      ),
+        } else if (state.status == AuthStatus.error) {
+          final msg =
+              state.error != null &&
+                  state.error!.isNotEmpty &&
+                  state.error != 'invalid'
+              ? state.error!
+              : l10n.invalidCredentials;
+          ScaffoldMessenger.of(
+            context,
+          ).showAppToast(SnackBar(content: Text(msg)));
+        }
+      },
+      builder: (context, state) {
+        final loading = state.status == AuthStatus.authenticating;
+        return AuthPageShell(
+          title: l10n.employeeLogin,
+          subtitle: l10n.authEmployeeSubtitle,
+          icon: Icons.inventory_2_outlined,
+          badge: l10n.authRoleEmployee,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _companyCtrl,
+                textInputAction: TextInputAction.next,
+                onChanged: (_) {
+                  if (_companyError != null) {
+                    setState(() => _companyError = null);
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: l10n.companyName,
+                  prefixIcon: const Icon(Icons.business),
+                  errorText: _companyError,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.email],
+                onChanged: (_) {
+                  if (_emailError != null) {
+                    setState(() => _emailError = null);
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: l10n.email,
+                  prefixIcon: const Icon(Icons.mail_outline),
+                  errorText: _emailError,
+                ),
+              ),
+              const SizedBox(height: 16),
+              AuthPasswordField(
+                controller: _passCtrl,
+                label: l10n.password,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => loading ? null : _login(),
+                errorText: _passError,
+                onChanged: (_) {
+                  if (_passError != null) {
+                    setState(() => _passError = null);
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                onPressed: loading ? null : _login,
+                child: loading
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      )
+                    : Text(l10n.login),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

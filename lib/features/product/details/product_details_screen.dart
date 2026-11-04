@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myshop/core/utils/favorite_actions.dart';
+import 'package:myshop/core/utils/product_share.dart';
 import 'package:myshop/features/product/widgets/add_on_sheet.dart';
 import 'package:myshop/features/product/widgets/product_discovery_sections.dart';
 
@@ -83,7 +84,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   Future<void> _load() async {
-    final p = await repo.product(widget.productId);
+    var p = await repo.product(widget.productId);
+    // An unpublished product is hidden from shoppers, even by direct link
+    // (only the shop's own admin may open it, to check it).
+    if (p != null && !p.isPublished) {
+      final me = AuthSession.currentUser;
+      final ownAdmin = me != null && me.isAdmin && me.companyId == p.companyId;
+      if (!ownAdmin) p = null;
+    }
     Company? c;
     bool mismatched = false;
     if (p != null) {
@@ -248,6 +256,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 backgroundColor: Colors.white,
                 elevation: 0,
                 actions: [
+                  _shareButton(p),
                   // Like / unlike, right where the shopper is looking.
                   FavoriteButton(product: p),
                   const BackToAdminButton(),
@@ -1444,6 +1453,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  /// Share the product's direct link (same link as the admin QR code).
+  Widget _shareButton(Product p) => Builder(
+    builder: (ctx) => IconButton(
+      key: const Key('product-share-button'),
+      tooltip: AppLocalizations.of(ctx).shareProduct,
+      icon: const Icon(Icons.share_outlined),
+      onPressed: () => ProductShare.share(ctx, p, shopName: _company?.name),
+    ),
+  );
+
   Widget _buildBreadcrumbs(BuildContext context, Product p) {
     return Row(
       children: [
@@ -1531,6 +1550,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        const Spacer(),
+        _shareButton(p),
       ],
     );
   }

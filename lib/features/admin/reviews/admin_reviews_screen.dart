@@ -95,6 +95,7 @@ class _AdminReviewsScreenState extends State<AdminReviewsScreen> {
   late final Stream<List<Order>> _orders = repo.orders(companyId: _companyId);
   late final Stream<List<Product>> _products = repo.products(
     companyId: _companyId,
+    includeUnpublished: true,
   );
 
   final _searchCtrl = TextEditingController();

@@ -46,6 +46,15 @@
                     android:scheme="https"
                     android:host="myshop-8bd4d.firebaseapp.com"
                     android:pathPrefix="/shop" />
+                <!-- Production domain (QrDeepLinkService.baseUrl for prod) -->
+                <data
+                    android:scheme="https"
+                    android:host="myshop-prod.web.app"
+                    android:pathPrefix="/shop" />
+                <data
+                    android:scheme="https"
+                    android:host="myshop-prod.firebaseapp.com"
+                    android:pathPrefix="/shop" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

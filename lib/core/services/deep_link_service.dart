@@ -28,7 +28,7 @@ class DeepLinkService {
           ? (path.isNotEmpty ? '/$host/$path' : '/$host')
           : '/$path';
       final query = uri.hasQuery ? '?${uri.query}' : '';
-      return '$fullPath$query';
+      return '${_withoutMissingIds(fullPath)}$query';
     }
 
     if (scheme.isNotEmpty && scheme != 'http' && scheme != 'https') {
@@ -40,7 +40,10 @@ class DeepLinkService {
       var frag = uri.fragment;
       if (frag.startsWith('#')) frag = frag.substring(1);
       if (frag.startsWith('/')) {
-        return frag;
+        final q = frag.indexOf('?');
+        return q < 0
+            ? _withoutMissingIds(frag)
+            : '${_withoutMissingIds(frag.substring(0, q))}${frag.substring(q)}';
       }
     }
 
@@ -62,10 +65,22 @@ class DeepLinkService {
       );
       if (isRecognized) {
         final query = uri.hasQuery ? '?${uri.query}' : '';
-        return '$cleanPath$query';
+        return '${_withoutMissingIds(cleanPath)}$query';
       }
     }
 
     return null;
+  }
+
+  /// `/shop/<id>/product` (or `/category`) with the item id missing would be
+  /// an unknown page; open the shop itself instead of an error screen.
+  static String _withoutMissingIds(String path) {
+    final clean = path.replaceFirst(RegExp(r'/+$'), '');
+    final m = RegExp(r'^/shop/([^/]+)/(product|category)$').firstMatch(clean);
+    return m != null
+        ? '/shop/${m.group(1)}'
+        : clean.isEmpty
+        ? '/'
+        : clean;
   }
 }

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:myshop/core/widgets/app_toast.dart';
 import 'package:myshop/core/widgets/category_image.dart';
 import 'package:myshop/features/product/widgets/add_on_sheet.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
@@ -60,6 +61,11 @@ class HomeScreen extends StatefulWidget {
 
   const HomeScreen({super.key, this.shopId});
 
+  /// Opens a banner's external link (replaced in tests).
+  @visibleForTesting
+  static Future<bool> Function(Uri uri) adLinkLauncher = (uri) =>
+      launchUrl(uri, mode: LaunchMode.externalApplication);
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -75,7 +81,17 @@ class _HomeScreenState extends State<HomeScreen> {
   // open every query again). Shop-dependent ones follow the selected shop.
   late final Stream<List<Company>> _companies = repo.companies();
   late final Stream<List<Category>> _categories = repo.categories();
-  late final Stream<List<AdBanner>> _ads = repo.adBanners();
+  // The ads banners of the shop being viewed (reopened when the shop changes).
+  Stream<List<AdBanner>>? _adsStream;
+  String? _adsShopId;
+  Stream<List<AdBanner>> _adsFor(String shopId) {
+    if (_adsStream == null || _adsShopId != shopId) {
+      _adsShopId = shopId;
+      _adsStream = repo.adBanners(shopId: shopId);
+    }
+    return _adsStream!;
+  }
+
   // Fetched once and kept: shown at once when the tab is opened again, and
   // refreshed in the background only when it has gone stale.
   late final Refreshable<List<Product>> _recs = Refreshable<List<Product>>(
@@ -179,12 +195,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final l10n = AppLocalizations.of(context);
     final companies = _companies;
     final categories = _categories;
-    final ads = _ads;
     final recs = _recs;
     final recommendedProducts = _allProducts;
     final vouchers = _vouchers;
 
     final effectiveShopId = _selectedShopId ?? widget.shopId ?? '';
+    final ads = _adsFor(effectiveShopId);
     final dynamicExploreCategories = _exploreDynamic;
     if (_boundShopId != effectiveShopId || _trendingDynamic == null) {
       // A different shop: open its own queries and start from page one.
@@ -529,8 +545,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return ReplayStreamBuilder<List<AdBanner>>(
       stream: ads,
       builder: (context, snap) {
-        final list = snap.data ?? const <AdBanner>[];
-        final totalCards = list.isEmpty ? 1 : list.length + 1;
+        final list = [...(snap.data ?? const <AdBanner>[])]
+          ..sort((a, b) => b.priority.compareTo(a.priority));
+        // Only the banners saved in the database; nothing when there are none.
+        if (list.isEmpty) return const SizedBox.shrink();
+        final totalCards = list.length;
 
         return Column(
           children: [
@@ -543,245 +562,129 @@ class _HomeScreenState extends State<HomeScreen> {
                     : context.isTablet
                     ? (availableWidth / (16 / 5)).clamp(190.0, 260.0)
                     : 165.0;
+                // Extra room under the card: the PageView clips, and the
+                // card's shadow would otherwise be cut off along its bottom.
                 return SizedBox(
-                  height: height,
+                  height: height + 18,
                   child: PageView.builder(
                     controller: _carouselCtrl,
                     itemCount: totalCards,
                     onPageChanged: (i) => setState(() => _carouselIndex = i),
-                    itemBuilder: (context, i) {
-                      if (i == 0) {
-                        return _festiveHeroBanner(context);
-                      }
-                      return _adBannerCard(context, list[i - 1]);
-                    },
+                    itemBuilder: (context, i) =>
+                        _adBannerCard(context, list[i]),
                   ),
                 );
               },
             ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                totalCards,
-                (i) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  width: i == _carouselIndex ? 18 : 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: i == _carouselIndex
-                        ? const Color(0xFFFF5247)
-                        : const Color(0xFFD1D5DB),
-                    borderRadius: BorderRadius.circular(3),
+            if (totalCards > 1)
+              Padding(
+                padding: const EdgeInsets.only(top: 2, bottom: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    totalCards,
+                    (i) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: i == _carouselIndex ? 22 : 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: i == _carouselIndex
+                            ? const Color(0xFFFF5247)
+                            : const Color(0xFFD1D5DB),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            const SizedBox(height: 6),
           ],
         );
       },
     );
   }
 
-  Widget _festiveHeroBanner(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF8E0E00), Color(0xFF1F1C18)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.15),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Background subtle pattern
-          Positioned(
-            right: -20,
-            bottom: -20,
-            child: Icon(
-              Icons.celebration,
-              size: 140,
-              color: Colors.white.withValues(alpha: 0.08),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
-            child: Row(
-              children: [
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: context.isDesktop ? 600 : 230,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFD700),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              AppLocalizations.of(context).limitedTimeOffer,
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 9,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            AppLocalizations.of(context).grandFestiveMegaSale,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            AppLocalizations.of(context).flat50OffFreeDelivery,
-                            style: const TextStyle(
-                              color: Color(0xFFFFEBEA),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          InkWell(
-                            onTap: () {
-                              Clipboard.setData(
-                                const ClipboardData(text: 'FESTIVE50'),
-                              );
-                              ScaffoldMessenger.of(context).showAppToast(
-                                SnackBar(
-                                  content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).promoCodeFestive50CopiedToClipboard,
-                                  ),
-                                  backgroundColor: const Color(0xFF1E8F66),
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.18),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: Colors.white38),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      ).codeFestive50,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(
-                                      Icons.copy,
-                                      size: 11,
-                                      color: Colors.white,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFD700),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                  onPressed: () => context.push(AppRoutes.search),
-                  child: Text(
-                    AppLocalizations.of(context).shopNow,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  /// What a tap on a banner does: open its product or category (inside the
+  /// banner's own shop when it has one), a shop page, or an external link.
+  Future<void> _openAd(AdBanner ad) async {
+    final target = ad.actionTarget.trim();
+    if (target.isEmpty) return;
+    final shop = ad.shopId.isNotEmpty
+        ? ad.shopId
+        : (_selectedShopId ?? widget.shopId ?? '');
+    switch (ad.actionType) {
+      case BannerActionType.product:
+        context.push(
+          shop.isNotEmpty
+              ? '/shop/$shop/product/${Uri.encodeComponent(target)}'
+              : AppRoutes.productPath(target),
+        );
+      case BannerActionType.category:
+        context.push(
+          shop.isNotEmpty
+              ? '/shop/$shop/category/${Uri.encodeComponent(target)}'
+              : AppRoutes.categoryPath(target),
+        );
+      case BannerActionType.companyPage:
+        context.push(AppRoutes.companyPath(target));
+      case BannerActionType.externalUrl:
+        final uri = Uri.tryParse(
+          target.contains('://') ? target : 'https://$target',
+        );
+        var ok = false;
+        if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
+          try {
+            ok = await HomeScreen.adLinkLauncher(uri);
+          } catch (_) {}
+        }
+        if (!ok && mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Couldn't open $target")));
+        }
+    }
   }
 
   Widget _adBannerCard(BuildContext context, AdBanner ad) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.fromLTRB(16, 2, 16, 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFF1F2F6),
         boxShadow: const [
           BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.12),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            color: Color.fromRGBO(17, 24, 39, 0.10),
+            blurRadius: 14,
+            spreadRadius: -2,
+            offset: Offset(0, 6),
           ),
         ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child:
-            ad.image.isNotEmpty &&
-                (ad.image.startsWith('http://') ||
-                    ad.image.startsWith('https://'))
-            ? Image.network(
-                ad.image,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => _bannerFallbackContent(ad),
-              )
-            : _bannerFallbackContent(ad),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            key: Key('ad-banner-${ad.id}'),
+            onTap: ad.actionTarget.trim().isEmpty ? null : () => _openAd(ad),
+            child: Ink(
+              child:
+                  ad.image.isNotEmpty &&
+                      (ad.image.startsWith('http://') ||
+                          ad.image.startsWith('https://'))
+                  ? Image.network(
+                      ad.image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (_, _, _) => _bannerFallbackContent(ad),
+                    )
+                  : _bannerFallbackContent(ad),
+            ),
+          ),
+        ),
       ),
     );
   }

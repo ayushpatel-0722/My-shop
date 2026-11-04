@@ -520,7 +520,7 @@ class _AdminQrScreenState extends State<AdminQrScreen> {
 
   Widget _buildProductSelector() {
     return StreamBuilder<List<Product>>(
-      stream: repo.products(companyId: _shopId),
+      stream: repo.products(companyId: _shopId, includeUnpublished: true),
       builder: (context, snap) {
         final products = snap.data ?? const <Product>[];
 

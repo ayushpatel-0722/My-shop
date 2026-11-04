@@ -1137,7 +1137,10 @@ class _ProductPickerState extends State<_ProductPicker> {
           ),
           const SizedBox(height: 6),
           StreamBuilder<List<Product>>(
-            stream: repo.products(companyId: widget.companyId),
+            stream: repo.products(
+              companyId: widget.companyId,
+              includeUnpublished: true,
+            ),
             builder: (context, snap) {
               final list = snap.data ?? const <Product>[];
               if (list.isEmpty) {

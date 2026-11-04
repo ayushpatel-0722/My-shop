@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../../app/l10n/l10n_service.dart';
+import '../domain/subscription_plans.dart';
 
 /// Tenant / Company model (Firestore: /companies).
 class Company {
@@ -35,6 +36,14 @@ class Company {
   /// Minimum order amount required for delivery (or 0 if no minimum).
   final double minOrderAmount;
 
+  /// How many products the shop may publish: its plan's number, else the
+  /// platform-set `max_products`; never changed by the shop. Null: no limit.
+  final int? maxProducts;
+
+  /// The subscription plan (`plan` field, set by the platform). When set, its
+  /// product limit is [maxProducts] whatever `max_products` says.
+  final SubscriptionPlan? plan;
+
   const Company({
     required this.id,
     required this.name,
@@ -59,6 +68,8 @@ class Company {
     this.handlingMinutes = 45,
     this.deliveryMinutes = 30,
     this.minOrderAmount = 0.0,
+    this.maxProducts,
+    this.plan,
   });
 
   factory Company.fromMap(String id, Map<String, dynamic> map) => Company(
@@ -101,7 +112,18 @@ class Company {
         (map['minOrder'] as num?)?.toDouble() ??
         (map['minOrderAmt'] as num?)?.toDouble() ??
         0.0,
+    maxProducts:
+        SubscriptionPlan.fromId(map['plan'])?.maxProducts ??
+        _planLimit(map['max_products']),
+    plan: SubscriptionPlan.fromId(map['plan']),
   );
+
+  /// `max_products` as stored (a number, or text from the console); anything
+  /// else, or zero / negative, means no limit is set.
+  static int? _planLimit(Object? raw) {
+    final n = raw is num ? raw.toInt() : int.tryParse('${raw ?? ''}'.trim());
+    return n != null && n > 0 ? n : null;
+  }
 
   Map<String, dynamic> toMap() => {
     'name': name,
@@ -190,6 +212,8 @@ class Company {
     int? handlingMinutes,
     int? deliveryMinutes,
     double? minOrderAmount,
+    int? maxProducts,
+    SubscriptionPlan? plan,
   }) => Company(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -214,6 +238,8 @@ class Company {
     handlingMinutes: handlingMinutes ?? this.handlingMinutes,
     deliveryMinutes: deliveryMinutes ?? this.deliveryMinutes,
     minOrderAmount: minOrderAmount ?? this.minOrderAmount,
+    maxProducts: maxProducts ?? this.maxProducts,
+    plan: plan ?? this.plan,
   );
 
   /// Priority image for company card and storefront displays.

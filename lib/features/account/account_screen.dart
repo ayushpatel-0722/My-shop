@@ -316,7 +316,7 @@ class AccountScreen extends StatelessWidget {
                       AppLocalizations.of(context).orderUpdatesPromoAlerts,
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.go(AppRoutes.notifications),
+                    onTap: () => context.push(AppRoutes.notifications),
                   ),
                 ],
               ),

@@ -143,12 +143,20 @@ service cloud.firestore {
     // =========================================================================
     match /companies/{companyId} {
       allow read: if true;
-      allow create: if isSignedIn()
+      // `plan` and `max_products` are the shop's subscription: set by the
+      // platform (console / Admin SDK), never by the shop itself.
+      allow create: if (isSignedIn()
                      || (request.resource.data.name is string
                          && request.resource.data.companyPassword is string
                          && request.resource.data.name.size() > 0
-                         && request.resource.data.companyPassword.size() > 0);
-      allow update: if isCompanyAdmin(companyId);
+                         && request.resource.data.companyPassword.size() > 0))
+                     && !('max_products' in request.resource.data)
+                     && !('plan' in request.resource.data);
+      allow update: if isCompanyAdmin(companyId)
+                     && request.resource.data.get('max_products', null)
+                        == resource.data.get('max_products', null)
+                     && request.resource.data.get('plan', null)
+                        == resource.data.get('plan', null);
       allow delete: if false;
 
       // ---- /companies/{companyId}/admins/{adminId} ---------------------------
@@ -321,11 +329,14 @@ service cloud.firestore {
     }
 
     // Editing password for the home-screen storefront sections. One document,
-    // the same for every company, holding only a salted hash (never the
-    // password). Admins may read it to check what was typed; nobody can write
-    // it from the app: the platform owner sets it in the Firebase console.
-    match /storefront_config/{docId} {
-      allow read: if isAdmin();
+    // the same for every company, set by the developer in the Firebase console
+    // (plain text or a pbkdf2 hash). The app compares what was typed against
+    // it, so any signed-in user can read it: admins are recorded per company
+    // (companies/{id}/admins/{uid}), which rules cannot look up without knowing
+    // the company. Storing a hash keeps the password itself out of reach.
+    // Nobody can write it from the app.
+    match /home_screen_confing_password/{docId} {
+      allow read: if isSignedIn();
       allow write: if false;
     }
 
@@ -333,6 +344,18 @@ service cloud.firestore {
     match /ads_banners/{bannerId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // Home screen: Ads Banners (one shop's carousel on its home screen)
+    match /home_ads_banners/{bannerId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && isCompanyAdmin(request.resource.data.shopId);
+      allow update: if isSignedIn()
+        && isCompanyAdmin(resource.data.shopId)
+        && isCompanyAdmin(request.resource.data.shopId);
+      allow delete: if isSignedIn()
+        && isCompanyAdmin(resource.data.shopId);
     }
 
     // Media Links

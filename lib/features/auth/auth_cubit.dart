@@ -11,6 +11,7 @@ import '../../core/models/company.dart';
 import '../../core/services/auth_session.dart';
 import '../../core/services/secure_session_cache.dart';
 import '../../core/services/service_locator.dart';
+import '../admin/storefront_lock/storefront_access.dart';
 import 'google_sign_in_errors.dart';
 
 enum AuthStatus { unauthenticated, authenticating, authenticated, error }
@@ -563,6 +564,8 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> signOut() async {
+    // Logging out never needs a manual lock: lock the storefront sections first.
+    StorefrontAccess.lock();
     try {
       await _repo.signOut();
     } catch (e) {

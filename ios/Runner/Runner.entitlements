@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Universal Links. Not wired into the Xcode project yet: it needs a paid
+	     Apple team and the real bundle id. See the deep-link notes. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:myshop-8bd4d.web.app</string>
+		<string>applinks:myshop-prod.web.app</string>
+	</array>
+</dict>
+</plist>

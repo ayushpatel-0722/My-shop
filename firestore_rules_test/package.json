@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Emulator tests for firestore.rules (employee order permissions, favourites, storefront lock).",
+  "description": "Emulator tests for firestore.rules (employee order permissions, favourites, storefront lock, plan product limits).",
   "scripts": {
     "pretest": "cp ../firestore.rules ./firestore.rules",
-    "test": "npx -y firebase-tools@13.35.1 emulators:exec --only firestore --project demo-rules \"node orders_rules.test.mjs && node favorites_rules.test.mjs && node storefront_lock_rules.test.mjs\""
+    "test": "npx -y firebase-tools@13.35.1 emulators:exec --only firestore --project demo-rules \"node orders_rules.test.mjs && node favorites_rules.test.mjs && node storefront_lock_rules.test.mjs && node product_limits_rules.test.mjs\""
   },
   "dependencies": {
     "@firebase/rules-unit-testing": "^4.0.0",

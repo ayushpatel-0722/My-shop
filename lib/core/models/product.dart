@@ -517,6 +517,11 @@ class Product {
   final bool isUnlimitedStock;
   final bool isRecommended;
 
+  /// Whether shoppers can see the product. Only published products count
+  /// towards the plan's `max_products`. Products saved before this field
+  /// existed have none stored and are published.
+  final bool isPublished;
+
   /// Optional extras sold with the product (assembly, delivery, ...).
   final List<ProductAddOn> addOns;
 
@@ -547,6 +552,7 @@ class Product {
     this.stockQty = 0,
     this.isUnlimitedStock = false,
     this.isRecommended = false,
+    this.isPublished = true,
     this.addOns = const [],
     this.addOnSelection = AddOnSelectionType.checkbox,
   });
@@ -747,6 +753,7 @@ class Product {
     stockQty: asInt(map['stockQty']),
     isUnlimitedStock: asBool(map['isUnlimitedStock']),
     isRecommended: asBool(map['isRecommended']),
+    isPublished: map['isPublished'] is bool ? map['isPublished'] as bool : true,
     addOns: asMapList(map['addOns']).map(ProductAddOn.fromMap).toList(),
     addOnSelection: AddOnSelectionType.normalize(map['addOnSelection']),
   );
@@ -774,6 +781,7 @@ class Product {
     'stockQty': stockQty,
     'isUnlimitedStock': isUnlimitedStock,
     'isRecommended': isRecommended,
+    'isPublished': isPublished,
     'addOns': addOns.map((e) => e.toMap()).toList(),
     'addOnSelection': addOnSelection,
   };
@@ -802,6 +810,7 @@ class Product {
     int? stockQty,
     bool? isUnlimitedStock,
     bool? isRecommended,
+    bool? isPublished,
     List<ProductAddOn>? addOns,
     String? addOnSelection,
   }) {
@@ -828,6 +837,7 @@ class Product {
       color: color ?? this.color,
       stockQty: stockQty ?? this.stockQty,
       isUnlimitedStock: isUnlimitedStock ?? this.isUnlimitedStock,
+      isPublished: isPublished ?? this.isPublished,
       isRecommended: isRecommended ?? this.isRecommended,
       addOns: addOns ?? this.addOns,
       addOnSelection: addOnSelection ?? this.addOnSelection,

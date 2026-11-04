@@ -18,6 +18,45 @@ void main() {
 
   tearDown(() => TestHarness.signOut());
 
+  testWidgets('publish / unpublish filter splits live and hidden products', (
+    tester,
+  ) async {
+    for (final (id, name, pub) in [
+      ('pf1', 'Live Item', true),
+      ('pf2', 'Hidden Item', false),
+    ]) {
+      await repo.saveProduct(
+        Product(
+          id: id,
+          companyId: 'c_organic',
+          categoryId: 'cat_1',
+          name: name,
+          amount: 10,
+          stockQty: 5,
+          isPublished: pub,
+        ),
+      );
+    }
+    await pumpTestApp(tester, const AdminProductsScreen());
+    expect(find.text('Live Item'), findsOneWidget);
+    expect(find.text('Hidden Item'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('product-filter-unpublished')));
+    await tester.pumpAndSettle();
+    expect(find.text('Hidden Item'), findsOneWidget);
+    expect(find.text('Live Item'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('product-filter-published')));
+    await tester.pumpAndSettle();
+    expect(find.text('Live Item'), findsOneWidget);
+    expect(find.text('Hidden Item'), findsNothing);
+
+    // Tapping the active chip again clears the filter.
+    await tester.tap(find.byKey(const Key('product-filter-published')));
+    await tester.pumpAndSettle();
+    expect(find.text('Hidden Item'), findsOneWidget);
+  });
+
   testWidgets('lists the store\'s products with an id badge', (tester) async {
     await repo.saveProduct(
       const Product(

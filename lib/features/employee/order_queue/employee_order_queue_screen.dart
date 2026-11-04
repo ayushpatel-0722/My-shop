@@ -12,6 +12,7 @@ import '../../../core/models/app_user.dart';
 import '../../../core/models/order.dart';
 import '../../../core/services/service_locator.dart';
 import '../../../core/widgets/order_status_badge.dart';
+import '../../admin/orders/widgets/order_filter_bar.dart';
 import '../../auth/auth_cubit.dart';
 import '../employee_access_scope.dart';
 import '../packing/packing_actions.dart';
@@ -33,6 +34,7 @@ class EmployeeOrderQueueScreen extends StatefulWidget {
 class _EmployeeOrderQueueScreenState extends State<EmployeeOrderQueueScreen> {
   PackingStage _stage = PackingStage.toPack;
   String _query = '';
+  DateTimeRange? _dateRange;
   // Bumped by "Retry" so the StreamBuilder resubscribes.
   int _attempt = 0;
   Stream<List<Order>>? _stream;
@@ -148,8 +150,10 @@ class _EmployeeOrderQueueScreenState extends State<EmployeeOrderQueueScreen> {
                   stages: stages,
                   stage: stages.contains(_stage) ? _stage : stages.first,
                   query: _query,
+                  dateRange: _dateRange,
                   onStage: (s) => setState(() => _stage = s),
                   onQuery: (q) => setState(() => _query = q),
+                  onDateRange: (r) => setState(() => _dateRange = r),
                 );
               },
             ),
@@ -157,15 +161,17 @@ class _EmployeeOrderQueueScreenState extends State<EmployeeOrderQueueScreen> {
   }
 }
 
-class _Body extends StatelessWidget {
+class _Body extends StatefulWidget {
   final List<Order> orders;
   final String employeeId;
   final EmployeeAccess access;
   final List<PackingStage> stages;
   final PackingStage stage;
   final String query;
+  final DateTimeRange? dateRange;
   final ValueChanged<PackingStage> onStage;
   final ValueChanged<String> onQuery;
+  final ValueChanged<DateTimeRange?> onDateRange;
 
   const _Body({
     required this.orders,
@@ -174,9 +180,35 @@ class _Body extends StatelessWidget {
     required this.stages,
     required this.stage,
     required this.query,
+    required this.dateRange,
     required this.onStage,
     required this.onQuery,
+    required this.onDateRange,
   });
+
+  @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  late final TextEditingController _search = TextEditingController(
+    text: widget.query,
+  );
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  List<Order> get orders => widget.orders;
+  String get employeeId => widget.employeeId;
+  EmployeeAccess get access => widget.access;
+  List<PackingStage> get stages => widget.stages;
+  PackingStage get stage => widget.stage;
+  String get query => widget.query;
+  ValueChanged<PackingStage> get onStage => widget.onStage;
+  ValueChanged<String> get onQuery => widget.onQuery;
 
   @override
   Widget build(BuildContext context) {
@@ -188,6 +220,7 @@ class _Body extends StatelessWidget {
     final q = query.trim().toLowerCase();
     final shown = orders.where((o) {
       if (PackingWorkflow.stageOf(o, access) != stage) return false;
+      if (!orderInDateRange(o.createdAt, widget.dateRange)) return false;
       if (q.isEmpty) return true;
       return o.reference.toLowerCase().contains(q) ||
           o.id.toLowerCase().contains(q) ||
@@ -222,14 +255,21 @@ class _Body extends StatelessWidget {
                           onStage: onStage,
                         ),
                         const SizedBox(height: 14),
-                        TextField(
-                          key: const Key('employee-search'),
-                          onChanged: onQuery,
-                          decoration: InputDecoration(
-                            hintText: l10n.empSearchHint,
-                            prefixIcon: const Icon(Icons.search),
-                            isDense: true,
-                          ),
+                        OrderFilterBar(
+                          searchKey: const Key('employee-search'),
+                          searchController: _search,
+                          searchHint: l10n.empSearchHint,
+                          onSearchChanged: onQuery,
+                          dateRange: widget.dateRange,
+                          onDateRangeChanged: widget.onDateRange,
+                          hasActiveFilters:
+                              query.trim().isNotEmpty ||
+                              widget.dateRange != null,
+                          onClear: () {
+                            _search.clear();
+                            onQuery('');
+                            widget.onDateRange(null);
+                          },
                         ),
                         const SizedBox(height: 14),
                       ],
@@ -373,6 +413,8 @@ class _StatCard extends StatelessWidget {
       width: 168,
       child: Card(
         margin: EdgeInsets.zero,
+        elevation: 0,
+        color: selected ? accent.withValues(alpha: 0.08) : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(
@@ -551,8 +593,15 @@ class _OrderCardState extends State<_OrderCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
-                    child: TextButton(
+                    child: OutlinedButton(
                       key: Key('employee-view-${o.id}'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 42),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                       onPressed: _open,
                       child: Text(
                         l10n.empViewDetails,
@@ -566,6 +615,16 @@ class _OrderCardState extends State<_OrderCard> {
                     Flexible(
                       child: FilledButton(
                         key: Key('employee-action-${o.id}'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 42),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                         onPressed: _busy ? null : () => _run(action),
                         child: _busy
                             ? const SizedBox(

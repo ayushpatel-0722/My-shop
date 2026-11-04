@@ -13,6 +13,7 @@ import '../cache/shared_streams.dart';
 import '../domain/category_tree.dart';
 import '../domain/employee_roles.dart';
 import '../domain/order_status.dart';
+import '../domain/product_limits.dart';
 import '../models/admin.dart';
 import '../models/app_user.dart';
 import '../models/banner.dart';
@@ -54,7 +55,7 @@ import '../utils/type_utils.dart';
 ///
 /// Flat Root Collections (Platform-wide / Cross-company):
 ///   - `/users/{user_uid}`
-///   - `/ads_banners/{banner_id}`
+///   - `/home_ads_banners/{banner_id}` (shop-scoped via `shopId`)
 ///   - `/media_links/{media_id}`
 class FirebaseAppRepository implements AppRepository {
   final _db = FirebaseFirestore.instance;
@@ -990,19 +991,37 @@ class FirebaseAppRepository implements AppRepository {
     String companyId = '',
     String categoryId = '',
     String search = '',
+    bool includeUnpublished = false,
   }) => _shared.stream(
-    'products|$companyId|$categoryId|$search',
+    'products|$companyId|$categoryId|$search|$includeUnpublished',
     DataClass.catalog,
     () => _rawProducts(
       companyId: companyId,
       categoryId: categoryId,
       search: search,
+      includeUnpublished: includeUnpublished,
     ),
   );
 
   @override
-  Stream<List<AdBanner>> adBanners() =>
-      _shared.stream('adBanners', DataClass.reference, () => _rawAdBanners());
+  Future<ProductCounts> productCounts(String companyId) async {
+    final col = _productsCol(companyId);
+    final total = (await col.count().get()).count ?? 0;
+    // Products saved before `isPublished` existed have no such field and are
+    // published, so count the unpublished ones and subtract.
+    final unpublished =
+        (await col.where('isPublished', isEqualTo: false).count().get())
+            .count ??
+        0;
+    return ProductCounts(total: total, published: total - unpublished);
+  }
+
+  @override
+  Stream<List<AdBanner>> adBanners({String shopId = ''}) => _shared.stream(
+    'adBanners:$shopId',
+    DataClass.reference,
+    () => _rawAdBanners(shopId),
+  );
 
   @override
   Stream<List<OfferBanner>> offerBanners(String companyId) => _shared.stream(
@@ -1147,6 +1166,7 @@ class FirebaseAppRepository implements AppRepository {
     String companyId = '',
     String categoryId = '',
     String search = '',
+    bool includeUnpublished = false,
   }) {
     Query<Map<String, dynamic>> q = companyId.isNotEmpty
         ? _productsCol(companyId)
@@ -1166,6 +1186,7 @@ class FirebaseAppRepository implements AppRepository {
                 }
                 return Product.fromMap(d.id, map);
               })
+              .where((p) => includeUnpublished || p.isPublished)
               .where(
                 (p) =>
                     search.isEmpty ||
@@ -1230,15 +1251,19 @@ class FirebaseAppRepository implements AppRepository {
     return null;
   }
 
-  Stream<List<AdBanner>> _rawAdBanners() => _db
-      .collection('ads_banners')
-      .snapshots()
-      .map(
-        (s) => s.docs
-            .map((d) => AdBanner.fromMap(d.id, _asMap(d.data())))
-            .toList(),
-      )
-      .asBroadcastStream();
+  Stream<List<AdBanner>> _rawAdBanners(String shopId) {
+    final Query<Map<String, dynamic>> col = shopId.isEmpty
+        ? _db.collection('home_ads_banners')
+        : _db.collection('home_ads_banners').where('shopId', isEqualTo: shopId);
+    return col
+        .snapshots()
+        .map(
+          (s) => s.docs
+              .map((d) => AdBanner.fromMap(d.id, _asMap(d.data())))
+              .toList(),
+        )
+        .asBroadcastStream();
+  }
 
   Stream<List<OfferBanner>> _rawOfferBanners(String companyId) {
     final Stream<QuerySnapshot<Map<String, dynamic>>> stream =
@@ -2558,6 +2583,29 @@ class FirebaseAppRepository implements AppRepository {
     }
   }
 
+  /// Applies the shop's plan limits (`max_products`) to a save: refuses a new
+  /// product over the total limit, keeps one over the published limit
+  /// unpublished. The Cloud Function `enforceProductLimits` checks the same
+  /// rules on the server, which also covers requests made at the same moment.
+  Future<Product> _withinPlanLimits(Product product, String id) async {
+    final companyId = product.companyId.trim();
+    final company = await this.company(companyId);
+    final limits = ProductLimits(company?.maxProducts);
+    if (!limits.hasLimit) return product;
+    final ref = _productsCol(companyId).doc(id);
+    final existingSnap = await ref.get();
+    final existing = existingSnap.exists
+        ? Product.fromMap(id, _asMap(existingSnap.data()))
+        : null;
+    final counts = await productCounts(companyId);
+    final others = ProductCounts(
+      total: counts.total - (existing == null ? 0 : 1),
+      published:
+          counts.published - (existing != null && existing.isPublished ? 1 : 0),
+    );
+    return limits.guardSave(product, existing: existing, others: others);
+  }
+
   @override
   Future<void> saveProduct(Product product) async {
     final companyId = product.companyId.trim();
@@ -2566,6 +2614,7 @@ class FirebaseAppRepository implements AppRepository {
     }
     final isNew = product.id.isEmpty;
     final id = isNew ? _uuid.v4() : product.id;
+    product = await _withinPlanLimits(product, id);
     final batch = _db.batch();
     batch.set(_productsCol(companyId).doc(id), <String, dynamic>{
       ...product.toMap(),
@@ -3003,22 +3052,24 @@ class FirebaseAppRepository implements AppRepository {
   Future<String?> storefrontLockHash() async {
     // Always from the server: a stale cached copy must not decide who may edit.
     final snap = await _db
-        .collection('storefront_config')
-        .doc('lock')
+        .collection('home_screen_confing_password')
+        .doc('password')
         .get(const GetOptions(source: Source.server));
-    final hash = snap.data()?['passwordHash'];
-    return hash is String && hash.trim().isNotEmpty ? hash.trim() : null;
+    final data = snap.data();
+    final value = data?['password'] ?? data?['passwordHash'];
+    return value is String && value.trim().isNotEmpty ? value.trim() : null;
   }
 
   @override
   Future<void> saveAdBanner(AdBanner banner) {
     final id = banner.id.isEmpty ? _uuid.v4() : banner.id;
-    return _db.collection('ads_banners').doc(id).set({
+    return _db.collection('home_ads_banners').doc(id).set({
       'id': id,
       'image': banner.image,
       'actionType': banner.actionTypeWire,
       'actionTarget': banner.actionTarget,
       'priority': banner.priority,
+      'shopId': banner.shopId,
     });
   }
 
@@ -3028,7 +3079,7 @@ class FirebaseAppRepository implements AppRepository {
       await _bannersCol(companyId).doc(id).delete();
       return;
     }
-    final adDoc = _db.collection('ads_banners').doc(id);
+    final adDoc = _db.collection('home_ads_banners').doc(id);
     final adSnap = await adDoc.get();
     if (adSnap.exists) {
       await adDoc.delete();

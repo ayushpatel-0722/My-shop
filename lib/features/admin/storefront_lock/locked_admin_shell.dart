@@ -4,6 +4,7 @@ import 'package:myshop/core/widgets/app_toast.dart';
 import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../admin_shell.dart';
+import 'storefront_access.dart';
 import 'storefront_lock_controller.dart';
 import 'storefront_unlock_dialog.dart';
 
@@ -34,7 +35,7 @@ class LockedAdminShell extends StatefulWidget {
   final String backRoute;
   final Widget? floatingActionButton;
 
-  /// Tests pass their own; otherwise the shell makes (and disposes) one.
+  /// Tests pass their own; otherwise the group's shared lock is used.
   final StorefrontLockController? controller;
 
   @override
@@ -42,26 +43,32 @@ class LockedAdminShell extends StatefulWidget {
 }
 
 class _LockedAdminShellState extends State<LockedAdminShell> {
+  // The group's shared lock unless a test passes its own.
   late final StorefrontLockController _lock =
-      widget.controller ?? StorefrontLockController();
+      widget.controller ?? StorefrontAccess.controller;
 
-  @override
-  void dispose() {
-    if (widget.controller == null) _lock.dispose();
-    super.dispose();
+  /// Tests pass their own controller, which is not the shared one.
+  Future<bool> _confirmAndLockOwn(BuildContext context) async {
+    final ok = await StorefrontAccess.confirmAndLock(context);
+    if (ok) _lock.lock();
+    return ok;
   }
 
   Future<void> _toggle() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     if (_lock.unlocked) {
-      _lock.lock();
-      messenger.showAppToast(
-        SnackBar(
-          content: Text(l10n.storefrontLockedAgainToast),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      final locked = widget.controller == null
+          ? await StorefrontAccess.confirmAndLock(context)
+          : await _confirmAndLockOwn(context);
+      if (locked && mounted) {
+        messenger.showAppToast(
+          SnackBar(
+            content: Text(l10n.storefrontLockedAgainToast),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
       return;
     }
     final ok = await showStorefrontUnlockDialog(context, _lock);

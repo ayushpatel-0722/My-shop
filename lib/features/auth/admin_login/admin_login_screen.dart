@@ -8,6 +8,7 @@ import '../../../app/l10n/app_localizations.dart';
 import '../../../app/routes/app_router.dart';
 import '../../../core/services/company_password.dart';
 import '../auth_cubit.dart';
+import '../widgets/auth_page_shell.dart';
 
 /// Two-step Admin login (Section 5.1):
 /// Step 1 — Company Name + Company Password (tenant resolution).
@@ -43,129 +44,130 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.adminLogin)),
-      body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state.status == AuthStatus.authenticated) {
-            context.go(AppRoutes.admin);
-          } else if (state.status == AuthStatus.error) {
-            final msg =
-                state.error != null &&
-                    state.error!.isNotEmpty &&
-                    state.error != 'invalid'
-                ? state.error!
-                : l10n.invalidCredentials;
-            ScaffoldMessenger.of(
-              context,
-            ).showAppToast(SnackBar(content: Text(msg)));
-          }
-        },
-        builder: (context, state) {
-          final loading = state.status == AuthStatus.authenticating;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_step == 1) ...[
-                  _label(context, '1 · ${l10n.companyName}'),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _companyCtrl,
-                    onChanged: (_) {
-                      if (_companyError != null) {
-                        setState(() => _companyError = null);
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context).greenleafOrganics,
-                      prefixIcon: const Icon(Icons.business),
-                      errorText: _companyError,
-                    ),
+    return BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          context.go(AppRoutes.admin);
+        } else if (state.status == AuthStatus.error) {
+          final msg =
+              state.error != null &&
+                  state.error!.isNotEmpty &&
+                  state.error != 'invalid'
+              ? state.error!
+              : l10n.invalidCredentials;
+          ScaffoldMessenger.of(
+            context,
+          ).showAppToast(SnackBar(content: Text(msg)));
+        }
+      },
+      builder: (context, state) {
+        final loading = state.status == AuthStatus.authenticating;
+        final busy = loading || _validatingStep1;
+        return AuthPageShell(
+          title: l10n.adminLogin,
+          subtitle: l10n.authAdminSubtitle,
+          icon: Icons.admin_panel_settings,
+          badge: l10n.authRoleAdmin,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthStepBar(
+                current: _step - 1,
+                labels: [l10n.authStepCompany, l10n.authStepAccount],
+              ),
+              const SizedBox(height: 20),
+              if (_step == 1) ...[
+                TextField(
+                  controller: _companyCtrl,
+                  textInputAction: TextInputAction.next,
+                  onChanged: (_) {
+                    if (_companyError != null) {
+                      setState(() => _companyError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: l10n.companyName,
+                    hintText: l10n.greenleafOrganics,
+                    prefixIcon: const Icon(Icons.business),
+                    errorText: _companyError,
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _companyPassCtrl,
-                    obscureText: true,
-                    onChanged: (_) {
-                      if (_companyPassError != null) {
-                        setState(() => _companyPassError = null);
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: l10n.companyPassword,
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      errorText: _companyPassError,
-                    ),
-                  ),
-                ] else ...[
-                  _label(context, '2 · ${l10n.email}'),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _emailCtrl,
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: (_) {
-                      if (_emailError != null) {
-                        setState(() => _emailError = null);
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context).adminCompanyIn,
-                      prefixIcon: const Icon(Icons.mail_outline),
-                      errorText: _emailError,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _passCtrl,
-                    obscureText: true,
-                    onChanged: (_) {
-                      if (_passError != null) {
-                        setState(() => _passError = null);
-                      }
-                    },
-                    decoration: InputDecoration(
-                      hintText: l10n.password,
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      errorText: _passError,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: (loading || _validatingStep1) ? null : _next,
-                  child: (loading || _validatingStep1)
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2.5),
-                        )
-                      : Text(_step == 1 ? l10n.next : l10n.login),
                 ),
-                if (_step == 2)
-                  TextButton(
-                    onPressed: () => setState(() {
-                      _step = 1;
-                      _emailError = null;
-                      _passError = null;
-                    }),
-                    child: Text(l10n.back),
+                const SizedBox(height: 16),
+                AuthPasswordField(
+                  controller: _companyPassCtrl,
+                  label: l10n.companyPassword,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => busy ? null : _next(),
+                  errorText: _companyPassError,
+                  onChanged: (_) {
+                    if (_companyPassError != null) {
+                      setState(() => _companyPassError = null);
+                    }
+                  },
+                ),
+              ] else ...[
+                TextField(
+                  controller: _emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
+                  onChanged: (_) {
+                    if (_emailError != null) {
+                      setState(() => _emailError = null);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    hintText: l10n.adminCompanyIn,
+                    prefixIcon: const Icon(Icons.mail_outline),
+                    errorText: _emailError,
                   ),
+                ),
+                const SizedBox(height: 16),
+                AuthPasswordField(
+                  controller: _passCtrl,
+                  label: l10n.password,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => busy ? null : _next(),
+                  errorText: _passError,
+                  onChanged: (_) {
+                    if (_passError != null) {
+                      setState(() => _passError = null);
+                    }
+                  },
+                ),
               ],
-            ),
-          );
-        },
-      ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                onPressed: busy ? null : _next,
+                child: busy
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      )
+                    : Text(_step == 1 ? l10n.next : l10n.login),
+              ),
+              if (_step == 2) ...[
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => setState(() {
+                    _step = 1;
+                    _emailError = null;
+                    _passError = null;
+                  }),
+                  child: Text(l10n.back),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
-
-  Widget _label(BuildContext context, String text) => Text(
-    text,
-    style: Theme.of(
-      context,
-    ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-  );
 
   bool _isValidEmail(String email) {
     return RegExp(

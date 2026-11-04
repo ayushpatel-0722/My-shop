@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../core/services/deep_link_handler.dart';
 import '../core/services/service_locator.dart';
 import '../core/utils/force_update_gate.dart';
 import '../core/widgets/cache_consent_prompt.dart';
@@ -30,7 +29,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  StreamSubscription<Uri>? _deepLinkSub;
+  late final DeepLinkHandler _deepLinkHandler;
 
   @override
   void initState() {
@@ -38,27 +37,20 @@ class _AppState extends State<App> {
     _initDeepLinks();
   }
 
-  /// Listens for `ecommerce://…` links and routes them to the correct screen
-  /// (Section 15.2).
+  /// Opens `ecommerce://…` and https product / shop links on the right screen
+  /// (Section 15.2), whether the app was closed, in the background or open.
   void _initDeepLinks() {
-    _deepLinkSub = deepLinks.stream.listen((uri) {
-      final loc = deepLinks.toRoute(uri);
-      if (loc != null) appRouter.push(loc);
-    });
-    deepLinks
-        .getInitialLink()
-        .then((uri) {
-          if (uri != null) {
-            final loc = deepLinks.toRoute(uri);
-            if (loc != null) appRouter.push(loc);
-          }
-        })
-        .catchError((_) {});
+    _deepLinkHandler = DeepLinkHandler(
+      service: deepLinks,
+      navigate: (loc) => appRouter.push(loc),
+      currentLocation: () =>
+          appRouter.routerDelegate.currentConfiguration.uri.toString(),
+    )..start();
   }
 
   @override
   void dispose() {
-    _deepLinkSub?.cancel();
+    _deepLinkHandler.dispose();
     super.dispose();
   }
 

@@ -37,12 +37,16 @@ class AdminProductsScreen extends StatefulWidget {
 enum ProductStockFilter { all, inStock, lowStock, outOfStock }
 
 /// Product image audit filter.
+/// Visibility filter: live in the shop vs. saved as unpublished.
+enum ProductPublishFilter { all, published, unpublished }
+
 enum ProductImageFilter { all, withImages, multipleImages, missingImages }
 
 class _AdminProductsScreenState extends State<AdminProductsScreen> {
   final _searchCtrl = TextEditingController();
   ProductStockFilter _stockFilter = ProductStockFilter.all;
   ProductImageFilter _imageFilter = ProductImageFilter.all;
+  ProductPublishFilter _publishFilter = ProductPublishFilter.all;
   ProductSort _sort = ProductSort.relevance;
 
   @override
@@ -77,6 +81,12 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
   List<Product> _apply(List<Product> products) {
     final filtered = Catalog.apply(products, _query);
     return filtered.where((p) {
+      if (_publishFilter == ProductPublishFilter.published && !p.isPublished) {
+        return false;
+      }
+      if (_publishFilter == ProductPublishFilter.unpublished && p.isPublished) {
+        return false;
+      }
       if (_imageFilter == ProductImageFilter.withImages && p.images.isEmpty) {
         return false;
       }
@@ -190,7 +200,10 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
       title: AppLocalizations.of(context).products,
       actions: [
         StreamBuilder<List<Product>>(
-          stream: repo.products(companyId: _companyId),
+          stream: repo.products(
+            companyId: _companyId,
+            includeUnpublished: true,
+          ),
           builder: (context, snap) {
             final prods = snap.data ?? const <Product>[];
             return IconButton(
@@ -299,7 +312,10 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
           SizedBox(
             height: 46,
             child: StreamBuilder<List<Product>>(
-              stream: repo.products(companyId: _companyId),
+              stream: repo.products(
+                companyId: _companyId,
+                includeUnpublished: true,
+              ),
               builder: (context, snap) {
                 final products = snap.data ?? const <Product>[];
                 final summary = Catalog.summarize(products);
@@ -327,6 +343,16 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
                       summary.outOfStock,
                       ProductStockFilter.outOfStock,
                     ),
+                    _publishChip(
+                      AppLocalizations.of(context).productPublishedLabel,
+                      products.where((p) => p.isPublished).length,
+                      ProductPublishFilter.published,
+                    ),
+                    _publishChip(
+                      AppLocalizations.of(context).productUnpublishedBadge,
+                      products.where((p) => !p.isPublished).length,
+                      ProductPublishFilter.unpublished,
+                    ),
                     _imageChip(
                       'Multi-Image (2+)',
                       products.where((p) => p.images.length > 1).length,
@@ -345,7 +371,10 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
           ),
           Expanded(
             child: StreamBuilder<List<Product>>(
-              stream: repo.products(companyId: _companyId),
+              stream: repo.products(
+                companyId: _companyId,
+                includeUnpublished: true,
+              ),
               builder: (context, snap) {
                 final products = snap.data ?? const <Product>[];
                 final list = _apply(products);
@@ -415,6 +444,21 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
         label: Text('$label ($count)'),
         selected: _stockFilter == filter,
         onSelected: (_) => setState(() => _stockFilter = filter),
+      ),
+    );
+  }
+
+  Widget _publishChip(String label, int count, ProductPublishFilter filter) {
+    final isSelected = _publishFilter == filter;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        key: Key('product-filter-${filter.name}'),
+        label: Text('$label ($count)'),
+        selected: isSelected,
+        onSelected: (_) => setState(() {
+          _publishFilter = isSelected ? ProductPublishFilter.all : filter;
+        }),
       ),
     );
   }
@@ -607,6 +651,12 @@ class _ProductTile extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (!product.isPublished) ...[
+                          const SizedBox(width: 6),
+                          _UnpublishedBadge(
+                            key: Key('unpublished-${product.id}'),
+                          ),
+                        ],
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -848,12 +898,23 @@ class _ProductTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  product.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.5,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16.5,
+                        ),
+                      ),
+                    ),
+                    if (!product.isPublished) ...[
+                      const SizedBox(width: 8),
+                      _UnpublishedBadge(key: Key('unpublished-${product.id}')),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Wrap(
@@ -1004,4 +1065,26 @@ class _EmptyProducts extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Marks a product that shoppers can not see.
+class _UnpublishedBadge extends StatelessWidget {
+  const _UnpublishedBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+    decoration: BoxDecoration(
+      color: Colors.orange.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(6),
+    ),
+    child: Text(
+      AppLocalizations.of(context).productUnpublishedBadge,
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        color: Colors.orange.shade900,
+      ),
+    ),
+  );
 }

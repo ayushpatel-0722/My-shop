@@ -10,6 +10,10 @@ class AdBanner {
   final DateTime? endDate;
   final int priority;
 
+  /// The shop that owns this banner. Empty: a platform-wide banner shown in
+  /// every shop.
+  final String shopId;
+
   /// The value stored in Firebase for [actionType] (what [AdBanner.fromMap]
   /// reads back).
   String get actionTypeWire => switch (actionType) {
@@ -27,6 +31,7 @@ class AdBanner {
     this.startDate,
     this.endDate,
     this.priority = 0,
+    this.shopId = '',
   });
 
   factory AdBanner.fromMap(String id, Map<String, dynamic> map) => AdBanner(
@@ -41,6 +46,7 @@ class AdBanner {
         ? DateTime.tryParse(map['endDate'].toString())
         : null,
     priority: map['priority'] ?? 0,
+    shopId: (map['shopId'] ?? '').toString(),
   );
 
   static BannerActionType _actionFrom(String s) => switch (s) {

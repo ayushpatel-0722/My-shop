@@ -12,6 +12,8 @@ import '../../core/services/admin_company_name.dart';
 import '../../core/services/auth_session.dart';
 import '../auth/auth_cubit.dart';
 import 'employees/employee_role_labels.dart';
+import 'storefront_lock/storefront_access.dart';
+import 'storefront_lock/storefront_unlock_dialog.dart';
 
 /// Breakpoint at which the admin layout transitions from mobile/tablet drawer to
 /// a dedicated desktop sidebar layout (matches AppBreakpoints.tabletMax).
@@ -56,7 +58,6 @@ class AdminShell extends StatelessWidget {
       builder: (context, _) {
         final user = AuthSession.currentUser;
         final companyName = AdminCompanyName.instance.nameFor(user);
-
         // Only block while we genuinely have nobody to show. Widget tests and
         // deep links set the session without a restoring phase, and they must
         // not be stuck on a spinner.
@@ -211,11 +212,19 @@ class _AdminNavItemData {
   final String route;
   final String? section;
 
+  /// Starts the password-protected group; its header carries the lock.
+  final bool protectedGroup;
+
+  /// A screen inside the protected group.
+  final bool isProtected;
+
   const _AdminNavItemData({
     required this.icon,
     required this.label,
     required this.route,
     this.section,
+    this.protectedGroup = false,
+    this.isProtected = false,
   });
 }
 
@@ -282,25 +291,32 @@ List<_AdminNavItemData> _allAdminNavItems(BuildContext context) {
       label: l10n.banners,
       route: AppRoutes.adminBanners,
     ),
-    const _AdminNavItemData(
-      icon: Icons.grid_view_rounded,
-      label: 'Home Explore Categories',
-      route: AppRoutes.adminExploreCategories,
+    _AdminNavItemData(
+      icon: Icons.qr_code_2,
+      label: l10n.qrCodes,
+      route: AppRoutes.adminQr,
     ),
-    const _AdminNavItemData(
+
+    // HOME SCREEN CONFIG (password protected)
+    _AdminNavItemData(
+      icon: Icons.grid_view_rounded,
+      label: l10n.homeExploreCategoriesNav,
+      route: AppRoutes.adminExploreCategories,
+      section: l10n.homeConfigGroupTitle,
+      protectedGroup: true,
+      isProtected: true,
+    ),
+    _AdminNavItemData(
       icon: Icons.local_fire_department,
-      label: 'Home Trending Now',
+      label: l10n.homeTrendingNowNav,
       route: AppRoutes.adminTrendingNow,
+      isProtected: true,
     ),
     _AdminNavItemData(
       icon: Icons.campaign_outlined,
       label: l10n.adsBannerTitle,
       route: AppRoutes.adminAdsBanners,
-    ),
-    _AdminNavItemData(
-      icon: Icons.qr_code_2,
-      label: l10n.qrCodes,
-      route: AppRoutes.adminQr,
+      isProtected: true,
     ),
 
     // OPERATIONS & DATA
@@ -329,6 +345,11 @@ List<_AdminNavItemData> _allAdminNavItems(BuildContext context) {
       icon: Icons.admin_panel_settings,
       label: l10n.admins,
       route: AppRoutes.adminAdmins,
+    ),
+    _AdminNavItemData(
+      icon: Icons.workspace_premium_outlined,
+      label: l10n.subscriptionPlanTitle,
+      route: AppRoutes.adminSubscription,
     ),
   ];
 }
@@ -391,21 +412,35 @@ class _AdminDesktopSidebarState extends State<_AdminDesktopSidebar> {
     // Only if the selected item is out of sight (a page opened directly, or
     // reached from inside another page) bring it into view; otherwise leave
     // the menu exactly where it is.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = _activeKey.currentContext;
-      if (!mounted || ctx == null || !_scroll.hasClients) return;
-      final box = ctx.findRenderObject() as RenderBox?;
-      final viewport = _scroll.position.viewportDimension;
-      if (box == null || !box.attached) return;
-      final scrollBox =
-          _scroll.position.context.storageContext.findRenderObject()
-              as RenderBox?;
-      if (scrollBox == null) return;
-      final top = box.localToGlobal(Offset.zero, ancestor: scrollBox).dy;
-      if (top < 0 || top + box.size.height > viewport) {
-        Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(retry: true));
+  }
+
+  void _reveal({bool retry = false}) {
+    final ctx = _activeKey.currentContext;
+    if (!mounted || !_scroll.hasClients) return;
+    if (ctx == null) {
+      // The list builds lazily, so a far-down item may not exist yet: jump
+      // near it first, then place it exactly on the next frame.
+      if (!retry) return;
+      final items = _getAdminNavItems(context);
+      final i = items.indexWhere((it) => _isRouteActive(currentPath, it.route));
+      if (i <= 0 || items.length < 2) return;
+      final max = _scroll.position.maxScrollExtent;
+      _scroll.jumpTo((max * i / (items.length - 1)).clamp(0, max).toDouble());
+      WidgetsBinding.instance.addPostFrameCallback((_) => _reveal());
+      return;
+    }
+    final box = ctx.findRenderObject() as RenderBox?;
+    final viewport = _scroll.position.viewportDimension;
+    if (box == null || !box.attached) return;
+    final scrollBox =
+        _scroll.position.context.storageContext.findRenderObject()
+            as RenderBox?;
+    if (scrollBox == null) return;
+    final top = box.localToGlobal(Offset.zero, ancestor: scrollBox).dy;
+    if (top < 0 || top + box.size.height > viewport) {
+      Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
+    }
   }
 
   @override
@@ -520,30 +555,42 @@ class _AdminDesktopSidebarState extends State<_AdminDesktopSidebar> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (item.section != null) ...[
-                              Padding(
-                                padding: EdgeInsets.fromLTRB(
-                                  10,
-                                  index == 0 ? 4 : 14,
-                                  10,
-                                  6,
-                                ),
-                                child: Text(
-                                  item.section!,
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.8,
-                                    color: theme.colorScheme.onSurfaceVariant
-                                        .withValues(alpha: 0.8),
+                              if (item.protectedGroup)
+                                _ProtectedGroupHeader(
+                                  title: item.section!,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    10,
+                                    10,
+                                    0,
+                                    2,
+                                  ),
+                                )
+                              else
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    10,
+                                    index == 0 ? 4 : 14,
+                                    10,
+                                    6,
+                                  ),
+                                  child: Text(
+                                    item.section!,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.8,
+                                      color: theme.colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.8),
+                                    ),
                                   ),
                                 ),
-                              ),
                             ],
                             _SidebarNavItem(
                               icon: item.icon,
                               label: item.label,
                               route: item.route,
                               isActive: isActive,
+                              onTap: () => _openNavItem(context, item),
                             ),
                           ],
                         );
@@ -666,12 +713,16 @@ class _SidebarNavItem extends StatefulWidget {
   final bool isActive;
   final bool isStorefrontLink;
 
+  /// Replaces the default "go to [route]" (used for the protected screens).
+  final VoidCallback? onTap;
+
   const _SidebarNavItem({
     required this.icon,
     required this.label,
     required this.route,
     required this.isActive,
     this.isStorefrontLink = false,
+    this.onTap,
   });
 
   @override
@@ -703,31 +754,54 @@ class _SidebarNavItemState extends State<_SidebarNavItem> {
       weight = FontWeight.w500;
     }
 
+    final primary = theme.colorScheme.primary;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 1.5),
+        padding: const EdgeInsets.symmetric(vertical: 2),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 140),
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: widget.isActive
+                  ? primary.withValues(alpha: 0.22)
+                  : Colors.transparent,
+            ),
           ),
           child: InkWell(
-            onTap: () {
-              try {
-                context.go(widget.route);
-              } catch (_) {}
-            },
-            borderRadius: BorderRadius.circular(8),
+            onTap:
+                widget.onTap ??
+                () {
+                  try {
+                    context.go(widget.route);
+                  } catch (_) {}
+                },
+            borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
               child: Row(
                 children: [
-                  Icon(widget.icon, size: 20, color: fg),
-                  const SizedBox(width: 10),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 140),
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: widget.isActive
+                          ? primary
+                          : fg.withValues(alpha: _isHovered ? 0.14 : 0.08),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      size: 18,
+                      color: widget.isActive ? theme.colorScheme.onPrimary : fg,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       widget.label,
@@ -740,20 +814,21 @@ class _SidebarNavItemState extends State<_SidebarNavItem> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (widget.isActive)
-                    Container(
-                      width: 4,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
                   if (widget.isStorefrontLink)
                     Icon(
                       Icons.arrow_outward_rounded,
                       size: 15,
                       color: fg.withValues(alpha: 0.6),
+                    )
+                  else if (widget.isActive)
+                    Container(
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.only(right: 4),
+                      decoration: BoxDecoration(
+                        color: primary,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                 ],
               ),
@@ -797,7 +872,10 @@ class _AdminDesktopAppBar extends StatelessWidget
       backgroundColor: theme.colorScheme.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      leading: showBack ? BackButton(onPressed: onBack) : null,
+      // The persistent sidebar already lists every section, so the desktop
+      // header never needs a back arrow (the mobile app bar keeps its own).
+      automaticallyImplyLeading: false,
+      leading: null,
       title: Text(
         title,
         style: const TextStyle(
@@ -950,7 +1028,12 @@ class _AdminMobileDrawerContent extends StatelessWidget {
             ],
           ),
         ),
-        for (final item in items)
+        for (final item in items) ...[
+          if (item.protectedGroup)
+            _ProtectedGroupHeader(
+              title: item.section!,
+              padding: const EdgeInsets.fromLTRB(16, 12, 4, 0),
+            ),
           ListTile(
             leading: Icon(
               item.icon,
@@ -970,13 +1053,9 @@ class _AdminMobileDrawerContent extends StatelessWidget {
               ),
             ),
             selected: _isRouteActive(currentPath, item.route),
-            onTap: () {
-              Navigator.of(context).pop(); // Close drawer
-              try {
-                context.go(item.route);
-              } catch (_) {}
-            },
+            onTap: () => _openNavItem(context, item, closeDrawer: true),
           ),
+        ],
         const Divider(),
         ListTile(
           leading: const Icon(Icons.storefront),
@@ -1021,4 +1100,84 @@ String _roleCaption(BuildContext context, AppUser? user) {
     user.employeeRole,
     user.permissions,
   ).label(AppLocalizations.of(context)).toUpperCase();
+}
+
+/// Opens [item]'s screen. Inside the protected group the password dialog comes
+/// first unless the group is already unlocked.
+Future<void> _openNavItem(
+  BuildContext context,
+  _AdminNavItemData item, {
+  bool closeDrawer = false,
+}) async {
+  final access = StorefrontAccess.controller;
+  if (item.isProtected && !access.unlocked) {
+    final ok = await showStorefrontUnlockDialog(context, access);
+    if (!ok || !context.mounted) return;
+  }
+  if (closeDrawer && context.mounted) Navigator.of(context).pop();
+  if (!context.mounted) return;
+  try {
+    context.go(item.route);
+  } catch (_) {}
+}
+
+/// Title of the password-protected group, with its lock: tap to unlock (which
+/// opens the password dialog) or to lock again.
+class _ProtectedGroupHeader extends StatelessWidget {
+  const _ProtectedGroupHeader({required this.title, required this.padding});
+
+  final String title;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    return ListenableBuilder(
+      listenable: StorefrontAccess.controller,
+      builder: (context, _) {
+        final access = StorefrontAccess.controller;
+        final unlocked = access.unlocked;
+        return Padding(
+          padding: padding,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.8,
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                key: const Key('storefront-group-lock'),
+                visualDensity: VisualDensity.compact,
+                iconSize: 18,
+                tooltip: unlocked
+                    ? l10n.storefrontUnlockedTooltip
+                    : l10n.storefrontLockTooltip,
+                icon: Icon(
+                  unlocked ? Icons.lock_open_rounded : Icons.lock_rounded,
+                  color: unlocked ? Colors.green.shade700 : null,
+                ),
+                onPressed: () {
+                  if (unlocked) {
+                    StorefrontAccess.confirmAndLock(context);
+                  } else {
+                    showStorefrontUnlockDialog(context, access);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

@@ -1188,12 +1188,17 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                 ),
             ] else if (next != null) ...[
               // Advance to next forward stage
-              FilledButton.icon(
-                icon: const Icon(Icons.arrow_forward),
-                label: Text('Advance to ${orderStatusLabel(context, next)}'),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 onPressed: _isActionLoading
                     ? null
                     : () => _advanceStatus(order, next),
+                child: Text('Advance to ${orderStatusLabel(context, next)}'),
               ),
             ],
 

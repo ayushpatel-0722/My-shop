@@ -11,6 +11,7 @@ import 'package:myshop/core/database/mock_app_repository.dart';
 import 'package:myshop/core/models/app_user.dart';
 import 'package:myshop/core/services/auth_session.dart';
 import 'package:myshop/core/services/service_locator.dart';
+import 'package:myshop/features/admin/storefront_lock/storefront_access.dart';
 import 'package:myshop/features/auth/auth_cubit.dart';
 import 'package:myshop/features/checkout/cart/cart_cubit.dart';
 import 'package:myshop/features/checkout/cart/wishlist_cubit.dart';
@@ -45,6 +46,7 @@ abstract class TestHarness {
   /// Without this, `connectivity_plus` throws `MissingPluginException`.
   static void setupPlatformChannels() {
     TestWidgetsFlutterBinding.ensureInitialized();
+    StorefrontAccess.reset(); // the admin menu's lock is shared state
     SharedPreferences.setMockInitialValues({});
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(

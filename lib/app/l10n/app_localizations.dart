@@ -8788,6 +8788,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This banner will disappear from every shopper\'s home screen.'**
   String get adsBannerDeleteBody;
+
+  /// No description provided for @homeConfigGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'HOME SCREEN CONFIG'**
+  String get homeConfigGroupTitle;
+
+  /// No description provided for @homeExploreCategoriesNav.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Explore Categories'**
+  String get homeExploreCategoriesNav;
+
+  /// No description provided for @homeTrendingNowNav.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Trending Now'**
+  String get homeTrendingNowNav;
+
+  /// No description provided for @storefrontLockConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to lock all storefront configuration sections?'**
+  String get storefrontLockConfirmBody;
+
+  /// No description provided for @storefrontLockConfirmOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get storefrontLockConfirmOk;
+
+  /// No description provided for @shareProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Share product'**
+  String get shareProduct;
+
+  /// No description provided for @productPublishLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing limit reached'**
+  String get productPublishLimitTitle;
+
+  /// No description provided for @productPublishLimitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan lets you publish up to {max} products, and all {max} slots are in use.\n\nYou can still save this product. It will stay unpublished (hidden from shoppers) until you free up a slot or upgrade your plan to publish more.\n\nDo you want to save it as unpublished?'**
+  String productPublishLimitBody(int max);
+
+  /// No description provided for @productCreateLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product limit reached'**
+  String get productCreateLimitTitle;
+
+  /// No description provided for @productCreateLimitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the maximum of {cap} products allowed on your current plan.\n\nTo add more products, upgrade your plan or delete products you no longer need to free up space.'**
+  String productCreateLimitBody(int cap);
+
+  /// No description provided for @productLimitClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get productLimitClose;
+
+  /// No description provided for @upgradePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade plan'**
+  String get upgradePlan;
+
+  /// No description provided for @productPublishedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get productPublishedLabel;
+
+  /// No description provided for @productPublishedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoppers can see and buy it. Unpublished products stay hidden.'**
+  String get productPublishedHint;
+
+  /// No description provided for @productUnpublishedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublished'**
+  String get productUnpublishedBadge;
+
+  /// No description provided for @subscriptionPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Plan'**
+  String get subscriptionPlanTitle;
+
+  /// No description provided for @subscriptionPublishedUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Published products'**
+  String get subscriptionPublishedUsage;
+
+  /// No description provided for @subscriptionTotalUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'All products (published + unpublished)'**
+  String get subscriptionTotalUsage;
+
+  /// No description provided for @subscriptionNoLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan has no product limit set.'**
+  String get subscriptionNoLimit;
+
+  /// No description provided for @subscriptionRulesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can publish up to {max} products. You can create up to {cap} in total; the extra ones stay unpublished. To raise these limits, contact support to upgrade your plan.'**
+  String subscriptionRulesNote(int max, int cap);
+
+  /// No description provided for @productLimitSaveUnpublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as unpublished'**
+  String get productLimitSaveUnpublished;
+
+  /// No description provided for @productLimitUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {total} used'**
+  String productLimitUsed(int used, int total);
+
+  /// No description provided for @planBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get planBasic;
+
+  /// No description provided for @planGolden.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden'**
+  String get planGolden;
+
+  /// No description provided for @planDiamond.
+  ///
+  /// In en, this message translates to:
+  /// **'Diamond'**
+  String get planDiamond;
+
+  /// No description provided for @planCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom plan'**
+  String get planCustom;
+
+  /// No description provided for @planYourPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan'**
+  String get planYourPlan;
+
+  /// No description provided for @planCurrentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current plan'**
+  String get planCurrentBadge;
+
+  /// No description provided for @planMostPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Most popular'**
+  String get planMostPopular;
+
+  /// No description provided for @planPublishFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish up to {count} products'**
+  String planPublishFeature(int count);
+
+  /// No description provided for @planCreateFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep up to {count} products in total (extra ones stay unpublished)'**
+  String planCreateFeature(int count);
+
+  /// No description provided for @planCategoriesFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} categories'**
+  String planCategoriesFeature(int count);
+
+  /// No description provided for @planUpgradeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to {plan}'**
+  String planUpgradeTo(String plan);
+
+  /// No description provided for @planIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in your plan'**
+  String get planIncluded;
+
+  /// No description provided for @planChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your plan'**
+  String get planChoose;
+
+  /// No description provided for @planChooseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every plan includes the full store. Pick the one that fits your catalogue.'**
+  String get planChooseHint;
+
+  /// No description provided for @planCategoriesUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get planCategoriesUsage;
+
+  /// No description provided for @planContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to upgrade?'**
+  String get planContactTitle;
+
+  /// No description provided for @planContactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Get in touch with {name} to change your plan. Your new limits apply as soon as the plan is updated.'**
+  String planContactBody(String name);
+
+  /// No description provided for @planContactEmailButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Email {name}'**
+  String planContactEmailButton(String name);
+
+  /// No description provided for @planCopyEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy email'**
+  String get planCopyEmail;
+
+  /// No description provided for @planEmailCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address copied'**
+  String get planEmailCopied;
+
+  /// No description provided for @planEmailSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan upgrade request: {plan} ({shop})'**
+  String planEmailSubject(String plan, String shop);
+
+  /// No description provided for @planEmailBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello {name},\n\nI would like to upgrade my shop \"{shop}\" to the {plan} plan.\n\nThank you.'**
+  String planEmailBody(String name, String shop, String plan);
+
+  /// No description provided for @planEmailFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open your email app. The address is {email}.'**
+  String planEmailFailed(String email);
+
+  /// No description provided for @authAdminSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to manage your shop'**
+  String get authAdminSubtitle;
+
+  /// No description provided for @authEmployeeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to handle your shop\'s orders'**
+  String get authEmployeeSubtitle;
+
+  /// No description provided for @authRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get authRoleAdmin;
+
+  /// No description provided for @authRoleEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee'**
+  String get authRoleEmployee;
+
+  /// No description provided for @authStepCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get authStepCompany;
+
+  /// No description provided for @authStepAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get authStepAccount;
+
+  /// No description provided for @authStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String authStepOf(int current, int total);
+
+  /// No description provided for @authChangeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different role'**
+  String get authChangeRole;
+
+  /// No description provided for @authShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authShowPassword;
+
+  /// No description provided for @authHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authHidePassword;
+
+  /// No description provided for @onboardingStepBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business'**
+  String get onboardingStepBusiness;
+
+  /// No description provided for @onboardingStepHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get onboardingStepHours;
+
+  /// No description provided for @onboardingStepSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get onboardingStepSetup;
+
+  /// No description provided for @onboardingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your shop in three short steps'**
+  String get onboardingSubtitle;
+
+  /// No description provided for @orderFilterAnyDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Any date'**
+  String get orderFilterAnyDate;
+
+  /// No description provided for @orderFilterClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get orderFilterClear;
+
+  /// No description provided for @orderFilterPickDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date range'**
+  String get orderFilterPickDate;
+
+  /// No description provided for @orderFilterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get orderFilterStatus;
 }
 
 class _AppLocalizationsDelegate
